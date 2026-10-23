@@ -1,0 +1,10 @@
+# Локальная разработка: один origin http://localhost:8080
+# /api/* -> FastAPI, всё остальное -> Next.js
+:8080 {
+	handle /api/* {
+		reverse_proxy api:8000
+	}
+	handle {
+		reverse_proxy web:3000
+	}
+}
