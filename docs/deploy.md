@@ -45,8 +45,9 @@
    SSH только по ключу и автообновления безопасности (боты перебирают пароли к SSH с первого часа):
    ```bash
    # сначала: ssh-copy-id user@сервер и проверить, что вход по ключу работает
-   sudo sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/; s/^#\?PermitRootLogin.*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
-   sudo systemctl restart ssh
+   # отдельный файл с префиксом 00: побеждает первое значение, а конфиг провайдера (50-cloud-init.conf) может включать пароли
+   printf 'PasswordAuthentication no\nPermitRootLogin no\n' | sudo tee /etc/ssh/sshd_config.d/00-hardening.conf
+   sudo sshd -t && sudo systemctl restart ssh
    sudo apt install -y unattended-upgrades && sudo dpkg-reconfigure -plow unattended-upgrades
    ```
 2. DNS: A-запись домена на IP сервера. HTTPS-сертификат Caddy выпустит сам.
