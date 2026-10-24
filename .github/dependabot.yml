@@ -9,10 +9,22 @@ updates:
     directory: /apps/web
     schedule: { interval: weekly }
     groups:
-      npm: { patterns: ["*"] }
+      npm:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+    ignore:
+      # Мажорные версии (TypeScript, ESLint, Next...) обновляем отдельными задачами.
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly }
   - package-ecosystem: docker
     directories: [/apps/api, /apps/web]
     schedule: { interval: weekly }
+    ignore:
+      # Только LTS: мажорные версии Node и Python обновляем вручную.
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
+      - dependency-name: python
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
