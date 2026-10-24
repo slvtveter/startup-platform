@@ -48,7 +48,11 @@ async def public_stats(db: DbSession) -> StatsOut:
 async def track_client_event(
     data: ClientEventIn, request: Request, user: OptionalUser, db: DbSession
 ) -> OkOut:
-    props = {k: v for k, v in (("path", data.path), ("slug", data.slug)) if v is not None}
+    props = {
+        k: v
+        for k, v in (("path", data.path), ("slug", data.slug), ("src", data.src))
+        if v is not None
+    }
     # Отброшенное лимитом событие отвечает так же, как принятое: боту не видно, что его отсекли.
     await client_events.record(
         db, data.name, client_ip(request), user.id if user else None, **props
