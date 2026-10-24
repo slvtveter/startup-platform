@@ -70,6 +70,7 @@ async def send_message(
     conv_id: uuid.UUID, data: MessageIn, user: CurrentUser, db: DbSession
 ) -> MessageOut:
     conv = await service.get_for(db, conv_id, user)
+    await service.ensure_can_send(db, conv, user)
     msg = await service.post(db, conv, user, data.body)
     await db.commit()
     await db.refresh(msg)

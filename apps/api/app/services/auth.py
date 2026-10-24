@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.errors import AppError, Conflict, Unauthorized
-from app.core.security import hash_password, hash_token, new_token, verify_password
+from app.core.security import check_password, hash_password_async, hash_token, new_token
 from app.models import EmailToken, Profile, Session, User
 from app.models.enums import TokenPurpose
 from app.services import mail, ratelimit
@@ -80,6 +80,13 @@ async def _consume_email_token(
     return user, row
 
 
+async def resend_verification(db: AsyncSession, user: User) -> None:
+    key = f"resend-verification:{user.id}"
+    await ratelimit.ensure_allowed(db, key)
+    ratelimit.hit(db, key)
+    await send_verification(db, user)
+
+
 async def send_verification(db: AsyncSession, user: User) -> None:
     token = await _issue_email_token(db, user, TokenPurpose.verify_email, timedelta(hours=24))
     await db.commit()
@@ -100,7 +107,7 @@ async def register(
     if await db.scalar(select(User.id).where(User.email == email)):
         await db.commit()
         raise Conflict("Пользователь с таким email уже зарегистрирован")
-    user = User(email=email, password_hash=hash_password(password))
+    user = User(email=email, password_hash=await hash_password_async(password))
     user.profile = Profile(slug=f"u-{secrets.token_hex(4)}", looking_for=[], skills=[], links=[])
     db.add(user)
     await db.flush()
@@ -113,12 +120,11 @@ async def register(
 async def login(db: AsyncSession, email: str, password: str, ip: str) -> tuple[User, str]:
     key = f"login:{email}"
     await ratelimit.ensure_allowed(db, key)
+    # Перебор паролей сразу по многим адресам с одного IP: лимит шире, чем на один адрес.
+    await ratelimit.ensure_allowed(db, f"login-ip:{ip}", get_settings().auth_rate_limit * 4)
     user = await db.scalar(select(User).where(User.email == email))
-    if (
-        user is None
-        or user.password_hash is None
-        or not verify_password(password, user.password_hash)
-    ):
+    ok = await check_password(password, user.password_hash if user else None)
+    if user is None or not ok:
         ratelimit.hit(db, key)
         ratelimit.hit(db, f"login-ip:{ip}")
         await db.commit()
@@ -163,29 +169,46 @@ async def forgot_password(db: AsyncSession, email: str, ip: str) -> None:
 
 async def reset_password(db: AsyncSession, token: str, password: str) -> None:
     user, _ = await _consume_email_token(db, token, TokenPurpose.reset_password)
-    user.password_hash = hash_password(password)
+    user.password_hash = await hash_password_async(password)
     await db.execute(delete(Session).where(Session.user_id == user.id))
     await db.commit()
 
 
-async def change_password(db: AsyncSession, user: User, current: str, new: str) -> None:
-    if user.password_hash is None or not verify_password(current, user.password_hash):
+async def change_password(
+    db: AsyncSession, user: User, current: str, new: str, session_token: str
+) -> None:
+    # Лимит: украденная сессия не должна позволять подбирать текущий пароль.
+    key = f"change-password:{user.id}"
+    await ratelimit.ensure_allowed(db, key)
+    if not await check_password(current, user.password_hash):
+        ratelimit.hit(db, key)
+        await db.commit()
         raise AppError("Текущий пароль указан неверно")
-    user.password_hash = hash_password(new)
+    user.password_hash = await hash_password_async(new)
+    # Остальные устройства выходят из аккаунта: смена пароля часто реакция на взлом.
+    await db.execute(
+        delete(Session).where(
+            Session.user_id == user.id, Session.token_hash != hash_token(session_token)
+        )
+    )
+    await ratelimit.reset(db, key)
     await db.commit()
 
 
 async def request_email_change(db: AsyncSession, user: User, new_email: str, password: str) -> None:
     """KAN-72: письмо со ссылкой уходит на новый адрес; старый работает до подтверждения."""
-    if user.password_hash is None or not verify_password(password, user.password_hash):
-        raise AppError("Пароль указан неверно")
-    new_email = new_email.lower()
-    if new_email == user.email:
-        raise AppError("Это ваш текущий адрес")
     key = f"change-email:{user.id}"
     await ratelimit.ensure_allowed(db, key)
     ratelimit.hit(db, key)
+    if not await check_password(password, user.password_hash):
+        await db.commit()
+        raise AppError("Пароль указан неверно")
+    new_email = new_email.lower()
+    if new_email == user.email:
+        await db.commit()
+        raise AppError("Это ваш текущий адрес")
     if await db.scalar(select(User.id).where(User.email == new_email)):
+        await db.commit()
         raise Conflict("Этот адрес уже занят другим аккаунтом")
     token = await _issue_email_token(
         db, user, TokenPurpose.change_email, timedelta(hours=24), new_email=new_email

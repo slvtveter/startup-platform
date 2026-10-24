@@ -9,9 +9,16 @@ from app.models import Event, Feedback, Profile, Report, Startup, StartupRole
 from app.models.enums import StartupStatus
 from app.schemas.common import OkOut
 from app.schemas.ops import ClientEventIn, FeedbackIn, ReportIn, StatsOut
-from app.services import client_events
+from app.services import client_events, ratelimit
 
 router = APIRouter(tags=["ops"])
+
+
+async def _limit(db: DbSession, kind: str, request: Request) -> None:
+    # Жалобы и отзывы можно слать без входа: ограничиваем по IP, чтобы бот не завалил модерацию.
+    key = f"{kind}:{client_ip(request)}"
+    await ratelimit.ensure_allowed(db, key, 20)
+    ratelimit.hit(db, key)
 
 
 @router.get("/stats", response_model=StatsOut)
@@ -61,7 +68,10 @@ async def track_client_event(
 
 
 @router.post("/reports", response_model=OkOut, status_code=201)
-async def create_report(data: ReportIn, user: OptionalUser, db: DbSession) -> OkOut:
+async def create_report(
+    data: ReportIn, request: Request, user: OptionalUser, db: DbSession
+) -> OkOut:
+    await _limit(db, "report", request)
     db.add(
         Report(
             reporter_id=user.id if user else None,
@@ -76,7 +86,10 @@ async def create_report(data: ReportIn, user: OptionalUser, db: DbSession) -> Ok
 
 
 @router.post("/feedback", response_model=OkOut, status_code=201)
-async def send_feedback(data: FeedbackIn, user: OptionalUser, db: DbSession) -> OkOut:
+async def send_feedback(
+    data: FeedbackIn, request: Request, user: OptionalUser, db: DbSession
+) -> OkOut:
+    await _limit(db, "feedback", request)
     db.add(Feedback(user_id=user.id if user else None, text=data.text, page_url=data.page_url))
     await db.commit()
     return OkOut()
