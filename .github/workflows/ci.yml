@@ -77,6 +77,8 @@ jobs:
       - name: Start stack
         run: |
           cp infra/.env.example infra/.env
+          # E2E регистрирует много пользователей с одного IP: лимит защиты здесь мешает.
+          echo "AUTH_RATE_LIMIT=1000" >> infra/.env
           docker compose -f infra/docker-compose.yml up --build -d
           for i in $(seq 1 60); do curl -sf localhost:8080/api/health && break; sleep 3; done
           docker compose -f infra/docker-compose.yml exec -T api python -m app.scripts.seed
