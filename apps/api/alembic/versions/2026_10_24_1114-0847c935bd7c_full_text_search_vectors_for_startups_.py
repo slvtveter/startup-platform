@@ -1,7 +1,7 @@
 """full-text search vectors for startups, roles and profiles
 
 Revision ID: 0847c935bd7c
-Revises: ae4a9f5a3acb
+Revises: 679c20f9ea85
 Create Date: 2026-10-24 11:14:06.879990
 
 """
@@ -13,7 +13,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision: str = '0847c935bd7c'
-down_revision: Union[str, Sequence[str], None] = 'ae4a9f5a3acb'
+down_revision: Union[str, Sequence[str], None] = '679c20f9ea85'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
