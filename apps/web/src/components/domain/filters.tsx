@@ -51,7 +51,7 @@ export function ChipFilter({
             <Link
               key={o.value}
               href={toggleHref(basePath, params, name, o.value)}
-              aria-pressed={active}
+              aria-current={active ? "true" : undefined}
               scroll={false}
               className={cn(
                 "shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium whitespace-nowrap transition-colors",

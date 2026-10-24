@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ChipFilter, Pager, SearchBox, asList, type SearchParams } from "@/components/domain/filters";
 import { Container, EmptyState, PageHeader } from "@/components/domain/page-header";
 import { PersonCard } from "@/components/domain/person-card";
+import { buttonVariants } from "@/components/ui/button";
 import { listPeople, listRoles } from "@/lib/api";
 import { LEVEL, TERMS, plural } from "@/lib/labels";
 import { serverClient } from "@/lib/server-api";
@@ -54,7 +55,15 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
         </div>
       ) : (
         <div className="mt-5">
-          <EmptyState title="Никого не нашли" text="Попробуй убрать часть фильтров." />
+          <EmptyState
+            title="Никого не нашли"
+            text="Попробуй убрать часть фильтров."
+            action={
+              <Link href="/people" className={buttonVariants({ variant: "outline" })}>
+                Сбросить фильтры
+              </Link>
+            }
+          />
         </div>
       )}
       <Pager basePath="/people" params={params} total={total} limit={LIMIT} page={page} />

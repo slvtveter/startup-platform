@@ -9,7 +9,7 @@ export function TermsBadge({ terms, className }: { terms: string; className?: st
 }
 
 export function StageBadge({ stage }: { stage: string }) {
-  return <span className={cn(pill, "border bg-white text-muted-foreground")}>{STAGE[stage] ?? stage}</span>;
+  return <span className={cn(pill, "border bg-background text-muted-foreground")}>{STAGE[stage] ?? stage}</span>;
 }
 
 export function StartupStatusBadge({ status }: { status: string }) {

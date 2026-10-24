@@ -97,7 +97,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         ) : (
           <>
             Уже есть аккаунт?{" "}
-            <Link href="/login" className="font-bold text-foreground">
+            <Link href={`/login${params.get("next") ? `?next=${encodeURIComponent(params.get("next")!)}` : ""}`} className="font-bold text-foreground">
               Войти
             </Link>
           </>

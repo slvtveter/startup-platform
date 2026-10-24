@@ -1,8 +1,18 @@
-from sqlalchemy import Select, and_, func, or_, select
+from sqlalchemy import Select, and_, exists, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import AppError, NotFound
-from app.models import Profile, ProfileLink, Role, Skill, Startup, StartupMember, User
+from app.models import (
+    Application,
+    Profile,
+    ProfileLink,
+    Role,
+    Skill,
+    Startup,
+    StartupMember,
+    StartupRole,
+    User,
+)
 from app.models.enums import StartupStatus
 from app.models.profile import profile_skills
 from app.schemas.catalog import RoleOut, SkillOut
@@ -102,6 +112,20 @@ async def to_detail(db: AsyncSession, p: Profile) -> PersonDetail:
     )
 
 
+def apply_blockers(user: User, p: Profile | None) -> list[str]:
+    """Минимум для отклика (гипотеза H6): мягче, чем для публикации в каталоге."""
+    blockers = []
+    if not user.email_verified:
+        blockers.append("Подтвердите email")
+    if p is None or not p.display_name:
+        blockers.append("Укажите имя")
+    if p is None or p.primary_role_id is None:
+        blockers.append("Выберите основную роль")
+    if p is None or (not p.links and len(p.skills) < 2):
+        blockers.append("Добавьте ссылку на работу или хотя бы 2 навыка")
+    return blockers
+
+
 async def my_profile(db: AsyncSession, user: User) -> MyProfileOut:
     p = user.profile
     assert p is not None
@@ -115,6 +139,7 @@ async def my_profile(db: AsyncSession, user: User) -> MyProfileOut:
         completeness=score,
         missing=missing,
         can_publish=not publish_blockers(user, p),
+        apply_blockers=apply_blockers(user, p),
     )
 
 
@@ -216,11 +241,26 @@ async def list_people(
     return list(rows.unique()), total or 0
 
 
-async def get_public(db: AsyncSession, slug: str) -> Profile:
+async def get_public(db: AsyncSession, slug: str, viewer: User | None = None) -> Profile:
     p = await db.scalar(_people_query().where(Profile.slug == slug))
-    if p is None:
-        raise NotFound("Профиль не найден")
-    return p
+    if p is not None:
+        return p
+    # Неопубликованный профиль видит основатель, на чей стартап человек откликнулся (KAN-83).
+    if viewer is not None:
+        p = await db.scalar(
+            select(Profile)
+            .join(User, User.id == Profile.user_id)
+            .where(Profile.slug == slug, User.is_active.is_(True))
+            .where(
+                exists()
+                .where(Application.applicant_id == Profile.user_id)
+                .where(Application.startup_role_id == StartupRole.id)
+                .where(StartupRole.startup_id == Startup.id, Startup.owner_id == viewer.id)
+            )
+        )
+        if p is not None:
+            return p
+    raise NotFound("Профиль не найден")
 
 
 async def get_by_slug_any(db: AsyncSession, slug: str) -> Profile:

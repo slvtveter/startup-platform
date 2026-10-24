@@ -102,9 +102,9 @@ async def apply(db: AsyncSession, user: User, role_id: uuid.UUID, message: str) 
     role = await _open_role(db, role_id)
     if role.startup.owner_id == user.id:
         raise AppError("Нельзя откликнуться на свой стартап")
-    p = user.profile
-    if not user.email_verified or p is None or not p.is_published:
-        raise AppError("Чтобы откликаться, подтвердите email и опубликуйте профиль")
+    blockers = profile_service.apply_blockers(user, user.profile)
+    if blockers:
+        raise AppError("Чтобы откликнуться, дополните профиль", blockers)
     await _check_daily_limit(db, Application.applicant_id, user.id, ApplicationDirection.apply)
     app = Application(
         startup_role_id=role.id,

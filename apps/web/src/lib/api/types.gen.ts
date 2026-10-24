@@ -539,6 +539,10 @@ export type MyProfileOut = {
      * Can Publish
      */
     can_publish: boolean;
+    /**
+     * Apply Blockers
+     */
+    apply_blockers?: Array<string>;
 };
 
 /**

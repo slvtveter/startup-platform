@@ -2,13 +2,22 @@ import { PlusIcon } from "lucide-react";
 import Link from "next/link";
 
 import { TermsBadge } from "@/components/domain/badges";
-import { Container } from "@/components/domain/page-header";
-import { initialsOf, Seat } from "@/components/domain/seats";
+import { Container, EmptyState } from "@/components/domain/page-header";
+import { initialsOf, Seat, SeatRow } from "@/components/domain/seats";
 import { StartupCard } from "@/components/domain/startup-card";
 import { PathLink } from "@/components/site/path-link";
 import { buttonVariants } from "@/components/ui/button";
-import { listOpenSeats, listRecommendedStartups, publicStats, type OpenSeat } from "@/lib/api";
+import {
+  getMyProfile,
+  listMyApplications,
+  listMyStartups,
+  listOpenSeats,
+  listRecommendedStartups,
+  publicStats,
+  type OpenSeat,
+} from "@/lib/api";
 import { plural } from "@/lib/labels";
+import { nextStep } from "@/lib/next-step";
 import { getMe, serverClient } from "@/lib/server-api";
 
 export default async function Home() {
@@ -37,10 +46,10 @@ async function Landing() {
             <PathLink
               path="seeker"
               href="/startups"
-              className="group rounded-2xl bg-brand p-5 text-white transition-colors hover:bg-brand-ink"
+              className="group rounded-2xl bg-brand p-5 text-primary-foreground transition-colors hover:bg-brand-ink"
             >
               <span className="block text-lg font-bold">Ищу первый опыт</span>
-              <span className="mt-1 block text-sm text-white/85">Смотри свободные места и откликайся</span>
+              <span className="mt-1 block text-sm text-primary-foreground/85">Смотри свободные места и откликайся</span>
             </PathLink>
             <PathLink
               path="founder"
@@ -217,43 +226,75 @@ function TeamPreview() {
 async function Dashboard() {
   const user = (await getMe())!;
   const client = await serverClient();
-  const { data: recs } = await listRecommendedStartups({ client });
-  const p = user.profile;
-  const name = p?.display_name || user.email.split("@")[0];
+  const [{ data: recs }, { data: profile }, { data: apps }, { data: mine }] = await Promise.all([
+    listRecommendedStartups({ client }),
+    getMyProfile({ client }),
+    listMyApplications({ client }),
+    listMyStartups({ client }),
+  ]);
+  const name = profile?.display_name || user.email.split("@")[0];
+  const myStartups = mine ?? [];
+  const step = nextStep({
+    emailVerified: user.email_verified,
+    applyBlockers: profile?.apply_blockers ?? [],
+    pendingIncoming: myStartups.map((m) => ({ slug: m.slug, title: m.title, count: m.pending_applications })),
+    applications: (apps ?? []).map((a) => ({ status: a.status, startupTitle: a.startup_title, decidedAt: a.decided_at ?? null })),
+    hasStartups: myStartups.length > 0,
+  });
 
   return (
     <Container>
-      <h1 className="text-3xl sm:text-4xl">Привет, {name}!</h1>
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
-        {!user.email_verified && (
-          <Notice tone="warn" title="Подтверди email" text="Мы отправили письмо со ссылкой. Без подтверждения нельзя публиковать профиль и откликаться." />
-        )}
-        {p && !p.is_published && (
-          <Notice
-            tone="brand"
-            title={`Профиль заполнен на ${p.completeness}%`}
-            text="Опубликуй профиль, чтобы откликаться на роли и попадать в каталог."
-            href="/me/profile"
-            cta="Заполнить профиль"
-          />
-        )}
-        {p?.is_published && (
-          <Notice tone="ok" title="Профиль опубликован" text="Основатели видят тебя в каталоге людей." href={`/people/${p.slug}`} cta="Как меня видят" />
-        )}
-      </div>
+      <h1 className="text-2xl sm:text-[34px]">Привет, {name}</h1>
+
+      <section aria-labelledby="next-step" className="mt-6 flex flex-col gap-5 rounded-3xl bg-secondary p-6 sm:flex-row sm:items-center sm:p-8">
+        <div className="max-w-2xl">
+          <div className="text-sm text-muted-foreground">Следующий шаг</div>
+          <h2 id="next-step" className="mt-1 font-sans text-xl font-bold tracking-normal sm:text-2xl">
+            {step.title}
+          </h2>
+          <p className="mt-2 text-muted-foreground">{step.text}</p>
+        </div>
+        <Link href={step.href} className={buttonVariants({ variant: "brand", size: "lg", className: "sm:ml-auto" })}>
+          {step.cta}
+        </Link>
+      </section>
+
+      {myStartups.length > 0 && (
+        <section className="mt-12">
+          <h2 className="text-xl sm:text-2xl">Мои стартапы</h2>
+          <ul className="mt-4 divide-y border-y">
+            {myStartups.map((m) => {
+              const open = m.open_roles.reduce((n, r) => n + (r.slots ?? 1), 0);
+              return (
+                <li key={m.id}>
+                  <Link href={`/me/startups/${m.slug}`} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-4 hover:text-brand-ink">
+                    <span className="font-semibold">{m.title}</span>
+                    <SeatRow filled={m.team_size ?? 1} open={open} />
+                    <span className="ml-auto text-sm text-muted-foreground">
+                      {m.pending_applications
+                        ? plural(m.pending_applications, `${m.pending_applications} новый отклик`, `${m.pending_applications} новых отклика`, `${m.pending_applications} новых откликов`)
+                        : "Новых откликов нет"}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       <section className="mt-12">
-        <div className="flex items-end">
+        <div className="flex flex-wrap items-end gap-2">
           <div>
-            <h2 className="text-2xl">Подходят тебе</h2>
+            <h2 className="text-xl sm:text-2xl">Подходят тебе</h2>
             <p className="mt-1 text-sm text-muted-foreground">Подбор по твоей роли, навыкам и условиям</p>
           </div>
-          <Link href="/startups" className="ml-auto text-sm font-bold hover:text-brand-ink">
+          <Link href="/startups" className="ml-auto text-sm font-semibold text-brand-ink hover:underline">
             Все стартапы
           </Link>
         </div>
         {recs && recs.length > 0 ? (
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
+          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {recs.map((r) => (
               <div key={r.startup.id} className="flex flex-col">
                 <StartupCard startup={r.startup} />
@@ -262,42 +303,17 @@ async function Dashboard() {
             ))}
           </div>
         ) : (
-          <div className="mt-6 rounded-2xl border border-dashed bg-card p-8 text-muted-foreground">
-            Укажи роль и навыки в{" "}
-            <Link href="/me/profile" className="font-bold text-foreground underline">
-              профиле
-            </Link>
-            , и здесь появятся стартапы, которым ты нужен.
-          </div>
+          <EmptyState
+            title="Пока нечего предложить"
+            text="Укажи роль и навыки в профиле, и здесь появятся стартапы, которым ты нужен."
+            action={
+              <Link href="/me/profile" className={buttonVariants({ variant: "brand" })}>
+                Заполнить профиль
+              </Link>
+            }
+          />
         )}
       </section>
     </Container>
-  );
-}
-
-function Notice({
-  tone,
-  title,
-  text,
-  href,
-  cta,
-}: {
-  tone: "warn" | "brand" | "ok";
-  title: string;
-  text: string;
-  href?: string;
-  cta?: string;
-}) {
-  const bg = tone === "warn" ? "bg-warn-soft" : tone === "ok" ? "bg-success-soft" : "bg-brand-soft";
-  return (
-    <div className={`rounded-2xl p-5 ${bg}`}>
-      <div className="font-extrabold">{title}</div>
-      <p className="mt-1 text-sm text-foreground/75">{text}</p>
-      {href && (
-        <Link href={href} className={buttonVariants({ size: "sm", className: "mt-4" })}>
-          {cta}
-        </Link>
-      )}
-    </div>
   );
 }
