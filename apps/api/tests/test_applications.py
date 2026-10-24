@@ -93,3 +93,40 @@ async def test_contacts_never_leak_in_public_endpoints(make_user, client):
     for path in ("/api/startups", "/api/startups/vkusnoryadom", "/api/people", "/api/people/maria"):
         text = (await client.get(path)).text
         assert "@mail.ru" not in text, path
+
+
+async def test_apply_with_minimal_unpublished_profile(make_user):
+    founder = await make_user("alina@mail.ru", published=True)
+    s = await create_published(founder)
+    role_id = s["roles"][0]["id"]
+    c = await make_user("newbie@mail.ru")
+
+    r = await c.post(f"/api/startup-roles/{role_id}/applications", json={"message": MESSAGE})
+    assert r.status_code == 400
+    assert r.json()["error"]["details"] == [
+        "Укажите имя",
+        "Выберите основную роль",
+        "Добавьте ссылку на работу или хотя бы 2 навыка",
+    ]
+    me = (await c.get("/api/profile/me")).json()
+    assert len(me["apply_blockers"]) == 3
+
+    # Имя, роль и одна ссылка — достаточно, публиковать профиль в каталоге не нужно.
+    await c.patch(
+        "/api/profile/me",
+        json={
+            "display_name": "Новичок",
+            "primary_role": "designer",
+            "links": [{"kind": "portfolio", "url": "https://behance.net/newbie"}],
+        },
+    )
+    me = (await c.get("/api/profile/me")).json()
+    assert me["apply_blockers"] == [] and me["is_published"] is False
+    r = await c.post(f"/api/startup-roles/{role_id}/applications", json={"message": MESSAGE})
+    assert r.status_code == 201
+
+    # Неопубликованный профиль виден основателю, но не посторонним.
+    slug = me["slug"]
+    assert (await founder.get(f"/api/people/{slug}")).status_code == 200
+    stranger = await make_user("stranger@mail.ru")
+    assert (await stranger.get(f"/api/people/{slug}")).status_code == 404

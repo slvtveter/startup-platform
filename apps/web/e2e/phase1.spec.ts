@@ -71,7 +71,7 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
   await expect(candidate.getByText("1 из 1 совпадают с твоими навыками")).toBeVisible();
   await candidate.getByRole("button", { name: "Откликнуться" }).click();
   await candidate
-    .getByPlaceholder(/Расскажи, почему/)
+    .getByLabel("Сообщение основателю")
     .fill("Здравствуйте! Делала учебный проект с похожими экранами, готова начать на этой неделе.");
   await shot(candidate, "apply-dialog");
   await candidate.getByRole("button", { name: "Отправить отклик" }).click();

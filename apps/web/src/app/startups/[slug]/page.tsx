@@ -3,13 +3,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { ApplyDialog } from "@/components/domain/apply-dialog";
+import { ApplyDialog, type ApplyState } from "@/components/domain/apply-dialog";
 import { SkillChip, StageBadge, StartupStatusBadge, TermsBadge } from "@/components/domain/badges";
 import { Container } from "@/components/domain/page-header";
 import { ReportButton } from "@/components/domain/report-button";
 import { initialsOf, Seat } from "@/components/domain/seats";
 import { buttonVariants } from "@/components/ui/button";
-import { getMyProfile, getStartup, type StartupDetail } from "@/lib/api";
+import { getMyProfile, getStartup, listRoles, type StartupDetail } from "@/lib/api";
 import { TERMS, TERMS_HINT, plural } from "@/lib/labels";
 import { getMe, serverClient } from "@/lib/server-api";
 
@@ -35,13 +35,27 @@ export default async function StartupPage({ params }: Props) {
   if (!s) notFound();
   const profile = user ? (await getMyProfile({ client })).data : null;
   const mySkills = new Set(profile?.skills.map((x) => x.slug));
-  const ready = !!user?.email_verified && !!profile?.is_published;
+  const blockers = profile?.apply_blockers ?? [];
+  const needs = {
+    name: blockers.includes("Укажите имя"),
+    role: blockers.includes("Выберите основную роль"),
+    proof: blockers.some((b) => b.startsWith("Добавьте ссылку")),
+  };
+  const roleOptions = needs.role ? ((await listRoles({ client })).data ?? []) : [];
 
   const openRoles = s.roles.filter((r) => r.is_open);
   const closedRoles = s.roles.filter((r) => !r.is_open);
   const openSeats = openRoles.reduce((n, r) => n + Math.max(0, (r.slots ?? 1) - (r.filled ?? 0)), 0);
-  const state = (roleId: string) =>
-    !user ? "guest" : (s.my_active_role_ids ?? []).includes(roleId) ? "applied" : ready ? "can_apply" : "not_ready";
+  const state = (roleId: string): ApplyState =>
+    !user
+      ? "guest"
+      : (s.my_active_role_ids ?? []).includes(roleId)
+        ? "applied"
+        : !user.email_verified
+          ? "unverified"
+          : blockers.length
+            ? "incomplete"
+            : "can_apply";
 
   return (
     <Container className="pb-28 lg:pb-10">
@@ -133,7 +147,15 @@ export default async function StartupPage({ params }: Props) {
                     )}
                     {!s.is_owner && (
                       <div className="mt-5">
-                        <ApplyDialog roleId={r.id} roleTitle={r.title} startupTitle={s.title} primary state={state(r.id)} />
+                        <ApplyDialog
+                          roleId={r.id}
+                          roleTitle={r.title}
+                          startupTitle={s.title}
+                          primary
+                          state={state(r.id)}
+                          needs={needs}
+                          roles={roleOptions}
+                        />
                       </div>
                     )}
                   </article>

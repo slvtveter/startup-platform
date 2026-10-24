@@ -29,7 +29,10 @@ export async function verifyEmailViaMailpit(page: Page, email: string) {
 
 export async function register(page: Page, email: string) {
   await page.goto("/register");
+  // Ждём гидрацию: иначе React сбросит значения, введённые до неё.
+  await page.waitForLoadState("networkidle");
   await page.getByLabel("Email").fill(email);
+  await expect(page.getByLabel("Email")).toHaveValue(email);
   await page.getByLabel("Пароль").fill("e2e-password-1");
   await page.getByText("Мне есть 18 лет").click();
   await page.getByRole("button", { name: "Создать аккаунт" }).click();

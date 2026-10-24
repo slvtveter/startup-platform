@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query
 
-from app.core.deps import CurrentUser
+from app.core.deps import CurrentUser, OptionalUser
 from app.db.session import DbSession
 from app.schemas.common import Page
 from app.schemas.profile import MyProfileOut, PersonCard, PersonDetail, ProfileUpdate, PublishIn
@@ -44,5 +44,5 @@ async def list_people(
 
 
 @router.get("/people/{slug}", response_model=PersonDetail)
-async def get_person(slug: str, db: DbSession) -> PersonDetail:
-    return await service.to_detail(db, await service.get_public(db, slug))
+async def get_person(slug: str, user: OptionalUser, db: DbSession) -> PersonDetail:
+    return await service.to_detail(db, await service.get_public(db, slug, user))

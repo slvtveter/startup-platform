@@ -3102,6 +3102,14 @@
           "can_publish": {
             "type": "boolean",
             "title": "Can Publish"
+          },
+          "apply_blockers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Apply Blockers",
+            "default": []
           }
         },
         "type": "object",

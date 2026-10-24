@@ -81,11 +81,19 @@ jobs:
           for i in $(seq 1 60); do curl -sf localhost:8080/api/health && break; sleep 3; done
           docker compose -f infra/docker-compose.yml exec -T api python -m app.scripts.seed
           # Прогреваем dev-сервер Next, чтобы первая компиляция не съела таймауты тестов.
-          for p in / /startups /people /register /login /me/profile /startups/new; do curl -s -o /dev/null localhost:8080$p; done
+          for p in / /startups /startups/vkusnoryadom /people /people/maria /register /login /me/profile /startups/new; do curl -s -o /dev/null localhost:8080$p; done
       - run: npm ci
         working-directory: apps/web
       - run: npx playwright test
         working-directory: apps/web
+      - name: Screenshots of key pages (KAN-86)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: screens
+          path: apps/web/test-results/screens
+          retention-days: 14
+          if-no-files-found: ignore
       - name: Logs on failure
         if: failure()
         run: docker compose -f infra/docker-compose.yml logs --tail=200

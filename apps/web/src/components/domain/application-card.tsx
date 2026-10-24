@@ -104,7 +104,7 @@ export function ApplicationCard({ app, perspective }: { app: ApplicationOut; per
         <div className="mt-4 flex flex-wrap items-center gap-2">
           {app.can_decide && !rejecting && (
             <>
-              <Button className="bg-success-ink text-white hover:bg-success-ink/90" onClick={() => act("accept")} disabled={busy}>
+              <Button className="bg-success-ink text-primary-foreground hover:bg-success-ink/90" onClick={() => act("accept")} disabled={busy}>
                 Принять
               </Button>
               <Button variant="outline" onClick={() => setRejecting(true)} disabled={busy}>

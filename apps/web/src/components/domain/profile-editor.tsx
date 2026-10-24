@@ -105,7 +105,7 @@ export function ProfileEditor({
                 <span
                   className={cn(
                     "grid size-8 place-items-center rounded-full",
-                    i === step ? "bg-brand text-white" : i < step ? "bg-foreground text-background" : "border-2 text-muted-foreground",
+                    i === step ? "bg-brand text-primary-foreground" : i < step ? "bg-foreground text-background" : "border-2 text-muted-foreground",
                   )}
                 >
                   {i < step ? "✓" : i + 1}

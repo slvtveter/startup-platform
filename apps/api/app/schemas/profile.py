@@ -65,3 +65,4 @@ class MyProfileOut(PersonDetail):
     completeness: int
     missing: list[str]
     can_publish: bool
+    apply_blockers: list[str] = []
