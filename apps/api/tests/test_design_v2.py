@@ -87,7 +87,7 @@ async def test_landing_path_event(client):
     assert r.status_code == 422
     async with SessionLocal() as db:
         event = await db.scalar(select(Event).where(Event.name == "landing_path_selected"))
-    assert event is not None and event.props == {"path": "seeker"}
+    assert event is not None and event.props["path"] == "seeker"
 
 
 async def test_e2e_cleanup_only_outside_prod(make_user, client, monkeypatch):
@@ -100,3 +100,26 @@ async def test_e2e_cleanup_only_outside_prod(make_user, client, monkeypatch):
 
     monkeypatch.setattr(get_settings(), "env", "prod")
     assert (await client.post("/api/testing/cleanup-e2e")).status_code == 404
+
+
+async def test_client_events_dedup_rate_limit_and_no_ip(client, monkeypatch):
+    ip = {"x-forwarded-for": "203.0.113.7"}
+    for _ in range(100):
+        r = await client.post("/api/events", json={"name": "landing_viewed"}, headers=ip)
+        assert r.status_code == 201  # отброшенные отвечают так же, как принятые
+    monkeypatch.setattr(get_settings(), "client_events_per_minute", 5)
+    for _ in range(10):
+        await client.post(
+            "/api/events", json={"name": "landing_path_selected", "path": "founder"}, headers=ip
+        )
+    async with SessionLocal() as db:
+        events = list(
+            await db.scalars(
+                select(Event).where(Event.name.in_(["landing_viewed", "landing_path_selected"]))
+            )
+        )
+    names = [e.name for e in events]
+    assert names.count("landing_viewed") == 1
+    assert names.count("landing_path_selected") == 4  # лимит 5 в минуту, один уже занят просмотром
+    for e in events:
+        assert "203.0.113.7" not in str(e.props) and len(e.props["v"]) == 24

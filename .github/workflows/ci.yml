@@ -139,6 +139,19 @@ jobs:
           curl -skf https://localhost/ | grep -q "Тебя ждёт место в команде"
           curl -skf https://localhost/startups > /dev/null
           echo "production stack is healthy"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - name: Browser check of prod build under CSP (KAN-95)
+        working-directory: apps/web
+        env:
+          PROD_CHECK: "1"
+          E2E_BASE_URL: https://localhost
+        run: |
+          npm ci
+          npx playwright test e2e/prod-csp.spec.ts
       - name: Stack logs on failure
         if: failure()
         working-directory: infra

@@ -1,15 +1,15 @@
 from datetime import UTC, datetime, timedelta
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from sqlalchemy import func, select
 
-from app.core.deps import OptionalUser
+from app.core.deps import OptionalUser, client_ip
 from app.db.session import DbSession
 from app.models import Event, Feedback, Profile, Report, Startup, StartupRole
 from app.models.enums import StartupStatus
 from app.schemas.common import OkOut
 from app.schemas.ops import ClientEventIn, FeedbackIn, ReportIn, StatsOut
-from app.services.events import track
+from app.services import client_events
 
 router = APIRouter(tags=["ops"])
 
@@ -45,10 +45,14 @@ async def public_stats(db: DbSession) -> StatsOut:
 
 
 @router.post("/events", response_model=OkOut, status_code=201)
-async def track_client_event(data: ClientEventIn, user: OptionalUser, db: DbSession) -> OkOut:
+async def track_client_event(
+    data: ClientEventIn, request: Request, user: OptionalUser, db: DbSession
+) -> OkOut:
     props = {k: v for k, v in (("path", data.path), ("slug", data.slug)) if v is not None}
-    track(db, data.name, user.id if user else None, **props)
-    await db.commit()
+    # Отброшенное лимитом событие отвечает так же, как принятое: боту не видно, что его отсекли.
+    await client_events.record(
+        db, data.name, client_ip(request), user.id if user else None, **props
+    )
     return OkOut()
 
 
