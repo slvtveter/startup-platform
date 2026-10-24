@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Index, String, Text, func
+from sqlalchemy import DateTime, Enum, ForeignKey, Index, String, Text, func, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -13,7 +13,15 @@ from app.models.enums import ReportReason, ReportStatus
 
 class Event(Base):
     __tablename__ = "events"
-    __table_args__ = (Index("ix_events_name_created_at", "name", "created_at"),)
+    __table_args__ = (
+        Index("ix_events_name_created_at", "name", "created_at"),
+        # KAN-105: лимит и дедупликация клиентских событий по хешу посетителя.
+        Index("ix_events_visitor_created_at", text("(props->>'v')"), "created_at"),
+        # Просмотры стартапа за 30 дней.
+        Index("ix_events_name_slug_created_at", "name", text("(props->>'slug')"), "created_at"),
+        # Когорты: активность конкретных пользователей.
+        Index("ix_events_user_name_created_at", "user_id", "name", "created_at"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(64))
