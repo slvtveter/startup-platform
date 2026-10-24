@@ -4,6 +4,9 @@
 
 **Стек:** Next.js + Tailwind + shadcn/ui · FastAPI + SQLAlchemy 2 + Alembic · PostgreSQL 17 · Caddy · Docker Compose.
 
+Как устроена система и онбординг для новых людей — [docs/architecture.md](docs/architecture.md).
+Дизайн и исследование — [docs/ux](docs/ux), безопасность — [docs/security.md](docs/security.md), деплой — [docs/deploy.md](docs/deploy.md).
+
 ## Быстрый старт
 Нужны Docker, [uv](https://docs.astral.sh/uv/) и Node 22.
 
