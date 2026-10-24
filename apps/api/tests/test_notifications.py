@@ -49,7 +49,13 @@ async def test_notification_has_html_and_unsubscribe_works_without_login(make_us
         assert r.status_code == 200 and r.json()["label"] == "Новые отклики на мои стартапы"
 
     prefs = {p["kind"]: p["enabled"] for p in (await founder.get("/api/me/email-prefs")).json()}
-    assert prefs == {"applications": False, "decisions": True, "invites": True, "reminders": True}
+    assert prefs == {
+        "applications": False,
+        "decisions": True,
+        "invites": True,
+        "reminders": True,
+        "digest": True,
+    }
 
     # Следующий отклик основателю уже не пишем.
     mail.outbox.clear()

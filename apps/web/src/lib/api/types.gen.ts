@@ -273,6 +273,10 @@ export type ClientEventIn = {
      * Slug
      */
     slug?: string | null;
+    /**
+     * Src
+     */
+    src?: 'digest' | null;
 };
 
 /**

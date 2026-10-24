@@ -35,6 +35,8 @@ class ClientEventIn(BaseModel):
     name: Literal["landing_viewed", "landing_path_selected", "startup_viewed", "apply_started"]
     path: Literal["seeker", "founder"] | None = None
     slug: str | None = Field(default=None, max_length=100, pattern=r"^[a-z0-9-]+$")
+    # Откуда пришёл посетитель: переход из письма-подборки (KAN-107).
+    src: Literal["digest"] | None = None
 
 
 class HypothesisRow(BaseModel):

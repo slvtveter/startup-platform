@@ -3409,6 +3409,18 @@
               }
             ],
             "title": "Slug"
+          },
+          "src": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "digest"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Src"
           }
         },
         "type": "object",
