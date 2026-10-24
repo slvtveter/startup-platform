@@ -1,8 +1,8 @@
+import { Plus } from "lucide-react";
 import Link from "next/link";
 
 import { MobileNav } from "@/components/site/mobile-nav";
 import { NavLink } from "@/components/site/nav-link";
-import { InboxBadge } from "@/components/site/inbox-badge";
 import { Logo } from "@/components/site/logo";
 import { UserMenu } from "@/components/site/user-menu";
 import { buttonVariants } from "@/components/ui/button";
@@ -12,17 +12,20 @@ import { getMe, serverClient } from "@/lib/server-api";
 export async function SiteHeader() {
   const user = await getMe();
   const inbox = user ? (await inboxCount({ client: await serverClient() })).data : undefined;
-  const links = user
+  // В шапке только каталог; личные разделы — в меню аккаунта (на телефоне — в общем меню).
+  const links = [
+    { href: "/startups", label: "Стартапы" },
+    { href: "/people", label: "Люди" },
+  ];
+  const mobileLinks = user
     ? [
-        { href: "/startups", label: "Стартапы" },
-        { href: "/people", label: "Люди" },
-        { href: "/me/applications", label: "Мои заявки", badge: inbox?.mine ?? 0 },
+        ...links,
+        { href: "/startups/new", label: "Разместить стартап" },
+        { href: "/me/profile", label: "Мой профиль" },
+        { href: "/me/applications", label: "Мои отклики", badge: inbox?.mine ?? 0 },
         { href: "/me/startups", label: "Мои стартапы", badge: inbox?.incoming ?? 0 },
       ]
-    : [
-        { href: "/startups", label: "Стартапы" },
-        { href: "/people", label: "Люди" },
-      ];
+    : [...links, { href: "/login", label: "Войти" }];
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
@@ -32,20 +35,21 @@ export async function SiteHeader() {
           {links.map((l) => (
             <NavLink key={l.href} href={l.href}>
               {l.label}
-              <InboxBadge count={"badge" in l ? (l.badge ?? 0) : 0} />
             </NavLink>
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
           {user ? (
             <>
-              <Link href="/startups/new" className={buttonVariants({ variant: "brand", className: "max-sm:hidden" })}>
-                Создать стартап
+              <Link href="/startups/new" className={buttonVariants({ variant: "ghost", className: "max-sm:hidden" })}>
+                <Plus aria-hidden className="size-4" />
+                Разместить стартап
               </Link>
               <UserMenu
                 email={user.email}
                 name={user.profile?.display_name || user.email.split("@")[0]}
                 isAdmin={user.is_admin}
+                inbox={{ mine: inbox?.mine ?? 0, incoming: inbox?.incoming ?? 0 }}
               />
             </>
           ) : (
@@ -58,7 +62,7 @@ export async function SiteHeader() {
               </Link>
             </>
           )}
-          <MobileNav links={user ? links : [...links, { href: "/login", label: "Войти" }]} />
+          <MobileNav links={mobileLinks} />
         </div>
       </div>
     </header>

@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { Button, buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 export type Option = { value: string; label: string };
 export type SearchParams = Record<string, string | string[] | undefined>;
@@ -21,50 +20,6 @@ export function toggleHref(basePath: string, params: SearchParams, name: string,
   if (value !== null && !asList(params[name]).includes(value)) q.append(name, value);
   const s = q.toString();
   return s ? `${basePath}?${s}` : basePath;
-}
-
-/**
- * Фильтр-чипы: каждый чип — обычная ссылка, поэтому фильтры работают без JS,
- * применяются сразу и сохраняются в URL (ссылкой можно поделиться).
- */
-export function ChipFilter({
-  basePath,
-  params,
-  name,
-  title,
-  options,
-}: {
-  basePath: string;
-  params: SearchParams;
-  name: string;
-  title: string;
-  options: Option[];
-}) {
-  const selected = asList(params[name]);
-  return (
-    <div className="flex items-center gap-3">
-      <span className="w-24 shrink-0 text-sm font-semibold text-muted-foreground max-sm:hidden">{title}</span>
-      <div role="group" aria-label={title} className="flex min-w-0 gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
-        {options.map((o) => {
-          const active = selected.includes(o.value);
-          return (
-            <Link
-              key={o.value}
-              href={toggleHref(basePath, params, name, o.value)}
-              aria-current={active ? "true" : undefined}
-              scroll={false}
-              className={cn(
-                "shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium whitespace-nowrap transition-colors",
-                active ? "border-foreground bg-foreground text-background" : "bg-card hover:border-foreground",
-              )}
-            >
-              {o.label}
-            </Link>
-          );
-        })}
-      </div>
-    </div>
-  );
 }
 
 /** Поиск по тексту: GET-форма, которая сохраняет остальные фильтры скрытыми полями. */

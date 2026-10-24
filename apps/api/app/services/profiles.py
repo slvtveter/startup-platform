@@ -240,7 +240,8 @@ async def list_people(
     if looking_for:
         stmt = stmt.where(Profile.looking_for.overlap(looking_for))
     q = (q or "").strip()
-    order = [Profile.updated_at.desc()]
+    # Сначала профили с описанием: пустые карточки в начале каталога отталкивают основателей.
+    order = [(Profile.headline == "").asc(), Profile.updated_at.desc()]
     if len(q) >= search.MIN_FTS_LEN:
         tsq = search.query(q)
         # Человек находится по своему тексту или по названию основной роли («дизайнеры»).

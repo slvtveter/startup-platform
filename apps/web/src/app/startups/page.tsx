@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { ChipFilter, Pager, SearchBox, asList, toggleHref, type SearchParams } from "@/components/domain/filters";
+import { FilterBar } from "@/components/domain/filter-bar";
+import { Pager, SearchBox, asList, toggleHref, type SearchParams } from "@/components/domain/filters";
 import { Container, EmptyState, PageHeader } from "@/components/domain/page-header";
 import { StartupCard } from "@/components/domain/startup-card";
 import { buttonVariants } from "@/components/ui/button";
@@ -39,18 +40,19 @@ export default async function StartupsPage({ searchParams }: { searchParams: Pro
     <Container>
       <PageHeader
         title="Стартапы"
-        description="Проекты, которые прямо сейчас ищут людей в команду. Жёлтые места свободны: на них можно откликнуться."
-        actions={
-          <Link href="/startups/new" className={buttonVariants({ variant: "outline" })}>
-            Создать стартап
-          </Link>
-        }
+        description="Проекты, которые прямо сейчас ищут людей в команду. Откликнуться можно на любую открытую роль."
       />
       <div className="mt-8 space-y-3">
         <SearchBox params={params} placeholder="Поиск по названию и описанию" />
-        <ChipFilter basePath="/startups" params={params} name="role" title="Кого ищут" options={(roles ?? []).map((r) => ({ value: r.slug, label: r.name }))} />
-        <ChipFilter basePath="/startups" params={params} name="terms" title="Условия" options={Object.entries(TERMS).map(([value, label]) => ({ value, label }))} />
-        <ChipFilter basePath="/startups" params={params} name="stage" title="Стадия" options={Object.entries(STAGE).map(([value, label]) => ({ value, label }))} />
+        <FilterBar
+          basePath="/startups"
+          params={params}
+          groups={[
+            { name: "role", title: "Кого ищут", options: (roles ?? []).map((r) => ({ value: r.slug, label: r.name })) },
+            { name: "terms", title: "Условия", options: Object.entries(TERMS).map(([value, label]) => ({ value, label })) },
+            { name: "stage", title: "Стадия", options: Object.entries(STAGE).map(([value, label]) => ({ value, label })) },
+          ]}
+        />
       </div>
       <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 border-t pt-5 text-sm">
         <span className="font-semibold">
@@ -90,7 +92,7 @@ export default async function StartupsPage({ searchParams }: { searchParams: Pro
             text="Попробуй убрать часть условий. Или создай свой стартап: возможно, именно его здесь не хватает."
             action={
               <Link href="/startups/new" className={buttonVariants({ variant: "brand" })}>
-                Создать стартап
+                Разместить стартап
               </Link>
             }
           />

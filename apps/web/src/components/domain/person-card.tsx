@@ -14,7 +14,16 @@ export function PersonAvatar({ name, size = "md" }: { name: string; size?: "md" 
   );
 }
 
+/**
+ * Карточка человека в каталоге. Показываем только то, что человек заполнил:
+ * пустые блоки не рисуем, а условия работы идут одной строкой текста, без лишних рамок.
+ */
 export function PersonCard({ person }: { person: PersonCardData }) {
+  const role = [person.primary_role?.name, person.experience_level ? LEVEL[person.experience_level].toLowerCase() : null]
+    .filter(Boolean)
+    .join(", ");
+  const skills = person.skills.slice(0, 4);
+  const more = person.skills.length - skills.length;
   return (
     <Link
       href={`/people/${person.slug}`}
@@ -24,26 +33,22 @@ export function PersonCard({ person }: { person: PersonCardData }) {
         <Avatar name={person.display_name} url={person.avatar_url} className="size-12 rounded-xl text-base" />
         <div className="min-w-0">
           <div className="truncate text-lg font-bold group-hover:text-brand-ink">{person.display_name}</div>
-          <div className="truncate text-sm text-muted-foreground">
-            {person.primary_role?.name ?? "Роль не указана"}
-            {person.experience_level ? `, ${LEVEL[person.experience_level].toLowerCase()}` : ""}
-          </div>
+          {role && <div className="truncate text-sm text-muted-foreground">{role}</div>}
         </div>
       </div>
       {person.headline && <p className="mt-3 line-clamp-2 text-sm text-foreground/80">{person.headline}</p>}
-      <div className="mt-3 flex flex-wrap gap-1">
-        {person.skills.slice(0, 5).map((s) => (
-          <SkillChip key={s.slug} name={s.name} />
-        ))}
-      </div>
-      {person.looking_for.length > 0 && (
-        <div className="mt-auto flex flex-wrap gap-1.5 pt-4">
-          {person.looking_for.map((t) => (
-            <span key={t} className="rounded-full border px-2 py-0.5 text-xs font-semibold text-muted-foreground">
-              {TERMS[t]}
-            </span>
+      {skills.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-1">
+          {skills.map((s) => (
+            <SkillChip key={s.slug} name={s.name} />
           ))}
+          {more > 0 && <span className="self-center px-1 text-xs text-muted-foreground">+{more}</span>}
         </div>
+      )}
+      {person.looking_for.length > 0 && (
+        <p className="mt-3 text-xs text-muted-foreground">
+          Готов работать: {person.looking_for.map((t) => TERMS[t].toLowerCase()).join(", ")}
+        </p>
       )}
     </Link>
   );

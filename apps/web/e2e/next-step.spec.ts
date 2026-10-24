@@ -28,8 +28,9 @@ test("next step for every user state", () => {
     kind: "wait",
     title: "1 отклик ждёт ответа",
   });
-  // Старое «принято» больше не главное действие.
-  expect(
-    nextStep({ ...base, applications: [{ status: "accepted", startupTitle: "A", decidedAt: "2026-09-01T00:00:00Z" }] }).kind,
-  ).toBe("wait");
+  // Старое «принято» больше не главное действие: вместо пустого «всё сделано» — следующее полезное.
+  const later = nextStep({ ...base, applications: [{ status: "accepted", startupTitle: "A", decidedAt: "2026-09-01T00:00:00Z" }] });
+  expect(later.kind).toBe("invite");
+  expect(later.title).not.toContain("Всё сделано");
+  expect(nextStep({ ...base, hasStartups: true }).href).toBe("/people");
 });
