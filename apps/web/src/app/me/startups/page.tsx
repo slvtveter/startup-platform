@@ -46,7 +46,7 @@ export default async function MyStartupsPage() {
                   <TermsBadge terms={s.terms} />
                   {s.is_hidden && <span className="rounded-full bg-destructive/10 px-2.5 py-0.5 text-xs font-bold text-destructive">Скрыт модератором</span>}
                 </div>
-                <div className="mt-2 text-xl font-extrabold">{s.title}</div>
+                <div className="mt-2 text-xl font-bold">{s.title}</div>
                 <div className="text-sm text-muted-foreground">
                   Открытых ролей: {s.open_roles.length}
                   {s.pending_applications > 0 && (

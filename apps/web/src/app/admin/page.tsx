@@ -59,12 +59,12 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <div className="grid gap-4">
           <div className="rounded-2xl border bg-card p-6">
             <div className="text-sm text-muted-foreground">Ответ на отклик за 72 часа</div>
-            <div className="mt-1 text-4xl font-extrabold">{m?.answered_72h_share == null ? "—" : `${Math.round(m.answered_72h_share * 100)}%`}</div>
+            <div className="mt-1 text-4xl font-bold">{m?.answered_72h_share == null ? "—" : `${Math.round(m.answered_72h_share * 100)}%`}</div>
             <div className="mt-4 text-sm text-muted-foreground">Активных стартапов</div>
-            <div className="mt-1 text-4xl font-extrabold">{m?.active_startups ?? 0}</div>
+            <div className="mt-1 text-4xl font-bold">{m?.active_startups ?? 0}</div>
           </div>
           <div className="rounded-2xl border bg-card p-6">
-            <div className="font-extrabold">Источники регистраций</div>
+            <div className="font-bold">Источники регистраций</div>
             <ul className="mt-3 grid gap-1 text-sm">
               {m?.sources.length ? (
                 m.sources.map((s) => (

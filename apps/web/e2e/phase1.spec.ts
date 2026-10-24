@@ -89,8 +89,11 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
 
   // --- Кандидат видит контакты основателя ---
   await candidate.reload();
-  await expect(candidate.getByText("Принят")).toBeVisible();
+  await expect(candidate.getByRole("heading", { name: "Тебя приняли" })).toBeVisible();
+  await expect(candidate.getByText("Принят", { exact: true })).toBeVisible();
   await expect(candidate.getByText(founderEmail)).toBeVisible();
+  await expect(candidate.getByText("Что дальше")).toBeVisible();
+  await expect(candidate.getByText(/Напиши основателю первым/)).toBeVisible();
   await shot(candidate, "my-applications");
 
   // Роль с одним местом закрылась автоматически.

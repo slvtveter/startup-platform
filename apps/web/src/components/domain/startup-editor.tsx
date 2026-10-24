@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { Seat, SeatRow } from "@/components/domain/seats";
 import { SkillPicker } from "@/components/domain/skill-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -178,7 +179,7 @@ export function StartupEditor({ startup, roles, skills }: { startup?: StartupDet
             <div className="rounded-2xl border bg-card p-5">
               {startup.status === "recruiting" ? (
                 <>
-                  <div className="font-extrabold">Набор открыт</div>
+                  <div className="font-bold">Набор открыт</div>
                   <p className="mt-1 text-sm text-muted-foreground">Стартап виден в ленте.</p>
                   <div className="mt-4 flex gap-2">
                     <Button variant="outline" onClick={() => changeStatus("close")}>
@@ -191,7 +192,7 @@ export function StartupEditor({ startup, roles, skills }: { startup?: StartupDet
                 </>
               ) : (
                 <>
-                  <div className="font-extrabold">{startup.status === "draft" ? "Черновик" : "Набор закрыт"}</div>
+                  <div className="font-bold">{startup.status === "draft" ? "Черновик" : "Набор закрыт"}</div>
                   <p className="mt-1 text-sm text-muted-foreground">Опубликуй, чтобы стартап появился в ленте и на него можно было откликнуться.</p>
                   {blockers.length > 0 && (
                     <ul className="mt-3 grid gap-1 rounded-xl bg-warn-soft p-3 text-sm text-warn-ink">
@@ -209,7 +210,7 @@ export function StartupEditor({ startup, roles, skills }: { startup?: StartupDet
           </>
         ) : (
           <div className="rounded-2xl bg-secondary p-5 text-sm text-muted-foreground">
-            <div className="font-extrabold text-foreground">Как это работает</div>
+            <div className="font-bold text-foreground">Как это работает</div>
             <ol className="mt-2 grid list-decimal gap-1 pl-4">
               <li>Опиши идею и условия, создай черновик.</li>
               <li>Добавь роли, которые ищешь: кто нужен, задачи, навыки.</li>
@@ -262,10 +263,21 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
       <p className="mt-1 text-sm text-muted-foreground">
         Чем конкретнее задачи, часы и то, что человек получит, тем больше откликов.
       </p>
+      <div className="mt-4 rounded-xl bg-secondary p-3">
+        <div className="text-xs text-muted-foreground">Так команду увидят новички</div>
+        <div className="mt-2 flex items-center gap-3">
+          <SeatRow
+            filled={startup.team.length}
+            open={startup.roles.filter((r) => r.is_open).reduce((n, r) => n + Math.max(0, (r.slots ?? 1) - (r.filled ?? 0)), 0)}
+            size="md"
+          />
+        </div>
+      </div>
       <ul className="mt-3 grid gap-2">
         {startup.roles.map((r) => (
-          <li key={r.id} className="rounded-xl bg-secondary p-3">
+          <li key={r.id} className="rounded-xl border p-3">
             <div className="flex items-start gap-2">
+              <Seat filled={!r.is_open} size="sm" className="mt-0.5" />
               <div className="min-w-0">
                 <div className="truncate font-bold">{r.title}</div>
                 <div className="text-xs text-muted-foreground">

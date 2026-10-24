@@ -273,8 +273,8 @@ export function ProfileEditor({
       <aside className="grid h-fit gap-4 lg:sticky lg:top-24">
         <div className="rounded-2xl border bg-card p-5">
           <div className="flex items-baseline">
-            <span className="font-extrabold">Профиль заполнен</span>
-            <span className="ml-auto text-2xl font-extrabold">{profile.completeness}%</span>
+            <span className="font-bold">Профиль заполнен</span>
+            <span className="ml-auto text-2xl font-bold">{profile.completeness}%</span>
           </div>
           <div className="mt-3 h-2 overflow-hidden rounded-full bg-secondary">
             <div className="h-full rounded-full bg-brand transition-all" style={{ width: `${profile.completeness}%` }} />
@@ -289,7 +289,7 @@ export function ProfileEditor({
           <p className="mt-4 text-xs text-muted-foreground">С портфолио и рассказом о себе основатели отвечают заметно чаще.</p>
         </div>
         <div className="rounded-2xl border bg-card p-5">
-          <div className="font-extrabold">{profile.is_published ? "Опубликован" : "Не опубликован"}</div>
+          <div className="font-bold">{profile.is_published ? "Опубликован" : "Не опубликован"}</div>
           <p className="mt-1 text-sm text-muted-foreground">
             {profile.is_published ? "Тебя видно в каталоге людей." : "Пока профиль скрыт, нельзя откликаться и тебя не найдут в каталоге."}
           </p>

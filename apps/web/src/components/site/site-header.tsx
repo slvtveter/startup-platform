@@ -35,7 +35,7 @@ export async function SiteHeader() {
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
           {user ? (
             <>
-              <Link href="/startups/new" className={buttonVariants({ variant: "brand", className: "hidden sm:inline-flex" })}>
+              <Link href="/startups/new" className={buttonVariants({ variant: "brand", className: "max-sm:hidden" })}>
                 Создать стартап
               </Link>
               <UserMenu

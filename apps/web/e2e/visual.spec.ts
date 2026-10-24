@@ -5,6 +5,13 @@ import { expect, test } from "@playwright/test";
  * KAN-86: скриншоты ключевых экранов (артефакт CI `screens`) и проверка доступности axe.
  * Падаем только на нарушениях уровня serious/critical, остальные видны в отчёте.
  */
+const AUTH_PAGES = [
+  ["my-applications", "/me/applications", "maria@example.com"],
+  ["my-profile", "/me/profile", "maria@example.com"],
+  ["new-startup", "/startups/new", "alina@example.com"],
+  ["dashboard", "/", "alina@example.com"],
+] as const;
+
 const PAGES = [
   ["landing", "/"],
   ["startups", "/startups"],
@@ -24,8 +31,14 @@ const DIR = process.env.SCREENS_DIR ?? "test-results/screens";
 for (const [vpName, viewport] of VIEWPORTS) {
   test.describe(vpName, () => {
     test.use({ viewport });
-    for (const [name, path] of PAGES) {
+    const pages = [...PAGES.map(([n, p]) => [n, p, null] as const), ...AUTH_PAGES];
+    for (const [name, path, user] of pages) {
       test(`${name} is accessible and fits the screen`, async ({ page }) => {
+        if (user) {
+          // Демо-аккаунты из make seed; успешный вход не расходует лимит попыток.
+          const res = await page.request.post("/api/auth/login", { data: { email: user, password: "demo12345" } });
+          expect(res.ok()).toBeTruthy();
+        }
         await page.goto(path);
         await page.waitForLoadState("networkidle");
         await page.screenshot({ path: `${DIR}/${vpName}-${name}.png`, fullPage: true });

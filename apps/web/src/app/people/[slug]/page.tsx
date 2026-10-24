@@ -104,7 +104,7 @@ export default async function PersonPage({ params }: Props) {
 
         <aside className="grid h-fit gap-4 lg:sticky lg:top-24">
           <div className="rounded-2xl border bg-card p-5">
-            <div className="text-sm font-extrabold">Готов работать</div>
+            <div className="text-sm font-bold">Готов работать</div>
             <div className="mt-2 flex flex-wrap gap-2">
               {p.looking_for.map((t) => (
                 <span key={t} className="rounded-full bg-warn-soft px-3 py-1 text-sm font-bold text-warn-ink">

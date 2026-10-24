@@ -1,3 +1,4 @@
+from app.services import mail
 from tests.test_startups import create_published
 
 MESSAGE = "Здравствуйте! Хочу поработать над экранами заказа, есть кейс в портфолио."
@@ -27,6 +28,11 @@ async def test_apply_accept_exchanges_contacts(make_user):
     r = await founder.post(f"/api/applications/{app['id']}/accept", json={})
     assert r.status_code == 200
     assert r.json()["contacts"]["telegram"] == "maria"
+    # Письмо о принятии ведёт прямо к карточке с контактами и шагами «что дальше».
+    accepted_mail = next(
+        m for m in mail.outbox if m["To"] == "maria@mail.ru" and "решение" in m["Subject"]
+    )
+    assert f"/me/applications#app-{app['id']}" in accepted_mail.get_content()
 
     mine = (await maria.get("/api/me/applications")).json()
     assert mine[0]["status"] == "accepted"
