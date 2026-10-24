@@ -6,6 +6,7 @@ from sqlalchemy import Select, exists, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import AppError, Forbidden, NotFound
+from app.db import search
 from app.models import (
     Application,
     Event,
@@ -418,17 +419,25 @@ async def list_public(
         stmt = stmt.where(Startup.terms.in_(terms))
     if stages:
         stmt = stmt.where(Startup.stage.in_(stages))
-    if q:
-        like = f"%{q.strip()}%"
-        stmt = stmt.where(
-            or_(
-                Startup.title.ilike(like),
-                Startup.pitch.ilike(like),
-                Startup.description.ilike(like),
-            )
+    q = (q or "").strip()
+    rank = None
+    if len(q) >= search.MIN_FTS_LEN:
+        tsq = search.query(q)
+        # Стартап находится по своему тексту или по названию и описанию открытой роли.
+        role_hit = (
+            exists()
+            .where(StartupRole.startup_id == Startup.id, StartupRole.is_open.is_(True))
+            .where(StartupRole.search.op("@@")(tsq))
         )
+        stmt = stmt.where(or_(Startup.search.op("@@")(tsq), role_hit))
+        rank = func.ts_rank(Startup.search, tsq)
+    elif q:
+        stmt = stmt.where(Startup.title.ilike(f"{q}%"))
     total = await db.scalar(select(func.count()).select_from(stmt.subquery()))
-    if sort == "roles":
+    if rank is not None:
+        # Совпадение в названии (вес A) выше, чем в описании; только по роли — в конце.
+        stmt = stmt.order_by(rank.desc(), Startup.published_at.desc())
+    elif sort == "roles":
         open_roles = (
             select(func.count())
             .where(StartupRole.startup_id == Startup.id, StartupRole.is_open.is_(True))

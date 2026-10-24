@@ -17,6 +17,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
+from app.db.search import search_column, search_index
 from app.models.catalog import Role, Skill
 from app.models.enums import Stage, StartupStatus, Terms
 
@@ -30,6 +31,7 @@ startup_role_skills = Table(
 
 class Startup(TimestampMixin, Base):
     __tablename__ = "startups"
+    __table_args__ = (search_index("startups"),)
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     owner_id: Mapped[uuid.UUID] = mapped_column(
@@ -39,6 +41,7 @@ class Startup(TimestampMixin, Base):
     slug: Mapped[str] = mapped_column(String(100), unique=True)
     pitch: Mapped[str] = mapped_column(String(160), default="")
     description: Mapped[str] = mapped_column(Text, default="")
+    search = search_column(("title", "A"), ("pitch", "B"), ("description", "C"))
     stage: Mapped[Stage] = mapped_column(Enum(Stage, native_enum=False, length=16))
     terms: Mapped[Terms] = mapped_column(Enum(Terms, native_enum=False, length=16))
     terms_details: Mapped[str] = mapped_column(Text, default="")
@@ -67,6 +70,7 @@ class Startup(TimestampMixin, Base):
 
 class StartupRole(Base):
     __tablename__ = "startup_roles"
+    __table_args__ = (search_index("startup_roles"),)
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     startup_id: Mapped[uuid.UUID] = mapped_column(
@@ -75,6 +79,7 @@ class StartupRole(Base):
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
     title: Mapped[str] = mapped_column(String(100))
     description: Mapped[str] = mapped_column(Text, default="")
+    search = search_column(("title", "A"), ("description", "C"))
     slots: Mapped[int] = mapped_column(Integer, default=1)
     hours_per_week: Mapped[int | None] = mapped_column(Integer)
     outcome: Mapped[str] = mapped_column(Text, default="", server_default="")  # «что получишь»
