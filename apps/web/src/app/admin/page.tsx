@@ -89,7 +89,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <p className="mt-1 text-sm text-muted-foreground">
           Сравнение с предыдущими {days} днями. Описание гипотез: docs/ux/research.md.
         </p>
-        <div className="mt-4 overflow-x-auto">
+        <div className="mt-4 overflow-x-auto" tabIndex={0} role="region" aria-label="Таблица гипотез">
           <table className="w-full min-w-[640px] text-sm">
             <thead className="text-left text-muted-foreground">
               <tr className="border-b">
