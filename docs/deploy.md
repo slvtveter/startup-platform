@@ -9,16 +9,46 @@
 Выкатка на сервер — workflow **Deploy** (Actions → Deploy → Run workflow), только вручную
 и только через GitHub Environment с подтверждением человеком.
 
+## Какой сервер нужен
+
+Замер prod-стека (`compose.prod.yml`, демо-данные, 2026-10-24):
+
+| Контейнер | Память в покое | Под нагрузкой* | CPU под нагрузкой |
+|---|---|---|---|
+| web (Next SSR) | 47 МБ | 121 МБ | ~1 ядро |
+| api (FastAPI) | 149 МБ | 159 МБ | ~0.6 ядра |
+| db (Postgres) | 69 МБ | 90 МБ | ~0.8 ядра |
+| worker | 62 МБ | 62 МБ | — |
+| caddy | 26 МБ | 37 МБ | ~0.2 ядра |
+| **Итого** | **~355 МБ** | **~470 МБ** | |
+
+\* 1600 SSR-запросов в 20 потоков. После нагрузки `/startups` отвечает за 16 мс.
+
+Образы занимают около 1.5 ГБ диска, ещё нужно место под логи (ротация 5 × 10 МБ на контейнер), бэкапы (14 дней) и аватары.
+
+- **Старт: 1 vCPU / 2 ГБ / 50 ГБ, Ubuntu 24.04 LTS, swap 2 ГБ.** Памяти хватает с запасом в 4 раза. При всплеске трафика упрёмся в CPU — сайт станет медленнее, но не упадёт.
+- **2 vCPU / 4 ГБ** — когда на одном сервере нужен ещё staging (второй стек, около 0.5 ГБ) или когда под реальной нагрузкой растёт время ответа.
+- Сервер должен работать постоянно: иначе не уходят письма, не продлевается HTTPS-сертификат и не делаются бэкапы.
+
 ## Первичная настройка сервера (один раз)
 
-1. VPS с Docker (Ubuntu 24.04, 2 vCPU / 4 ГБ для старта), открыты порты 80 и 443.
+1. Ubuntu 24.04, открыты только порты 22, 80 и 443. Docker — по [официальной инструкции](https://docs.docker.com/engine/install/ubuntu/).
+   ```bash
+   # swap 2 ГБ: страховка от нехватки памяти на тарифе с 2 ГБ
+   sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile
+   sudo mkswap /swapfile && sudo swapon /swapfile
+   echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+   # файрвол
+   sudo ufw allow OpenSSH && sudo ufw allow 80 && sudo ufw allow 443 && sudo ufw enable
+   ```
+   Docker публикует порты в обход ufw, поэтому наружу открыт только Caddy: у остальных сервисов в `compose.prod.yml` нет `ports`.
 2. DNS: A-запись домена на IP сервера. HTTPS-сертификат Caddy выпустит сам.
 3. На сервере:
    ```bash
    sudo mkdir -p /opt/startup-platform && sudo chown $USER /opt/startup-platform
    cd /opt/startup-platform
    # скопировать сюда infra/compose.prod.yml, Caddyfile.prod, папку backup (или дождаться первого деплоя)
-   cp .env.prod.example .env.prod   # и заполнить: домен, пароль БД, SMTP
+   cp .env.prod.example .env.prod   # заполнить: домен, пароль БД, SMTP, SECRET_KEY и EVENTS_SALT (openssl rand -hex 32)
    echo $GHCR_TOKEN | docker login ghcr.io -u <github-user> --password-stdin   # если пакеты приватные
    docker compose -f compose.prod.yml --env-file .env.prod up -d
    docker compose -f compose.prod.yml --env-file .env.prod exec api python -m app.scripts.create_admin you@example.com
