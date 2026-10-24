@@ -21,7 +21,7 @@ export function PageHeader({
 export function EmptyState({ title, text, action }: { title: string; text?: string; action?: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-dashed bg-card px-6 py-14 text-center">
-      <div className="text-lg font-extrabold">{title}</div>
+      <div className="text-lg font-bold">{title}</div>
       {text && <p className="mx-auto mt-2 max-w-md text-muted-foreground">{text}</p>}
       {action && <div className="mt-5 flex justify-center">{action}</div>}
     </div>

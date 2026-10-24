@@ -242,13 +242,17 @@ async def decide(
 
     other = app.applicant if user.id != app.applicant_id else role.startup.owner
     verdict = "приняли" if accept else "отклонили"
+    # Ссылка ведёт прямо к карточке заявки с контактами и шагами «что дальше».
+    page = (
+        "/me/applications" if other.id == app.applicant_id else f"/me/startups/{role.startup.slug}"
+    )
     await mail.send_mail(
         other.email,
         f"{role.startup.title}: решение по роли «{role.title}»",
         f"Ваш {'отклик' if app.direction == ApplicationDirection.apply else 'приглашение'} "
         f"{verdict}."
         + (f"\nКомментарий: {note}" if note else "")
-        + (f"\n\nКонтакты открыты: {mail.link('/me/applications')}" if accept else ""),
+        + (f"\n\nКонтакты открыты: {mail.link(f'{page}#app-{app.id}')}" if accept else ""),
     )
     return app
 

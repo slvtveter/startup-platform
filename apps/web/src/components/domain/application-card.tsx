@@ -15,6 +15,50 @@ import { LEVEL, timeAgo } from "@/lib/labels";
 
 const REJECT_TEMPLATES = ["Роль уже закрыта", "Нужен опыт в этой области", "Не совпадаем по времени"];
 
+// Шаги после взаимного согласия: это реальная последовательность, поэтому с номерами.
+const NEXT_STEPS = [
+  "Напиши основателю первым сегодня: пара фраз о себе и когда удобно созвониться.",
+  "Договоритесь о коротком созвоне на 20–30 минут в ближайшие дни.",
+  "Спроси, какие задачи на первую неделю и кто в команде их проверяет.",
+];
+
+const STEP_LABELS: Record<string, string> = {
+  accepted: "Принят",
+  rejected: "Отказ",
+  withdrawn: "Отозван",
+};
+
+/** Путь отклика: отправлен → решение → контакты. Текущий шаг выделен, будущие приглушены. */
+function StatusTimeline({ app }: { app: ApplicationOut }) {
+  const decided = app.status !== "pending";
+  const steps = [
+    { label: app.direction === "invite" ? "Приглашение" : "Отправлен", done: true, at: app.created_at },
+    { label: decided ? (STEP_LABELS[app.status] ?? "Решение") : "Ждёт решения", done: decided, at: app.decided_at },
+    { label: "Контакты открыты", done: app.status === "accepted", at: app.status === "accepted" ? app.decided_at : null },
+  ];
+  return (
+    <ol className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs" aria-label="Статус заявки">
+      {steps.map((step, i) => (
+        <li key={step.label} className="flex items-center gap-2">
+          {i > 0 && <span aria-hidden className={`h-px w-6 ${step.done ? "bg-foreground" : "bg-border"}`} />}
+          <span
+            className={`rounded-full px-2.5 py-1 font-semibold ${
+              step.done
+                ? app.status === "rejected" && i === 1
+                  ? "bg-secondary text-muted-foreground"
+                  : "bg-foreground text-background"
+                : "border border-dashed text-muted-foreground"
+            }`}
+          >
+            {step.label}
+            {step.done && step.at ? `, ${timeAgo(step.at)}` : ""}
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 export function ApplicationCard({ app, perspective }: { app: ApplicationOut; perspective: "candidate" | "founder" }) {
   const router = useRouter();
   const [rejecting, setRejecting] = useState(false);
@@ -42,7 +86,7 @@ export function ApplicationCard({ app, perspective }: { app: ApplicationOut; per
   const highlight = app.can_decide ? "border-foreground border-2" : app.status === "accepted" ? "border-success-ink/40" : "";
 
   return (
-    <article className={`rounded-2xl border bg-card p-5 sm:p-6 ${highlight}`}>
+    <article id={`app-${app.id}`} className={`scroll-mt-24 rounded-2xl border bg-card p-5 sm:p-6 ${highlight}`}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
         {perspective === "founder" && person && <PersonAvatar name={person.display_name} />}
         <div className="min-w-0 flex-1">
@@ -56,10 +100,10 @@ export function ApplicationCard({ app, perspective }: { app: ApplicationOut; per
                 {person.display_name}
               </Link>
             ) : null}
-            {" · "}
-            {isInvite ? (perspective === "candidate" ? "приглашение от основателя" : "вы пригласили") : "отклик"} · {timeAgo(app.created_at)}
+            {", "}
+            {isInvite ? (perspective === "candidate" ? "приглашение от основателя" : "вы пригласили") : "отклик"}, {timeAgo(app.created_at)}
           </div>
-          <div className="mt-0.5 text-xl font-extrabold">{app.role_title}</div>
+          <div className="mt-0.5 text-xl font-bold">{app.role_title}</div>
           {perspective === "founder" && person && (
             <div className="mt-2 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
               {person.experience_level && <span className="mr-1">{LEVEL[person.experience_level]}</span>}
@@ -71,6 +115,8 @@ export function ApplicationCard({ app, perspective }: { app: ApplicationOut; per
         </div>
         <ApplicationStatusBadge status={app.status} />
       </div>
+
+      <StatusTimeline app={app} />
 
       <p className="mt-4 rounded-xl bg-secondary p-4 text-[15px] leading-relaxed whitespace-pre-line">{app.message}</p>
       {app.decision_note && <p className="mt-3 text-sm text-muted-foreground">Комментарий: {app.decision_note}</p>}
@@ -97,6 +143,20 @@ export function ApplicationCard({ app, perspective }: { app: ApplicationOut; per
               </a>
             </div>
           )}
+        </div>
+      )}
+
+      {app.contacts && perspective === "candidate" && (
+        <div className="mt-4 rounded-xl border p-4">
+          <div className="font-semibold">Что дальше</div>
+          <ol className="mt-2 grid gap-1.5 text-sm text-muted-foreground">
+            {NEXT_STEPS.map((step, i) => (
+              <li key={step} className="flex gap-2">
+                <span className="font-semibold text-foreground">{i + 1}.</span>
+                {step}
+              </li>
+            ))}
+          </ol>
         </div>
       )}
 
