@@ -92,3 +92,16 @@ async def test_platform_startup_for_existing_verified_user(make_user):
     r = await admin.post("/api/admin/startups", json=PLATFORM_STARTUP)
     assert r.json()["is_owner"] is False
     assert len((await founder.get("/api/me/startups")).json()) == 1
+
+
+async def test_every_catalog_role_has_a_template(make_user, client):
+    admin = await make_user("admin@mail.ru", admin=True)
+    # Роль, которую добавил админ, тоже получает пример (общий шаблон).
+    await admin.post("/api/admin/catalog/roles", json={"name": "Юрист"})
+    roles = {r["slug"] for r in (await client.get("/api/roles")).json()}
+    templates = {t["role"]: t for t in (await client.get("/api/role-templates")).json()}
+    assert set(templates) == roles
+    assert templates["designer"]["title"] == "UI/UX дизайнер"
+    assert templates["designer"]["hours_per_week"] == 8
+    assert set(templates["yurist"]["outcome"]) == {"free", "paid", "equity", "mixed"}
+    assert templates["yurist"]["title"] == "Юрист" and templates["yurist"]["description"]
