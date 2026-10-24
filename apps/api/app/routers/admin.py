@@ -4,7 +4,7 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Response
 from sqlalchemy import delete, func, or_, select
 
 from app.core.deps import AdminUser
@@ -31,6 +31,7 @@ from app.schemas.ops import (
     CatalogItemIn,
     CatalogMergeIn,
     CatalogRenameIn,
+    CohortRow,
     FunnelStep,
     HypothesisRow,
     MetricsOut,
@@ -39,7 +40,7 @@ from app.schemas.ops import (
     SourceRow,
 )
 from app.schemas.startup import StartupDetail, StartupIn
-from app.services import catalog_admin
+from app.services import catalog_admin, retention
 from app.services import hypotheses as hypotheses_service
 from app.services import jobs as jobs_service
 from app.services import startups as startup_service
@@ -335,3 +336,50 @@ async def admin_create_platform_startup(
     _log(db, admin, "startup_create_for", "startup", s.id, owner_email=data.owner_email)
     await db.commit()
     return await startup_service.to_detail(db, s, admin)
+
+
+# --- Удержание и экспорт (KAN-100) ---
+
+
+@router.get("/cohorts", response_model=list[CohortRow])
+async def admin_cohorts(
+    admin: AdminUser, db: DbSession, weeks: Annotated[int, Query(ge=1, le=26)] = 8
+) -> list[CohortRow]:
+    return await retention.cohorts(db, weeks)
+
+
+@router.get("/export", response_class=Response, responses={200: {"content": {"text/csv": {}}}})
+async def admin_export_csv(
+    admin: AdminUser,
+    db: DbSession,
+    kind: Annotated[str, Query(pattern="^(funnel|cohorts)$")] = "funnel",
+    days: Annotated[int, Query(ge=1, le=365)] = 30,
+) -> Response:
+    if kind == "funnel":
+        m = await admin_metrics(admin, db, days)
+        body = retention.to_csv(
+            ["шаг", "событие", f"пользователей за {days} дней"],
+            [[f.label, f.name, f.count] for f in m.funnel],
+        )
+    else:
+        rows = await retention.cohorts(db, 8)
+        body = retention.to_csv(
+            ["неделя регистрации", "регистраций", "D7", "D30"],
+            [
+                [
+                    r.week.isoformat(),
+                    r.signups,
+                    r.d7 if r.d7 is not None else "",
+                    r.d30 if r.d30 is not None else "",
+                ]
+                for r in rows
+            ],
+        )
+    _log(db, admin, "export_csv", "report", kind, days=days)
+    await db.commit()
+    filename = f"{kind}-{datetime.now(UTC).date().isoformat()}.csv"
+    return Response(
+        body,
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )

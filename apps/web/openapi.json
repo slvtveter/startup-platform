@@ -2814,6 +2814,107 @@
           }
         }
       }
+    },
+    "/api/admin/cohorts": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin Cohorts",
+        "operationId": "admin_cohorts",
+        "parameters": [
+          {
+            "name": "weeks",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 26,
+              "minimum": 1,
+              "default": 8,
+              "title": "Weeks"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CohortRow"
+                  },
+                  "title": "Response Admin Cohorts"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/export": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin Export Csv",
+        "operationId": "admin_export_csv",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(funnel|cohorts)$",
+              "default": "funnel",
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 365,
+              "minimum": 1,
+              "default": 30,
+              "title": "Days"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/csv": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3242,6 +3343,50 @@
         ],
         "title": "ClientEventIn",
         "description": "\u0421\u043e\u0431\u044b\u0442\u0438\u044f, \u043a\u043e\u0442\u043e\u0440\u044b\u0435 \u0432\u0438\u0434\u0438\u0442 \u0442\u043e\u043b\u044c\u043a\u043e \u0431\u0440\u0430\u0443\u0437\u0435\u0440 (docs/events.md). \u0411\u0435\u043b\u044b\u0439 \u0441\u043f\u0438\u0441\u043e\u043a \u0438\u043c\u0451\u043d."
+      },
+      "CohortRow": {
+        "properties": {
+          "week": {
+            "type": "string",
+            "format": "date",
+            "title": "Week"
+          },
+          "signups": {
+            "type": "integer",
+            "title": "Signups"
+          },
+          "d7": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "D7",
+            "description": "\u0414\u043e\u043b\u044f \u0432\u0435\u0440\u043d\u0443\u0432\u0448\u0438\u0445\u0441\u044f \u043d\u0430 7\u201313 \u0434\u0435\u043d\u044c; None \u2014 \u043a\u043e\u0433\u043e\u0440\u0442\u0430 \u0435\u0449\u0451 \u043d\u0435 \u0434\u043e\u0437\u0440\u0435\u043b\u0430"
+          },
+          "d30": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "D30"
+          }
+        },
+        "type": "object",
+        "required": [
+          "week",
+          "signups",
+          "d7",
+          "d30"
+        ],
+        "title": "CohortRow"
       },
       "ContactsOut": {
         "properties": {

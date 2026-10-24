@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, EmailStr, Field
@@ -120,3 +120,12 @@ class PlatformStartupIn(StartupIn):
     """Стартап, который админ переносит на платформу за основателя (KAN-75)."""
 
     owner_email: EmailStr
+
+
+class CohortRow(BaseModel):
+    week: date
+    signups: int
+    d7: float | None = Field(
+        description="Доля вернувшихся на 7–13 день; None — когорта ещё не дозрела"
+    )
+    d30: float | None

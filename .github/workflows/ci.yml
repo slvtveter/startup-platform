@@ -83,7 +83,7 @@ jobs:
           for i in $(seq 1 60); do curl -sf localhost:8080/api/health && break; sleep 3; done
           docker compose -f infra/docker-compose.yml exec -T api python -m app.scripts.seed
           # Прогреваем dev-сервер Next, чтобы первая компиляция не съела таймауты тестов.
-          for p in / /startups /startups/vkusnoryadom /people /people/maria /register /login /me/profile /startups/new; do curl -s -o /dev/null localhost:8080$p; done
+          for p in / /startups /startups/vkusnoryadom /people /people/mariya-kim /register /login /me/profile /me/settings /admin /startups/new; do curl -s -o /dev/null localhost:8080$p; done
       - run: npm ci
         working-directory: apps/web
       - run: npx playwright test

@@ -76,3 +76,51 @@ async def test_hypotheses_panel(make_user, client):
     # Откликов не было: «нет данных», а не ноль.
     assert rows["H4"]["current"] is None and rows["H8"]["current"] is None
     assert (await client.get("/api/admin/hypotheses")).status_code == 401
+
+
+async def test_cohort_retention_and_csv_export(make_user):
+    from datetime import UTC, datetime, timedelta
+
+    from app.db.session import SessionLocal
+    from app.models import Event, User
+    from app.services import retention
+
+    admin = await make_user("admin@mail.ru", admin=True)
+    now = datetime(2026, 10, 24, 12, tzinfo=UTC)
+    week_ago = now - timedelta(days=30)  # когорта дозрела до D7
+    async with SessionLocal() as db:
+        people = [User(email=f"cohort{i}@mail.ru") for i in range(4)]
+        db.add_all(people)
+        await db.flush()
+        users = [u.id for u in people]
+        for uid in users:
+            db.add(Event(name="signup", user_id=uid, created_at=week_ago, props={}))
+        # Двое вернулись на 8-й день, один — только на 2-й (не считается).
+        for uid in users[:2]:
+            db.add(
+                Event(
+                    name="application_sent",
+                    user_id=uid,
+                    created_at=week_ago + timedelta(days=8),
+                    props={},
+                )
+            )
+        db.add(
+            Event(
+                name="application_sent",
+                user_id=users[2],
+                created_at=week_ago + timedelta(days=2),
+                props={},
+            )
+        )
+        await db.commit()
+        rows = await retention.cohorts(db, weeks=8, now=now)
+    cohort = next(r for r in rows if r.signups == 4)
+    assert cohort.d7 == 0.5 and cohort.d30 is None  # D30 ещё не дозрел
+
+    r = await admin.get("/api/admin/export?kind=funnel&days=30")
+    assert r.status_code == 200 and r.headers["content-type"].startswith("text/csv")
+    assert r.text.startswith("﻿шаг,событие,")
+    assert "attachment" in r.headers["content-disposition"]
+    r = await admin.get("/api/admin/export?kind=cohorts")
+    assert r.text.splitlines()[0] == "﻿неделя регистрации,регистраций,D7,D30"
