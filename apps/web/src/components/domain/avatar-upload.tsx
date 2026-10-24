@@ -40,6 +40,7 @@ export function AvatarUpload({ name, initialUrl }: { name: string; initialUrl: s
           ref={input}
           id="avatar"
           type="file"
+          aria-label="Фото профиля"
           accept="image/jpeg,image/png,image/webp"
           className="sr-only"
           onChange={(e) => onFile(e.target.files?.[0])}
