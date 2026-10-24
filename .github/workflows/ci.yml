@@ -134,7 +134,9 @@ jobs:
           docker compose -f compose.prod.yml --env-file .env.ci up -d
           for i in $(seq 1 60); do curl -skf https://localhost/api/health && break; sleep 3; done
           curl -skf https://localhost/api/health | grep '"db":"ok"'
-          curl -skf https://localhost/ | grep -q "Первый реальный опыт"
+          # web стартует отдельно от api: ждём и его, иначе гонка на холодном старте.
+          for i in $(seq 1 40); do curl -skf -o /dev/null https://localhost/ && break; sleep 3; done
+          curl -skf https://localhost/ | grep -q "Тебя ждёт место в команде"
           curl -skf https://localhost/startups > /dev/null
           echo "production stack is healthy"
       - name: Stack logs on failure

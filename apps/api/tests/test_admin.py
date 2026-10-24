@@ -51,3 +51,23 @@ async def test_public_stats(make_user, client):
         "open_roles": 1,
         "intros_30d": 0,
     }
+
+
+async def test_hypotheses_panel(make_user, client):
+    admin = await make_user("admin@mail.ru", admin=True)
+    for _ in range(4):
+        await client.post("/api/events", json={"name": "landing_viewed"})
+    await client.post("/api/events", json={"name": "landing_path_selected", "path": "seeker"})
+    await client.post("/api/events", json={"name": "startup_viewed", "slug": "vkusnoryadom"})
+    assert (
+        await client.post("/api/events", json={"name": "startup_viewed", "slug": "Bad slug!"})
+    ).status_code == 422
+
+    rows = {r["key"]: r for r in (await admin.get("/api/admin/hypotheses?days=30")).json()}
+    assert list(rows) == [f"H{i}" for i in range(1, 9)]
+    assert rows["H2"]["current"] == 0.25 and rows["H2"]["previous"] is None
+    # Регистрация админа в тесте тоже signup: 1 из 4 просмотров.
+    assert rows["H1"]["current"] == 0.25
+    # Откликов не было: «нет данных», а не ноль.
+    assert rows["H4"]["current"] is None and rows["H8"]["current"] is None
+    assert (await client.get("/api/admin/hypotheses")).status_code == 401

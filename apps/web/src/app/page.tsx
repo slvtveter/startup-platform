@@ -6,6 +6,7 @@ import { Container, EmptyState } from "@/components/domain/page-header";
 import { initialsOf, Seat, SeatRow } from "@/components/domain/seats";
 import { StartupCard } from "@/components/domain/startup-card";
 import { PathLink } from "@/components/site/path-link";
+import { TrackView } from "@/components/site/track-view";
 import { buttonVariants } from "@/components/ui/button";
 import {
   getMyProfile,
@@ -35,6 +36,7 @@ async function Landing() {
 
   return (
     <>
+      <TrackView name="landing_viewed" />
       <Container className="grid grid-cols-1 gap-12 pt-12 pb-16 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:pt-20">
         <div className="flex min-w-0 flex-col">
           <h1 className="text-[32px] leading-[1.1] sm:text-[56px] sm:leading-[1.08]">Тебя ждёт место в команде</h1>

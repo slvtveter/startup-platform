@@ -29,10 +29,20 @@ class FeedbackIn(BaseModel):
 
 
 class ClientEventIn(BaseModel):
-    """События, которые видит только браузер (клик по развилке на лендинге)."""
+    """События, которые видит только браузер (docs/events.md). Белый список имён."""
 
-    name: Literal["landing_path_selected"]
-    path: Literal["seeker", "founder"]
+    name: Literal["landing_viewed", "landing_path_selected", "startup_viewed", "apply_started"]
+    path: Literal["seeker", "founder"] | None = None
+    slug: str | None = Field(default=None, max_length=100, pattern=r"^[a-z0-9-]+$")
+
+
+class HypothesisRow(BaseModel):
+    key: str
+    title: str
+    metric: str
+    unit: Literal["%", "ч", "шт"]
+    current: float | None
+    previous: float | None
 
 
 class StatsOut(BaseModel):
