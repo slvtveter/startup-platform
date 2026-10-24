@@ -273,9 +273,10 @@ async function Dashboard() {
                     <span className="font-semibold">{m.title}</span>
                     <SeatRow filled={m.team_size ?? 1} open={open} />
                     <span className="ml-auto text-sm text-muted-foreground">
+                      {plural(m.views_30d ?? 0, `${m.views_30d ?? 0} просмотр`, `${m.views_30d ?? 0} просмотра`, `${m.views_30d ?? 0} просмотров`)} за 30 дней,{" "}
                       {m.pending_applications
                         ? plural(m.pending_applications, `${m.pending_applications} новый отклик`, `${m.pending_applications} новых отклика`, `${m.pending_applications} новых откликов`)
-                        : "Новых откликов нет"}
+                        : "новых откликов нет"}
                     </span>
                   </Link>
                 </li>

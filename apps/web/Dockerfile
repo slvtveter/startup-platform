@@ -24,6 +24,8 @@ RUN addgroup -S app && adduser -S app -G app
 COPY --from=build --chown=app:app /app/.next/standalone ./
 COPY --from=build --chown=app:app /app/.next/static ./.next/static
 COPY --from=build --chown=app:app /app/public ./public
+# Шрифты OG-картинок читаются с диска (src/lib/og.tsx): трассировка standalone их не видит.
+COPY --from=build --chown=app:app /app/assets ./assets
 USER app
 EXPOSE 3000
 CMD ["node", "server.js"]

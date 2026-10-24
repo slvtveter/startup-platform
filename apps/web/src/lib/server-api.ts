@@ -21,6 +21,11 @@ export async function serverClient() {
   return createClient(createConfig({ baseUrl: API_URL, headers: cookie ? { cookie } : {} }));
 }
 
+/** Анонимный клиент без cookie: для публичных данных (OG-картинки, sitemap). */
+export function publicClient() {
+  return createClient(createConfig({ baseUrl: API_URL }));
+}
+
 /** Текущий пользователь или null. cache() — один запрос к API на рендер страницы. */
 export const getMe = cache(async () => {
   const { data } = await me({ client: await serverClient() });

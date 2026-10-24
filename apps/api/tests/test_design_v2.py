@@ -123,3 +123,23 @@ async def test_client_events_dedup_rate_limit_and_no_ip(client, monkeypatch):
     assert names.count("landing_path_selected") == 4  # лимит 5 в минуту, один уже занят просмотром
     for e in events:
         assert "203.0.113.7" not in str(e.props) and len(e.props["v"]) == 24
+
+
+async def test_founder_sees_views_and_urls_stay_stable(make_user, client):
+    founder = await make_user("alina@mail.ru", published=True)
+    s = await create_published(founder)
+    for i in range(3):
+        await client.post(
+            "/api/events",
+            json={"name": "startup_viewed", "slug": s["slug"]},
+            headers={"x-forwarded-for": f"10.1.0.{i}"},
+        )
+    mine = (await founder.get("/api/me/startups")).json()
+    assert mine[0]["views_30d"] == 3
+
+    # Адреса не меняются при переименовании: ссылки в чатах и поиске не ломаются.
+    await founder.patch(f"/api/startups/{s['id']}", json={"title": "Новое имя проекта"})
+    assert (await client.get(f"/api/startups/{s['slug']}")).json()["title"] == "Новое имя проекта"
+    me = (await founder.get("/api/profile/me")).json()
+    await founder.patch("/api/profile/me", json={"display_name": "Алина Новая"})
+    assert (await founder.get("/api/profile/me")).json()["slug"] == me["slug"]
