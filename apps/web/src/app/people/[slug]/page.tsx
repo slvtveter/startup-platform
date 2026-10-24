@@ -7,7 +7,7 @@ import { SkillChip } from "@/components/domain/badges";
 import { InviteDialog, type InviteOption } from "@/components/domain/invite-dialog";
 import { Container } from "@/components/domain/page-header";
 import { ReportButton } from "@/components/domain/report-button";
-import { initialsOf, Seat } from "@/components/domain/seats";
+import { Avatar } from "@/components/domain/avatar-upload";
 import { buttonVariants } from "@/components/ui/button";
 import { getPerson, getStartup, listMyStartups } from "@/lib/api";
 import { AVAILABILITY, LEVEL, LINK_KIND, TERMS } from "@/lib/labels";
@@ -57,7 +57,7 @@ export default async function PersonPage({ params }: Props) {
       <div className="mt-6 grid gap-10 lg:grid-cols-[1fr_320px]">
         <div className="min-w-0">
           <header className="flex flex-col gap-5 sm:flex-row sm:items-center">
-            <Seat filled initials={initialsOf(p.display_name)} className="size-20 rounded-2xl text-2xl" />
+            <Avatar name={p.display_name} url={p.avatar_url} className="size-20 rounded-2xl text-2xl" />
             <div className="min-w-0">
               <h1 className="text-[30px] leading-tight sm:text-[40px]">{p.display_name}</h1>
               <p className="mt-1 text-lg text-muted-foreground">{facts.join(", ")}</p>

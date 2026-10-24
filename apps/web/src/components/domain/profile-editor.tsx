@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { AvatarUpload } from "@/components/domain/avatar-upload";
 import { SkillPicker } from "@/components/domain/skill-picker";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -119,6 +120,7 @@ export function ProfileEditor({
 
         {step === 0 && (
           <div className="mt-8 grid gap-6">
+            <AvatarUpload name={f.display_name || profile.display_name} initialUrl={profile.avatar_url ?? null} />
             <div>
               <Label htmlFor="name">Имя или псевдоним</Label>
               <Input id="name" className="mt-1.5 h-11" value={f.display_name} onChange={(e) => set("display_name", e.target.value)} placeholder="Мария Ким" />

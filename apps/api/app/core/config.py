@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     auth_rate_limit: int = 5
     auth_rate_window_minutes: int = 15
 
+    # Загруженные файлы (аватары): локальный каталог, в docker — volume, который раздаёт Caddy.
+    media_dir: str = "media"
+
     # Подпись ссылок отписки в письмах. В prod обязателен свой (openssl rand -hex 32).
     secret_key: str = "dev-secret-change-me"
 
