@@ -224,7 +224,15 @@ export function StartupEditor({ startup, roles, skills }: { startup?: StartupDet
 
 function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles: RoleOut[]; skills: SkillOut[] }) {
   const router = useRouter();
-  const empty = { role: roles[0]?.slug ?? "", title: "", description: "", slots: 1, skills: [] as string[] };
+  const empty = {
+    role: roles[0]?.slug ?? "",
+    title: "",
+    description: "",
+    outcome: "",
+    hours_per_week: null as number | null,
+    slots: 1,
+    skills: [] as string[],
+  };
   const [draft, setDraft] = useState(empty);
   const [adding, setAdding] = useState(startup.roles.length === 0);
 
@@ -250,7 +258,10 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
 
   return (
     <div className="rounded-2xl border bg-card p-5">
-      <div className="font-extrabold">Роли в команду</div>
+      <div className="font-bold">Места в команде</div>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Чем конкретнее задачи, часы и то, что человек получит, тем больше откликов.
+      </p>
       <ul className="mt-3 grid gap-2">
         {startup.roles.map((r) => (
           <li key={r.id} className="rounded-xl bg-secondary p-3">
@@ -258,7 +269,9 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
               <div className="min-w-0">
                 <div className="truncate font-bold">{r.title}</div>
                 <div className="text-xs text-muted-foreground">
-                  {r.role.name} · мест: {r.slots} · {r.is_open ? "открыта" : "закрыта"}
+                  {[r.role.name, `мест: ${r.slots ?? 1}`, r.hours_per_week ? `${r.hours_per_week} ч в неделю` : null, r.is_open ? "открыта" : "закрыта"]
+                    .filter(Boolean)
+                    .join(", ")}
                 </div>
               </div>
             </div>
@@ -283,11 +296,36 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
             ))}
           </select>
           <Input placeholder="Название роли, напр. «UI/UX дизайнер»" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
-          <Textarea rows={3} placeholder="Задачи на первые недели" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
-          <label className="flex items-center gap-2 text-sm">
-            Мест:
-            <Input type="number" min={1} max={20} className="w-20" value={draft.slots} onChange={(e) => setDraft({ ...draft, slots: Number(e.target.value) || 1 })} />
-          </label>
+          <Textarea
+            rows={3}
+            placeholder="Что делать: например, «нарисовать экраны заказа и корзины в Figma, собрать UI-кит»"
+            value={draft.description}
+            onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+          />
+          <Textarea
+            rows={2}
+            maxLength={500}
+            placeholder="Что получит человек: например, «кейс в портфолио, рекомендация, доля 0,5% после MVP»"
+            value={draft.outcome}
+            onChange={(e) => setDraft({ ...draft, outcome: e.target.value })}
+          />
+          <div className="flex flex-wrap gap-4">
+            <label className="flex items-center gap-2 text-sm">
+              Мест:
+              <Input type="number" min={1} max={20} className="w-20" value={draft.slots} onChange={(e) => setDraft({ ...draft, slots: Number(e.target.value) || 1 })} />
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              Часов в неделю:
+              <Input
+                type="number"
+                min={1}
+                max={40}
+                className="w-20"
+                value={draft.hours_per_week ?? ""}
+                onChange={(e) => setDraft({ ...draft, hours_per_week: e.target.value ? Math.min(40, Math.max(1, Number(e.target.value))) : null })}
+              />
+            </label>
+          </div>
           <SkillPicker all={skills} value={draft.skills} max={12} onChange={(v) => setDraft({ ...draft, skills: v })} />
           <div className="flex gap-2">
             <Button onClick={add} disabled={draft.title.trim().length < 2}>
@@ -302,7 +340,7 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
         </div>
       ) : (
         <Button variant="outline" className="mt-4 w-full" onClick={() => setAdding(true)}>
-          + Добавить роль
+          Добавить место
         </Button>
       )}
     </div>

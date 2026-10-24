@@ -68,7 +68,7 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
 
   // --- Отклик ---
   await candidate.goto(startupUrl);
-  await expect(candidate.getByText("Совпадение с твоим профилем: 1 из 1")).toBeVisible();
+  await expect(candidate.getByText("1 из 1 совпадают с твоими навыками")).toBeVisible();
   await candidate.getByRole("button", { name: "Откликнуться" }).click();
   await candidate
     .getByPlaceholder(/Расскажи, почему/)
@@ -95,7 +95,7 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
 
   // Роль с одним местом закрылась автоматически.
   await candidate.goto(startupUrl);
-  await expect(candidate.getByText("Закрыта")).toBeVisible();
+  await expect(candidate.getByText("Место занято")).toBeVisible();
 
   await founderCtx.close();
   await candidateCtx.close();

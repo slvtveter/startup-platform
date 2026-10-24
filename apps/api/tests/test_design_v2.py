@@ -2,8 +2,9 @@
 
 from sqlalchemy import select
 
+from app.core.config import get_settings
 from app.db.session import SessionLocal
-from app.models import Event
+from app.models import Event, User
 from tests.test_applications import MESSAGE
 from tests.test_startups import STARTUP, create_published
 
@@ -87,3 +88,15 @@ async def test_landing_path_event(client):
     async with SessionLocal() as db:
         event = await db.scalar(select(Event).where(Event.name == "landing_path_selected"))
     assert event is not None and event.props == {"path": "seeker"}
+
+
+async def test_e2e_cleanup_only_outside_prod(make_user, client, monkeypatch):
+    await make_user("e2e-1@e2e.example.com", published=True)
+    await make_user("real@mail.ru")
+    assert (await client.post("/api/testing/cleanup-e2e")).status_code == 200
+    async with SessionLocal() as db:
+        emails = set(await db.scalars(select(User.email)))
+    assert "real@mail.ru" in emails and "e2e-1@e2e.example.com" not in emails
+
+    monkeypatch.setattr(get_settings(), "env", "prod")
+    assert (await client.post("/api/testing/cleanup-e2e")).status_code == 404

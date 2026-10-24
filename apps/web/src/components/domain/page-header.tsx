@@ -10,7 +10,7 @@ export function PageHeader({
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
       <div>
-        <h1 className="text-3xl font-extrabold sm:text-4xl">{title}</h1>
+        <h1 className="text-2xl sm:text-[34px] sm:leading-tight">{title}</h1>
         {description && <p className="mt-2 max-w-2xl text-muted-foreground">{description}</p>}
       </div>
       {actions && <div className="flex gap-2 sm:ml-auto">{actions}</div>}

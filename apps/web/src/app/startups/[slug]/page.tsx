@@ -1,3 +1,4 @@
+import { ChevronLeftIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -5,11 +6,11 @@ import { notFound } from "next/navigation";
 import { ApplyDialog } from "@/components/domain/apply-dialog";
 import { SkillChip, StageBadge, StartupStatusBadge, TermsBadge } from "@/components/domain/badges";
 import { Container } from "@/components/domain/page-header";
-import { PersonAvatar } from "@/components/domain/person-card";
 import { ReportButton } from "@/components/domain/report-button";
+import { initialsOf, Seat } from "@/components/domain/seats";
 import { buttonVariants } from "@/components/ui/button";
-import { getMyProfile, getStartup } from "@/lib/api";
-import { TERMS_HINT, plural } from "@/lib/labels";
+import { getMyProfile, getStartup, type StartupDetail } from "@/lib/api";
+import { TERMS, TERMS_HINT, plural } from "@/lib/labels";
 import { getMe, serverClient } from "@/lib/server-api";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -36,126 +37,208 @@ export default async function StartupPage({ params }: Props) {
   const mySkills = new Set(profile?.skills.map((x) => x.slug));
   const ready = !!user?.email_verified && !!profile?.is_published;
 
+  const openRoles = s.roles.filter((r) => r.is_open);
+  const closedRoles = s.roles.filter((r) => !r.is_open);
+  const openSeats = openRoles.reduce((n, r) => n + Math.max(0, (r.slots ?? 1) - (r.filled ?? 0)), 0);
+  const state = (roleId: string) =>
+    !user ? "guest" : (s.my_active_role_ids ?? []).includes(roleId) ? "applied" : ready ? "can_apply" : "not_ready";
+
   return (
-    <Container>
-      <Link href="/startups" className="text-sm font-semibold text-muted-foreground hover:text-foreground">
-        ← Все стартапы
+    <Container className="pb-28 lg:pb-10">
+      <Link href="/startups" className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-foreground">
+        <ChevronLeftIcon className="size-4" /> Все стартапы
       </Link>
-      <div className="mt-4 grid gap-8 lg:grid-cols-[1fr_400px]">
-        <article className="rounded-3xl border bg-card p-6 sm:p-10">
-          <div className="flex flex-wrap gap-2">
-            <TermsBadge terms={s.terms} />
-            <StageBadge stage={s.stage} />
-            <StartupStatusBadge status={s.status} />
-          </div>
-          <h1 className="mt-4 text-4xl font-extrabold sm:text-5xl">{s.title}</h1>
-          <p className="mt-3 text-xl text-muted-foreground">{s.pitch}</p>
 
-          {s.is_owner && (
-            <div className="mt-6 flex flex-wrap gap-2 rounded-2xl bg-secondary p-4">
-              <span className="mr-auto self-center text-sm font-bold">Это ваш стартап</span>
-              <Link href={`/startups/${s.slug}/edit`} className={buttonVariants({ variant: "outline", size: "sm" })}>
-                Редактировать
-              </Link>
-              <Link href={`/me/startups/${s.slug}`} className={buttonVariants({ size: "sm" })}>
-                Отклики
-              </Link>
-            </div>
-          )}
+      <header className="mt-6 max-w-3xl">
+        <div className="flex flex-wrap gap-2">
+          <TermsBadge terms={s.terms} />
+          <StageBadge stage={s.stage} />
+          {s.status !== "recruiting" && <StartupStatusBadge status={s.status} />}
+        </div>
+        <h1 className="mt-4 text-[34px] leading-tight sm:text-5xl">{s.title}</h1>
+        <p className="mt-3 text-xl text-muted-foreground">{s.pitch}</p>
+        <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3">
+          <span className="flex items-center gap-1.5">
+            {s.team.map((m) => (
+              <Seat key={m.display_name + m.role_title} filled initials={initialsOf(m.display_name)} size="md" />
+            ))}
+            {Array.from({ length: Math.min(openSeats, 6) }, (_, i) => (
+              <Seat key={i} filled={false} size="md" />
+            ))}
+          </span>
+          <span className="text-sm text-muted-foreground">
+            {s.team.length} в команде
+            {openSeats > 0 && `, ${plural(openSeats, `свободно ${openSeats} место`, `свободно ${openSeats} места`, `свободно ${openSeats} мест`)}`}
+          </span>
+        </div>
+      </header>
 
-          <h2 className="mt-10 text-lg font-extrabold">Идея</h2>
-          <p className="mt-2 leading-relaxed whitespace-pre-line text-foreground/85">{s.description || "Описание пока не заполнено."}</p>
+      {s.is_owner && (
+        <div className="mt-8 flex max-w-3xl flex-wrap items-center gap-2 rounded-2xl bg-secondary p-4">
+          <span className="mr-auto text-sm font-bold">Это ваш стартап</span>
+          <Link href={`/startups/${s.slug}/edit`} className={buttonVariants({ variant: "outline", size: "sm" })}>
+            Редактировать
+          </Link>
+          <Link href={`/me/startups/${s.slug}`} className={buttonVariants({ size: "sm" })}>
+            Отклики
+          </Link>
+        </div>
+      )}
 
-          <h2 className="mt-8 text-lg font-extrabold">Условия участия</h2>
-          <p className="mt-2 text-sm text-muted-foreground">{TERMS_HINT[s.terms]}</p>
-          {s.terms_details && <p className="mt-2 leading-relaxed whitespace-pre-line text-foreground/85">{s.terms_details}</p>}
-
-          <h2 className="mt-8 text-lg font-extrabold">Команда</h2>
-          <ul className="mt-3 flex flex-wrap gap-3">
-            {s.team.map((m) => {
-              const body = (
-                <>
-                  <PersonAvatar name={m.display_name} />
-                  <span>
-                    <span className="block font-bold">{m.display_name}</span>
-                    <span className="block text-sm text-muted-foreground">{m.role_title}</span>
-                  </span>
-                </>
-              );
-              return (
-                <li key={m.display_name + m.role_title}>
-                  {m.slug ? (
-                    <Link href={`/people/${m.slug}`} className="flex items-center gap-3 rounded-xl bg-secondary px-4 py-3 hover:bg-accent">
-                      {body}
-                    </Link>
-                  ) : (
-                    <div className="flex items-center gap-3 rounded-xl bg-secondary px-4 py-3">{body}</div>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-
-          {(s.website || s.telegram) && (
-            <div className="mt-8 flex flex-wrap gap-4 text-sm font-semibold">
-              {s.website && (
-                <a href={s.website} target="_blank" rel="noopener noreferrer nofollow" className="underline">
-                  Сайт проекта
-                </a>
-              )}
-              {s.telegram && <span>Telegram: {s.telegram}</span>}
-            </div>
-          )}
-          <div className="mt-10 border-t pt-4">
-            <ReportButton targetType="startup" targetId={s.slug} />
-          </div>
-        </article>
-
-        <aside className="grid h-fit gap-4 lg:sticky lg:top-24">
-          <h2 className="text-2xl font-extrabold">Открытые роли</h2>
-          {s.roles.length === 0 && <p className="text-muted-foreground">Роли пока не добавлены.</p>}
-          {s.roles.map((r, i) => {
-            const matched = r.skills.filter((sk) => mySkills.has(sk.slug)).length;
-            const left = r.slots - (r.filled ?? 0);
-            const applied = (s.my_active_role_ids ?? []).includes(r.id);
-            return (
-              <div key={r.id} className={`rounded-2xl border bg-card p-5 ${r.is_open && i === 0 ? "border-foreground" : ""}`}>
-                <div className="flex items-start gap-2">
-                  <div>
-                    <div className="text-lg font-extrabold">{r.title}</div>
-                    {r.role.name !== r.title && <div className="text-sm text-muted-foreground">{r.role.name}</div>}
-                  </div>
-                  <span className="ml-auto shrink-0 text-sm text-muted-foreground">
-                    {r.is_open ? `${left} ${plural(left, "место", "места", "мест")}` : "Закрыта"}
-                  </span>
+      <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_340px]">
+        <div className="min-w-0">
+          <section id="roles" className="scroll-mt-24">
+            <h2 className="text-2xl">Свободные места</h2>
+            {openRoles.length === 0 && <p className="mt-3 text-muted-foreground">Сейчас все места заняты.</p>}
+            <div className="mt-5 space-y-4">
+              {openRoles.map((r) => {
+                const matched = r.skills.filter((sk) => mySkills.has(sk.slug)).length;
+                const left = Math.max(0, (r.slots ?? 1) - (r.filled ?? 0));
+                return (
+                  <article key={r.id} className="rounded-2xl border p-5 sm:p-6">
+                    <div className="flex items-start gap-4">
+                      <Seat filled={false} size="lg" />
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-xl font-bold">{r.title}</h3>
+                        <p className="mt-0.5 text-sm text-muted-foreground">
+                          {[r.role.name !== r.title ? r.role.name : null, plural(left, `${left} место`, `${left} места`, `${left} мест`), r.hours_per_week ? `${r.hours_per_week} ч в неделю` : null]
+                            .filter(Boolean)
+                            .join(", ")}
+                        </p>
+                      </div>
+                    </div>
+                    {r.description && (
+                      <div className="mt-5">
+                        <div className="text-sm font-semibold">Что делать</div>
+                        <p className="mt-1 whitespace-pre-line text-foreground/85">{r.description}</p>
+                      </div>
+                    )}
+                    {r.outcome && (
+                      <div className="mt-4 rounded-xl bg-marker-soft p-4">
+                        <div className="text-sm font-semibold text-marker-ink">Что получишь</div>
+                        <p className="mt-1 whitespace-pre-line">{r.outcome}</p>
+                      </div>
+                    )}
+                    {r.skills.length > 0 && (
+                      <div className="mt-4 flex flex-wrap items-center gap-1.5">
+                        {r.skills.map((sk) => (
+                          <SkillChip key={sk.slug} name={sk.name} highlight={mySkills.has(sk.slug)} />
+                        ))}
+                        {profile && matched > 0 && (
+                          <span className="ml-1 text-xs font-semibold text-success-ink">
+                            {matched} из {r.skills.length} совпадают с твоими навыками
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {!s.is_owner && (
+                      <div className="mt-5">
+                        <ApplyDialog roleId={r.id} roleTitle={r.title} startupTitle={s.title} primary state={state(r.id)} />
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
+              {closedRoles.map((r) => (
+                <div key={r.id} className="flex items-center gap-4 rounded-2xl border border-dashed p-4 text-muted-foreground">
+                  <Seat filled size="md" />
+                  <span className="font-semibold">{r.title}</span>
+                  <span className="ml-auto text-sm">Место занято</span>
                 </div>
-                {r.description && <p className="mt-2 text-sm text-foreground/80">{r.description}</p>}
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {r.skills.map((sk) => (
-                    <SkillChip key={sk.slug} name={sk.name} highlight={mySkills.has(sk.slug)} />
-                  ))}
-                </div>
-                {profile && r.skills.length > 0 && matched > 0 && (
-                  <div className="mt-2 text-xs font-bold text-success-ink">
-                    Совпадение с твоим профилем: {matched} из {r.skills.length}
-                  </div>
-                )}
-                {r.is_open && !s.is_owner && (
-                  <div className="mt-4">
-                    <ApplyDialog
-                      roleId={r.id}
-                      roleTitle={r.title}
-                      startupTitle={s.title}
-                      primary={i === 0}
-                      state={!user ? "guest" : applied ? "applied" : ready ? "can_apply" : "not_ready"}
-                    />
-                  </div>
-                )}
-              </div>
-            );
-          })}
+              ))}
+            </div>
+          </section>
+
+          <section className="mt-12">
+            <h2 className="text-2xl">Идея</h2>
+            <p className="mt-3 leading-relaxed whitespace-pre-line text-foreground/85">{s.description || "Описание пока не заполнено."}</p>
+          </section>
+
+          <section className="mt-12">
+            <h2 className="text-2xl">Команда</h2>
+            <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+              {s.team.map((m) => {
+                const body = (
+                  <>
+                    <Seat filled initials={initialsOf(m.display_name)} size="lg" />
+                    <span>
+                      <span className="block font-semibold">{m.display_name}</span>
+                      <span className="block text-sm text-muted-foreground">{m.role_title}</span>
+                    </span>
+                  </>
+                );
+                return (
+                  <li key={m.display_name + m.role_title}>
+                    {m.slug ? (
+                      <Link href={`/people/${m.slug}`} className="flex items-center gap-3 rounded-xl p-2 hover:bg-secondary">
+                        {body}
+                      </Link>
+                    ) : (
+                      <div className="flex items-center gap-3 p-2">{body}</div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+
+          <div className="mt-12 flex flex-wrap items-center gap-4 border-t pt-5 text-sm">
+            {s.website && (
+              <a href={s.website} target="_blank" rel="noopener noreferrer nofollow" className="font-semibold underline underline-offset-4">
+                Сайт проекта
+              </a>
+            )}
+            {s.telegram && <span className="font-semibold">Telegram: {s.telegram}</span>}
+            <span className="ml-auto">
+              <ReportButton targetType="startup" targetId={s.slug} />
+            </span>
+          </div>
+        </div>
+
+        <aside className="h-fit space-y-4 lg:sticky lg:top-24">
+          <div className="rounded-2xl bg-secondary p-5">
+            <div className="text-sm text-muted-foreground">Условия участия</div>
+            <div className="mt-1 text-lg font-bold">{TERMS[s.terms]}</div>
+            <p className="mt-1 text-sm text-muted-foreground">{TERMS_HINT[s.terms]}</p>
+            {s.terms_details && <p className="mt-3 text-sm whitespace-pre-line">{s.terms_details}</p>}
+            <div className="mt-5 border-t border-foreground/10 pt-4">
+              <div className="text-sm text-muted-foreground">Как команда отвечает</div>
+              <div className="mt-1 font-semibold">{responseText(s.response_stats)}</div>
+            </div>
+            {openSeats > 0 && !s.is_owner && (
+              <a href="#roles" className={buttonVariants({ variant: "brand", size: "lg", className: "mt-5 w-full max-lg:hidden" })}>
+                Выбрать место
+              </a>
+            )}
+          </div>
+          <p className="px-1 text-sm text-muted-foreground">
+            Контакты основателя откроются, когда он примет твой отклик. До этого вы общаетесь только через отклик.
+          </p>
         </aside>
       </div>
+
+      {openSeats > 0 && !s.is_owner && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 px-4 py-3 backdrop-blur lg:hidden">
+          <div className="mx-auto flex max-w-6xl items-center gap-3">
+            <span className="text-sm">
+              <span className="block font-semibold">{TERMS[s.terms]}</span>
+              <span className="text-muted-foreground">{plural(openSeats, `${openSeats} свободное место`, `${openSeats} свободных места`, `${openSeats} свободных мест`)}</span>
+            </span>
+            <a href="#roles" className={buttonVariants({ variant: "brand", size: "lg", className: "ml-auto" })}>
+              Выбрать место
+            </a>
+          </div>
+        </div>
+      )}
     </Container>
   );
+}
+
+function responseText(stats: StartupDetail["response_stats"]) {
+  if (!stats) return "Новая команда, статистики пока нет";
+  const share = `Отвечают на ${Math.round(stats.answered_share * 100)}% откликов`;
+  if (stats.median_hours == null) return share;
+  const h = stats.median_hours;
+  const when = h < 24 ? `${Math.max(1, Math.ceil(h))} ч` : `${Math.round(h / 24)} ${plural(Math.round(h / 24), "день", "дня", "дней")}`;
+  return `${share}, обычно за ${when}`;
 }

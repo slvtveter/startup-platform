@@ -34,7 +34,7 @@ export default async function MyApplicationsPage() {
         <div className="mt-8 grid gap-8">
           {invites.length > 0 && (
             <section>
-              <h2 className="text-lg font-extrabold">Ждут твоего ответа</h2>
+              <h2 className="text-lg">Ждут твоего ответа</h2>
               <div className="mt-3 grid gap-4">
                 {invites.map((a) => (
                   <ApplicationCard key={a.id} app={a} perspective="candidate" />

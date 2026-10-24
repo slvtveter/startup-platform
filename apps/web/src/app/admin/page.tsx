@@ -40,7 +40,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
 
       <section className="mt-8 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
         <div className="rounded-2xl border bg-card p-6">
-          <h2 className="font-extrabold">Воронка за {m?.days} дней</h2>
+          <h2 className="font-sans text-base font-bold">Воронка за {m?.days} дней</h2>
           <ol className="mt-4 grid gap-3">
             {m?.funnel.map((f) => (
               <li key={f.name}>
@@ -81,7 +81,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
       </section>
 
       <section className="mt-10">
-        <h2 className="text-xl font-extrabold">Жалобы</h2>
+        <h2 className="text-xl">Жалобы</h2>
         <div className="mt-3 grid gap-2">
           {reports?.length ? (
             reports.map((r) => (
@@ -106,7 +106,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
       <section className="mt-10 grid gap-8 lg:grid-cols-2">
         <div>
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-extrabold">Пользователи</h2>
+            <h2 className="text-xl">Пользователи</h2>
             <form className="ml-auto">
               <input name="q" defaultValue={q} placeholder="Поиск" className="h-9 rounded-lg border bg-card px-3 text-sm" />
             </form>
@@ -135,7 +135,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           </div>
         </div>
         <div>
-          <h2 className="text-xl font-extrabold">Стартапы</h2>
+          <h2 className="text-xl">Стартапы</h2>
           <div className="mt-3 divide-y rounded-xl border bg-card">
             {startups?.map((s) => (
               <div key={s.id} className="flex items-center gap-3 p-3 text-sm">
@@ -158,7 +158,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
       </section>
 
       <section className="mt-10">
-        <h2 className="text-xl font-extrabold">Журнал действий</h2>
+        <h2 className="text-xl">Журнал действий</h2>
         <ul className="mt-3 grid gap-1 text-sm text-muted-foreground">
           {audit?.length ? (
             audit.slice(0, 30).map((a) => (

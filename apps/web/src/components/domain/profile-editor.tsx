@@ -163,7 +163,7 @@ export function ProfileEditor({
         {step === 1 && (
           <div className="mt-8 grid gap-6">
             <div>
-              <h2 className="text-2xl font-extrabold">Что ты умеешь?</h2>
+              <h2 className="text-2xl">Что ты умеешь?</h2>
               <p className="mt-1 text-muted-foreground">По навыкам основатели найдут тебя в каталоге, а мы подберём подходящие стартапы.</p>
               <div className="mt-4">
                 <SkillPicker all={skills} value={f.skills} onChange={(v) => set("skills", v)} />
