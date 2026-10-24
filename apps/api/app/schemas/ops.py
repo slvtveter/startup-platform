@@ -70,6 +70,8 @@ class MetricsOut(BaseModel):
     active_startups: int
     answered_72h_share: float | None
     sources: list[SourceRow]
+    jobs_pending: int = 0
+    jobs_failed: int = 0
 
 
 class AdminUserOut(BaseModel):

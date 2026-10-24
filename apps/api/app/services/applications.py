@@ -121,6 +121,8 @@ async def apply(db: AsyncSession, user: User, role_id: uuid.UUID, message: str) 
         f"{_contacts(user).display_name} откликается на роль «{role.title}» "
         f"в {role.startup.title}.\n\n"
         f"{message}\n\nОтветить: {mail.link('/me/startups/' + role.startup.slug)}",
+        user=owner,
+        kind="applications",
     )
     return app
 
@@ -162,6 +164,8 @@ async def invite(
         f"Вас пригласили в {role.startup.title}",
         f"Основатель {role.startup.title} приглашает вас на роль «{role.title}».\n\n{message}\n\n"
         f"Ответить: {mail.link('/me/applications')}",
+        user=target.user,
+        kind="invites",
     )
     return app
 
@@ -253,6 +257,8 @@ async def decide(
         f"{verdict}."
         + (f"\nКомментарий: {note}" if note else "")
         + (f"\n\nКонтакты открыты: {mail.link(f'{page}#app-{app.id}')}" if accept else ""),
+        user=other,
+        kind="decisions",
     )
     return app
 
@@ -299,5 +305,7 @@ async def remind_stale(db: AsyncSession) -> int:
             f"{s.title}: отклик ждёт ответа",
             f"Отклик на роль «{app.startup_role.title}» ждёт ответа больше 48 часов.\n"
             f"{mail.link('/me/startups/' + s.slug)}",
+            user=s.owner,
+            kind="reminders",
         )
     return len(rows)

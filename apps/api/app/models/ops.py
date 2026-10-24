@@ -61,3 +61,26 @@ class AdminAction(Base):
     target_id: Mapped[str] = mapped_column(String(64))
     details: Mapped[dict] = mapped_column(JSONB, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Job(Base):
+    """Фоновая задача (KAN-91): очередь в Postgres, разбирает `python -m app.worker`.
+
+    Воркер берёт задачу через SELECT … FOR UPDATE SKIP LOCKED, поэтому несколько воркеров
+    не возьмут одну и ту же. Отдельный брокер (Redis, RabbitMQ) на нашем объёме не нужен.
+    """
+
+    __tablename__ = "jobs"
+    __table_args__ = (Index("ix_jobs_pending", "run_at", postgresql_where="done_at IS NULL"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    kind: Mapped[str] = mapped_column(String(64))
+    payload: Mapped[dict] = mapped_column(JSONB, default=dict)
+    run_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    attempts: Mapped[int] = mapped_column(default=0)
+    locked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    done_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Задача исчерпала попытки: done_at проставлен, failed — True.
+    failed: Mapped[bool] = mapped_column(default=False)
+    last_error: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

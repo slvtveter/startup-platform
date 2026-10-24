@@ -27,12 +27,13 @@ services:
     image: ${REGISTRY:-ghcr.io/slvtveter/startup-platform}-api:${IMAGE_TAG:-main}
     restart: unless-stopped
     logging: *logging
-    environment:
+    environment: &api-env
       ENV: production
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       SITE_URL: https://${SITE_DOMAIN}
       ALLOWED_ORIGINS: '["https://${SITE_DOMAIN}"]'
       EVENTS_SALT: ${EVENTS_SALT:-}
+      SECRET_KEY: ${SECRET_KEY:?задайте SECRET_KEY в .env.prod (openssl rand -hex 32)}
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
@@ -48,6 +49,17 @@ services:
       timeout: 5s
       retries: 10
 
+
+  # Фоновые задачи (KAN-91): письма из очереди jobs и ежечасные напоминания основателям.
+  worker:
+    image: ${REGISTRY:-ghcr.io/slvtveter/startup-platform}-api:${IMAGE_TAG:-main}
+    restart: unless-stopped
+    logging: *logging
+    environment: *api-env
+    command: ["python", "-m", "app.worker"]
+    depends_on:
+      api:
+        condition: service_healthy
   web:
     image: ${REGISTRY:-ghcr.io/slvtveter/startup-platform}-web:${IMAGE_TAG:-main}
     restart: unless-stopped

@@ -32,7 +32,7 @@ async def test_apply_accept_exchanges_contacts(make_user):
     accepted_mail = next(
         m for m in mail.outbox if m["To"] == "maria@mail.ru" and "решение" in m["Subject"]
     )
-    assert f"/me/applications#app-{app['id']}" in accepted_mail.get_content()
+    assert f"/me/applications#app-{app['id']}" in accepted_mail.get_body(("plain",)).get_content()
 
     mine = (await maria.get("/api/me/applications")).json()
     assert mine[0]["status"] == "accepted"
