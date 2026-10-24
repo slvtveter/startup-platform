@@ -2,6 +2,11 @@
 # Запуск на сервере: docker compose -f compose.prod.yml --env-file .env.prod up -d
 name: startup-platform-${STACK:-prod}
 
+# Общие ограничения для сервисов приложения (KAN-102).
+x-hardening: &hardening
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+
 x-logging: &logging
   driver: json-file
   options: { max-size: "10m", max-file: "5" }
@@ -23,10 +28,25 @@ services:
       timeout: 3s
       retries: 20
 
+  # Владелец volume media — пользователь приложения (uid 10001), а не root (KAN-102).
+  # Одноразовый шаг: без него порядок монтирования решал бы, кто владеет каталогом.
+  media-init:
+    image: ${REGISTRY:-ghcr.io/slvtveter/startup-platform}-api:${IMAGE_TAG:-main}
+    user: root
+    command: ["chown", "-R", "10001:10001", "/media"]
+    volumes:
+      - media:/media
+    restart: "no"
+
   api:
     image: ${REGISTRY:-ghcr.io/slvtveter/startup-platform}-api:${IMAGE_TAG:-main}
     restart: unless-stopped
     logging: *logging
+    <<: *hardening
+    read_only: true
+    tmpfs: [/tmp]
+    mem_limit: 768m
+    cpus: 1.0
     environment: &api-env
       ENV: production
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
@@ -46,6 +66,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      media-init:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
       interval: 10s
@@ -58,6 +80,11 @@ services:
     image: ${REGISTRY:-ghcr.io/slvtveter/startup-platform}-api:${IMAGE_TAG:-main}
     restart: unless-stopped
     logging: *logging
+    <<: *hardening
+    read_only: true
+    tmpfs: [/tmp]
+    mem_limit: 384m
+    cpus: 0.5
     environment: *api-env
     command: ["python", "-m", "app.worker"]
     depends_on:
@@ -67,6 +94,9 @@ services:
     image: ${REGISTRY:-ghcr.io/slvtveter/startup-platform}-web:${IMAGE_TAG:-main}
     restart: unless-stopped
     logging: *logging
+    <<: *hardening
+    mem_limit: 768m
+    cpus: 1.0
     environment:
       API_INTERNAL_URL: http://api:8000
       SITE_URL: https://${SITE_DOMAIN}
