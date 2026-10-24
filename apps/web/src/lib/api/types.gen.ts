@@ -706,6 +706,10 @@ export type MyStartupOut = {
      * Is Hidden
      */
     is_hidden: boolean;
+    /**
+     * Views 30D
+     */
+    views_30d?: number;
 };
 
 /**

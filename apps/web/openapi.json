@@ -3773,6 +3773,11 @@
           "is_hidden": {
             "type": "boolean",
             "title": "Is Hidden"
+          },
+          "views_30d": {
+            "type": "integer",
+            "title": "Views 30D",
+            "default": 0
           }
         },
         "type": "object",

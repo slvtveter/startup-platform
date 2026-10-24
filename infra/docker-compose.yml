@@ -59,6 +59,7 @@ services:
     volumes:
       - ../apps/web/src:/app/src
       - ../apps/web/public:/app/public
+      - ../apps/web/assets:/app/assets
     depends_on:
       - api
 

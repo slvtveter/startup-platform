@@ -48,10 +48,10 @@ export default async function MyStartupsPage() {
                 </div>
                 <div className="mt-2 text-xl font-bold">{s.title}</div>
                 <div className="text-sm text-muted-foreground">
-                  Открытых ролей: {s.open_roles.length}
+                  Свободных мест: {s.open_roles.length}, {s.views_30d ?? 0} {plural(s.views_30d ?? 0, "просмотр", "просмотра", "просмотров")} за 30 дней
                   {s.pending_applications > 0 && (
-                    <span className="ml-2 font-bold text-brand-ink">
-                      · {s.pending_applications} {plural(s.pending_applications, "новый отклик", "новых отклика", "новых откликов")}
+                    <span className="font-bold text-brand-ink">
+                      , {s.pending_applications} {plural(s.pending_applications, "новый отклик", "новых отклика", "новых откликов")}
                     </span>
                   )}
                 </div>

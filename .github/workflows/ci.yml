@@ -139,6 +139,9 @@ jobs:
           for i in $(seq 1 40); do curl -skf -o /dev/null https://localhost/ && break; sleep 3; done
           curl -skf https://localhost/ | grep -q "Тебя ждёт место в команде"
           curl -skf https://localhost/startups > /dev/null
+          # OG-картинка рендерится в prod-образе: шрифты из assets/og-fonts попали в сборку.
+          curl -skf -o /tmp/og.png https://localhost/startups/no-such-startup/opengraph-image
+          file /tmp/og.png | grep -q "PNG image data, 1200 x 630"
           # Воркер фоновых задач запущен и не падает в цикле перезапусков.
           sleep 5
           test "$(docker compose -f compose.prod.yml --env-file .env.ci ps worker --format '{{.State}}')" = "running"

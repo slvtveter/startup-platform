@@ -6,7 +6,17 @@ from sqlalchemy import Select, exists, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import AppError, Forbidden, NotFound
-from app.models import Application, Profile, Role, Skill, Startup, StartupMember, StartupRole, User
+from app.models import (
+    Application,
+    Event,
+    Profile,
+    Role,
+    Skill,
+    Startup,
+    StartupMember,
+    StartupRole,
+    User,
+)
 from app.models.enums import ApplicationDirection, ApplicationStatus, StartupStatus
 from app.models.startup import startup_role_skills
 from app.schemas.catalog import RoleOut, SkillOut
@@ -432,6 +442,22 @@ async def my_startups(db: AsyncSession, user: User) -> list[MyStartupOut]:
             )
         ).unique()
     )
+    # Просмотры страницы за 30 дней (клиентское событие startup_viewed, уже без дублей).
+    since = datetime.now(UTC) - timedelta(days=30)
+    slug = Event.props["slug"].astext
+    views = dict(
+        (
+            await db.execute(
+                select(slug, func.count())
+                .where(
+                    Event.name == "startup_viewed",
+                    Event.created_at > since,
+                    slug.in_([s.slug for s in rows]),
+                )
+                .group_by(slug)
+            )
+        ).all()
+    )
     out = []
     for s in rows:
         pending = await db.scalar(
@@ -442,7 +468,10 @@ async def my_startups(db: AsyncSession, user: User) -> list[MyStartupOut]:
         )
         out.append(
             MyStartupOut(
-                **to_card(s).model_dump(), pending_applications=pending or 0, is_hidden=s.is_hidden
+                **to_card(s).model_dump(),
+                pending_applications=pending or 0,
+                is_hidden=s.is_hidden,
+                views_30d=views.get(s.slug, 0),
             )
         )
     return out

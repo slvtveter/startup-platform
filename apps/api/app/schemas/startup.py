@@ -106,6 +106,7 @@ class StartupDetail(StartupCard):
 class MyStartupOut(StartupCard):
     pending_applications: int
     is_hidden: bool
+    views_30d: int = 0
 
 
 class OpenSeatStartup(BaseModel):
