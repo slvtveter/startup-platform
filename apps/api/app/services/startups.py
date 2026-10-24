@@ -343,8 +343,15 @@ async def add_role(db: AsyncSession, s: Startup, data: RoleIn) -> StartupRole:
         skills=await _skills(db, data.skills),
     )
     db.add(r)
+    _reopen(s)
     await db.commit()
     return r
+
+
+def _reopen(s: Startup) -> None:
+    """Новое открытое место возвращает собранную команду в набор (KAN-99)."""
+    if s.status == StartupStatus.closed:
+        s.status = StartupStatus.recruiting
 
 
 async def get_owned_role(db: AsyncSession, role_id: uuid.UUID, user: User) -> StartupRole:
@@ -363,6 +370,8 @@ async def update_role(db: AsyncSession, r: StartupRole, data: RoleUpdate) -> Non
             setattr(r, key, value)
     if data.skills is not None:
         r.skills = await _skills(db, data.skills)
+    if data.is_open:
+        _reopen(r.startup)
     await db.commit()
 
 

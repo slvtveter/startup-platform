@@ -191,9 +191,27 @@ async def withdraw(db: AsyncSession, user: User, app_id: uuid.UUID) -> Applicati
     return app
 
 
+async def _close_if_full(db: AsyncSession, role: StartupRole, user: User) -> bool:
+    """KAN-99: последнее свободное место занято — набор закрывается сам."""
+    still_open = await db.scalar(
+        select(func.count()).where(
+            StartupRole.startup_id == role.startup_id,
+            StartupRole.is_open.is_(True),
+            StartupRole.id != role.id,
+        )
+    )
+    startup = role.startup
+    if still_open or startup.status != StartupStatus.recruiting:
+        return False
+    startup.status = StartupStatus.closed
+    track(db, "team_assembled", user.id, "startup", startup.id)
+    return True
+
+
 async def decide(
     db: AsyncSession, user: User, app_id: uuid.UUID, accept: bool, note: str
 ) -> Application:
+    team_assembled = False
     # Блокируем строку роли: два одновременных «принять» не займут одно место дважды.
     app = await get_visible(db, app_id, user)
     role = await db.scalar(
@@ -222,6 +240,7 @@ async def decide(
         await startup_service.add_member(db, role.startup_id, app.applicant_id, role.title)
         if (accepted or 0) + 1 >= role.slots:
             role.is_open = False
+            team_assembled = await _close_if_full(db, role, user)
         track(
             db,
             "contacts_exchanged",
@@ -260,6 +279,17 @@ async def decide(
         user=other,
         kind="decisions",
     )
+    if team_assembled:
+        owner = role.startup.owner
+        await mail.send_mail(
+            owner.email,
+            f"{role.startup.title}: команда собрана",
+            "Все места заняты, поэтому набор закрыт и стартап больше не показывается в ленте.\n\n"
+            "Если понадобится ещё человек, откройте новое место — набор возобновится сам:\n"
+            f"{mail.link('/startups/' + role.startup.slug + '/edit')}",
+            user=owner,
+            kind="decisions",
+        )
     return app
 
 
