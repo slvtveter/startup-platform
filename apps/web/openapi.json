@@ -3925,6 +3925,17 @@
           "role_title": {
             "type": "string",
             "title": "Role Title"
+          },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
           }
         },
         "type": "object",

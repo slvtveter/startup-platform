@@ -7,7 +7,8 @@ import { ApplyDialog, type ApplyState } from "@/components/domain/apply-dialog";
 import { SkillChip, StageBadge, StartupStatusBadge, TermsBadge } from "@/components/domain/badges";
 import { Container } from "@/components/domain/page-header";
 import { ReportButton } from "@/components/domain/report-button";
-import { initialsOf, Seat } from "@/components/domain/seats";
+import { Avatar } from "@/components/domain/avatar-upload";
+import { Seat } from "@/components/domain/seats";
 import { TrackView } from "@/components/site/track-view";
 import { buttonVariants } from "@/components/ui/button";
 import { getMyProfile, getStartup, listRoles, type StartupDetail } from "@/lib/api";
@@ -82,7 +83,7 @@ export default async function StartupPage({ params }: Props) {
         <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3">
           <span className="flex items-center gap-1.5">
             {s.team.map((m) => (
-              <Seat key={m.display_name + m.role_title} filled initials={initialsOf(m.display_name)} size="md" />
+              <Avatar key={m.display_name + m.role_title} name={m.display_name} url={m.avatar_url} className="size-8 rounded-lg text-xs" />
             ))}
             {Array.from({ length: Math.min(openSeats, 6) }, (_, i) => (
               <Seat key={i} filled={false} size="md" />
@@ -190,7 +191,7 @@ export default async function StartupPage({ params }: Props) {
               {s.team.map((m) => {
                 const body = (
                   <>
-                    <Seat filled initials={initialsOf(m.display_name)} size="lg" />
+                    <Avatar name={m.display_name} url={m.avatar_url} className="size-11 rounded-xl text-sm" />
                     <span>
                       <span className="block font-semibold">{m.display_name}</span>
                       <span className="block text-sm text-muted-foreground">{m.role_title}</span>
