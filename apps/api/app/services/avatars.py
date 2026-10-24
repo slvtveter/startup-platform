@@ -1,5 +1,6 @@
 """Загрузка аватара (KAN-34): проверка, обрезка в квадрат, два размера, WebP без EXIF."""
 
+import asyncio
 import io
 import secrets
 
@@ -39,7 +40,8 @@ def _render(data: bytes) -> dict[int, bytes]:
 async def upload(db: AsyncSession, profile: Profile, data: bytes) -> None:
     if len(data) > MAX_BYTES:
         raise AppError("Файл больше 5 МБ")
-    images = _render(data)
+    # Декодирование и ресайз — работа CPU: в потоке, чтобы не стоял весь api.
+    images = await asyncio.to_thread(_render, data)
     storage = get_storage()
     old = profile.avatar_key
     # Новый ключ на каждую загрузку: браузеры и CDN не покажут старую картинку из кеша.

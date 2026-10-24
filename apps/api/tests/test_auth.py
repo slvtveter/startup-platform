@@ -148,3 +148,37 @@ async def test_change_email_requires_confirmation_from_new_address(make_user, cl
     assert r.status_code == 200
     # Ссылка одноразовая.
     assert (await client.post("/api/auth/confirm-email", json={"token": token})).status_code == 400
+
+
+async def test_change_password_logs_out_other_devices(make_user, client):
+    maria = await make_user("maria@mail.ru")
+    r = await client.post(
+        "/api/auth/login", json={"email": "maria@mail.ru", "password": "secret-pass-1"}
+    )
+    assert r.status_code == 200
+    r = await maria.post(
+        "/api/auth/password/change",
+        json={"current_password": "secret-pass-1", "new_password": "another-pass"},
+    )
+    assert r.status_code == 200
+    assert (await maria.get("/api/auth/me")).status_code == 200  # текущее устройство остаётся
+    assert (await client.get("/api/auth/me")).status_code == 401  # второе вышло
+
+
+async def test_login_limited_per_ip_across_emails(client):
+    s = get_settings()
+    old = s.auth_rate_limit
+    s.auth_rate_limit = 2
+    try:
+        codes = [
+            (
+                await client.post(
+                    "/api/auth/login", json={"email": f"u{i}@a.ru", "password": "wrong-pass"}
+                )
+            ).status_code
+            for i in range(9)
+        ]
+        assert codes[:8] == [401] * 8
+        assert codes[8] == 429
+    finally:
+        s.auth_rate_limit = old

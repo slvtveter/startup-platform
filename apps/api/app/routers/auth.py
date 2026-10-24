@@ -93,7 +93,7 @@ async def verify_email(data: TokenIn, db: DbSession) -> OkOut:
 @router.post("/resend-verification", response_model=OkOut)
 async def resend_verification(user: CurrentUser, db: DbSession) -> OkOut:
     if not user.email_verified:
-        await auth_service.send_verification(db, user)
+        await auth_service.resend_verification(db, user)
     return OkOut()
 
 
@@ -110,8 +110,11 @@ async def reset_password(data: ResetIn, db: DbSession) -> OkOut:
 
 
 @router.post("/password/change", response_model=OkOut)
-async def change_password(data: ChangePasswordIn, user: CurrentUser, db: DbSession) -> OkOut:
-    await auth_service.change_password(db, user, data.current_password, data.new_password)
+async def change_password(
+    data: ChangePasswordIn, request: Request, user: CurrentUser, db: DbSession
+) -> OkOut:
+    token = request.cookies.get(get_settings().session_cookie_name, "")
+    await auth_service.change_password(db, user, data.current_password, data.new_password, token)
     return OkOut()
 
 

@@ -63,3 +63,21 @@ async def test_unverified_cannot_start_chats(make_user):
     newbie = await make_user("new@mail.ru", verified=False)
     r = await newbie.post("/api/chats", json={"slug": "oleg", "body": "Привет"})
     assert r.status_code == 403
+
+
+async def test_message_flood_is_limited(make_user, monkeypatch):
+    from app.services import chat as chat_service
+
+    monkeypatch.setattr(chat_service, "MESSAGES_PER_MINUTE", 2)
+    maria = await make_user("maria@mail.ru", published=True)
+    alina = await make_user("alina@mail.ru", published=True)
+    slug = (await alina.get("/api/profile/me")).json()["slug"]
+    conv = (await maria.post("/api/chats", json={"slug": slug, "body": "Привет!"})).json()["id"]
+    assert (
+        await maria.post(f"/api/chats/{conv}/messages", json={"body": "ещё"})
+    ).status_code == 201
+    r = await maria.post(f"/api/chats/{conv}/messages", json={"body": "и ещё"})
+    assert r.status_code == 429
+    # Повторный «Написать» из каталога тоже упирается в лимит.
+    r = await maria.post("/api/chats", json={"slug": slug, "body": "обход"})
+    assert r.status_code == 429

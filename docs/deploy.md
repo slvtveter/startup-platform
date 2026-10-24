@@ -42,6 +42,13 @@
    sudo ufw allow OpenSSH && sudo ufw allow 80 && sudo ufw allow 443 && sudo ufw enable
    ```
    Docker публикует порты в обход ufw, поэтому наружу открыт только Caddy: у остальных сервисов в `compose.prod.yml` нет `ports`.
+   SSH только по ключу и автообновления безопасности (боты перебирают пароли к SSH с первого часа):
+   ```bash
+   # сначала: ssh-copy-id user@сервер и проверить, что вход по ключу работает
+   sudo sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/; s/^#\?PermitRootLogin.*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
+   sudo systemctl restart ssh
+   sudo apt install -y unattended-upgrades && sudo dpkg-reconfigure -plow unattended-upgrades
+   ```
 2. DNS: A-запись домена на IP сервера. HTTPS-сертификат Caddy выпустит сам.
 3. На сервере:
    ```bash

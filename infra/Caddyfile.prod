@@ -23,6 +23,10 @@
 		file_server
 	}
 	handle /api/* {
+		# Самый большой запрос — аватар до 5 МБ. Гигабайтное тело Caddy отклонит, не передав в api.
+		request_body {
+			max_size 6MB
+		}
 		reverse_proxy api:8000
 	}
 	handle {

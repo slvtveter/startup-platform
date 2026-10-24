@@ -12,7 +12,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import and_, func, or_, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.errors import AppError, Forbidden, NotFound
+from app.core.errors import AppError, Forbidden, NotFound, TooManyRequests
 from app.models import Application, Conversation, Message, User
 from app.schemas.chat import ChatApplicationRef, ChatPeer, ConversationOut, MessageOut
 from app.services import profiles as profile_service
@@ -20,6 +20,8 @@ from app.services.events import track
 
 # Новых диалогов в сутки от одного человека: защита от рассылок.
 NEW_CHATS_PER_DAY = 20
+# Живой человек столько не напишет за минуту в один диалог; бот-спамер упрётся.
+MESSAGES_PER_MINUTE = 20
 PAGE = 50
 
 
@@ -83,6 +85,18 @@ async def get_or_create(db: AsyncSession, u1: User, u2: User) -> Conversation:
         await db.flush()
         await db.refresh(conv)
     return conv
+
+
+async def ensure_can_send(db: AsyncSession, conv: Conversation, user: User) -> None:
+    recent = await db.scalar(
+        select(func.count()).where(
+            Message.conversation_id == conv.id,
+            Message.sender_id == user.id,
+            Message.created_at > _now() - timedelta(minutes=1),
+        )
+    )
+    if (recent or 0) >= MESSAGES_PER_MINUTE:
+        raise TooManyRequests("Слишком много сообщений подряд. Подождите минуту.")
 
 
 async def post(
@@ -230,6 +244,7 @@ async def start(db: AsyncSession, user: User, slug: str, body: str) -> Conversat
             raise AppError("Достигнут дневной лимит новых диалогов. Попробуйте завтра.")
         track(db, "chat_started", user.id, "user", target.user_id)
     conv = await get_or_create(db, user, target.user)
+    await ensure_can_send(db, conv, user)
     await post(db, conv, user, body)
     await db.commit()
     return conv
