@@ -42,16 +42,16 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
         start = time.perf_counter()
         try:
             response = await call_next(request)
+            response.headers["x-request-id"] = rid
+            logging.getLogger("app.access").info(
+                "request",
+                extra={
+                    "method": request.method,
+                    "path": request.url.path,
+                    "status": response.status_code,
+                    "duration_ms": round((time.perf_counter() - start) * 1000, 1),
+                },
+            )
         finally:
             request_id_var.reset(token)
-        response.headers["x-request-id"] = rid
-        logging.getLogger("app.access").info(
-            "request",
-            extra={
-                "method": request.method,
-                "path": request.url.path,
-                "status": response.status_code,
-                "duration_ms": round((time.perf_counter() - start) * 1000, 1),
-            },
-        )
         return response
