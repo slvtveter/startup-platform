@@ -163,8 +163,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <div>
           <div className="flex items-center gap-3">
             <h2 className="text-xl">Пользователи</h2>
-            <form className="ml-auto">
-              <input name="q" defaultValue={q} placeholder="Поиск" className="h-9 rounded-lg border bg-card px-3 text-sm" />
+            <form className="ml-auto min-w-0">
+              <input name="q" defaultValue={q} placeholder="Поиск" aria-label="Поиск пользователей" className="h-9 w-36 rounded-lg border bg-card px-3 text-sm sm:w-56" />
             </form>
           </div>
           <div className="mt-3 divide-y rounded-xl border bg-card">
