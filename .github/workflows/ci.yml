@@ -150,6 +150,9 @@ jobs:
           # OG-картинка рендерится в prod-образе: шрифты из assets/og-fonts попали в сборку.
           curl -skf -o /tmp/og.png https://localhost/startups/no-such-startup/opengraph-image
           file /tmp/og.png | grep -q "PNG image data, 1200 x 630"
+          # api и worker работают не от root (KAN-102).
+          test "$(docker compose -f compose.prod.yml --env-file .env.ci exec -T api id -u)" != "0"
+          test "$(docker compose -f compose.prod.yml --env-file .env.ci exec -T worker id -u)" != "0"
           # Воркер фоновых задач запущен и не падает в цикле перезапусков.
           sleep 5
           test "$(docker compose -f compose.prod.yml --env-file .env.ci ps worker --format '{{.State}}')" = "running"

@@ -17,6 +17,15 @@ services:
       timeout: 3s
       retries: 20
 
+  # Владелец volume media — пользователь приложения (uid 10001), см. compose.prod.yml.
+  media-init:
+    build: ../apps/api
+    user: root
+    command: ["chown", "-R", "10001:10001", "/media"]
+    volumes:
+      - media:/media
+    restart: "no"
+
   api:
     build: ../apps/api
     env_file: .env
@@ -34,6 +43,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      media-init:
+        condition: service_completed_successfully
 
 
   # Фоновые задачи (KAN-91). Код не перезагружается сам: после правок — make restart-worker.
