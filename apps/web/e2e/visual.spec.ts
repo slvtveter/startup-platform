@@ -10,6 +10,7 @@ const AUTH_PAGES = [
   ["my-profile", "/me/profile", "maria@example.com"],
   ["new-startup", "/startups/new", "alina@example.com"],
   ["dashboard", "/", "alina@example.com"],
+  ["admin", "/admin", "admin@example.com"],
 ] as const;
 
 const PAGES = [

@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AcceptApplicationData, AcceptApplicationErrors, AcceptApplicationResponses, AddStartupRoleData, AddStartupRoleErrors, AddStartupRoleResponses, AdminAuditLogData, AdminAuditLogResponses, AdminBlockUserData, AdminBlockUserErrors, AdminBlockUserResponses, AdminHideStartupData, AdminHideStartupErrors, AdminHideStartupResponses, AdminHypothesesData, AdminHypothesesErrors, AdminHypothesesResponses, AdminListReportsData, AdminListReportsErrors, AdminListReportsResponses, AdminListStartupsData, AdminListStartupsResponses, AdminListUsersData, AdminListUsersErrors, AdminListUsersResponses, AdminMetricsData, AdminMetricsErrors, AdminMetricsResponses, AdminResolveReportData, AdminResolveReportErrors, AdminResolveReportResponses, AdminUnblockUserData, AdminUnblockUserErrors, AdminUnblockUserResponses, AdminUnhideStartupData, AdminUnhideStartupErrors, AdminUnhideStartupResponses, ApplyToRoleData, ApplyToRoleErrors, ApplyToRoleResponses, ArchiveStartupData, ArchiveStartupErrors, ArchiveStartupResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, CloseStartupData, CloseStartupErrors, CloseStartupResponses, CreateReportData, CreateReportErrors, CreateReportResponses, CreateStartupData, CreateStartupErrors, CreateStartupResponses, DeleteAccountData, DeleteAccountResponses, DeleteStartupRoleData, DeleteStartupRoleErrors, DeleteStartupRoleResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetMyProfileData, GetMyProfileResponses, GetPersonData, GetPersonErrors, GetPersonResponses, GetStartupData, GetStartupErrors, GetStartupResponses, HealthData, HealthResponses, InvitePersonData, InvitePersonErrors, InvitePersonResponses, ListMyApplicationsData, ListMyApplicationsResponses, ListMyStartupsData, ListMyStartupsResponses, ListOpenSeatsData, ListOpenSeatsErrors, ListOpenSeatsResponses, ListPeopleData, ListPeopleErrors, ListPeopleResponses, ListRecommendedStartupsData, ListRecommendedStartupsResponses, ListRolesData, ListRolesResponses, ListSkillsData, ListSkillsErrors, ListSkillsResponses, ListStartupApplicationsData, ListStartupApplicationsErrors, ListStartupApplicationsResponses, ListStartupsData, ListStartupsErrors, ListStartupsResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, MeData, MeResponses, PublicStatsData, PublicStatsResponses, PublishMyProfileData, PublishMyProfileErrors, PublishMyProfileResponses, PublishStartupData, PublishStartupErrors, PublishStartupResponses, RegisterData, RegisterErrors, RegisterResponses, RejectApplicationData, RejectApplicationErrors, RejectApplicationResponses, ResendVerificationData, ResendVerificationResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, SendFeedbackData, SendFeedbackErrors, SendFeedbackResponses, TrackClientEventData, TrackClientEventErrors, TrackClientEventResponses, UpdateMyProfileData, UpdateMyProfileErrors, UpdateMyProfileResponses, UpdateStartupData, UpdateStartupErrors, UpdateStartupResponses, UpdateStartupRoleData, UpdateStartupRoleErrors, UpdateStartupRoleResponses, VerifyEmailData, VerifyEmailErrors, VerifyEmailResponses, WithdrawApplicationData, WithdrawApplicationErrors, WithdrawApplicationResponses } from './types.gen';
+import type { AcceptApplicationData, AcceptApplicationErrors, AcceptApplicationResponses, AddStartupRoleData, AddStartupRoleErrors, AddStartupRoleResponses, AdminAuditLogData, AdminAuditLogResponses, AdminBlockUserData, AdminBlockUserErrors, AdminBlockUserResponses, AdminCatalogCreateData, AdminCatalogCreateErrors, AdminCatalogCreateResponses, AdminCatalogMergeData, AdminCatalogMergeErrors, AdminCatalogMergeResponses, AdminCatalogRenameData, AdminCatalogRenameErrors, AdminCatalogRenameResponses, AdminCreatePlatformStartupData, AdminCreatePlatformStartupErrors, AdminCreatePlatformStartupResponses, AdminHideStartupData, AdminHideStartupErrors, AdminHideStartupResponses, AdminHypothesesData, AdminHypothesesErrors, AdminHypothesesResponses, AdminListReportsData, AdminListReportsErrors, AdminListReportsResponses, AdminListStartupsData, AdminListStartupsResponses, AdminListUsersData, AdminListUsersErrors, AdminListUsersResponses, AdminMetricsData, AdminMetricsErrors, AdminMetricsResponses, AdminResolveReportData, AdminResolveReportErrors, AdminResolveReportResponses, AdminUnblockUserData, AdminUnblockUserErrors, AdminUnblockUserResponses, AdminUnhideStartupData, AdminUnhideStartupErrors, AdminUnhideStartupResponses, ApplyToRoleData, ApplyToRoleErrors, ApplyToRoleResponses, ArchiveStartupData, ArchiveStartupErrors, ArchiveStartupResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, CloseStartupData, CloseStartupErrors, CloseStartupResponses, CreateReportData, CreateReportErrors, CreateReportResponses, CreateStartupData, CreateStartupErrors, CreateStartupResponses, DeleteAccountData, DeleteAccountResponses, DeleteStartupRoleData, DeleteStartupRoleErrors, DeleteStartupRoleResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetMyProfileData, GetMyProfileResponses, GetPersonData, GetPersonErrors, GetPersonResponses, GetStartupData, GetStartupErrors, GetStartupResponses, HealthData, HealthResponses, InvitePersonData, InvitePersonErrors, InvitePersonResponses, ListMyApplicationsData, ListMyApplicationsResponses, ListMyStartupsData, ListMyStartupsResponses, ListOpenSeatsData, ListOpenSeatsErrors, ListOpenSeatsResponses, ListPeopleData, ListPeopleErrors, ListPeopleResponses, ListRecommendedStartupsData, ListRecommendedStartupsResponses, ListRolesData, ListRolesResponses, ListSkillsData, ListSkillsErrors, ListSkillsResponses, ListStartupApplicationsData, ListStartupApplicationsErrors, ListStartupApplicationsResponses, ListStartupsData, ListStartupsErrors, ListStartupsResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, MeData, MeResponses, PublicStatsData, PublicStatsResponses, PublishMyProfileData, PublishMyProfileErrors, PublishMyProfileResponses, PublishStartupData, PublishStartupErrors, PublishStartupResponses, RegisterData, RegisterErrors, RegisterResponses, RejectApplicationData, RejectApplicationErrors, RejectApplicationResponses, ResendVerificationData, ResendVerificationResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, SendFeedbackData, SendFeedbackErrors, SendFeedbackResponses, TrackClientEventData, TrackClientEventErrors, TrackClientEventResponses, UpdateMyProfileData, UpdateMyProfileErrors, UpdateMyProfileResponses, UpdateStartupData, UpdateStartupErrors, UpdateStartupResponses, UpdateStartupRoleData, UpdateStartupRoleErrors, UpdateStartupRoleResponses, VerifyEmailData, VerifyEmailErrors, VerifyEmailResponses, WithdrawApplicationData, WithdrawApplicationErrors, WithdrawApplicationResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -392,6 +392,18 @@ export const adminUnblockUser = <ThrowOnError extends boolean = false>(options: 
 export const adminListStartups = <ThrowOnError extends boolean = false>(options?: Options<AdminListStartupsData, ThrowOnError>): RequestResult<AdminListStartupsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<AdminListStartupsResponses, unknown, ThrowOnError>({ url: '/api/admin/startups', ...options });
 
 /**
+ * Admin Create Platform Startup
+ */
+export const adminCreatePlatformStartup = <ThrowOnError extends boolean = false>(options: Options<AdminCreatePlatformStartupData, ThrowOnError>): RequestResult<AdminCreatePlatformStartupResponses, AdminCreatePlatformStartupErrors, ThrowOnError> => (options.client ?? client).post<AdminCreatePlatformStartupResponses, AdminCreatePlatformStartupErrors, ThrowOnError>({
+    url: '/api/admin/startups',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * Admin Hide Startup
  */
 export const adminHideStartup = <ThrowOnError extends boolean = false>(options: Options<AdminHideStartupData, ThrowOnError>): RequestResult<AdminHideStartupResponses, AdminHideStartupErrors, ThrowOnError> => (options.client ?? client).post<AdminHideStartupResponses, AdminHideStartupErrors, ThrowOnError>({ url: '/api/admin/startups/{startup_id}/hide', ...options });
@@ -415,3 +427,39 @@ export const adminResolveReport = <ThrowOnError extends boolean = false>(options
  * Admin Audit Log
  */
 export const adminAuditLog = <ThrowOnError extends boolean = false>(options?: Options<AdminAuditLogData, ThrowOnError>): RequestResult<AdminAuditLogResponses, unknown, ThrowOnError> => (options?.client ?? client).get<AdminAuditLogResponses, unknown, ThrowOnError>({ url: '/api/admin/audit', ...options });
+
+/**
+ * Admin Catalog Create
+ */
+export const adminCatalogCreate = <ThrowOnError extends boolean = false>(options: Options<AdminCatalogCreateData, ThrowOnError>): RequestResult<AdminCatalogCreateResponses, AdminCatalogCreateErrors, ThrowOnError> => (options.client ?? client).post<AdminCatalogCreateResponses, AdminCatalogCreateErrors, ThrowOnError>({
+    url: '/api/admin/catalog/{kind}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Admin Catalog Rename
+ */
+export const adminCatalogRename = <ThrowOnError extends boolean = false>(options: Options<AdminCatalogRenameData, ThrowOnError>): RequestResult<AdminCatalogRenameResponses, AdminCatalogRenameErrors, ThrowOnError> => (options.client ?? client).patch<AdminCatalogRenameResponses, AdminCatalogRenameErrors, ThrowOnError>({
+    url: '/api/admin/catalog/{kind}/{slug}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Admin Catalog Merge
+ */
+export const adminCatalogMerge = <ThrowOnError extends boolean = false>(options: Options<AdminCatalogMergeData, ThrowOnError>): RequestResult<AdminCatalogMergeResponses, AdminCatalogMergeErrors, ThrowOnError> => (options.client ?? client).post<AdminCatalogMergeResponses, AdminCatalogMergeErrors, ThrowOnError>({
+    url: '/api/admin/catalog/{kind}/{slug}/merge',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});

@@ -2,8 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AdminAction } from "@/components/domain/admin-actions";
+import { CatalogEditor, PlatformStartupForm } from "@/components/domain/admin-cold-start";
 import { Container, PageHeader } from "@/components/domain/page-header";
-import { adminAuditLog, adminHypotheses, adminListReports, adminListStartups, adminListUsers, adminMetrics, type HypothesisRow } from "@/lib/api";
+import { adminAuditLog, adminHypotheses, adminListReports, adminListStartups, adminListUsers, adminMetrics, listRoles, listSkills, type HypothesisRow } from "@/lib/api";
 import { STARTUP_STATUS, timeAgo } from "@/lib/labels";
 import { requireMe, serverClient } from "@/lib/server-api";
 
@@ -14,13 +15,15 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   if (!user.is_admin) notFound();
   const { days = "7", q } = await searchParams;
   const client = await serverClient();
-  const [{ data: m }, { data: users }, { data: startups }, { data: reports }, { data: audit }, { data: hyp }] = await Promise.all([
+  const [{ data: m }, { data: users }, { data: startups }, { data: reports }, { data: audit }, { data: hyp }, { data: roles }, { data: skills }] = await Promise.all([
     adminMetrics({ client, query: { days: Number(days) } }),
     adminListUsers({ client, query: { q } }),
     adminListStartups({ client }),
     adminListReports({ client }),
     adminAuditLog({ client }),
     adminHypotheses({ client, query: { days: Number(days) } }),
+    listRoles({ client }),
+    listSkills({ client }),
   ]);
   const top = Math.max(1, ...(m?.funnel.map((f) => f.count) ?? [1]));
 
@@ -39,7 +42,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         }
       />
 
-      <section className="mt-8 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+      <section className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr]">
         <div className="rounded-2xl border bg-card p-6">
           <h2 className="font-sans text-base font-bold">Воронка за {m?.days} дней</h2>
           <ol className="mt-4 grid gap-3">
@@ -86,7 +89,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <p className="mt-1 text-sm text-muted-foreground">
           Сравнение с предыдущими {days} днями. Описание гипотез: docs/ux/research.md.
         </p>
-        <div className="mt-4 overflow-x-auto">
+        <div className="mt-4 overflow-x-auto" tabIndex={0} role="region" aria-label="Таблица гипотез">
           <table className="w-full min-w-[640px] text-sm">
             <thead className="text-left text-muted-foreground">
               <tr className="border-b">
@@ -110,6 +113,26 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               ))}
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <section className="mt-8 rounded-2xl border bg-card p-6">
+        <h2 className="font-sans text-base font-bold">Перенести стартап на платформу</h2>
+        <p className="mt-1 mb-4 text-sm text-muted-foreground">
+          Для холодного старта: оформить открытый проект за основателя. Черновик принадлежит платформе, пока основатель не
+          зарегистрируется и не подтвердит почту.
+        </p>
+        <PlatformStartupForm />
+      </section>
+
+      <section className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="rounded-2xl border bg-card p-6">
+          <h2 className="mb-4 font-sans text-base font-bold">Роли</h2>
+          <CatalogEditor kind="roles" items={roles ?? []} />
+        </div>
+        <div className="rounded-2xl border bg-card p-6">
+          <h2 className="mb-4 font-sans text-base font-bold">Навыки</h2>
+          <CatalogEditor kind="skills" items={skills ?? []} />
         </div>
       </section>
 
@@ -140,8 +163,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <div>
           <div className="flex items-center gap-3">
             <h2 className="text-xl">Пользователи</h2>
-            <form className="ml-auto">
-              <input name="q" defaultValue={q} placeholder="Поиск" className="h-9 rounded-lg border bg-card px-3 text-sm" />
+            <form className="ml-auto min-w-0">
+              <input name="q" defaultValue={q} placeholder="Поиск" aria-label="Поиск пользователей" className="h-9 w-36 rounded-lg border bg-card px-3 text-sm sm:w-56" />
             </form>
           </div>
           <div className="mt-3 divide-y rounded-xl border bg-card">

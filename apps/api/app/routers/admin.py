@@ -2,7 +2,7 @@
 
 import uuid
 from datetime import UTC, datetime, timedelta
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Query
 from sqlalchemy import delete, func, or_, select
@@ -10,20 +10,38 @@ from sqlalchemy import delete, func, or_, select
 from app.core.deps import AdminUser
 from app.core.errors import NotFound
 from app.db.session import DbSession
-from app.models import AdminAction, Application, Event, Profile, Report, Session, Startup, User
+from app.models import (
+    AdminAction,
+    Application,
+    Event,
+    Profile,
+    Report,
+    Role,
+    Session,
+    Skill,
+    Startup,
+    User,
+)
 from app.models.enums import ApplicationStatus, ReportStatus, StartupStatus
 from app.schemas.common import OkOut
 from app.schemas.ops import (
     AdminActionOut,
     AdminStartupOut,
     AdminUserOut,
+    CatalogItemIn,
+    CatalogMergeIn,
+    CatalogRenameIn,
     FunnelStep,
     HypothesisRow,
     MetricsOut,
+    PlatformStartupIn,
     ReportOut,
     SourceRow,
 )
+from app.schemas.startup import StartupDetail, StartupIn
+from app.services import catalog_admin
 from app.services import hypotheses as hypotheses_service
+from app.services import startups as startup_service
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -248,3 +266,68 @@ async def admin_audit_log(admin: AdminUser, db: DbSession) -> list[AdminActionOu
         )
         for a, email in rows
     ]
+
+
+# --- Справочники ролей и навыков (KAN-75) ---
+
+CATALOGS = {"roles": Role, "skills": Skill}
+CatalogKind = Literal["roles", "skills"]
+
+
+def _catalog(kind: str):
+    if kind not in CATALOGS:
+        raise NotFound("Нет такого справочника")
+    return CATALOGS[kind]
+
+
+@router.post("/catalog/{kind}", response_model=OkOut, status_code=201)
+async def admin_catalog_create(
+    kind: CatalogKind, data: CatalogItemIn, admin: AdminUser, db: DbSession
+) -> OkOut:
+    item = await catalog_admin.create(db, _catalog(kind), data.name, data.category)
+    _log(db, admin, "catalog_create", kind, item.slug, name=item.name)
+    await db.commit()
+    return OkOut()
+
+
+@router.patch("/catalog/{kind}/{slug}", response_model=OkOut)
+async def admin_catalog_rename(
+    kind: CatalogKind,
+    slug: str,
+    data: CatalogRenameIn,
+    admin: AdminUser,
+    db: DbSession,
+) -> OkOut:
+    item = await catalog_admin.rename(db, _catalog(kind), slug, data.name)
+    _log(db, admin, "catalog_rename", kind, slug, name=item.name)
+    await db.commit()
+    return OkOut()
+
+
+@router.post("/catalog/{kind}/{slug}/merge", response_model=OkOut)
+async def admin_catalog_merge(
+    kind: CatalogKind,
+    slug: str,
+    data: CatalogMergeIn,
+    admin: AdminUser,
+    db: DbSession,
+) -> OkOut:
+    await catalog_admin.merge(db, _catalog(kind), slug, data.into)
+    _log(db, admin, "catalog_merge", kind, slug, into=data.into)
+    await db.commit()
+    return OkOut()
+
+
+# --- Перенос стартапа на платформу (KAN-75) ---
+
+
+@router.post("/startups", response_model=StartupDetail, status_code=201)
+async def admin_create_platform_startup(
+    data: PlatformStartupIn, admin: AdminUser, db: DbSession
+) -> StartupDetail:
+    s = await startup_service.create_for_platform(
+        db, admin, StartupIn(**data.model_dump(exclude={"owner_email"})), data.owner_email
+    )
+    _log(db, admin, "startup_create_for", "startup", s.id, owner_email=data.owner_email)
+    await db.commit()
+    return await startup_service.to_detail(db, s, admin)

@@ -2097,6 +2097,45 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin Create Platform Startup",
+        "operationId": "admin_create_platform_startup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformStartupIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StartupDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/admin/startups/{startup_id}/hide": {
@@ -2302,6 +2341,192 @@
                   },
                   "type": "array",
                   "title": "Response Admin Audit Log"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/catalog/{kind}": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin Catalog Create",
+        "operationId": "admin_catalog_create",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "roles",
+                "skills"
+              ],
+              "type": "string",
+              "title": "Kind"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogItemIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/catalog/{kind}/{slug}": {
+      "patch": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin Catalog Rename",
+        "operationId": "admin_catalog_rename",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "roles",
+                "skills"
+              ],
+              "type": "string",
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogRenameIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/catalog/{kind}/{slug}/merge": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin Catalog Merge",
+        "operationId": "admin_catalog_merge",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "roles",
+                "skills"
+              ],
+              "type": "string",
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogMergeIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -2589,6 +2814,62 @@
           "full_time"
         ],
         "title": "Availability"
+      },
+      "CatalogItemIn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 2,
+            "title": "Name"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "CatalogItemIn"
+      },
+      "CatalogMergeIn": {
+        "properties": {
+          "into": {
+            "type": "string",
+            "title": "Into",
+            "description": "slug \u044d\u043b\u0435\u043c\u0435\u043d\u0442\u0430, \u0432 \u043a\u043e\u0442\u043e\u0440\u044b\u0439 \u0441\u043b\u0438\u0432\u0430\u0435\u043c \u0434\u0443\u0431\u043b\u044c"
+          }
+        },
+        "type": "object",
+        "required": [
+          "into"
+        ],
+        "title": "CatalogMergeIn"
+      },
+      "CatalogRenameIn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 2,
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "CatalogRenameIn"
       },
       "ChangePasswordIn": {
         "properties": {
@@ -3667,6 +3948,66 @@
           "links"
         ],
         "title": "PersonDetail"
+      },
+      "PlatformStartupIn": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 2,
+            "title": "Title"
+          },
+          "pitch": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Pitch",
+            "default": ""
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8000,
+            "title": "Description",
+            "default": ""
+          },
+          "stage": {
+            "$ref": "#/components/schemas/Stage"
+          },
+          "terms": {
+            "$ref": "#/components/schemas/Terms"
+          },
+          "terms_details": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Terms Details",
+            "default": ""
+          },
+          "website": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Website",
+            "default": ""
+          },
+          "telegram": {
+            "type": "string",
+            "maxLength": 100,
+            "title": "Telegram",
+            "default": ""
+          },
+          "owner_email": {
+            "type": "string",
+            "format": "email",
+            "title": "Owner Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "stage",
+          "terms",
+          "owner_email"
+        ],
+        "title": "PlatformStartupIn",
+        "description": "\u0421\u0442\u0430\u0440\u0442\u0430\u043f, \u043a\u043e\u0442\u043e\u0440\u044b\u0439 \u0430\u0434\u043c\u0438\u043d \u043f\u0435\u0440\u0435\u043d\u043e\u0441\u0438\u0442 \u043d\u0430 \u043f\u043b\u0430\u0442\u0444\u043e\u0440\u043c\u0443 \u0437\u0430 \u043e\u0441\u043d\u043e\u0432\u0430\u0442\u0435\u043b\u044f (KAN-75)."
       },
       "ProfileUpdate": {
         "properties": {

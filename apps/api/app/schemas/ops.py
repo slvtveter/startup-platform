@@ -1,9 +1,10 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 from app.models.enums import ReportReason, ReportStatus
+from app.schemas.startup import StartupIn
 
 
 class ReportIn(BaseModel):
@@ -98,3 +99,22 @@ class AdminActionOut(BaseModel):
     target_type: str
     target_id: str
     created_at: datetime
+
+
+class CatalogItemIn(BaseModel):
+    name: str = Field(min_length=2, max_length=100)
+    category: str | None = Field(default=None, max_length=64)
+
+
+class CatalogRenameIn(BaseModel):
+    name: str = Field(min_length=2, max_length=100)
+
+
+class CatalogMergeIn(BaseModel):
+    into: str = Field(description="slug элемента, в который сливаем дубль")
+
+
+class PlatformStartupIn(StartupIn):
+    """Стартап, который админ переносит на платформу за основателя (KAN-75)."""
+
+    owner_email: EmailStr
