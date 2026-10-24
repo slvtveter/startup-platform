@@ -2,6 +2,7 @@ from sqlalchemy import Select, and_, exists, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import AppError, NotFound
+from app.db import search
 from app.models import (
     Application,
     Profile,
@@ -238,17 +239,22 @@ async def list_people(
         stmt = stmt.where(Profile.experience_level.in_(levels))
     if looking_for:
         stmt = stmt.where(Profile.looking_for.overlap(looking_for))
-    if q:
-        like = f"%{q.strip()}%"
-        stmt = stmt.where(
-            or_(
-                Profile.display_name.ilike(like),
-                Profile.headline.ilike(like),
-                Profile.bio.ilike(like),
-            )
+    q = (q or "").strip()
+    order = [Profile.updated_at.desc()]
+    if len(q) >= search.MIN_FTS_LEN:
+        tsq = search.query(q)
+        # Человек находится по своему тексту или по названию основной роли («дизайнеры»).
+        role_hit = (
+            exists()
+            .where(Role.id == Profile.primary_role_id)
+            .where(func.to_tsvector(search.CONFIG, Role.name).op("@@")(tsq))
         )
+        stmt = stmt.where(or_(Profile.search.op("@@")(tsq), role_hit))
+        order.insert(0, func.ts_rank(Profile.search, tsq).desc())
+    elif q:
+        stmt = stmt.where(Profile.display_name.ilike(f"{q}%"))
     total = await db.scalar(select(func.count()).select_from(stmt.subquery()))
-    rows = await db.scalars(stmt.order_by(Profile.updated_at.desc()).limit(limit).offset(offset))
+    rows = await db.scalars(stmt.order_by(*order).limit(limit).offset(offset))
     return list(rows.unique()), total or 0
 
 

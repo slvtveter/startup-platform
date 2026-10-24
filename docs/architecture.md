@@ -42,6 +42,7 @@ flowchart LR
 | Роуты и схемы | `apps/api/app/routers`, `apps/api/app/schemas` |
 | События воронки | `app.services.events.track()`, каталог в `docs/events.md` |
 | Метрики и гипотезы | `/admin`: воронка, H1–H8 (`services/hypotheses.py`), когорты D7/D30 (`services/retention.py`), CSV |
+| Поиск | `app/db/search.py`: вычисляемые `tsvector` (russian) у стартапов, ролей и профилей, GIN-индексы, `websearch_to_tsquery` + `ts_rank`; запрос короче 3 символов — префикс названия |
 | Подбор v0 | `services/startups.py::recommended`, показы пишутся в `recommendation_shown` |
 | Дизайн-система | `docs/ux/design-system.md`, токены в `apps/web/src/app/globals.css`, компоненты мест `components/domain/seats.tsx` |
 | UX-исследование | `docs/ux/research.md` (JTBD, CJM, гипотезы), доска Miro «Startup Platform: макеты MVP» |

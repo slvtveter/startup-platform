@@ -4,6 +4,7 @@ from sqlalchemy import ARRAY, Boolean, Column, Enum, ForeignKey, String, Table, 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
+from app.db.search import search_column, search_index
 from app.models.catalog import Role, Skill
 from app.models.enums import Availability, ExperienceLevel, LinkKind
 
@@ -17,6 +18,7 @@ profile_skills = Table(
 
 class Profile(TimestampMixin, Base):
     __tablename__ = "profiles"
+    __table_args__ = (search_index("profiles"),)
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(
@@ -26,6 +28,7 @@ class Profile(TimestampMixin, Base):
     slug: Mapped[str] = mapped_column(String(100), unique=True)
     headline: Mapped[str] = mapped_column(String(140), default="")
     bio: Mapped[str] = mapped_column(Text, default="")
+    search = search_column(("display_name", "A"), ("headline", "B"), ("bio", "C"))
     primary_role_id: Mapped[int | None] = mapped_column(ForeignKey("roles.id"), index=True)
     experience_level: Mapped[ExperienceLevel | None] = mapped_column(
         Enum(ExperienceLevel, native_enum=False, length=32)
