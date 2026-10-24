@@ -25,7 +25,7 @@ export function InviteDialog({ slug, name, options }: { slug: string; name: stri
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button variant="brand" size="lg" />}>Пригласить в проект</DialogTrigger>
+      <DialogTrigger render={<Button variant="brand" size="lg" className="w-full" />}>Пригласить в команду</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Пригласить: {name}</DialogTitle>

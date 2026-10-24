@@ -17,7 +17,7 @@ const PAGES = [
   ["startups", "/startups"],
   ["startup", "/startups/vkusnoryadom"],
   ["people", "/people"],
-  ["person", "/people/maria"],
+  ["person", "/people/mariya-kim"],
   ["register", "/register"],
 ] as const;
 
@@ -39,7 +39,9 @@ for (const [vpName, viewport] of VIEWPORTS) {
           const res = await page.request.post("/api/auth/login", { data: { email: user, password: "demo12345" } });
           expect(res.ok()).toBeTruthy();
         }
-        await page.goto(path);
+        const res = await page.goto(path);
+        // Страница должна существовать: иначе проверка молча проходит на экране 404.
+        expect(res?.status(), `${path} отдаёт ошибку`).toBeLessThan(400);
         await page.waitForLoadState("networkidle");
         await page.screenshot({ path: `${DIR}/${vpName}-${name}.png`, fullPage: true });
 

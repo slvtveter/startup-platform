@@ -136,3 +136,24 @@ async def test_apply_with_minimal_unpublished_profile(make_user):
     assert (await founder.get(f"/api/people/{slug}")).status_code == 200
     stranger = await make_user("stranger@mail.ru")
     assert (await stranger.get(f"/api/people/{slug}")).status_code == 404
+
+
+async def test_profile_shows_platform_experience(make_user, client):
+    founder = await make_user("alina@mail.ru", published=True, name="Алина")
+    s = await create_published(founder)
+    maria = await make_user("maria@mail.ru", published=True, name="Мария")
+    r = await maria.post(
+        f"/api/startup-roles/{s['roles'][0]['id']}/applications", json={"message": MESSAGE}
+    )
+    await founder.post(f"/api/applications/{r.json()['id']}/accept", json={})
+
+    maria_slug = (await maria.get("/api/profile/me")).json()["slug"]
+    exp = (await client.get(f"/api/people/{maria_slug}")).json()["memberships"]
+    assert [(m["startup_title"], m["role_title"]) for m in exp] == [
+        ("ВкусноРядом", "UI/UX дизайнер")
+    ]
+    assert exp[0]["since"]
+
+    alina_slug = (await founder.get("/api/profile/me")).json()["slug"]
+    exp = (await client.get(f"/api/people/{alina_slug}")).json()["memberships"]
+    assert [m["role_title"] for m in exp] == ["Основатель"]

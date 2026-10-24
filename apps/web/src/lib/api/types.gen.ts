@@ -478,6 +478,10 @@ export type MembershipOut = {
      * Role Title
      */
     role_title: string;
+    /**
+     * Since
+     */
+    since: string;
 };
 
 /**
