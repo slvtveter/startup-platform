@@ -157,3 +157,25 @@ async def test_profile_shows_platform_experience(make_user, client):
     alina_slug = (await founder.get("/api/profile/me")).json()["slug"]
     exp = (await client.get(f"/api/people/{alina_slug}")).json()["memberships"]
     assert [m["role_title"] for m in exp] == ["Основатель"]
+
+
+async def test_last_seat_closes_recruiting_and_new_seat_reopens(make_user, client):
+    founder = await make_user("alina@mail.ru", published=True)
+    s = await create_published(founder)  # одна роль, одно место
+    maria = await make_user("maria@mail.ru", published=True)
+    r = await maria.post(
+        f"/api/startup-roles/{s['roles'][0]['id']}/applications", json={"message": MESSAGE}
+    )
+    mail.outbox.clear()
+    await founder.post(f"/api/applications/{r.json()['id']}/accept", json={})
+
+    detail = (await client.get(f"/api/startups/{s['slug']}")).json()
+    assert detail["status"] == "closed"
+    assert (await client.get("/api/startups")).json()["total"] == 0
+    assert any("команда собрана" in m["Subject"] for m in mail.outbox if m["To"] == "alina@mail.ru")
+
+    await founder.post(
+        f"/api/startups/{s['id']}/roles",
+        json={"role": "backend", "title": "Backend-разработчик", "skills": []},
+    )
+    assert (await client.get(f"/api/startups/{s['slug']}")).json()["status"] == "recruiting"
