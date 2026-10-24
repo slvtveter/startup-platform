@@ -56,8 +56,11 @@ export function SiteFooter() {
         ))}
       </div>
       <div className="border-t">
-        <div className="mx-auto max-w-6xl px-4 py-4 text-xs text-muted-foreground sm:px-6">
-          © {new Date().getFullYear()} startup.platform
+        <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 px-4 py-4 text-xs text-muted-foreground sm:px-6">
+          <span>© {new Date().getFullYear()} startup.platform</span>
+          <Link href="/cookies" className="hover:text-foreground">
+            Cookie и данные
+          </Link>
         </div>
       </div>
     </footer>
