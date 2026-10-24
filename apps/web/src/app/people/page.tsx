@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { ChipFilter, Pager, SearchBox, asList, type SearchParams } from "@/components/domain/filters";
+import { FilterBar } from "@/components/domain/filter-bar";
+import { Pager, SearchBox, asList, type SearchParams } from "@/components/domain/filters";
 import { Container, EmptyState, PageHeader } from "@/components/domain/page-header";
 import { PersonCard } from "@/components/domain/person-card";
 import { buttonVariants } from "@/components/ui/button";
@@ -33,9 +34,15 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
       <PageHeader title="Люди" description="Контакты открываются только после взаимного согласия. Нашёл подходящего человека? Пригласи его на роль в своём стартапе." />
       <div className="mt-8 space-y-3">
         <SearchBox params={params} placeholder="Поиск по имени и описанию" />
-        <ChipFilter basePath="/people" params={params} name="role" title="Роль" options={(roles ?? []).map((r) => ({ value: r.slug, label: r.name }))} />
-        <ChipFilter basePath="/people" params={params} name="looking_for" title="Готов работать" options={Object.entries(TERMS).filter(([v]) => v !== "mixed").map(([value, label]) => ({ value, label }))} />
-        <ChipFilter basePath="/people" params={params} name="level" title="Опыт" options={Object.entries(LEVEL).map(([value, label]) => ({ value, label }))} />
+        <FilterBar
+          basePath="/people"
+          params={params}
+          groups={[
+            { name: "role", title: "Роль", options: (roles ?? []).map((r) => ({ value: r.slug, label: r.name })) },
+            { name: "looking_for", title: "Условия", options: Object.entries(TERMS).filter(([v]) => v !== "mixed").map(([value, label]) => ({ value, label })) },
+            { name: "level", title: "Опыт", options: Object.entries(LEVEL).map(([value, label]) => ({ value, label })) },
+          ]}
+        />
       </div>
       <div className="mt-8 flex items-center gap-4 border-t pt-5 text-sm">
         <span className="font-semibold">

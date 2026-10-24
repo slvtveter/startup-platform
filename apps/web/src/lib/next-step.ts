@@ -13,7 +13,7 @@ export type NextStepInput = {
 };
 
 export type NextStep = {
-  kind: "answer" | "accepted" | "verify" | "profile" | "apply" | "wait";
+  kind: "answer" | "accepted" | "verify" | "profile" | "apply" | "wait" | "invite";
   title: string;
   text: string;
   href: string;
@@ -76,16 +76,31 @@ export function nextStep(i: NextStepInput): NextStep {
       cta: "Все свободные места",
     };
   }
+  if (pending) {
+    return {
+      kind: "wait",
+      title: `${pending} ${plural(pending, "отклик ждёт", "отклика ждут", "откликов ждут")} ответа`,
+      text: "Основатели обычно отвечают за 2–3 дня. Пока ждёшь, можно откликнуться ещё на одно место.",
+      href: "/me/applications",
+      cta: "Мои отклики",
+    };
+  }
+  // Срочных дел нет: вместо пустого «всё сделано» предлагаем действие, которое двигает к цели.
+  if (i.hasStartups) {
+    return {
+      kind: "invite",
+      title: "Новых откликов пока нет",
+      text: "Не жди, пока найдут тебя: посмотри людей с подходящими навыками и позови их на свободное место.",
+      href: "/people",
+      cta: "Найти людей",
+    };
+  }
   return {
-    kind: "wait",
-    title: pending
-      ? `${pending} ${plural(pending, "отклик ждёт", "отклика ждут", "откликов ждут")} ответа`
-      : "Всё сделано",
-    text: pending
-      ? "Основатели обычно отвечают за 2–3 дня. Пока ждёшь, можно откликнуться ещё на одно место."
-      : "Новые отклики и решения придут на почту.",
-    href: pending ? "/me/applications" : "/startups",
-    cta: pending ? "Мои отклики" : "Смотреть стартапы",
+    kind: "invite",
+    title: "Ты уже в команде",
+    text: "Можно откликнуться ещё на одно место. Раз в неделю пришлём на почту новые роли под твой профиль.",
+    href: "/startups",
+    cta: "Смотреть стартапы",
   };
 }
 

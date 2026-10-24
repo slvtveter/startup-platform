@@ -291,7 +291,6 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
           <SeatRow
             filled={startup.team.length}
             open={startup.roles.filter((r) => r.is_open).reduce((n, r) => n + Math.max(0, (r.slots ?? 1) - (r.filled ?? 0)), 0)}
-            size="md"
           />
         </div>
       </div>

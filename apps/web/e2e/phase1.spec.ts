@@ -81,18 +81,18 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
   // --- Основатель принимает: контакты кандидата открываются ---
   await founder.goto("/me/startups");
   await shot(founder, "my-startups");
-  // Счётчик в шапке (KAN-101): новый отклик виден, после просмотра пропадает.
-  await expect(founder.getByRole("link", { name: /Мои стартапы.*новых: 1/ })).toBeVisible();
+  // Счётчик на кнопке аккаунта (KAN-101): новый отклик виден, после просмотра пропадает.
+  await expect(founder.getByRole("button", { name: "Меню аккаунта, новых событий: 1" })).toBeVisible();
   await founder.getByRole("link", { name: "Отклики" }).first().click();
   await expect(founder.getByText("Мария Тестова")).toBeVisible();
-  await expect(founder.getByRole("link", { name: /Мои стартапы.*новых/ })).toHaveCount(0);
+  await expect(founder.getByRole("button", { name: /новых событий/ })).toHaveCount(0);
   await shot(founder, "incoming");
   await founder.getByRole("button", { name: "Принять" }).click();
   await expect(founder.getByText(`@${tg}`)).toBeVisible();
 
   // --- Кандидат видит контакты основателя ---
   await candidate.goto("/");
-  await expect(candidate.getByRole("link", { name: /Мои заявки.*новых: 1/ })).toBeVisible();
+  await expect(candidate.getByRole("button", { name: "Меню аккаунта, новых событий: 1" })).toBeVisible();
   await candidate.goto("/me/applications");
   await expect(candidate.getByRole("heading", { name: "Тебя приняли" })).toBeVisible();
   await expect(candidate.getByText("Принят", { exact: true })).toBeVisible();
@@ -107,4 +107,13 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
 
   await founderCtx.close();
   await candidateCtx.close();
+});
+
+/** Меню аккаунта открывается и ведёт в профиль (раньше падало при открытии). */
+test("account menu opens and leads to the profile", async ({ page }) => {
+  await page.request.post("/api/auth/login", { data: { email: "alina@example.com", password: "demo12345" } });
+  await page.goto("/");
+  await page.getByRole("button", { name: /Меню аккаунта/ }).click();
+  await page.getByRole("menuitem", { name: /Мой профиль/ }).click();
+  await expect(page).toHaveURL(/\/me\/profile$/);
 });
