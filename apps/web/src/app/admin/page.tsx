@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { AdminAction } from "@/components/domain/admin-actions";
 import { CatalogEditor, PlatformStartupForm } from "@/components/domain/admin-cold-start";
 import { Container, PageHeader } from "@/components/domain/page-header";
-import { adminAuditLog, adminHypotheses, adminListReports, adminListStartups, adminListUsers, adminMetrics, listRoles, listSkills, type HypothesisRow } from "@/lib/api";
+import { adminAuditLog, adminHypotheses, adminListReports, adminListStartups, adminListUsers, adminCohorts, adminMetrics, listRoles, listSkills, type HypothesisRow } from "@/lib/api";
 import { STARTUP_STATUS, timeAgo } from "@/lib/labels";
 import { requireMe, serverClient } from "@/lib/server-api";
 
@@ -15,7 +15,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   if (!user.is_admin) notFound();
   const { days = "7", q } = await searchParams;
   const client = await serverClient();
-  const [{ data: m }, { data: users }, { data: startups }, { data: reports }, { data: audit }, { data: hyp }, { data: roles }, { data: skills }] = await Promise.all([
+  const [{ data: m }, { data: users }, { data: startups }, { data: reports }, { data: audit }, { data: hyp }, { data: roles }, { data: skills }, { data: cohorts }] = await Promise.all([
     adminMetrics({ client, query: { days: Number(days) } }),
     adminListUsers({ client, query: { q } }),
     adminListStartups({ client }),
@@ -24,6 +24,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     adminHypotheses({ client, query: { days: Number(days) } }),
     listRoles({ client }),
     listSkills({ client }),
+    adminCohorts({ client }),
   ]);
   const top = Math.max(1, ...(m?.funnel.map((f) => f.count) ?? [1]));
 
@@ -86,6 +87,45 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               )}
             </ul>
           </div>
+        </div>
+      </section>
+
+      <section className="mt-8 rounded-2xl border bg-card p-6">
+        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
+          <h2 className="font-sans text-base font-bold">Удержание по неделям регистрации</h2>
+          <span className="ml-auto flex gap-3 text-sm font-semibold">
+            <a href={`/api/admin/export?kind=funnel&days=${days}`} className="text-brand-ink hover:underline">
+              Воронка в CSV
+            </a>
+            <a href="/api/admin/export?kind=cohorts" className="text-brand-ink hover:underline">
+              Когорты в CSV
+            </a>
+          </span>
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Доля тех, кто сделал осмысленное действие (отклик, приглашение, ответ, публикация) на 7–13 и 30–36 день.
+        </p>
+        <div className="mt-4 overflow-x-auto" tabIndex={0} role="region" aria-label="Таблица когорт">
+          <table className="w-full min-w-[420px] text-sm">
+            <thead className="text-left text-muted-foreground">
+              <tr className="border-b">
+                <th className="py-2 pr-3 font-semibold">Неделя</th>
+                <th className="py-2 pr-3 text-right font-semibold">Регистраций</th>
+                <th className="py-2 pr-3 text-right font-semibold">D7</th>
+                <th className="py-2 text-right font-semibold">D30</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(cohorts ?? []).map((c) => (
+                <tr key={c.week} className="border-b last:border-0">
+                  <td className="py-2.5 pr-3">с {new Date(c.week).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })}</td>
+                  <td className="py-2.5 pr-3 text-right tabular-nums">{c.signups}</td>
+                  <td className="py-2.5 pr-3 text-right tabular-nums">{fmtShare(c.d7)}</td>
+                  <td className="py-2.5 text-right tabular-nums">{fmtShare(c.d30)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
 
@@ -240,4 +280,8 @@ function fmtMetric(v: number | null | undefined, unit: HypothesisRow["unit"]) {
   if (v == null) return "нет данных";
   if (unit === "%") return `${Math.round(v * 1000) / 10}%`;
   return unit === "ч" ? `${v} ч` : String(v);
+}
+
+function fmtShare(v: number | null | undefined) {
+  return v == null ? "рано считать" : `${Math.round(v * 1000) / 10}%`;
 }

@@ -266,6 +266,30 @@ export type ClientEventIn = {
 };
 
 /**
+ * CohortRow
+ */
+export type CohortRow = {
+    /**
+     * Week
+     */
+    week: string;
+    /**
+     * Signups
+     */
+    signups: number;
+    /**
+     * D7
+     *
+     * Доля вернувшихся на 7–13 день; None — когорта ещё не дозрела
+     */
+    d7: number | null;
+    /**
+     * D30
+     */
+    d30: number | null;
+};
+
+/**
  * ContactsOut
  */
 export type ContactsOut = {
@@ -3381,3 +3405,67 @@ export type AdminCatalogMergeResponses = {
 };
 
 export type AdminCatalogMergeResponse = AdminCatalogMergeResponses[keyof AdminCatalogMergeResponses];
+
+export type AdminCohortsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Weeks
+         */
+        weeks?: number;
+    };
+    url: '/api/admin/cohorts';
+};
+
+export type AdminCohortsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminCohortsError = AdminCohortsErrors[keyof AdminCohortsErrors];
+
+export type AdminCohortsResponses = {
+    /**
+     * Response Admin Cohorts
+     *
+     * Successful Response
+     */
+    200: Array<CohortRow>;
+};
+
+export type AdminCohortsResponse = AdminCohortsResponses[keyof AdminCohortsResponses];
+
+export type AdminExportCsvData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Kind
+         */
+        kind?: string;
+        /**
+         * Days
+         */
+        days?: number;
+    };
+    url: '/api/admin/export';
+};
+
+export type AdminExportCsvErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminExportCsvError = AdminExportCsvErrors[keyof AdminExportCsvErrors];
+
+export type AdminExportCsvResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
