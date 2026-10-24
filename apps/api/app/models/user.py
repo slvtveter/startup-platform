@@ -21,6 +21,9 @@ class User(TimestampMixin, Base):
     email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # Какие уведомления присылать (KAN-74): {"applications": false, ...}; нет ключа — включено.
     email_prefs: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
+    # Когда человек последний раз открывал свои заявки и входящие отклики (KAN-101).
+    seen_mine_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    seen_incoming_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     profile: Mapped["Profile | None"] = relationship(  # noqa: F821
         back_populates="user", uselist=False, cascade="all, delete-orphan", lazy="selectin"

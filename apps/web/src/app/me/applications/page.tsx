@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { ApplicationCard } from "@/components/domain/application-card";
+import { MarkSeen } from "@/components/site/mark-seen";
 import {
   Container,
   EmptyState,
@@ -37,6 +38,7 @@ export default async function MyApplicationsPage({
 
   return (
     <Container className="max-w-4xl">
+      <MarkSeen section="mine" />
       <PageHeader
         title="Мои заявки"
         description="Отклики на роли и приглашения от основателей. Основатели обычно отвечают в течение 72 часов."

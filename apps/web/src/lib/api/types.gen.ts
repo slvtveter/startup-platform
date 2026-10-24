@@ -427,6 +427,34 @@ export type HypothesisRow = {
 };
 
 /**
+ * InboxCountOut
+ */
+export type InboxCountOut = {
+    /**
+     * Mine
+     *
+     * Решения по моим откликам и новые приглашения
+     */
+    mine: number;
+    /**
+     * Incoming
+     *
+     * Новые отклики на мои стартапы
+     */
+    incoming: number;
+};
+
+/**
+ * InboxSeenIn
+ */
+export type InboxSeenIn = {
+    /**
+     * Section
+     */
+    section: 'mine' | 'incoming';
+};
+
+/**
  * InviteIn
  */
 export type InviteIn = {
@@ -2781,6 +2809,47 @@ export type UnsubscribeResponses = {
 };
 
 export type UnsubscribeResponse = UnsubscribeResponses[keyof UnsubscribeResponses];
+
+export type InboxCountData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/me/inbox-count';
+};
+
+export type InboxCountResponses = {
+    /**
+     * Successful Response
+     */
+    200: InboxCountOut;
+};
+
+export type InboxCountResponse = InboxCountResponses[keyof InboxCountResponses];
+
+export type InboxSeenData = {
+    body: InboxSeenIn;
+    path?: never;
+    query?: never;
+    url: '/api/me/inbox-seen';
+};
+
+export type InboxSeenErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type InboxSeenError = InboxSeenErrors[keyof InboxSeenErrors];
+
+export type InboxSeenResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type InboxSeenResponse = InboxSeenResponses[keyof InboxSeenResponses];
 
 export type PublicStatsData = {
     body?: never;

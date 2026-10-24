@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -19,3 +21,12 @@ class UnsubscribeIn(BaseModel):
 
 class UnsubscribeOut(BaseModel):
     label: str
+
+
+class InboxCountOut(BaseModel):
+    mine: int = Field(description="Решения по моим откликам и новые приглашения")
+    incoming: int = Field(description="Новые отклики на мои стартапы")
+
+
+class InboxSeenIn(BaseModel):
+    section: Literal["mine", "incoming"]
