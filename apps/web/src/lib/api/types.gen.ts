@@ -218,6 +218,20 @@ export type CatalogRenameIn = {
 };
 
 /**
+ * ChangeEmailIn
+ */
+export type ChangeEmailIn = {
+    /**
+     * New Email
+     */
+    new_email: string;
+    /**
+     * Password
+     */
+    password: string;
+};
+
+/**
  * ChangePasswordIn
  */
 export type ChangePasswordIn = {
@@ -1785,6 +1799,56 @@ export type ChangePasswordResponses = {
 };
 
 export type ChangePasswordResponse = ChangePasswordResponses[keyof ChangePasswordResponses];
+
+export type ChangeEmailData = {
+    body: ChangeEmailIn;
+    path?: never;
+    query?: never;
+    url: '/api/auth/change-email';
+};
+
+export type ChangeEmailErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ChangeEmailError = ChangeEmailErrors[keyof ChangeEmailErrors];
+
+export type ChangeEmailResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type ChangeEmailResponse = ChangeEmailResponses[keyof ChangeEmailResponses];
+
+export type ConfirmEmailChangeData = {
+    body: TokenIn;
+    path?: never;
+    query?: never;
+    url: '/api/auth/confirm-email';
+};
+
+export type ConfirmEmailChangeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ConfirmEmailChangeError = ConfirmEmailChangeErrors[keyof ConfirmEmailChangeErrors];
+
+export type ConfirmEmailChangeResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type ConfirmEmailChangeResponse = ConfirmEmailChangeResponses[keyof ConfirmEmailChangeResponses];
 
 export type DeleteAccountData = {
     body?: never;

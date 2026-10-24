@@ -7,6 +7,8 @@
 |---|---|---|---|
 | `signup` | регистрация | user | `method`, `utm_source` (из `?utm_source=` или `?ref=`) |
 | `email_verified` | подтвердил почту | user | |
+| `email_changed` | подтвердил новый адрес почты (KAN-72) | user | |
+| `startup_claimed` | получил стартап, перенесённый админом на его email (KAN-75) | startup | |
 | `profile_completed` | заполненность профиля перешла порог 80% | profile | `completeness` |
 | `profile_published` | опубликовал профиль | profile | |
 | `startup_created` | создал черновик стартапа | startup | |

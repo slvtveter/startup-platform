@@ -52,6 +52,7 @@ class ApplicationStatus(StrEnum):
 class TokenPurpose(StrEnum):
     verify_email = "verify_email"
     reset_password = "reset_password"
+    change_email = "change_email"
 
 
 class LinkKind(StrEnum):

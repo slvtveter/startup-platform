@@ -57,6 +57,8 @@ class EmailToken(Base):
     purpose: Mapped[TokenPurpose] = mapped_column(Enum(TokenPurpose, native_enum=False, length=32))
     token_hash: Mapped[str] = mapped_column(String(64), unique=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    # Для change_email: новый адрес, который станет основным после перехода по ссылке.
+    new_email: Mapped[str | None] = mapped_column(String(320))
     used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 

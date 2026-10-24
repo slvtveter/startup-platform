@@ -335,6 +335,89 @@
         }
       }
     },
+    "/api/auth/change-email": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Change Email",
+        "operationId": "change_email",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeEmailIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/confirm-email": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Confirm Email Change",
+        "description": "\u041f\u0435\u0440\u0435\u0445\u043e\u0434 \u043f\u043e \u0441\u0441\u044b\u043b\u043a\u0435 \u0438\u0437 \u043f\u0438\u0441\u044c\u043c\u0430 \u043d\u0430 \u043d\u043e\u0432\u044b\u0439 \u0430\u0434\u0440\u0435\u0441. \u0412\u0445\u043e\u0434 \u043d\u0435 \u043d\u0443\u0436\u0435\u043d: \u0434\u043e\u043a\u0430\u0437\u0430\u0442\u0435\u043b\u044c\u0441\u0442\u0432\u043e \u2014 \u0441\u0430\u043c\u0430 \u0441\u0441\u044b\u043b\u043a\u0430.",
+        "operationId": "confirm_email_change",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TokenIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/account": {
       "delete": {
         "tags": [
@@ -2980,6 +3063,27 @@
           "name"
         ],
         "title": "CatalogRenameIn"
+      },
+      "ChangeEmailIn": {
+        "properties": {
+          "new_email": {
+            "type": "string",
+            "format": "email",
+            "title": "New Email"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "new_email",
+          "password"
+        ],
+        "title": "ChangeEmailIn"
       },
       "ChangePasswordIn": {
         "properties": {

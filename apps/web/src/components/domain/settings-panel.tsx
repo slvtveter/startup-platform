@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { changePassword, deleteAccount, resendVerification } from "@/lib/api";
+import { changeEmail, changePassword, deleteAccount, resendVerification } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 
 export function SettingsPanel({ email, verified }: { email: string; verified: boolean }) {
@@ -16,6 +16,18 @@ export function SettingsPanel({ email, verified }: { email: string; verified: bo
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [emailPassword, setEmailPassword] = useState("");
+  const [pendingEmail, setPendingEmail] = useState("");
+
+  async function onChangeEmail(e: React.FormEvent) {
+    e.preventDefault();
+    const { error } = await changeEmail({ body: { new_email: newEmail, password: emailPassword } });
+    if (error) return toast.error(errorMessage(error));
+    setPendingEmail(newEmail.trim().toLowerCase());
+    setNewEmail("");
+    setEmailPassword("");
+  }
 
   async function onChangePassword(e: React.FormEvent) {
     e.preventDefault();
@@ -53,6 +65,25 @@ export function SettingsPanel({ email, verified }: { email: string; verified: bo
               Отправить письмо ещё раз
             </Button>
           </div>
+        )}
+        {pendingEmail ? (
+          <p className="mt-4 rounded-xl bg-secondary p-3 text-sm">
+            Мы отправили ссылку на {pendingEmail}. Пока вы по ней не перейдёте, вход работает по текущему адресу.
+          </p>
+        ) : (
+          <form onSubmit={onChangeEmail} className="mt-5 grid gap-4 border-t pt-5 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="new-email">Новый адрес</Label>
+              <Input id="new-email" type="email" required className="mt-1.5 h-11" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="email-password">Пароль</Label>
+              <Input id="email-password" type="password" required className="mt-1.5 h-11" value={emailPassword} onChange={(e) => setEmailPassword(e.target.value)} />
+            </div>
+            <Button type="submit" variant="outline" className="w-fit">
+              Сменить почту
+            </Button>
+          </form>
         )}
       </section>
 
