@@ -2,7 +2,7 @@
 
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { AcceptApplicationData, AcceptApplicationErrors, AcceptApplicationResponses, AddStartupRoleData, AddStartupRoleErrors, AddStartupRoleResponses, AdminAuditLogData, AdminAuditLogResponses, AdminBlockUserData, AdminBlockUserErrors, AdminBlockUserResponses, AdminCatalogCreateData, AdminCatalogCreateErrors, AdminCatalogCreateResponses, AdminCatalogMergeData, AdminCatalogMergeErrors, AdminCatalogMergeResponses, AdminCatalogRenameData, AdminCatalogRenameErrors, AdminCatalogRenameResponses, AdminCohortsData, AdminCohortsErrors, AdminCohortsResponses, AdminCreatePlatformStartupData, AdminCreatePlatformStartupErrors, AdminCreatePlatformStartupResponses, AdminExportCsvData, AdminExportCsvErrors, AdminExportCsvResponses, AdminHideStartupData, AdminHideStartupErrors, AdminHideStartupResponses, AdminHypothesesData, AdminHypothesesErrors, AdminHypothesesResponses, AdminListReportsData, AdminListReportsErrors, AdminListReportsResponses, AdminListStartupsData, AdminListStartupsResponses, AdminListUsersData, AdminListUsersErrors, AdminListUsersResponses, AdminMetricsData, AdminMetricsErrors, AdminMetricsResponses, AdminResolveReportData, AdminResolveReportErrors, AdminResolveReportResponses, AdminUnblockUserData, AdminUnblockUserErrors, AdminUnblockUserResponses, AdminUnhideStartupData, AdminUnhideStartupErrors, AdminUnhideStartupResponses, ApplyToRoleData, ApplyToRoleErrors, ApplyToRoleResponses, ArchiveStartupData, ArchiveStartupErrors, ArchiveStartupResponses, ChangeEmailData, ChangeEmailErrors, ChangeEmailResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, CloseStartupData, CloseStartupErrors, CloseStartupResponses, ConfirmEmailChangeData, ConfirmEmailChangeErrors, ConfirmEmailChangeResponses, CreateReportData, CreateReportErrors, CreateReportResponses, CreateStartupData, CreateStartupErrors, CreateStartupResponses, DeleteAccountData, DeleteAccountResponses, DeleteMyAvatarData, DeleteMyAvatarResponses, DeleteStartupRoleData, DeleteStartupRoleErrors, DeleteStartupRoleResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetEmailPrefsData, GetEmailPrefsResponses, GetMyProfileData, GetMyProfileResponses, GetPersonData, GetPersonErrors, GetPersonResponses, GetStartupData, GetStartupErrors, GetStartupResponses, HealthData, HealthResponses, InboxCountData, InboxCountResponses, InboxSeenData, InboxSeenErrors, InboxSeenResponses, InvitePersonData, InvitePersonErrors, InvitePersonResponses, ListMyApplicationsData, ListMyApplicationsResponses, ListMyStartupsData, ListMyStartupsResponses, ListOpenSeatsData, ListOpenSeatsErrors, ListOpenSeatsResponses, ListPeopleData, ListPeopleErrors, ListPeopleResponses, ListRecommendedStartupsData, ListRecommendedStartupsResponses, ListRolesData, ListRolesResponses, ListRoleTemplatesData, ListRoleTemplatesResponses, ListSkillsData, ListSkillsErrors, ListSkillsResponses, ListStartupApplicationsData, ListStartupApplicationsErrors, ListStartupApplicationsResponses, ListStartupsData, ListStartupsErrors, ListStartupsResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, MeData, MeResponses, PublicStatsData, PublicStatsResponses, PublishMyProfileData, PublishMyProfileErrors, PublishMyProfileResponses, PublishStartupData, PublishStartupErrors, PublishStartupResponses, RegisterData, RegisterErrors, RegisterResponses, RejectApplicationData, RejectApplicationErrors, RejectApplicationResponses, ResendVerificationData, ResendVerificationResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, SendFeedbackData, SendFeedbackErrors, SendFeedbackResponses, TrackClientEventData, TrackClientEventErrors, TrackClientEventResponses, UnsubscribeData, UnsubscribeErrors, UnsubscribeResponses, UpdateEmailPrefsData, UpdateEmailPrefsErrors, UpdateEmailPrefsResponses, UpdateMyProfileData, UpdateMyProfileErrors, UpdateMyProfileResponses, UpdateStartupData, UpdateStartupErrors, UpdateStartupResponses, UpdateStartupRoleData, UpdateStartupRoleErrors, UpdateStartupRoleResponses, UploadMyAvatarData, UploadMyAvatarErrors, UploadMyAvatarResponses, VerifyEmailData, VerifyEmailErrors, VerifyEmailResponses, WithdrawApplicationData, WithdrawApplicationErrors, WithdrawApplicationResponses } from './types.gen';
+import type { AcceptApplicationData, AcceptApplicationErrors, AcceptApplicationResponses, AddStartupRoleData, AddStartupRoleErrors, AddStartupRoleResponses, AdminAuditLogData, AdminAuditLogResponses, AdminBlockUserData, AdminBlockUserErrors, AdminBlockUserResponses, AdminCatalogCreateData, AdminCatalogCreateErrors, AdminCatalogCreateResponses, AdminCatalogMergeData, AdminCatalogMergeErrors, AdminCatalogMergeResponses, AdminCatalogRenameData, AdminCatalogRenameErrors, AdminCatalogRenameResponses, AdminCohortsData, AdminCohortsErrors, AdminCohortsResponses, AdminCreatePlatformStartupData, AdminCreatePlatformStartupErrors, AdminCreatePlatformStartupResponses, AdminExportCsvData, AdminExportCsvErrors, AdminExportCsvResponses, AdminHideStartupData, AdminHideStartupErrors, AdminHideStartupResponses, AdminHypothesesData, AdminHypothesesErrors, AdminHypothesesResponses, AdminListReportsData, AdminListReportsErrors, AdminListReportsResponses, AdminListStartupsData, AdminListStartupsResponses, AdminListUsersData, AdminListUsersErrors, AdminListUsersResponses, AdminMetricsData, AdminMetricsErrors, AdminMetricsResponses, AdminResolveReportData, AdminResolveReportErrors, AdminResolveReportResponses, AdminUnblockUserData, AdminUnblockUserErrors, AdminUnblockUserResponses, AdminUnhideStartupData, AdminUnhideStartupErrors, AdminUnhideStartupResponses, ApplyToRoleData, ApplyToRoleErrors, ApplyToRoleResponses, ArchiveStartupData, ArchiveStartupErrors, ArchiveStartupResponses, ChangeEmailData, ChangeEmailErrors, ChangeEmailResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, ChatForApplicationData, ChatForApplicationErrors, ChatForApplicationResponses, CloseStartupData, CloseStartupErrors, CloseStartupResponses, ConfirmEmailChangeData, ConfirmEmailChangeErrors, ConfirmEmailChangeResponses, CreateReportData, CreateReportErrors, CreateReportResponses, CreateStartupData, CreateStartupErrors, CreateStartupResponses, DeleteAccountData, DeleteAccountResponses, DeleteMyAvatarData, DeleteMyAvatarResponses, DeleteStartupRoleData, DeleteStartupRoleErrors, DeleteStartupRoleResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetChatData, GetChatErrors, GetChatResponses, GetEmailPrefsData, GetEmailPrefsResponses, GetMyProfileData, GetMyProfileResponses, GetPersonData, GetPersonErrors, GetPersonResponses, GetStartupData, GetStartupErrors, GetStartupResponses, HealthData, HealthResponses, InboxCountData, InboxCountResponses, InboxSeenData, InboxSeenErrors, InboxSeenResponses, InvitePersonData, InvitePersonErrors, InvitePersonResponses, ListChatsData, ListChatsErrors, ListChatsResponses, ListMessagesData, ListMessagesErrors, ListMessagesResponses, ListMyApplicationsData, ListMyApplicationsResponses, ListMyStartupsData, ListMyStartupsResponses, ListOpenSeatsData, ListOpenSeatsErrors, ListOpenSeatsResponses, ListPeopleData, ListPeopleErrors, ListPeopleResponses, ListRecommendedStartupsData, ListRecommendedStartupsResponses, ListRolesData, ListRolesResponses, ListRoleTemplatesData, ListRoleTemplatesResponses, ListSkillsData, ListSkillsErrors, ListSkillsResponses, ListStartupApplicationsData, ListStartupApplicationsErrors, ListStartupApplicationsResponses, ListStartupsData, ListStartupsErrors, ListStartupsResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, MeData, MeResponses, PublicStatsData, PublicStatsResponses, PublishMyProfileData, PublishMyProfileErrors, PublishMyProfileResponses, PublishStartupData, PublishStartupErrors, PublishStartupResponses, ReadChatData, ReadChatErrors, ReadChatResponses, RegisterData, RegisterErrors, RegisterResponses, RejectApplicationData, RejectApplicationErrors, RejectApplicationResponses, ResendVerificationData, ResendVerificationResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, SendFeedbackData, SendFeedbackErrors, SendFeedbackResponses, SendMessageData, SendMessageErrors, SendMessageResponses, StartChatData, StartChatErrors, StartChatResponses, TrackClientEventData, TrackClientEventErrors, TrackClientEventResponses, UnreadChatsData, UnreadChatsResponses, UnsubscribeData, UnsubscribeErrors, UnsubscribeResponses, UpdateEmailPrefsData, UpdateEmailPrefsErrors, UpdateEmailPrefsResponses, UpdateMyProfileData, UpdateMyProfileErrors, UpdateMyProfileResponses, UpdateStartupData, UpdateStartupErrors, UpdateStartupResponses, UpdateStartupRoleData, UpdateStartupRoleErrors, UpdateStartupRoleResponses, UploadMyAvatarData, UploadMyAvatarErrors, UploadMyAvatarResponses, VerifyEmailData, VerifyEmailErrors, VerifyEmailResponses, WithdrawApplicationData, WithdrawApplicationErrors, WithdrawApplicationResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -370,6 +370,60 @@ export const rejectApplication = <ThrowOnError extends boolean = false>(options:
         ...options.headers
     }
 });
+
+/**
+ * List Chats
+ */
+export const listChats = <ThrowOnError extends boolean = false>(options?: Options<ListChatsData, ThrowOnError>): RequestResult<ListChatsResponses, ListChatsErrors, ThrowOnError> => (options?.client ?? client).get<ListChatsResponses, ListChatsErrors, ThrowOnError>({ url: '/api/chats', ...options });
+
+/**
+ * Start Chat
+ */
+export const startChat = <ThrowOnError extends boolean = false>(options: Options<StartChatData, ThrowOnError>): RequestResult<StartChatResponses, StartChatErrors, ThrowOnError> => (options.client ?? client).post<StartChatResponses, StartChatErrors, ThrowOnError>({
+    url: '/api/chats',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Unread Chats
+ */
+export const unreadChats = <ThrowOnError extends boolean = false>(options?: Options<UnreadChatsData, ThrowOnError>): RequestResult<UnreadChatsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<UnreadChatsResponses, unknown, ThrowOnError>({ url: '/api/chats/unread', ...options });
+
+/**
+ * Chat For Application
+ */
+export const chatForApplication = <ThrowOnError extends boolean = false>(options: Options<ChatForApplicationData, ThrowOnError>): RequestResult<ChatForApplicationResponses, ChatForApplicationErrors, ThrowOnError> => (options.client ?? client).get<ChatForApplicationResponses, ChatForApplicationErrors, ThrowOnError>({ url: '/api/chats/by-application/{app_id}', ...options });
+
+/**
+ * Get Chat
+ */
+export const getChat = <ThrowOnError extends boolean = false>(options: Options<GetChatData, ThrowOnError>): RequestResult<GetChatResponses, GetChatErrors, ThrowOnError> => (options.client ?? client).get<GetChatResponses, GetChatErrors, ThrowOnError>({ url: '/api/chats/{conv_id}', ...options });
+
+/**
+ * List Messages
+ */
+export const listMessages = <ThrowOnError extends boolean = false>(options: Options<ListMessagesData, ThrowOnError>): RequestResult<ListMessagesResponses, ListMessagesErrors, ThrowOnError> => (options.client ?? client).get<ListMessagesResponses, ListMessagesErrors, ThrowOnError>({ url: '/api/chats/{conv_id}/messages', ...options });
+
+/**
+ * Send Message
+ */
+export const sendMessage = <ThrowOnError extends boolean = false>(options: Options<SendMessageData, ThrowOnError>): RequestResult<SendMessageResponses, SendMessageErrors, ThrowOnError> => (options.client ?? client).post<SendMessageResponses, SendMessageErrors, ThrowOnError>({
+    url: '/api/chats/{conv_id}/messages',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Read Chat
+ */
+export const readChat = <ThrowOnError extends boolean = false>(options: Options<ReadChatData, ThrowOnError>): RequestResult<ReadChatResponses, ReadChatErrors, ThrowOnError> => (options.client ?? client).post<ReadChatResponses, ReadChatErrors, ThrowOnError>({ url: '/api/chats/{conv_id}/read', ...options });
 
 /**
  * Get Email Prefs

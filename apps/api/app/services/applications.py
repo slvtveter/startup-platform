@@ -9,7 +9,7 @@ from app.core.errors import AppError, Conflict, Forbidden, NotFound
 from app.models import Application, Profile, Startup, StartupRole, User
 from app.models.enums import ApplicationDirection, ApplicationStatus, StartupStatus
 from app.schemas.application import ApplicationOut, ContactsOut
-from app.services import mail
+from app.services import chat, mail
 from app.services import profiles as profile_service
 from app.services import startups as startup_service
 from app.services.events import track
@@ -115,6 +115,10 @@ async def apply(db: AsyncSession, user: User, role_id: uuid.UUID, message: str) 
     track(db, "application_sent", user.id, "startup_role", role.id, startup_id=str(role.startup_id))
     app = await _save(db, app)
     owner = role.startup.owner
+    # Сопроводительное письмо становится первым сообщением в диалоге с основателем.
+    conv = await chat.get_or_create(db, user, owner)
+    await chat.post(db, conv, user, message, application=app)
+    await db.commit()
     await mail.send_mail(
         owner.email,
         f"Новый отклик на роль «{role.title}»",
@@ -159,6 +163,9 @@ async def invite(
     )
     track(db, "invite_sent", founder.id, "startup_role", role.id, startup_id=str(role.startup_id))
     app = await _save(db, app)
+    conv = await chat.get_or_create(db, founder, target.user)
+    await chat.post(db, conv, founder, message, application=app)
+    await db.commit()
     await mail.send_mail(
         target.user.email,
         f"Вас пригласили в {role.startup.title}",

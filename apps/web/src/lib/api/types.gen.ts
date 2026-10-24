@@ -256,6 +256,66 @@ export type ChangePasswordIn = {
 };
 
 /**
+ * ChatApplicationRef
+ *
+ * Отклик или приглашение, из которого родилось сообщение.
+ */
+export type ChatApplicationRef = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Direction
+     */
+    direction: string;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Role Title
+     */
+    role_title: string;
+    /**
+     * Startup Title
+     */
+    startup_title: string;
+    /**
+     * Startup Slug
+     */
+    startup_slug: string;
+};
+
+/**
+ * ChatPeer
+ *
+ * Собеседник: имя и ссылка на профиль (если он опубликован).
+ */
+export type ChatPeer = {
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Display Name
+     */
+    display_name: string;
+    /**
+     * Slug
+     */
+    slug: string | null;
+    /**
+     * Avatar Url
+     */
+    avatar_url: string | null;
+    /**
+     * Headline
+     */
+    headline: string;
+};
+
+/**
  * ClientEventIn
  *
  * События, которые видит только браузер (docs/events.md). Белый список имён.
@@ -319,6 +379,36 @@ export type ContactsOut = {
      * Telegram
      */
     telegram: string | null;
+};
+
+/**
+ * ConversationOut
+ */
+export type ConversationOut = {
+    /**
+     * Id
+     */
+    id: string;
+    peer: ChatPeer;
+    last_message: MessageOut | null;
+    /**
+     * Last Message At
+     */
+    last_message_at: string;
+    /**
+     * Unread
+     */
+    unread: number;
+};
+
+/**
+ * ConversationRef
+ */
+export type ConversationRef = {
+    /**
+     * Id
+     */
+    id: string;
 };
 
 /**
@@ -637,6 +727,39 @@ export type MembershipOut = {
 };
 
 /**
+ * MessageIn
+ */
+export type MessageIn = {
+    /**
+     * Body
+     */
+    body: string;
+};
+
+/**
+ * MessageOut
+ */
+export type MessageOut = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Body
+     */
+    body: string;
+    /**
+     * Mine
+     */
+    mine: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+    application: ChatApplicationRef | null;
+};
+
+/**
  * MetricsOut
  */
 export type MetricsOut = {
@@ -850,6 +973,28 @@ export type OpenSeatStartup = {
     title: string;
     terms: Terms;
     stage: Stage;
+};
+
+/**
+ * Page[ConversationOut]
+ */
+export type PageConversationOut = {
+    /**
+     * Items
+     */
+    items: Array<ConversationOut>;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Limit
+     */
+    limit: number;
+    /**
+     * Offset
+     */
+    offset: number;
 };
 
 /**
@@ -1377,6 +1522,20 @@ export type SourceRow = {
 export type Stage = 'idea' | 'prototype' | 'mvp' | 'launched';
 
 /**
+ * StartChatIn
+ */
+export type StartChatIn = {
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Body
+     */
+    body: string;
+};
+
+/**
  * StartupCard
  */
 export type StartupCard = {
@@ -1638,6 +1797,16 @@ export type TokenIn = {
      * Token
      */
     token: string;
+};
+
+/**
+ * UnreadOut
+ */
+export type UnreadOut = {
+    /**
+     * Count
+     */
+    count: number;
 };
 
 /**
@@ -2834,6 +3003,238 @@ export type RejectApplicationResponses = {
 };
 
 export type RejectApplicationResponse = RejectApplicationResponses[keyof RejectApplicationResponses];
+
+export type ListChatsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+    };
+    url: '/api/chats';
+};
+
+export type ListChatsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListChatsError = ListChatsErrors[keyof ListChatsErrors];
+
+export type ListChatsResponses = {
+    /**
+     * Successful Response
+     */
+    200: PageConversationOut;
+};
+
+export type ListChatsResponse = ListChatsResponses[keyof ListChatsResponses];
+
+export type StartChatData = {
+    body: StartChatIn;
+    path?: never;
+    query?: never;
+    url: '/api/chats';
+};
+
+export type StartChatErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type StartChatError = StartChatErrors[keyof StartChatErrors];
+
+export type StartChatResponses = {
+    /**
+     * Successful Response
+     */
+    201: ConversationRef;
+};
+
+export type StartChatResponse = StartChatResponses[keyof StartChatResponses];
+
+export type UnreadChatsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/chats/unread';
+};
+
+export type UnreadChatsResponses = {
+    /**
+     * Successful Response
+     */
+    200: UnreadOut;
+};
+
+export type UnreadChatsResponse = UnreadChatsResponses[keyof UnreadChatsResponses];
+
+export type ChatForApplicationData = {
+    body?: never;
+    path: {
+        /**
+         * App Id
+         */
+        app_id: string;
+    };
+    query?: never;
+    url: '/api/chats/by-application/{app_id}';
+};
+
+export type ChatForApplicationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ChatForApplicationError = ChatForApplicationErrors[keyof ChatForApplicationErrors];
+
+export type ChatForApplicationResponses = {
+    /**
+     * Successful Response
+     */
+    200: ConversationRef;
+};
+
+export type ChatForApplicationResponse = ChatForApplicationResponses[keyof ChatForApplicationResponses];
+
+export type GetChatData = {
+    body?: never;
+    path: {
+        /**
+         * Conv Id
+         */
+        conv_id: string;
+    };
+    query?: never;
+    url: '/api/chats/{conv_id}';
+};
+
+export type GetChatErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetChatError = GetChatErrors[keyof GetChatErrors];
+
+export type GetChatResponses = {
+    /**
+     * Successful Response
+     */
+    200: ConversationOut;
+};
+
+export type GetChatResponse = GetChatResponses[keyof GetChatResponses];
+
+export type ListMessagesData = {
+    body?: never;
+    path: {
+        /**
+         * Conv Id
+         */
+        conv_id: string;
+    };
+    query?: {
+        /**
+         * Before
+         */
+        before?: number | null;
+    };
+    url: '/api/chats/{conv_id}/messages';
+};
+
+export type ListMessagesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListMessagesError = ListMessagesErrors[keyof ListMessagesErrors];
+
+export type ListMessagesResponses = {
+    /**
+     * Response List Messages
+     *
+     * Successful Response
+     */
+    200: Array<MessageOut>;
+};
+
+export type ListMessagesResponse = ListMessagesResponses[keyof ListMessagesResponses];
+
+export type SendMessageData = {
+    body: MessageIn;
+    path: {
+        /**
+         * Conv Id
+         */
+        conv_id: string;
+    };
+    query?: never;
+    url: '/api/chats/{conv_id}/messages';
+};
+
+export type SendMessageErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SendMessageError = SendMessageErrors[keyof SendMessageErrors];
+
+export type SendMessageResponses = {
+    /**
+     * Successful Response
+     */
+    201: MessageOut;
+};
+
+export type SendMessageResponse = SendMessageResponses[keyof SendMessageResponses];
+
+export type ReadChatData = {
+    body?: never;
+    path: {
+        /**
+         * Conv Id
+         */
+        conv_id: string;
+    };
+    query?: never;
+    url: '/api/chats/{conv_id}/read';
+};
+
+export type ReadChatErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadChatError = ReadChatErrors[keyof ReadChatErrors];
+
+export type ReadChatResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type ReadChatResponse = ReadChatResponses[keyof ReadChatResponses];
 
 export type GetEmailPrefsData = {
     body?: never;

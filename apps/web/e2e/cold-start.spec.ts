@@ -28,6 +28,8 @@ test("admin moves a startup to the platform and the founder claims it", async ({
 
   await admin.getByPlaceholder("Название роли").fill("Backend-разработчик");
   await admin.getByRole("button", { name: "Добавить роль" }).click();
+  // Под нагрузкой ответ на добавление роли приходит не сразу: ждём, пока редактор его увидит.
+  await expect(admin.getByText("Откройте хотя бы одну роль")).toHaveCount(0);
   await admin.getByRole("button", { name: "Опубликовать" }).click();
   await admin.waitForURL(/\/startups\/[^/]+$/);
   const url = new URL(admin.url()).pathname;
