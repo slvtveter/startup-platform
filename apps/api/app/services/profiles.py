@@ -91,16 +91,26 @@ def to_card(p: Profile) -> PersonCard:
 
 
 async def _memberships(db: AsyncSession, user_id) -> list[MembershipOut]:
-    rows = await db.execute(
-        select(Startup.slug, Startup.title, StartupMember.role_title)
+    """Опыт на платформе: где человек основатель и в каких командах участник (KAN-94)."""
+    visible = (Startup.status != StartupStatus.draft, Startup.is_hidden.is_(False))
+    member_rows = await db.execute(
+        select(Startup.slug, Startup.title, StartupMember.role_title, StartupMember.joined_at)
         .join(StartupMember, StartupMember.startup_id == Startup.id)
-        .where(
-            StartupMember.user_id == user_id,
-            Startup.status != StartupStatus.draft,
-            Startup.is_hidden.is_(False),
+        .where(StartupMember.user_id == user_id, Startup.owner_id != user_id, *visible)
+    )
+    owner_rows = await db.execute(
+        select(Startup.slug, Startup.title, Startup.published_at, Startup.created_at).where(
+            Startup.owner_id == user_id, *visible
         )
     )
-    return [MembershipOut(startup_slug=s, startup_title=t, role_title=r) for s, t, r in rows]
+    items = [
+        MembershipOut(startup_slug=s, startup_title=t, role_title=r, since=j)
+        for s, t, r, j in member_rows
+    ] + [
+        MembershipOut(startup_slug=s, startup_title=t, role_title="Основатель", since=p or c)
+        for s, t, p, c in owner_rows
+    ]
+    return sorted(items, key=lambda m: m.since, reverse=True)
 
 
 async def to_detail(db: AsyncSession, p: Profile) -> PersonDetail:

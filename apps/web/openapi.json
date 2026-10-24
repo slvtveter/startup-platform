@@ -3069,13 +3069,19 @@
           "role_title": {
             "type": "string",
             "title": "Role Title"
+          },
+          "since": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Since"
           }
         },
         "type": "object",
         "required": [
           "startup_slug",
           "startup_title",
-          "role_title"
+          "role_title",
+          "since"
         ],
         "title": "MembershipOut"
       },

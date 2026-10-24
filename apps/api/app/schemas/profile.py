@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field, HttpUrl
 
 from app.models.enums import Availability, ExperienceLevel, LinkKind, Terms
@@ -50,6 +52,7 @@ class MembershipOut(BaseModel):
     startup_slug: str
     startup_title: str
     role_title: str
+    since: datetime
 
 
 class PersonDetail(PersonCard):
