@@ -280,6 +280,38 @@ export type DecisionIn = {
 };
 
 /**
+ * EmailPrefOut
+ */
+export type EmailPrefOut = {
+    /**
+     * Kind
+     */
+    kind: string;
+    /**
+     * Label
+     */
+    label: string;
+    /**
+     * Enabled
+     */
+    enabled: boolean;
+};
+
+/**
+ * EmailPrefsIn
+ */
+export type EmailPrefsIn = {
+    /**
+     * Prefs
+     *
+     * Тип уведомления → присылать ли письма
+     */
+    prefs: {
+        [key: string]: boolean;
+    };
+};
+
+/**
  * ExperienceLevel
  */
 export type ExperienceLevel = 'no_experience' | 'courses' | 'internship' | 'junior';
@@ -1481,6 +1513,34 @@ export type TokenIn = {
 };
 
 /**
+ * UnsubscribeIn
+ */
+export type UnsubscribeIn = {
+    /**
+     * U
+     */
+    u: string;
+    /**
+     * K
+     */
+    k: string;
+    /**
+     * T
+     */
+    t: string;
+};
+
+/**
+ * UnsubscribeOut
+ */
+export type UnsubscribeOut = {
+    /**
+     * Label
+     */
+    label: string;
+};
+
+/**
  * ValidationError
  */
 export type ValidationError = {
@@ -2537,6 +2597,76 @@ export type RejectApplicationResponses = {
 };
 
 export type RejectApplicationResponse = RejectApplicationResponses[keyof RejectApplicationResponses];
+
+export type GetEmailPrefsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/me/email-prefs';
+};
+
+export type GetEmailPrefsResponses = {
+    /**
+     * Response Get Email Prefs
+     *
+     * Successful Response
+     */
+    200: Array<EmailPrefOut>;
+};
+
+export type GetEmailPrefsResponse = GetEmailPrefsResponses[keyof GetEmailPrefsResponses];
+
+export type UpdateEmailPrefsData = {
+    body: EmailPrefsIn;
+    path?: never;
+    query?: never;
+    url: '/api/me/email-prefs';
+};
+
+export type UpdateEmailPrefsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateEmailPrefsError = UpdateEmailPrefsErrors[keyof UpdateEmailPrefsErrors];
+
+export type UpdateEmailPrefsResponses = {
+    /**
+     * Response Update Email Prefs
+     *
+     * Successful Response
+     */
+    200: Array<EmailPrefOut>;
+};
+
+export type UpdateEmailPrefsResponse = UpdateEmailPrefsResponses[keyof UpdateEmailPrefsResponses];
+
+export type UnsubscribeData = {
+    body: UnsubscribeIn;
+    path?: never;
+    query?: never;
+    url: '/api/email/unsubscribe';
+};
+
+export type UnsubscribeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UnsubscribeError = UnsubscribeErrors[keyof UnsubscribeErrors];
+
+export type UnsubscribeResponses = {
+    /**
+     * Successful Response
+     */
+    200: UnsubscribeOut;
+};
+
+export type UnsubscribeResponse = UnsubscribeResponses[keyof UnsubscribeResponses];
 
 export type PublicStatsData = {
     body?: never;

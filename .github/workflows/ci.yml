@@ -130,6 +130,7 @@ jobs:
           POSTGRES_DB=app
           SMTP_HOST=localhost
           MAIL_FROM=ci@example.com
+          SECRET_KEY=ci-secret-not-for-prod
           ENV
           docker compose -f compose.prod.yml --env-file .env.ci up -d
           for i in $(seq 1 60); do curl -skf https://localhost/api/health && break; sleep 3; done

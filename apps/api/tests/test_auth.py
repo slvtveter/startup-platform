@@ -5,7 +5,7 @@ from app.services import mail
 
 
 def _token_from_mail(index: int = -1) -> str:
-    body = mail.outbox[index].get_content()
+    body = mail.outbox[index].get_body(("plain",)).get_content()
     return re.search(r"token=([\w-]+)", body).group(1)
 
 

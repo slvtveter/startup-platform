@@ -1697,6 +1697,116 @@
         }
       }
     },
+    "/api/me/email-prefs": {
+      "get": {
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Get Email Prefs",
+        "operationId": "get_email_prefs",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EmailPrefOut"
+                  },
+                  "type": "array",
+                  "title": "Response Get Email Prefs"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Update Email Prefs",
+        "operationId": "update_email_prefs",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailPrefsIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EmailPrefOut"
+                  },
+                  "type": "array",
+                  "title": "Response Update Email Prefs"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/email/unsubscribe": {
+      "post": {
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Unsubscribe",
+        "description": "\u041e\u0442\u043f\u0438\u0441\u043a\u0430 \u043f\u043e \u0441\u0441\u044b\u043b\u043a\u0435 \u0438\u0437 \u043f\u0438\u0441\u044c\u043c\u0430, \u0431\u0435\u0437 \u0432\u0445\u043e\u0434\u0430. \u041f\u043e\u0434\u043f\u0438\u0441\u044c \u043f\u0440\u043e\u0432\u0435\u0440\u044f\u0435\u0442\u0441\u044f \u0432 \u0441\u0435\u0440\u0432\u0438\u0441\u0435.",
+        "operationId": "unsubscribe",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnsubscribeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnsubscribeOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/stats": {
       "get": {
         "tags": [
@@ -2989,6 +3099,46 @@
         },
         "type": "object",
         "title": "DecisionIn"
+      },
+      "EmailPrefOut": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "label",
+          "enabled"
+        ],
+        "title": "EmailPrefOut"
+      },
+      "EmailPrefsIn": {
+        "properties": {
+          "prefs": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "type": "object",
+            "title": "Prefs",
+            "description": "\u0422\u0438\u043f \u0443\u0432\u0435\u0434\u043e\u043c\u043b\u0435\u043d\u0438\u044f \u2192 \u043f\u0440\u0438\u0441\u044b\u043b\u0430\u0442\u044c \u043b\u0438 \u043f\u0438\u0441\u044c\u043c\u0430"
+          }
+        },
+        "type": "object",
+        "required": [
+          "prefs"
+        ],
+        "title": "EmailPrefsIn"
       },
       "ExperienceLevel": {
         "type": "string",
@@ -5130,6 +5280,45 @@
           "token"
         ],
         "title": "TokenIn"
+      },
+      "UnsubscribeIn": {
+        "properties": {
+          "u": {
+            "type": "string",
+            "maxLength": 64,
+            "title": "U"
+          },
+          "k": {
+            "type": "string",
+            "maxLength": 32,
+            "title": "K"
+          },
+          "t": {
+            "type": "string",
+            "maxLength": 64,
+            "title": "T"
+          }
+        },
+        "type": "object",
+        "required": [
+          "u",
+          "k",
+          "t"
+        ],
+        "title": "UnsubscribeIn"
+      },
+      "UnsubscribeOut": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label"
+        ],
+        "title": "UnsubscribeOut"
       },
       "ValidationError": {
         "properties": {
