@@ -29,3 +29,11 @@
 События «с клиента» принимает `POST /api/events` только из белого списка (`ClientEventIn`). Панель гипотез H1–H8: `/admin`, эндпоинт `GET /api/admin/hypotheses`.
 
 **Защита от накрутки (KAN-95):** у каждого клиентского события в `props.v` лежит хеш посетителя: `sha256(EVENTS_SALT | IP | дата)`, первые 24 символа. Сам IP не хранится. Лимит — `CLIENT_EVENTS_PER_MINUTE` (60) на посетителя. `landing_viewed` и `startup_viewed` записываются не чаще раза в 30 минут на посетителя и страницу.
+
+## Индексы и нагрузка (KAN-105)
+Запросы по `props` идут через индексы на выражения:
+- `(props->>'v', created_at)` — лимит и дедупликация клиентских событий;
+- `(name, props->>'slug', created_at)` — просмотры стартапа;
+- `(user_id, name, created_at)` — когорты.
+
+Новый запрос к `events` с фильтром по `props` — сначала проверьте план на синтетике: `uv run python -m app.scripts.perf_seed` (100 тыс. событий, только local), затем `EXPLAIN ANALYZE`.
