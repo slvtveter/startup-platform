@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { SkillChip } from "@/components/domain/badges";
+import { WriteDialog } from "@/components/domain/chat/write-dialog";
 import { InviteDialog, type InviteOption } from "@/components/domain/invite-dialog";
 import { Container } from "@/components/domain/page-header";
 import { ReportButton } from "@/components/domain/report-button";
@@ -142,22 +143,19 @@ export default async function PersonPage({ params }: Props) {
             <div className="mt-5">
               {!user ? (
                 <Link href={`/login?next=/people/${p.slug}`} className={buttonVariants({ variant: "brand", className: "w-full" })}>
-                  Войти, чтобы пригласить
+                  Войти, чтобы написать
                 </Link>
               ) : user.profile?.slug === p.slug ? (
                 <Link href="/me/profile" className={buttonVariants({ variant: "outline", className: "w-full" })}>
                   Редактировать профиль
                 </Link>
               ) : options.length > 0 ? (
-                <InviteDialog slug={p.slug} name={p.display_name} options={options} />
+                <div className="grid gap-2">
+                  <InviteDialog slug={p.slug} name={p.display_name} options={options} />
+                  <WriteDialog slug={p.slug} name={p.display_name} />
+                </div>
               ) : (
-                <p className="text-sm">
-                  Чтобы пригласить, нужен{" "}
-                  <Link href="/startups/new" className="font-semibold underline">
-                    опубликованный стартап
-                  </Link>{" "}
-                  со свободным местом.
-                </p>
+                <WriteDialog slug={p.slug} name={p.display_name} />
               )}
             </div>
           </div>

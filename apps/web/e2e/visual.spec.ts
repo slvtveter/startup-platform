@@ -7,6 +7,7 @@ import { expect, test } from "@playwright/test";
  */
 const AUTH_PAGES = [
   ["my-applications", "/me/applications", "maria@example.com"],
+  ["chats", "/chats", "alina@example.com"],
   ["my-profile", "/me/profile", "maria@example.com"],
   ["new-startup", "/startups/new", "alina@example.com"],
   ["dashboard", "/", "alina@example.com"],

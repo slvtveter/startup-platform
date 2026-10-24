@@ -1,5 +1,6 @@
 "use client";
 
+import { MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -7,7 +8,7 @@ import { toast } from "sonner";
 
 import { ApplicationStatusBadge, SkillChip } from "@/components/domain/badges";
 import { PersonAvatar } from "@/components/domain/person-card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { acceptApplication, rejectApplication, withdrawApplication, type ApplicationOut } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
@@ -205,6 +206,15 @@ export function ApplicationCard({ app, perspective }: { app: ApplicationOut; per
             </Button>
           )}
         </div>
+      )}
+      {app.status !== "withdrawn" && (
+        <Link
+          href={`/chats/application/${app.id}`}
+          className={buttonVariants({ variant: "outline", size: "sm", className: "mt-4 w-fit" })}
+        >
+          <MessageCircle aria-hidden className="size-4" />
+          {perspective === "founder" ? "Написать кандидату" : "Написать основателю"}
+        </Link>
       )}
     </article>
   );

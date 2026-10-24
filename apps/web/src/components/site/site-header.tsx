@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { MessageCircle, Plus } from "lucide-react";
 import Link from "next/link";
 
 import { MobileNav } from "@/components/site/mobile-nav";
@@ -6,12 +6,15 @@ import { NavLink } from "@/components/site/nav-link";
 import { Logo } from "@/components/site/logo";
 import { UserMenu } from "@/components/site/user-menu";
 import { buttonVariants } from "@/components/ui/button";
-import { inboxCount } from "@/lib/api";
+import { inboxCount, unreadChats } from "@/lib/api";
 import { getMe, serverClient } from "@/lib/server-api";
 
 export async function SiteHeader() {
   const user = await getMe();
-  const inbox = user ? (await inboxCount({ client: await serverClient() })).data : undefined;
+  const client = user ? await serverClient() : undefined;
+  const [inbox, chats] = user
+    ? await Promise.all([inboxCount({ client }).then((r) => r.data), unreadChats({ client }).then((r) => r.data)])
+    : [undefined, undefined];
   // В шапке только каталог; личные разделы — в меню аккаунта (на телефоне — в общем меню).
   const links = [
     { href: "/startups", label: "Стартапы" },
@@ -21,6 +24,7 @@ export async function SiteHeader() {
     ? [
         ...links,
         { href: "/startups/new", label: "Разместить стартап" },
+        { href: "/chats", label: "Сообщения", badge: chats?.count ?? 0 },
         { href: "/me/profile", label: "Мой профиль" },
         { href: "/me/applications", label: "Мои отклики", badge: inbox?.mine ?? 0 },
         { href: "/me/startups", label: "Мои стартапы", badge: inbox?.incoming ?? 0 },
@@ -44,6 +48,18 @@ export async function SiteHeader() {
               <Link href="/startups/new" className={buttonVariants({ variant: "ghost", className: "max-sm:hidden" })}>
                 <Plus aria-hidden className="size-4" />
                 Разместить стартап
+              </Link>
+              <Link
+                href="/chats"
+                className="relative grid size-10 place-items-center rounded-full hover:bg-secondary"
+                aria-label={chats?.count ? `Сообщения, непрочитанных диалогов: ${chats.count}` : "Сообщения"}
+              >
+                <MessageCircle aria-hidden className="size-5" />
+                {chats?.count ? (
+                  <span className="absolute top-1 right-0.5 min-w-4 rounded-full bg-brand px-1 text-center text-[10px] leading-4 font-semibold text-white">
+                    {chats.count}
+                  </span>
+                ) : null}
               </Link>
               <UserMenu
                 email={user.email}
