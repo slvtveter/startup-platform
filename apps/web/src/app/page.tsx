@@ -248,15 +248,17 @@ async function Dashboard() {
     <Container>
       <h1 className="text-2xl sm:text-[34px]">Привет, {name}</h1>
 
-      <section aria-labelledby="next-step" className="mt-6 flex flex-col gap-5 rounded-3xl bg-secondary p-6 sm:flex-row sm:items-center sm:p-8">
-        <div className="max-w-2xl">
-          <div className="text-sm text-muted-foreground">Следующий шаг</div>
-          <h2 id="next-step" className="mt-1 font-sans text-xl font-bold tracking-normal sm:text-2xl">
+      <section
+        aria-labelledby="next-step"
+        className="mt-5 flex flex-col gap-3 rounded-2xl border border-l-4 border-l-brand px-4 py-3 sm:flex-row sm:items-center sm:gap-4"
+      >
+        <div className="min-w-0">
+          <h2 id="next-step" className="font-sans text-base font-semibold tracking-normal">
             {step.title}
           </h2>
-          <p className="mt-2 text-muted-foreground">{step.text}</p>
+          <p className="text-sm text-muted-foreground">{step.text}</p>
         </div>
-        <Link href={step.href} className={buttonVariants({ variant: "brand", size: "lg", className: "sm:ml-auto" })}>
+        <Link href={step.href} className={buttonVariants({ variant: "brand", size: "sm", className: "shrink-0 sm:ml-auto" })}>
           {step.cta}
         </Link>
       </section>
@@ -299,10 +301,7 @@ async function Dashboard() {
         {recs && recs.length > 0 ? (
           <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {recs.map((r) => (
-              <div key={r.startup.id} className="flex flex-col">
-                <StartupCard startup={r.startup} />
-                <div className="mt-2 px-1 text-xs text-muted-foreground">{r.reasons.join(", ")}</div>
-              </div>
+              <StartupCard key={r.startup.id} startup={r.startup} reasons={r.reasons} />
             ))}
           </div>
         ) : (

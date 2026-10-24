@@ -96,6 +96,13 @@ export function ProfileEditor({
     if (published && welcome) router.push("/startups");
   }
 
+  // Порог каталога «Люди» (как в API): роль, описание в одну строку и хотя бы один навык.
+  const catalogMissing = [
+    !profile.primary_role && "роль",
+    !profile.headline && "пару слов о себе",
+    profile.skills.length === 0 && "хотя бы один навык",
+  ].filter(Boolean) as string[];
+
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
       <div className="rounded-3xl border bg-card p-6 sm:p-8">
@@ -293,8 +300,13 @@ export function ProfileEditor({
         <div className="rounded-2xl border bg-card p-5">
           <div className="font-bold">{profile.is_published ? "Опубликован" : "Не опубликован"}</div>
           <p className="mt-1 text-sm text-muted-foreground">
-            {profile.is_published ? "Тебя видно в каталоге людей." : "Пока профиль скрыт, нельзя откликаться и тебя не найдут в каталоге."}
+            {profile.is_published ? "Профиль открыт по ссылке, можно откликаться." : "Пока профиль скрыт, нельзя откликаться и тебя не найдут в каталоге."}
           </p>
+          {profile.is_published && catalogMissing.length > 0 && (
+            <p className="mt-3 rounded-lg bg-marker-soft p-3 text-sm text-marker-ink">
+              Чтобы попасть в каталог людей, добавь: {catalogMissing.join(", ")}.
+            </p>
+          )}
           {!emailVerified && <p className="mt-3 rounded-lg bg-warn-soft p-3 text-sm text-warn-ink">Сначала подтверди email: письмо уже в почте.</p>}
           <div className="mt-4 flex flex-wrap gap-2">
             {profile.is_published ? (

@@ -12,8 +12,10 @@ test("user changes email after confirming the new address", async ({ page }) => 
   await verifyEmailViaMailpit(page, oldEmail);
 
   await page.goto("/me/settings");
+  // Форма раскрывается по кнопке: смена почты нужна редко.
+  await page.getByRole("button", { name: "Изменить" }).first().click();
   await page.getByLabel("Новый адрес").fill(newEmail);
-  await page.getByLabel("Пароль", { exact: true }).fill("e2e-password-1");
+  await page.getByLabel("Текущий пароль").fill("e2e-password-1");
   await page.getByRole("button", { name: "Сменить почту" }).click();
   await expect(page.getByText(`Мы отправили ссылку на ${newEmail}`)).toBeVisible();
   await expect(page.getByText(oldEmail)).toBeVisible();

@@ -1,17 +1,26 @@
+import { Check } from "lucide-react";
 import Link from "next/link";
 
 import { StageBadge, TermsBadge } from "@/components/domain/badges";
 import { SeatRow } from "@/components/domain/seats";
 import type { StartupCard as StartupCardData } from "@/lib/api";
-import { timeAgo } from "@/lib/labels";
+import { plural, timeAgo } from "@/lib/labels";
 
-export function StartupCard({ startup }: { startup: StartupCardData }) {
+/** Причины подбора («Совпадает навыков: 2») — короткими метками внутри карточки, а не подписью под ней. */
+function reasonLabel(r: string) {
+  const skills = r.match(/^Совпадает навыков: (\d+)/);
+  if (skills) return `${skills[1]} ${plural(Number(skills[1]), "навык совпадает", "навыка совпадают", "навыков совпадают")}`;
+  if (r.startsWith("Ищут:")) return "Ищут твою роль";
+  return r;
+}
+
+export function StartupCard({ startup, reasons }: { startup: StartupCardData; reasons?: string[] }) {
   const open = startup.open_roles.reduce((n, r) => n + (r.slots ?? 1), 0);
   const team = startup.team_size ?? 1;
   return (
     <Link
       href={`/startups/${startup.slug}`}
-      className="group flex flex-col rounded-2xl border bg-card p-5 transition-colors hover:border-foreground"
+      className="group flex h-full flex-col rounded-2xl border bg-card p-5 transition-colors hover:border-foreground"
     >
       <div className="flex items-start gap-3">
         <h3 className="text-lg leading-snug font-bold group-hover:text-brand-ink">{startup.title}</h3>
@@ -40,6 +49,16 @@ export function StartupCard({ startup }: { startup: StartupCardData }) {
       <div className="mt-4">
         <SeatRow filled={team} open={open} />
       </div>
+      {reasons && reasons.length > 0 && (
+        <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Почему подходит">
+          {reasons.map((r) => (
+            <li key={r} className="inline-flex items-center gap-1 rounded-full bg-marker-soft px-2.5 py-0.5 text-xs font-semibold text-marker-ink">
+              <Check aria-hidden className="size-3" />
+              {reasonLabel(r)}
+            </li>
+          ))}
+        </ul>
+      )}
       <div className="mt-auto flex items-center gap-2 pt-4 text-xs text-muted-foreground">
         <StageBadge stage={startup.stage} />
         <span className="ml-auto">{timeAgo(startup.published_at)}</span>

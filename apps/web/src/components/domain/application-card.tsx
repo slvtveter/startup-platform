@@ -31,10 +31,12 @@ const STEP_LABELS: Record<string, string> = {
 /** Путь отклика: отправлен → решение → контакты. Текущий шаг выделен, будущие приглушены. */
 function StatusTimeline({ app }: { app: ApplicationOut }) {
   const decided = app.status !== "pending";
+  // Принятие и открытие контактов — одно действие, поэтому и один шаг.
+  const decision =
+    app.status === "accepted" ? "Принят, контакты открыты" : decided ? (STEP_LABELS[app.status] ?? "Решение") : "Ждёт решения";
   const steps = [
     { label: app.direction === "invite" ? "Приглашение" : "Отправлен", done: true, at: app.created_at },
-    { label: decided ? (STEP_LABELS[app.status] ?? "Решение") : "Ждёт решения", done: decided, at: app.decided_at },
-    { label: "Контакты открыты", done: app.status === "accepted", at: app.status === "accepted" ? app.decided_at : null },
+    { label: decision, done: decided, at: app.decided_at },
   ];
   return (
     <ol className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs" aria-label="Статус заявки">
