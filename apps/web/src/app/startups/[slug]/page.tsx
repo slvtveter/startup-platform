@@ -69,7 +69,13 @@ export default async function StartupPage({ params }: Props) {
         <div className="flex flex-wrap gap-2">
           <TermsBadge terms={s.terms} />
           <StageBadge stage={s.stage} />
-          {s.status !== "recruiting" && <StartupStatusBadge status={s.status} />}
+          {s.status === "closed" && openSeats === 0 ? (
+            <span className="inline-flex items-center rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-bold text-success-ink">
+              Команда собрана
+            </span>
+          ) : (
+            s.status !== "recruiting" && <StartupStatusBadge status={s.status} />
+          )}
         </div>
         <h1 className="mt-4 text-[34px] leading-tight sm:text-5xl">{s.title}</h1>
         <p className="mt-3 text-xl text-muted-foreground">{s.pitch}</p>

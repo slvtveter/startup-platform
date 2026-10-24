@@ -16,6 +16,7 @@
 | `application_sent` | откликнулся на роль | startup_role | `startup_id` |
 | `invite_sent` | основатель пригласил человека | startup_role | `startup_id` |
 | `application_answered` | ответ на отклик/приглашение | application | `accepted`, `hours`, `direction` |
+| `team_assembled` | заняли последнее свободное место, набор закрылся сам (KAN-99) | startup | |
 | `contacts_exchanged` | знакомство состоялось (принят отклик или приглашение) | application | `startup_id` |
 | `landing_viewed` | показ лендинга гостю (знаменатель H1, H2), с клиента | | |
 | `startup_viewed` | показ страницы стартапа не владельцу (H3), с клиента | | `slug` |
