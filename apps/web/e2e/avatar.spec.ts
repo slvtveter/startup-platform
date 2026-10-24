@@ -24,3 +24,18 @@ test("member uploads an avatar and it shows on the public profile", async ({ pag
   // Возвращаем демо-профиль к исходному виду.
   expect((await page.request.delete("/api/profile/me/avatar")).ok()).toBeTruthy();
 });
+
+/** KAN-108: фото основателя видно в составе команды на карточке стартапа. */
+test("founder avatar shows in the startup team", async ({ page }) => {
+  await page.request.post("/api/auth/login", { data: { email: "alina@example.com", password: "demo12345" } });
+  const up = await page.request.post("/api/profile/me/avatar", {
+    multipart: { file: { name: "me.png", mimeType: "image/png", buffer: PNG } },
+  });
+  expect(up.ok()).toBeTruthy();
+
+  await page.goto("/startups/vkusnoryadom");
+  const team = page.locator("section", { has: page.getByRole("heading", { name: "Команда" }) });
+  await expect(team.locator("img").first()).toHaveAttribute("src", /\/media\/avatars\/.+\.webp$/);
+
+  expect((await page.request.delete("/api/profile/me/avatar")).ok()).toBeTruthy();
+});

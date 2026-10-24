@@ -104,12 +104,18 @@ async def to_detail(db: AsyncSession, s: Startup, viewer: User | None) -> Startu
         my_roles = [str(r) for r in rows]
     team = [
         MemberOut(
-            display_name=_display_name(s.owner), slug=_pub_slug(s.owner), role_title="Основатель"
+            display_name=_display_name(s.owner),
+            slug=_pub_slug(s.owner),
+            role_title="Основатель",
+            avatar_url=_pub_avatar(s.owner),
         )
     ]
     team += [
         MemberOut(
-            display_name=_display_name(m.user), slug=_pub_slug(m.user), role_title=m.role_title
+            display_name=_display_name(m.user),
+            slug=_pub_slug(m.user),
+            role_title=m.role_title,
+            avatar_url=_pub_avatar(m.user),
         )
         for m in s.members
         if m.user_id != s.owner_id
@@ -204,6 +210,12 @@ async def open_seats(db: AsyncSession, limit: int) -> list[OpenSeat]:
 def _pub_slug(user: User) -> str | None:
     p = user.profile
     return p.slug if p and p.is_published else None
+
+
+def _pub_avatar(user: User) -> str | None:
+    # Фото показываем по тем же правилам, что и ссылку на профиль: только опубликованным.
+    p = user.profile
+    return p.avatar_url if p and p.is_published else None
 
 
 async def get_by_slug(db: AsyncSession, slug: str, viewer: User | None) -> Startup:

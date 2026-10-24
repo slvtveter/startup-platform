@@ -68,6 +68,7 @@ class MemberOut(BaseModel):
     display_name: str
     slug: str | None
     role_title: str
+    avatar_url: str | None = None
 
 
 class StartupCard(BaseModel):

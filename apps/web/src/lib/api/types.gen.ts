@@ -604,6 +604,10 @@ export type MemberOut = {
      * Role Title
      */
     role_title: string;
+    /**
+     * Avatar Url
+     */
+    avatar_url?: string | null;
 };
 
 /**
