@@ -1,6 +1,6 @@
 COMPOSE := docker compose -f infra/docker-compose.yml
 
-.PHONY: help setup dev down logs test lint fmt migrate migration gen-client
+.PHONY: help setup dev down logs test lint fmt migrate migration gen-client seed create-admin
 
 help: ## Показать команды
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "}; {printf "  %-12s %s\n", $$1, $$2}'
@@ -40,3 +40,9 @@ migration: ## Создать миграцию: make migration m="add profiles"
 gen-client: ## Перегенерировать TS-клиент из OpenAPI схемы FastAPI
 	cd apps/api && uv run python -c "import json; from app.main import app; print(json.dumps(app.openapi(), indent=2))" > ../web/openapi.json
 	cd apps/web && npm run gen:client
+
+seed: ## Демо-данные (синтетика): make seed
+	$(COMPOSE) exec api python -m app.scripts.seed
+
+create-admin: ## Выдать права админа: make create-admin email=you@example.com
+	$(COMPOSE) exec api python -m app.scripts.create_admin $(email)

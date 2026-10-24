@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { HealthData, HealthResponses } from './types.gen';
+import type { AcceptApplicationData, AcceptApplicationErrors, AcceptApplicationResponses, AddStartupRoleData, AddStartupRoleErrors, AddStartupRoleResponses, AdminAuditLogData, AdminAuditLogResponses, AdminBlockUserData, AdminBlockUserErrors, AdminBlockUserResponses, AdminHideStartupData, AdminHideStartupErrors, AdminHideStartupResponses, AdminListReportsData, AdminListReportsErrors, AdminListReportsResponses, AdminListStartupsData, AdminListStartupsResponses, AdminListUsersData, AdminListUsersErrors, AdminListUsersResponses, AdminMetricsData, AdminMetricsErrors, AdminMetricsResponses, AdminResolveReportData, AdminResolveReportErrors, AdminResolveReportResponses, AdminUnblockUserData, AdminUnblockUserErrors, AdminUnblockUserResponses, AdminUnhideStartupData, AdminUnhideStartupErrors, AdminUnhideStartupResponses, ApplyToRoleData, ApplyToRoleErrors, ApplyToRoleResponses, ArchiveStartupData, ArchiveStartupErrors, ArchiveStartupResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, CloseStartupData, CloseStartupErrors, CloseStartupResponses, CreateReportData, CreateReportErrors, CreateReportResponses, CreateStartupData, CreateStartupErrors, CreateStartupResponses, DeleteAccountData, DeleteAccountResponses, DeleteStartupRoleData, DeleteStartupRoleErrors, DeleteStartupRoleResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetMyProfileData, GetMyProfileResponses, GetPersonData, GetPersonErrors, GetPersonResponses, GetStartupData, GetStartupErrors, GetStartupResponses, HealthData, HealthResponses, InvitePersonData, InvitePersonErrors, InvitePersonResponses, ListMyApplicationsData, ListMyApplicationsResponses, ListMyStartupsData, ListMyStartupsResponses, ListPeopleData, ListPeopleErrors, ListPeopleResponses, ListRecommendedStartupsData, ListRecommendedStartupsResponses, ListRolesData, ListRolesResponses, ListSkillsData, ListSkillsErrors, ListSkillsResponses, ListStartupApplicationsData, ListStartupApplicationsErrors, ListStartupApplicationsResponses, ListStartupsData, ListStartupsErrors, ListStartupsResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, MeData, MeResponses, PublicStatsData, PublicStatsResponses, PublishMyProfileData, PublishMyProfileErrors, PublishMyProfileResponses, PublishStartupData, PublishStartupErrors, PublishStartupResponses, RegisterData, RegisterErrors, RegisterResponses, RejectApplicationData, RejectApplicationErrors, RejectApplicationResponses, ResendVerificationData, ResendVerificationResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, SendFeedbackData, SendFeedbackErrors, SendFeedbackResponses, UpdateMyProfileData, UpdateMyProfileErrors, UpdateMyProfileResponses, UpdateStartupData, UpdateStartupErrors, UpdateStartupResponses, UpdateStartupRoleData, UpdateStartupRoleErrors, UpdateStartupRoleResponses, VerifyEmailData, VerifyEmailErrors, VerifyEmailResponses, WithdrawApplicationData, WithdrawApplicationErrors, WithdrawApplicationResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -22,3 +22,374 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
  * Health
  */
 export const health = <ThrowOnError extends boolean = false>(options?: Options<HealthData, ThrowOnError>): RequestResult<HealthResponses, unknown, ThrowOnError> => (options?.client ?? client).get<HealthResponses, unknown, ThrowOnError>({ url: '/api/health', ...options });
+
+/**
+ * Register
+ */
+export const register = <ThrowOnError extends boolean = false>(options: Options<RegisterData, ThrowOnError>): RequestResult<RegisterResponses, RegisterErrors, ThrowOnError> => (options.client ?? client).post<RegisterResponses, RegisterErrors, ThrowOnError>({
+    url: '/api/auth/register',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Login
+ */
+export const login = <ThrowOnError extends boolean = false>(options: Options<LoginData, ThrowOnError>): RequestResult<LoginResponses, LoginErrors, ThrowOnError> => (options.client ?? client).post<LoginResponses, LoginErrors, ThrowOnError>({
+    url: '/api/auth/login',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Logout
+ */
+export const logout = <ThrowOnError extends boolean = false>(options?: Options<LogoutData, ThrowOnError>): RequestResult<LogoutResponses, unknown, ThrowOnError> => (options?.client ?? client).post<LogoutResponses, unknown, ThrowOnError>({ url: '/api/auth/logout', ...options });
+
+/**
+ * Me
+ */
+export const me = <ThrowOnError extends boolean = false>(options?: Options<MeData, ThrowOnError>): RequestResult<MeResponses, unknown, ThrowOnError> => (options?.client ?? client).get<MeResponses, unknown, ThrowOnError>({ url: '/api/auth/me', ...options });
+
+/**
+ * Verify Email
+ */
+export const verifyEmail = <ThrowOnError extends boolean = false>(options: Options<VerifyEmailData, ThrowOnError>): RequestResult<VerifyEmailResponses, VerifyEmailErrors, ThrowOnError> => (options.client ?? client).post<VerifyEmailResponses, VerifyEmailErrors, ThrowOnError>({
+    url: '/api/auth/verify-email',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Resend Verification
+ */
+export const resendVerification = <ThrowOnError extends boolean = false>(options?: Options<ResendVerificationData, ThrowOnError>): RequestResult<ResendVerificationResponses, unknown, ThrowOnError> => (options?.client ?? client).post<ResendVerificationResponses, unknown, ThrowOnError>({ url: '/api/auth/resend-verification', ...options });
+
+/**
+ * Forgot Password
+ */
+export const forgotPassword = <ThrowOnError extends boolean = false>(options: Options<ForgotPasswordData, ThrowOnError>): RequestResult<ForgotPasswordResponses, ForgotPasswordErrors, ThrowOnError> => (options.client ?? client).post<ForgotPasswordResponses, ForgotPasswordErrors, ThrowOnError>({
+    url: '/api/auth/password/forgot',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Reset Password
+ */
+export const resetPassword = <ThrowOnError extends boolean = false>(options: Options<ResetPasswordData, ThrowOnError>): RequestResult<ResetPasswordResponses, ResetPasswordErrors, ThrowOnError> => (options.client ?? client).post<ResetPasswordResponses, ResetPasswordErrors, ThrowOnError>({
+    url: '/api/auth/password/reset',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Change Password
+ */
+export const changePassword = <ThrowOnError extends boolean = false>(options: Options<ChangePasswordData, ThrowOnError>): RequestResult<ChangePasswordResponses, ChangePasswordErrors, ThrowOnError> => (options.client ?? client).post<ChangePasswordResponses, ChangePasswordErrors, ThrowOnError>({
+    url: '/api/auth/password/change',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete Account
+ */
+export const deleteAccount = <ThrowOnError extends boolean = false>(options?: Options<DeleteAccountData, ThrowOnError>): RequestResult<DeleteAccountResponses, unknown, ThrowOnError> => (options?.client ?? client).delete<DeleteAccountResponses, unknown, ThrowOnError>({ url: '/api/auth/account', ...options });
+
+/**
+ * List Roles
+ */
+export const listRoles = <ThrowOnError extends boolean = false>(options?: Options<ListRolesData, ThrowOnError>): RequestResult<ListRolesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ListRolesResponses, unknown, ThrowOnError>({ url: '/api/roles', ...options });
+
+/**
+ * List Skills
+ */
+export const listSkills = <ThrowOnError extends boolean = false>(options?: Options<ListSkillsData, ThrowOnError>): RequestResult<ListSkillsResponses, ListSkillsErrors, ThrowOnError> => (options?.client ?? client).get<ListSkillsResponses, ListSkillsErrors, ThrowOnError>({ url: '/api/skills', ...options });
+
+/**
+ * Get My Profile
+ */
+export const getMyProfile = <ThrowOnError extends boolean = false>(options?: Options<GetMyProfileData, ThrowOnError>): RequestResult<GetMyProfileResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetMyProfileResponses, unknown, ThrowOnError>({ url: '/api/profile/me', ...options });
+
+/**
+ * Update My Profile
+ */
+export const updateMyProfile = <ThrowOnError extends boolean = false>(options: Options<UpdateMyProfileData, ThrowOnError>): RequestResult<UpdateMyProfileResponses, UpdateMyProfileErrors, ThrowOnError> => (options.client ?? client).patch<UpdateMyProfileResponses, UpdateMyProfileErrors, ThrowOnError>({
+    url: '/api/profile/me',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Publish My Profile
+ */
+export const publishMyProfile = <ThrowOnError extends boolean = false>(options: Options<PublishMyProfileData, ThrowOnError>): RequestResult<PublishMyProfileResponses, PublishMyProfileErrors, ThrowOnError> => (options.client ?? client).post<PublishMyProfileResponses, PublishMyProfileErrors, ThrowOnError>({
+    url: '/api/profile/me/publish',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List People
+ */
+export const listPeople = <ThrowOnError extends boolean = false>(options?: Options<ListPeopleData, ThrowOnError>): RequestResult<ListPeopleResponses, ListPeopleErrors, ThrowOnError> => (options?.client ?? client).get<ListPeopleResponses, ListPeopleErrors, ThrowOnError>({ url: '/api/people', ...options });
+
+/**
+ * Get Person
+ */
+export const getPerson = <ThrowOnError extends boolean = false>(options: Options<GetPersonData, ThrowOnError>): RequestResult<GetPersonResponses, GetPersonErrors, ThrowOnError> => (options.client ?? client).get<GetPersonResponses, GetPersonErrors, ThrowOnError>({ url: '/api/people/{slug}', ...options });
+
+/**
+ * List Startups
+ */
+export const listStartups = <ThrowOnError extends boolean = false>(options?: Options<ListStartupsData, ThrowOnError>): RequestResult<ListStartupsResponses, ListStartupsErrors, ThrowOnError> => (options?.client ?? client).get<ListStartupsResponses, ListStartupsErrors, ThrowOnError>({ url: '/api/startups', ...options });
+
+/**
+ * Create Startup
+ */
+export const createStartup = <ThrowOnError extends boolean = false>(options: Options<CreateStartupData, ThrowOnError>): RequestResult<CreateStartupResponses, CreateStartupErrors, ThrowOnError> => (options.client ?? client).post<CreateStartupResponses, CreateStartupErrors, ThrowOnError>({
+    url: '/api/startups',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get Startup
+ */
+export const getStartup = <ThrowOnError extends boolean = false>(options: Options<GetStartupData, ThrowOnError>): RequestResult<GetStartupResponses, GetStartupErrors, ThrowOnError> => (options.client ?? client).get<GetStartupResponses, GetStartupErrors, ThrowOnError>({ url: '/api/startups/{slug}', ...options });
+
+/**
+ * Update Startup
+ */
+export const updateStartup = <ThrowOnError extends boolean = false>(options: Options<UpdateStartupData, ThrowOnError>): RequestResult<UpdateStartupResponses, UpdateStartupErrors, ThrowOnError> => (options.client ?? client).patch<UpdateStartupResponses, UpdateStartupErrors, ThrowOnError>({
+    url: '/api/startups/{startup_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Publish Startup
+ */
+export const publishStartup = <ThrowOnError extends boolean = false>(options: Options<PublishStartupData, ThrowOnError>): RequestResult<PublishStartupResponses, PublishStartupErrors, ThrowOnError> => (options.client ?? client).post<PublishStartupResponses, PublishStartupErrors, ThrowOnError>({ url: '/api/startups/{startup_id}/publish', ...options });
+
+/**
+ * Close Startup
+ */
+export const closeStartup = <ThrowOnError extends boolean = false>(options: Options<CloseStartupData, ThrowOnError>): RequestResult<CloseStartupResponses, CloseStartupErrors, ThrowOnError> => (options.client ?? client).post<CloseStartupResponses, CloseStartupErrors, ThrowOnError>({ url: '/api/startups/{startup_id}/close', ...options });
+
+/**
+ * Archive Startup
+ */
+export const archiveStartup = <ThrowOnError extends boolean = false>(options: Options<ArchiveStartupData, ThrowOnError>): RequestResult<ArchiveStartupResponses, ArchiveStartupErrors, ThrowOnError> => (options.client ?? client).post<ArchiveStartupResponses, ArchiveStartupErrors, ThrowOnError>({ url: '/api/startups/{startup_id}/archive', ...options });
+
+/**
+ * Add Startup Role
+ */
+export const addStartupRole = <ThrowOnError extends boolean = false>(options: Options<AddStartupRoleData, ThrowOnError>): RequestResult<AddStartupRoleResponses, AddStartupRoleErrors, ThrowOnError> => (options.client ?? client).post<AddStartupRoleResponses, AddStartupRoleErrors, ThrowOnError>({
+    url: '/api/startups/{startup_id}/roles',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete Startup Role
+ */
+export const deleteStartupRole = <ThrowOnError extends boolean = false>(options: Options<DeleteStartupRoleData, ThrowOnError>): RequestResult<DeleteStartupRoleResponses, DeleteStartupRoleErrors, ThrowOnError> => (options.client ?? client).delete<DeleteStartupRoleResponses, DeleteStartupRoleErrors, ThrowOnError>({ url: '/api/startup-roles/{role_id}', ...options });
+
+/**
+ * Update Startup Role
+ */
+export const updateStartupRole = <ThrowOnError extends boolean = false>(options: Options<UpdateStartupRoleData, ThrowOnError>): RequestResult<UpdateStartupRoleResponses, UpdateStartupRoleErrors, ThrowOnError> => (options.client ?? client).patch<UpdateStartupRoleResponses, UpdateStartupRoleErrors, ThrowOnError>({
+    url: '/api/startup-roles/{role_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List My Startups
+ */
+export const listMyStartups = <ThrowOnError extends boolean = false>(options?: Options<ListMyStartupsData, ThrowOnError>): RequestResult<ListMyStartupsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ListMyStartupsResponses, unknown, ThrowOnError>({ url: '/api/me/startups', ...options });
+
+/**
+ * List Recommended Startups
+ */
+export const listRecommendedStartups = <ThrowOnError extends boolean = false>(options?: Options<ListRecommendedStartupsData, ThrowOnError>): RequestResult<ListRecommendedStartupsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ListRecommendedStartupsResponses, unknown, ThrowOnError>({ url: '/api/me/recommended-startups', ...options });
+
+/**
+ * List Startup Applications
+ */
+export const listStartupApplications = <ThrowOnError extends boolean = false>(options: Options<ListStartupApplicationsData, ThrowOnError>): RequestResult<ListStartupApplicationsResponses, ListStartupApplicationsErrors, ThrowOnError> => (options.client ?? client).get<ListStartupApplicationsResponses, ListStartupApplicationsErrors, ThrowOnError>({ url: '/api/startups/{startup_id}/applications', ...options });
+
+/**
+ * Apply To Role
+ */
+export const applyToRole = <ThrowOnError extends boolean = false>(options: Options<ApplyToRoleData, ThrowOnError>): RequestResult<ApplyToRoleResponses, ApplyToRoleErrors, ThrowOnError> => (options.client ?? client).post<ApplyToRoleResponses, ApplyToRoleErrors, ThrowOnError>({
+    url: '/api/startup-roles/{role_id}/applications',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Invite Person
+ */
+export const invitePerson = <ThrowOnError extends boolean = false>(options: Options<InvitePersonData, ThrowOnError>): RequestResult<InvitePersonResponses, InvitePersonErrors, ThrowOnError> => (options.client ?? client).post<InvitePersonResponses, InvitePersonErrors, ThrowOnError>({
+    url: '/api/people/{slug}/invite',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List My Applications
+ */
+export const listMyApplications = <ThrowOnError extends boolean = false>(options?: Options<ListMyApplicationsData, ThrowOnError>): RequestResult<ListMyApplicationsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ListMyApplicationsResponses, unknown, ThrowOnError>({ url: '/api/me/applications', ...options });
+
+/**
+ * Withdraw Application
+ */
+export const withdrawApplication = <ThrowOnError extends boolean = false>(options: Options<WithdrawApplicationData, ThrowOnError>): RequestResult<WithdrawApplicationResponses, WithdrawApplicationErrors, ThrowOnError> => (options.client ?? client).post<WithdrawApplicationResponses, WithdrawApplicationErrors, ThrowOnError>({ url: '/api/applications/{app_id}/withdraw', ...options });
+
+/**
+ * Accept Application
+ */
+export const acceptApplication = <ThrowOnError extends boolean = false>(options: Options<AcceptApplicationData, ThrowOnError>): RequestResult<AcceptApplicationResponses, AcceptApplicationErrors, ThrowOnError> => (options.client ?? client).post<AcceptApplicationResponses, AcceptApplicationErrors, ThrowOnError>({
+    url: '/api/applications/{app_id}/accept',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Reject Application
+ */
+export const rejectApplication = <ThrowOnError extends boolean = false>(options: Options<RejectApplicationData, ThrowOnError>): RequestResult<RejectApplicationResponses, RejectApplicationErrors, ThrowOnError> => (options.client ?? client).post<RejectApplicationResponses, RejectApplicationErrors, ThrowOnError>({
+    url: '/api/applications/{app_id}/reject',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Public Stats
+ */
+export const publicStats = <ThrowOnError extends boolean = false>(options?: Options<PublicStatsData, ThrowOnError>): RequestResult<PublicStatsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<PublicStatsResponses, unknown, ThrowOnError>({ url: '/api/stats', ...options });
+
+/**
+ * Create Report
+ */
+export const createReport = <ThrowOnError extends boolean = false>(options: Options<CreateReportData, ThrowOnError>): RequestResult<CreateReportResponses, CreateReportErrors, ThrowOnError> => (options.client ?? client).post<CreateReportResponses, CreateReportErrors, ThrowOnError>({
+    url: '/api/reports',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Send Feedback
+ */
+export const sendFeedback = <ThrowOnError extends boolean = false>(options: Options<SendFeedbackData, ThrowOnError>): RequestResult<SendFeedbackResponses, SendFeedbackErrors, ThrowOnError> => (options.client ?? client).post<SendFeedbackResponses, SendFeedbackErrors, ThrowOnError>({
+    url: '/api/feedback',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Admin Metrics
+ */
+export const adminMetrics = <ThrowOnError extends boolean = false>(options?: Options<AdminMetricsData, ThrowOnError>): RequestResult<AdminMetricsResponses, AdminMetricsErrors, ThrowOnError> => (options?.client ?? client).get<AdminMetricsResponses, AdminMetricsErrors, ThrowOnError>({ url: '/api/admin/metrics', ...options });
+
+/**
+ * Admin List Users
+ */
+export const adminListUsers = <ThrowOnError extends boolean = false>(options?: Options<AdminListUsersData, ThrowOnError>): RequestResult<AdminListUsersResponses, AdminListUsersErrors, ThrowOnError> => (options?.client ?? client).get<AdminListUsersResponses, AdminListUsersErrors, ThrowOnError>({ url: '/api/admin/users', ...options });
+
+/**
+ * Admin Block User
+ */
+export const adminBlockUser = <ThrowOnError extends boolean = false>(options: Options<AdminBlockUserData, ThrowOnError>): RequestResult<AdminBlockUserResponses, AdminBlockUserErrors, ThrowOnError> => (options.client ?? client).post<AdminBlockUserResponses, AdminBlockUserErrors, ThrowOnError>({ url: '/api/admin/users/{user_id}/block', ...options });
+
+/**
+ * Admin Unblock User
+ */
+export const adminUnblockUser = <ThrowOnError extends boolean = false>(options: Options<AdminUnblockUserData, ThrowOnError>): RequestResult<AdminUnblockUserResponses, AdminUnblockUserErrors, ThrowOnError> => (options.client ?? client).post<AdminUnblockUserResponses, AdminUnblockUserErrors, ThrowOnError>({ url: '/api/admin/users/{user_id}/unblock', ...options });
+
+/**
+ * Admin List Startups
+ */
+export const adminListStartups = <ThrowOnError extends boolean = false>(options?: Options<AdminListStartupsData, ThrowOnError>): RequestResult<AdminListStartupsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<AdminListStartupsResponses, unknown, ThrowOnError>({ url: '/api/admin/startups', ...options });
+
+/**
+ * Admin Hide Startup
+ */
+export const adminHideStartup = <ThrowOnError extends boolean = false>(options: Options<AdminHideStartupData, ThrowOnError>): RequestResult<AdminHideStartupResponses, AdminHideStartupErrors, ThrowOnError> => (options.client ?? client).post<AdminHideStartupResponses, AdminHideStartupErrors, ThrowOnError>({ url: '/api/admin/startups/{startup_id}/hide', ...options });
+
+/**
+ * Admin Unhide Startup
+ */
+export const adminUnhideStartup = <ThrowOnError extends boolean = false>(options: Options<AdminUnhideStartupData, ThrowOnError>): RequestResult<AdminUnhideStartupResponses, AdminUnhideStartupErrors, ThrowOnError> => (options.client ?? client).post<AdminUnhideStartupResponses, AdminUnhideStartupErrors, ThrowOnError>({ url: '/api/admin/startups/{startup_id}/unhide', ...options });
+
+/**
+ * Admin List Reports
+ */
+export const adminListReports = <ThrowOnError extends boolean = false>(options?: Options<AdminListReportsData, ThrowOnError>): RequestResult<AdminListReportsResponses, AdminListReportsErrors, ThrowOnError> => (options?.client ?? client).get<AdminListReportsResponses, AdminListReportsErrors, ThrowOnError>({ url: '/api/admin/reports', ...options });
+
+/**
+ * Admin Resolve Report
+ */
+export const adminResolveReport = <ThrowOnError extends boolean = false>(options: Options<AdminResolveReportData, ThrowOnError>): RequestResult<AdminResolveReportResponses, AdminResolveReportErrors, ThrowOnError> => (options.client ?? client).post<AdminResolveReportResponses, AdminResolveReportErrors, ThrowOnError>({ url: '/api/admin/reports/{report_id}/resolve', ...options });
+
+/**
+ * Admin Audit Log
+ */
+export const adminAuditLog = <ThrowOnError extends boolean = false>(options?: Options<AdminAuditLogData, ThrowOnError>): RequestResult<AdminAuditLogResponses, unknown, ThrowOnError> => (options?.client ?? client).get<AdminAuditLogResponses, unknown, ThrowOnError>({ url: '/api/admin/audit', ...options });

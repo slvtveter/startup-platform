@@ -16,4 +16,14 @@ make dev     # всё в Docker
 - API docs (Swagger): http://localhost:8080/api/docs
 - Почта (Mailpit): http://localhost:8025
 
-Остальные команды: `make help`. Правила работы: [AGENTS.md](AGENTS.md). Описание продукта: [docs/startup-idea.md](docs/startup-idea.md).
+Демо-данные: `make seed`. Аккаунты (пароль `demo12345`):
+
+| Email | Роль |
+|---|---|
+| `maria@example.com` | дизайнер, ищет первый опыт |
+| `alina@example.com` | основатель «ВкусноРядом», есть входящие отклики |
+| `admin@example.com` | администратор (`/admin`) |
+
+Тесты: `make test` (API, pytest), `cd apps/web && npx playwright test` (E2E, нужен `make dev` + `make seed`).
+
+Остальные команды: `make help`. Деплой: [docs/deploy.md](docs/deploy.md). События аналитики: [docs/events.md](docs/events.md). Правила работы: [AGENTS.md](AGENTS.md). Описание продукта: [docs/startup-idea.md](docs/startup-idea.md).

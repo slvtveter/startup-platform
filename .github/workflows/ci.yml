@@ -9,6 +9,9 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  REGISTRY: ghcr.io/${{ github.repository }}
+
 jobs:
   api:
     runs-on: ubuntu-latest
@@ -60,3 +63,82 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
+
+  e2e:
+    # Сквозной сценарий фазы 1 в настоящем браузере против поднятого docker compose.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - name: Start stack
+        run: |
+          cp infra/.env.example infra/.env
+          docker compose -f infra/docker-compose.yml up --build -d
+          for i in $(seq 1 60); do curl -sf localhost:8080/api/health && break; sleep 3; done
+          docker compose -f infra/docker-compose.yml exec -T api python -m app.scripts.seed
+          # Прогреваем dev-сервер Next, чтобы первая компиляция не съела таймауты тестов.
+          for p in / /startups /people /register /login /me/profile /startups/new; do curl -s -o /dev/null localhost:8080$p; done
+      - run: npm ci
+        working-directory: apps/web
+      - run: npx playwright test
+        working-directory: apps/web
+      - name: Logs on failure
+        if: failure()
+        run: docker compose -f infra/docker-compose.yml logs --tail=200
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: apps/web/test-results
+          retention-days: 7
+
+  images:
+    # Собираем prod-образы и поднимаем их через compose.prod.yml с HTTPS: так проверяем, что деплой соберётся.
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build images
+        run: |
+          docker build -t $REGISTRY-api:sha-${GITHUB_SHA::7} apps/api
+          docker build --target prod -t $REGISTRY-web:sha-${GITHUB_SHA::7} apps/web
+      - name: Smoke test production stack
+        working-directory: infra
+        run: |
+          cat > .env.ci <<ENV
+          STACK=ci
+          SITE_DOMAIN=localhost
+          ACME_EMAIL=ci@example.com
+          REGISTRY=$REGISTRY
+          IMAGE_TAG=sha-${GITHUB_SHA::7}
+          POSTGRES_USER=app
+          POSTGRES_PASSWORD=ci-password
+          POSTGRES_DB=app
+          SMTP_HOST=localhost
+          MAIL_FROM=ci@example.com
+          ENV
+          docker compose -f compose.prod.yml --env-file .env.ci up -d
+          for i in $(seq 1 60); do curl -skf https://localhost/api/health && break; sleep 3; done
+          curl -skf https://localhost/api/health | grep '"db":"ok"'
+          curl -skf https://localhost/ | grep -q "Первый реальный опыт"
+          curl -skf https://localhost/startups > /dev/null
+          echo "production stack is healthy"
+      - name: Stack logs on failure
+        if: failure()
+        working-directory: infra
+        run: docker compose -f compose.prod.yml --env-file .env.ci logs --tail=200
+      - name: Push to GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          for svc in api web; do
+            docker tag $REGISTRY-$svc:sha-${GITHUB_SHA::7} $REGISTRY-$svc:main
+            docker push $REGISTRY-$svc:sha-${GITHUB_SHA::7}
+            docker push $REGISTRY-$svc:main
+          done

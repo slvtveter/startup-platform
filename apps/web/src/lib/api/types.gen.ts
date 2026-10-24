@@ -5,6 +5,282 @@ export type ClientOptions = {
 };
 
 /**
+ * AdminActionOut
+ */
+export type AdminActionOut = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Admin Email
+     */
+    admin_email: string | null;
+    /**
+     * Action
+     */
+    action: string;
+    /**
+     * Target Type
+     */
+    target_type: string;
+    /**
+     * Target Id
+     */
+    target_id: string;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
+ * AdminStartupOut
+ */
+export type AdminStartupOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Owner Email
+     */
+    owner_email: string;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Is Hidden
+     */
+    is_hidden: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
+ * AdminUserOut
+ */
+export type AdminUserOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Display Name
+     */
+    display_name: string;
+    /**
+     * Is Active
+     */
+    is_active: boolean;
+    /**
+     * Is Admin
+     */
+    is_admin: boolean;
+    /**
+     * Email Verified
+     */
+    email_verified: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
+ * ApplicationDirection
+ */
+export type ApplicationDirection = 'apply' | 'invite';
+
+/**
+ * ApplicationOut
+ */
+export type ApplicationOut = {
+    /**
+     * Id
+     */
+    id: string;
+    direction: ApplicationDirection;
+    status: ApplicationStatus;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Decision Note
+     */
+    decision_note: string;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Decided At
+     */
+    decided_at: string | null;
+    /**
+     * Startup Slug
+     */
+    startup_slug: string;
+    /**
+     * Startup Title
+     */
+    startup_title: string;
+    /**
+     * Role Id
+     */
+    role_id: string;
+    /**
+     * Role Title
+     */
+    role_title: string;
+    applicant: PersonCard | null;
+    contacts: ContactsOut | null;
+    /**
+     * Can Decide
+     */
+    can_decide: boolean;
+    /**
+     * Can Withdraw
+     */
+    can_withdraw: boolean;
+};
+
+/**
+ * ApplicationStatus
+ */
+export type ApplicationStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn';
+
+/**
+ * ApplyIn
+ */
+export type ApplyIn = {
+    /**
+     * Message
+     */
+    message: string;
+};
+
+/**
+ * Availability
+ */
+export type Availability = 'few_hours' | 'part_time' | 'full_time';
+
+/**
+ * ChangePasswordIn
+ */
+export type ChangePasswordIn = {
+    /**
+     * Current Password
+     */
+    current_password: string;
+    /**
+     * New Password
+     */
+    new_password: string;
+};
+
+/**
+ * ContactsOut
+ */
+export type ContactsOut = {
+    /**
+     * Display Name
+     */
+    display_name: string;
+    /**
+     * Email
+     */
+    email: string | null;
+    /**
+     * Telegram
+     */
+    telegram: string | null;
+};
+
+/**
+ * DecisionIn
+ */
+export type DecisionIn = {
+    /**
+     * Note
+     */
+    note?: string;
+};
+
+/**
+ * ExperienceLevel
+ */
+export type ExperienceLevel = 'no_experience' | 'courses' | 'internship' | 'junior';
+
+/**
+ * FeedbackIn
+ */
+export type FeedbackIn = {
+    /**
+     * Text
+     */
+    text: string;
+    /**
+     * Page Url
+     */
+    page_url?: string;
+};
+
+/**
+ * ForgotIn
+ */
+export type ForgotIn = {
+    /**
+     * Email
+     */
+    email: string;
+};
+
+/**
+ * FunnelStep
+ */
+export type FunnelStep = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Label
+     */
+    label: string;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
+ * HTTPValidationError
+ */
+export type HttpValidationError = {
+    /**
+     * Detail
+     */
+    detail?: Array<ValidationError>;
+};
+
+/**
  * HealthOut
  */
 export type HealthOut = {
@@ -16,6 +292,977 @@ export type HealthOut = {
      * Db
      */
     db: 'ok' | 'error';
+};
+
+/**
+ * InviteIn
+ */
+export type InviteIn = {
+    /**
+     * Startup Role Id
+     */
+    startup_role_id: string;
+    /**
+     * Message
+     */
+    message: string;
+};
+
+/**
+ * LinkIn
+ */
+export type LinkIn = {
+    kind?: LinkKind;
+    /**
+     * Url
+     */
+    url: string;
+};
+
+/**
+ * LinkKind
+ */
+export type LinkKind = 'portfolio' | 'github' | 'behance' | 'linkedin' | 'other';
+
+/**
+ * LinkOut
+ */
+export type LinkOut = {
+    kind: LinkKind;
+    /**
+     * Url
+     */
+    url: string;
+};
+
+/**
+ * LoginIn
+ */
+export type LoginIn = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Password
+     */
+    password: string;
+};
+
+/**
+ * MeOut
+ */
+export type MeOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Is Admin
+     */
+    is_admin: boolean;
+    /**
+     * Email Verified
+     */
+    email_verified: boolean;
+    profile: MeProfile | null;
+};
+
+/**
+ * MeProfile
+ */
+export type MeProfile = {
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Display Name
+     */
+    display_name: string;
+    /**
+     * Is Published
+     */
+    is_published: boolean;
+    /**
+     * Completeness
+     */
+    completeness: number;
+};
+
+/**
+ * MemberOut
+ */
+export type MemberOut = {
+    /**
+     * Display Name
+     */
+    display_name: string;
+    /**
+     * Slug
+     */
+    slug: string | null;
+    /**
+     * Role Title
+     */
+    role_title: string;
+};
+
+/**
+ * MembershipOut
+ */
+export type MembershipOut = {
+    /**
+     * Startup Slug
+     */
+    startup_slug: string;
+    /**
+     * Startup Title
+     */
+    startup_title: string;
+    /**
+     * Role Title
+     */
+    role_title: string;
+};
+
+/**
+ * MetricsOut
+ */
+export type MetricsOut = {
+    /**
+     * Days
+     */
+    days: number;
+    /**
+     * Funnel
+     */
+    funnel: Array<FunnelStep>;
+    /**
+     * Active Startups
+     */
+    active_startups: number;
+    /**
+     * Answered 72H Share
+     */
+    answered_72h_share: number | null;
+    /**
+     * Sources
+     */
+    sources: Array<SourceRow>;
+};
+
+/**
+ * MyProfileOut
+ */
+export type MyProfileOut = {
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Display Name
+     */
+    display_name: string;
+    /**
+     * Headline
+     */
+    headline: string;
+    primary_role: RoleOut | null;
+    experience_level: ExperienceLevel | null;
+    availability: Availability | null;
+    /**
+     * Looking For
+     */
+    looking_for: Array<string>;
+    /**
+     * City
+     */
+    city: string;
+    /**
+     * Skills
+     */
+    skills: Array<SkillOut>;
+    /**
+     * Bio
+     */
+    bio: string;
+    /**
+     * Links
+     */
+    links: Array<LinkOut>;
+    /**
+     * Memberships
+     */
+    memberships?: Array<MembershipOut>;
+    /**
+     * Is Published
+     */
+    is_published: boolean;
+    /**
+     * Contact Telegram
+     */
+    contact_telegram: string;
+    /**
+     * Show Email
+     */
+    show_email: boolean;
+    /**
+     * Completeness
+     */
+    completeness: number;
+    /**
+     * Missing
+     */
+    missing: Array<string>;
+    /**
+     * Can Publish
+     */
+    can_publish: boolean;
+};
+
+/**
+ * MyStartupOut
+ */
+export type MyStartupOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Pitch
+     */
+    pitch: string;
+    stage: Stage;
+    terms: Terms;
+    status: StartupStatus;
+    /**
+     * Published At
+     */
+    published_at: string | null;
+    /**
+     * Owner Name
+     */
+    owner_name: string;
+    /**
+     * Open Roles
+     */
+    open_roles: Array<RoleBrief>;
+    /**
+     * Pending Applications
+     */
+    pending_applications: number;
+    /**
+     * Is Hidden
+     */
+    is_hidden: boolean;
+};
+
+/**
+ * OkOut
+ */
+export type OkOut = {
+    /**
+     * Ok
+     */
+    ok?: boolean;
+};
+
+/**
+ * Page[PersonCard]
+ */
+export type PagePersonCard = {
+    /**
+     * Items
+     */
+    items: Array<PersonCard>;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Limit
+     */
+    limit: number;
+    /**
+     * Offset
+     */
+    offset: number;
+};
+
+/**
+ * Page[StartupCard]
+ */
+export type PageStartupCard = {
+    /**
+     * Items
+     */
+    items: Array<StartupCard>;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Limit
+     */
+    limit: number;
+    /**
+     * Offset
+     */
+    offset: number;
+};
+
+/**
+ * PersonCard
+ */
+export type PersonCard = {
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Display Name
+     */
+    display_name: string;
+    /**
+     * Headline
+     */
+    headline: string;
+    primary_role: RoleOut | null;
+    experience_level: ExperienceLevel | null;
+    availability: Availability | null;
+    /**
+     * Looking For
+     */
+    looking_for: Array<string>;
+    /**
+     * City
+     */
+    city: string;
+    /**
+     * Skills
+     */
+    skills: Array<SkillOut>;
+};
+
+/**
+ * PersonDetail
+ */
+export type PersonDetail = {
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Display Name
+     */
+    display_name: string;
+    /**
+     * Headline
+     */
+    headline: string;
+    primary_role: RoleOut | null;
+    experience_level: ExperienceLevel | null;
+    availability: Availability | null;
+    /**
+     * Looking For
+     */
+    looking_for: Array<string>;
+    /**
+     * City
+     */
+    city: string;
+    /**
+     * Skills
+     */
+    skills: Array<SkillOut>;
+    /**
+     * Bio
+     */
+    bio: string;
+    /**
+     * Links
+     */
+    links: Array<LinkOut>;
+    /**
+     * Memberships
+     */
+    memberships?: Array<MembershipOut>;
+};
+
+/**
+ * ProfileUpdate
+ */
+export type ProfileUpdate = {
+    /**
+     * Display Name
+     */
+    display_name?: string | null;
+    /**
+     * Headline
+     */
+    headline?: string | null;
+    /**
+     * Bio
+     */
+    bio?: string | null;
+    /**
+     * Primary Role
+     *
+     * slug роли
+     */
+    primary_role?: string | null;
+    experience_level?: ExperienceLevel | null;
+    availability?: Availability | null;
+    /**
+     * Looking For
+     */
+    looking_for?: Array<Terms> | null;
+    /**
+     * City
+     */
+    city?: string | null;
+    /**
+     * Contact Telegram
+     */
+    contact_telegram?: string | null;
+    /**
+     * Show Email
+     */
+    show_email?: boolean | null;
+    /**
+     * Skills
+     *
+     * slug навыков
+     */
+    skills?: Array<string> | null;
+    /**
+     * Links
+     */
+    links?: Array<LinkIn> | null;
+};
+
+/**
+ * PublishIn
+ */
+export type PublishIn = {
+    /**
+     * Published
+     */
+    published: boolean;
+};
+
+/**
+ * RecommendedStartup
+ */
+export type RecommendedStartup = {
+    startup: StartupCard;
+    /**
+     * Score
+     */
+    score: number;
+    /**
+     * Reasons
+     */
+    reasons: Array<string>;
+};
+
+/**
+ * RegisterIn
+ */
+export type RegisterIn = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Password
+     */
+    password: string;
+    /**
+     * Utm Source
+     */
+    utm_source?: string | null;
+};
+
+/**
+ * ReportIn
+ */
+export type ReportIn = {
+    /**
+     * Target Type
+     */
+    target_type: string;
+    /**
+     * Target Id
+     *
+     * slug профиля или стартапа
+     */
+    target_id: string;
+    reason: ReportReason;
+    /**
+     * Comment
+     */
+    comment?: string;
+};
+
+/**
+ * ReportOut
+ */
+export type ReportOut = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Target Type
+     */
+    target_type: string;
+    /**
+     * Target Id
+     */
+    target_id: string;
+    reason: ReportReason;
+    /**
+     * Comment
+     */
+    comment: string;
+    status: ReportStatus;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
+ * ReportReason
+ */
+export type ReportReason = 'spam' | 'fake' | 'offensive' | 'scam' | 'other';
+
+/**
+ * ReportStatus
+ */
+export type ReportStatus = 'new' | 'resolved' | 'dismissed';
+
+/**
+ * ResetIn
+ */
+export type ResetIn = {
+    /**
+     * Token
+     */
+    token: string;
+    /**
+     * Password
+     */
+    password: string;
+};
+
+/**
+ * RoleBrief
+ */
+export type RoleBrief = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Title
+     */
+    title: string;
+    role: RoleOut;
+};
+
+/**
+ * RoleIn
+ */
+export type RoleIn = {
+    /**
+     * Role
+     *
+     * slug роли из справочника
+     */
+    role: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Description
+     */
+    description?: string;
+    /**
+     * Slots
+     */
+    slots?: number;
+    /**
+     * Skills
+     */
+    skills?: Array<string>;
+};
+
+/**
+ * RoleOut
+ */
+export type RoleOut = {
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Name
+     */
+    name: string;
+};
+
+/**
+ * RoleUpdate
+ */
+export type RoleUpdate = {
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Slots
+     */
+    slots?: number | null;
+    /**
+     * Skills
+     */
+    skills?: Array<string> | null;
+    /**
+     * Is Open
+     */
+    is_open?: boolean | null;
+};
+
+/**
+ * SkillOut
+ */
+export type SkillOut = {
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Category
+     */
+    category: string;
+};
+
+/**
+ * SourceRow
+ */
+export type SourceRow = {
+    /**
+     * Source
+     */
+    source: string;
+    /**
+     * Signups
+     */
+    signups: number;
+};
+
+/**
+ * Stage
+ */
+export type Stage = 'idea' | 'prototype' | 'mvp' | 'launched';
+
+/**
+ * StartupCard
+ */
+export type StartupCard = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Pitch
+     */
+    pitch: string;
+    stage: Stage;
+    terms: Terms;
+    status: StartupStatus;
+    /**
+     * Published At
+     */
+    published_at: string | null;
+    /**
+     * Owner Name
+     */
+    owner_name: string;
+    /**
+     * Open Roles
+     */
+    open_roles: Array<RoleBrief>;
+};
+
+/**
+ * StartupDetail
+ */
+export type StartupDetail = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Pitch
+     */
+    pitch: string;
+    stage: Stage;
+    terms: Terms;
+    status: StartupStatus;
+    /**
+     * Published At
+     */
+    published_at: string | null;
+    /**
+     * Owner Name
+     */
+    owner_name: string;
+    /**
+     * Open Roles
+     */
+    open_roles: Array<RoleBrief>;
+    /**
+     * Description
+     */
+    description: string;
+    /**
+     * Terms Details
+     */
+    terms_details: string;
+    /**
+     * Website
+     */
+    website: string;
+    /**
+     * Telegram
+     */
+    telegram: string;
+    /**
+     * Roles
+     */
+    roles: Array<StartupRoleOut>;
+    /**
+     * Team
+     */
+    team: Array<MemberOut>;
+    /**
+     * Is Owner
+     */
+    is_owner: boolean;
+    /**
+     * My Active Role Ids
+     */
+    my_active_role_ids?: Array<string>;
+};
+
+/**
+ * StartupIn
+ */
+export type StartupIn = {
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Pitch
+     */
+    pitch?: string;
+    /**
+     * Description
+     */
+    description?: string;
+    stage: Stage;
+    terms: Terms;
+    /**
+     * Terms Details
+     */
+    terms_details?: string;
+    /**
+     * Website
+     */
+    website?: string;
+    /**
+     * Telegram
+     */
+    telegram?: string;
+};
+
+/**
+ * StartupRoleOut
+ */
+export type StartupRoleOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Title
+     */
+    title: string;
+    role: RoleOut;
+    /**
+     * Description
+     */
+    description: string;
+    /**
+     * Slots
+     */
+    slots: number;
+    /**
+     * Is Open
+     */
+    is_open: boolean;
+    /**
+     * Skills
+     */
+    skills: Array<SkillOut>;
+    /**
+     * Filled
+     */
+    filled?: number;
+};
+
+/**
+ * StartupStatus
+ */
+export type StartupStatus = 'draft' | 'recruiting' | 'closed' | 'archived';
+
+/**
+ * StartupUpdate
+ */
+export type StartupUpdate = {
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Pitch
+     */
+    pitch?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    stage?: Stage | null;
+    terms?: Terms | null;
+    /**
+     * Terms Details
+     */
+    terms_details?: string | null;
+    /**
+     * Website
+     */
+    website?: string | null;
+    /**
+     * Telegram
+     */
+    telegram?: string | null;
+};
+
+/**
+ * StatsOut
+ */
+export type StatsOut = {
+    /**
+     * Startups
+     */
+    startups: number;
+    /**
+     * People
+     */
+    people: number;
+    /**
+     * Open Roles
+     */
+    open_roles: number;
+    /**
+     * Intros 30D
+     */
+    intros_30d: number;
+};
+
+/**
+ * Terms
+ */
+export type Terms = 'free' | 'paid' | 'equity' | 'mixed';
+
+/**
+ * TokenIn
+ */
+export type TokenIn = {
+    /**
+     * Token
+     */
+    token: string;
+};
+
+/**
+ * ValidationError
+ */
+export type ValidationError = {
+    /**
+     * Location
+     */
+    loc: Array<string | number>;
+    /**
+     * Message
+     */
+    msg: string;
+    /**
+     * Error Type
+     */
+    type: string;
+    /**
+     * Input
+     */
+    input?: unknown;
+    /**
+     * Context
+     */
+    ctx?: {
+        [key: string]: unknown;
+    };
 };
 
 export type HealthData = {
@@ -33,3 +1280,1336 @@ export type HealthResponses = {
 };
 
 export type HealthResponse = HealthResponses[keyof HealthResponses];
+
+export type RegisterData = {
+    body: RegisterIn;
+    path?: never;
+    query?: never;
+    url: '/api/auth/register';
+};
+
+export type RegisterErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RegisterError = RegisterErrors[keyof RegisterErrors];
+
+export type RegisterResponses = {
+    /**
+     * Successful Response
+     */
+    201: MeOut;
+};
+
+export type RegisterResponse = RegisterResponses[keyof RegisterResponses];
+
+export type LoginData = {
+    body: LoginIn;
+    path?: never;
+    query?: never;
+    url: '/api/auth/login';
+};
+
+export type LoginErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type LoginError = LoginErrors[keyof LoginErrors];
+
+export type LoginResponses = {
+    /**
+     * Successful Response
+     */
+    200: MeOut;
+};
+
+export type LoginResponse = LoginResponses[keyof LoginResponses];
+
+export type LogoutData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/logout';
+};
+
+export type LogoutResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type LogoutResponse = LogoutResponses[keyof LogoutResponses];
+
+export type MeData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/me';
+};
+
+export type MeResponses = {
+    /**
+     * Successful Response
+     */
+    200: MeOut;
+};
+
+export type MeResponse = MeResponses[keyof MeResponses];
+
+export type VerifyEmailData = {
+    body: TokenIn;
+    path?: never;
+    query?: never;
+    url: '/api/auth/verify-email';
+};
+
+export type VerifyEmailErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type VerifyEmailError = VerifyEmailErrors[keyof VerifyEmailErrors];
+
+export type VerifyEmailResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type VerifyEmailResponse = VerifyEmailResponses[keyof VerifyEmailResponses];
+
+export type ResendVerificationData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/resend-verification';
+};
+
+export type ResendVerificationResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type ResendVerificationResponse = ResendVerificationResponses[keyof ResendVerificationResponses];
+
+export type ForgotPasswordData = {
+    body: ForgotIn;
+    path?: never;
+    query?: never;
+    url: '/api/auth/password/forgot';
+};
+
+export type ForgotPasswordErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ForgotPasswordError = ForgotPasswordErrors[keyof ForgotPasswordErrors];
+
+export type ForgotPasswordResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type ForgotPasswordResponse = ForgotPasswordResponses[keyof ForgotPasswordResponses];
+
+export type ResetPasswordData = {
+    body: ResetIn;
+    path?: never;
+    query?: never;
+    url: '/api/auth/password/reset';
+};
+
+export type ResetPasswordErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ResetPasswordError = ResetPasswordErrors[keyof ResetPasswordErrors];
+
+export type ResetPasswordResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type ResetPasswordResponse = ResetPasswordResponses[keyof ResetPasswordResponses];
+
+export type ChangePasswordData = {
+    body: ChangePasswordIn;
+    path?: never;
+    query?: never;
+    url: '/api/auth/password/change';
+};
+
+export type ChangePasswordErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ChangePasswordError = ChangePasswordErrors[keyof ChangePasswordErrors];
+
+export type ChangePasswordResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type ChangePasswordResponse = ChangePasswordResponses[keyof ChangePasswordResponses];
+
+export type DeleteAccountData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/account';
+};
+
+export type DeleteAccountResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type DeleteAccountResponse = DeleteAccountResponses[keyof DeleteAccountResponses];
+
+export type ListRolesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/roles';
+};
+
+export type ListRolesResponses = {
+    /**
+     * Response List Roles
+     *
+     * Successful Response
+     */
+    200: Array<RoleOut>;
+};
+
+export type ListRolesResponse = ListRolesResponses[keyof ListRolesResponses];
+
+export type ListSkillsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Q
+         */
+        q?: string | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/skills';
+};
+
+export type ListSkillsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListSkillsError = ListSkillsErrors[keyof ListSkillsErrors];
+
+export type ListSkillsResponses = {
+    /**
+     * Response List Skills
+     *
+     * Successful Response
+     */
+    200: Array<SkillOut>;
+};
+
+export type ListSkillsResponse = ListSkillsResponses[keyof ListSkillsResponses];
+
+export type GetMyProfileData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/profile/me';
+};
+
+export type GetMyProfileResponses = {
+    /**
+     * Successful Response
+     */
+    200: MyProfileOut;
+};
+
+export type GetMyProfileResponse = GetMyProfileResponses[keyof GetMyProfileResponses];
+
+export type UpdateMyProfileData = {
+    body: ProfileUpdate;
+    path?: never;
+    query?: never;
+    url: '/api/profile/me';
+};
+
+export type UpdateMyProfileErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateMyProfileError = UpdateMyProfileErrors[keyof UpdateMyProfileErrors];
+
+export type UpdateMyProfileResponses = {
+    /**
+     * Successful Response
+     */
+    200: MyProfileOut;
+};
+
+export type UpdateMyProfileResponse = UpdateMyProfileResponses[keyof UpdateMyProfileResponses];
+
+export type PublishMyProfileData = {
+    body: PublishIn;
+    path?: never;
+    query?: never;
+    url: '/api/profile/me/publish';
+};
+
+export type PublishMyProfileErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PublishMyProfileError = PublishMyProfileErrors[keyof PublishMyProfileErrors];
+
+export type PublishMyProfileResponses = {
+    /**
+     * Successful Response
+     */
+    200: MyProfileOut;
+};
+
+export type PublishMyProfileResponse = PublishMyProfileResponses[keyof PublishMyProfileResponses];
+
+export type ListPeopleData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Role
+         */
+        role?: Array<string>;
+        /**
+         * Skill
+         */
+        skill?: Array<string>;
+        /**
+         * Level
+         */
+        level?: Array<string>;
+        /**
+         * Looking For
+         */
+        looking_for?: Array<string>;
+        /**
+         * Q
+         */
+        q?: string | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+    };
+    url: '/api/people';
+};
+
+export type ListPeopleErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListPeopleError = ListPeopleErrors[keyof ListPeopleErrors];
+
+export type ListPeopleResponses = {
+    /**
+     * Successful Response
+     */
+    200: PagePersonCard;
+};
+
+export type ListPeopleResponse = ListPeopleResponses[keyof ListPeopleResponses];
+
+export type GetPersonData = {
+    body?: never;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/people/{slug}';
+};
+
+export type GetPersonErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetPersonError = GetPersonErrors[keyof GetPersonErrors];
+
+export type GetPersonResponses = {
+    /**
+     * Successful Response
+     */
+    200: PersonDetail;
+};
+
+export type GetPersonResponse = GetPersonResponses[keyof GetPersonResponses];
+
+export type ListStartupsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Role
+         */
+        role?: Array<string>;
+        /**
+         * Skill
+         */
+        skill?: Array<string>;
+        /**
+         * Terms
+         */
+        terms?: Array<string>;
+        /**
+         * Stage
+         */
+        stage?: Array<string>;
+        /**
+         * Q
+         */
+        q?: string | null;
+        /**
+         * Sort
+         */
+        sort?: string;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+    };
+    url: '/api/startups';
+};
+
+export type ListStartupsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListStartupsError = ListStartupsErrors[keyof ListStartupsErrors];
+
+export type ListStartupsResponses = {
+    /**
+     * Successful Response
+     */
+    200: PageStartupCard;
+};
+
+export type ListStartupsResponse = ListStartupsResponses[keyof ListStartupsResponses];
+
+export type CreateStartupData = {
+    body: StartupIn;
+    path?: never;
+    query?: never;
+    url: '/api/startups';
+};
+
+export type CreateStartupErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateStartupError = CreateStartupErrors[keyof CreateStartupErrors];
+
+export type CreateStartupResponses = {
+    /**
+     * Successful Response
+     */
+    201: StartupDetail;
+};
+
+export type CreateStartupResponse = CreateStartupResponses[keyof CreateStartupResponses];
+
+export type GetStartupData = {
+    body?: never;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/startups/{slug}';
+};
+
+export type GetStartupErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetStartupError = GetStartupErrors[keyof GetStartupErrors];
+
+export type GetStartupResponses = {
+    /**
+     * Successful Response
+     */
+    200: StartupDetail;
+};
+
+export type GetStartupResponse = GetStartupResponses[keyof GetStartupResponses];
+
+export type UpdateStartupData = {
+    body: StartupUpdate;
+    path: {
+        /**
+         * Startup Id
+         */
+        startup_id: string;
+    };
+    query?: never;
+    url: '/api/startups/{startup_id}';
+};
+
+export type UpdateStartupErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateStartupError = UpdateStartupErrors[keyof UpdateStartupErrors];
+
+export type UpdateStartupResponses = {
+    /**
+     * Successful Response
+     */
+    200: StartupDetail;
+};
+
+export type UpdateStartupResponse = UpdateStartupResponses[keyof UpdateStartupResponses];
+
+export type PublishStartupData = {
+    body?: never;
+    path: {
+        /**
+         * Startup Id
+         */
+        startup_id: string;
+    };
+    query?: never;
+    url: '/api/startups/{startup_id}/publish';
+};
+
+export type PublishStartupErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PublishStartupError = PublishStartupErrors[keyof PublishStartupErrors];
+
+export type PublishStartupResponses = {
+    /**
+     * Successful Response
+     */
+    200: StartupDetail;
+};
+
+export type PublishStartupResponse = PublishStartupResponses[keyof PublishStartupResponses];
+
+export type CloseStartupData = {
+    body?: never;
+    path: {
+        /**
+         * Startup Id
+         */
+        startup_id: string;
+    };
+    query?: never;
+    url: '/api/startups/{startup_id}/close';
+};
+
+export type CloseStartupErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CloseStartupError = CloseStartupErrors[keyof CloseStartupErrors];
+
+export type CloseStartupResponses = {
+    /**
+     * Successful Response
+     */
+    200: StartupDetail;
+};
+
+export type CloseStartupResponse = CloseStartupResponses[keyof CloseStartupResponses];
+
+export type ArchiveStartupData = {
+    body?: never;
+    path: {
+        /**
+         * Startup Id
+         */
+        startup_id: string;
+    };
+    query?: never;
+    url: '/api/startups/{startup_id}/archive';
+};
+
+export type ArchiveStartupErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ArchiveStartupError = ArchiveStartupErrors[keyof ArchiveStartupErrors];
+
+export type ArchiveStartupResponses = {
+    /**
+     * Successful Response
+     */
+    200: StartupDetail;
+};
+
+export type ArchiveStartupResponse = ArchiveStartupResponses[keyof ArchiveStartupResponses];
+
+export type AddStartupRoleData = {
+    body: RoleIn;
+    path: {
+        /**
+         * Startup Id
+         */
+        startup_id: string;
+    };
+    query?: never;
+    url: '/api/startups/{startup_id}/roles';
+};
+
+export type AddStartupRoleErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AddStartupRoleError = AddStartupRoleErrors[keyof AddStartupRoleErrors];
+
+export type AddStartupRoleResponses = {
+    /**
+     * Successful Response
+     */
+    201: StartupDetail;
+};
+
+export type AddStartupRoleResponse = AddStartupRoleResponses[keyof AddStartupRoleResponses];
+
+export type DeleteStartupRoleData = {
+    body?: never;
+    path: {
+        /**
+         * Role Id
+         */
+        role_id: string;
+    };
+    query?: never;
+    url: '/api/startup-roles/{role_id}';
+};
+
+export type DeleteStartupRoleErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteStartupRoleError = DeleteStartupRoleErrors[keyof DeleteStartupRoleErrors];
+
+export type DeleteStartupRoleResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type DeleteStartupRoleResponse = DeleteStartupRoleResponses[keyof DeleteStartupRoleResponses];
+
+export type UpdateStartupRoleData = {
+    body: RoleUpdate;
+    path: {
+        /**
+         * Role Id
+         */
+        role_id: string;
+    };
+    query?: never;
+    url: '/api/startup-roles/{role_id}';
+};
+
+export type UpdateStartupRoleErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateStartupRoleError = UpdateStartupRoleErrors[keyof UpdateStartupRoleErrors];
+
+export type UpdateStartupRoleResponses = {
+    /**
+     * Successful Response
+     */
+    200: StartupDetail;
+};
+
+export type UpdateStartupRoleResponse = UpdateStartupRoleResponses[keyof UpdateStartupRoleResponses];
+
+export type ListMyStartupsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/me/startups';
+};
+
+export type ListMyStartupsResponses = {
+    /**
+     * Response List My Startups
+     *
+     * Successful Response
+     */
+    200: Array<MyStartupOut>;
+};
+
+export type ListMyStartupsResponse = ListMyStartupsResponses[keyof ListMyStartupsResponses];
+
+export type ListRecommendedStartupsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/me/recommended-startups';
+};
+
+export type ListRecommendedStartupsResponses = {
+    /**
+     * Response List Recommended Startups
+     *
+     * Successful Response
+     */
+    200: Array<RecommendedStartup>;
+};
+
+export type ListRecommendedStartupsResponse = ListRecommendedStartupsResponses[keyof ListRecommendedStartupsResponses];
+
+export type ListStartupApplicationsData = {
+    body?: never;
+    path: {
+        /**
+         * Startup Id
+         */
+        startup_id: string;
+    };
+    query?: {
+        /**
+         * Status
+         */
+        status?: string | null;
+    };
+    url: '/api/startups/{startup_id}/applications';
+};
+
+export type ListStartupApplicationsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListStartupApplicationsError = ListStartupApplicationsErrors[keyof ListStartupApplicationsErrors];
+
+export type ListStartupApplicationsResponses = {
+    /**
+     * Response List Startup Applications
+     *
+     * Successful Response
+     */
+    200: Array<ApplicationOut>;
+};
+
+export type ListStartupApplicationsResponse = ListStartupApplicationsResponses[keyof ListStartupApplicationsResponses];
+
+export type ApplyToRoleData = {
+    body: ApplyIn;
+    path: {
+        /**
+         * Role Id
+         */
+        role_id: string;
+    };
+    query?: never;
+    url: '/api/startup-roles/{role_id}/applications';
+};
+
+export type ApplyToRoleErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ApplyToRoleError = ApplyToRoleErrors[keyof ApplyToRoleErrors];
+
+export type ApplyToRoleResponses = {
+    /**
+     * Successful Response
+     */
+    201: ApplicationOut;
+};
+
+export type ApplyToRoleResponse = ApplyToRoleResponses[keyof ApplyToRoleResponses];
+
+export type InvitePersonData = {
+    body: InviteIn;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/people/{slug}/invite';
+};
+
+export type InvitePersonErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type InvitePersonError = InvitePersonErrors[keyof InvitePersonErrors];
+
+export type InvitePersonResponses = {
+    /**
+     * Successful Response
+     */
+    201: ApplicationOut;
+};
+
+export type InvitePersonResponse = InvitePersonResponses[keyof InvitePersonResponses];
+
+export type ListMyApplicationsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/me/applications';
+};
+
+export type ListMyApplicationsResponses = {
+    /**
+     * Response List My Applications
+     *
+     * Successful Response
+     */
+    200: Array<ApplicationOut>;
+};
+
+export type ListMyApplicationsResponse = ListMyApplicationsResponses[keyof ListMyApplicationsResponses];
+
+export type WithdrawApplicationData = {
+    body?: never;
+    path: {
+        /**
+         * App Id
+         */
+        app_id: string;
+    };
+    query?: never;
+    url: '/api/applications/{app_id}/withdraw';
+};
+
+export type WithdrawApplicationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type WithdrawApplicationError = WithdrawApplicationErrors[keyof WithdrawApplicationErrors];
+
+export type WithdrawApplicationResponses = {
+    /**
+     * Successful Response
+     */
+    200: ApplicationOut;
+};
+
+export type WithdrawApplicationResponse = WithdrawApplicationResponses[keyof WithdrawApplicationResponses];
+
+export type AcceptApplicationData = {
+    body: DecisionIn;
+    path: {
+        /**
+         * App Id
+         */
+        app_id: string;
+    };
+    query?: never;
+    url: '/api/applications/{app_id}/accept';
+};
+
+export type AcceptApplicationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AcceptApplicationError = AcceptApplicationErrors[keyof AcceptApplicationErrors];
+
+export type AcceptApplicationResponses = {
+    /**
+     * Successful Response
+     */
+    200: ApplicationOut;
+};
+
+export type AcceptApplicationResponse = AcceptApplicationResponses[keyof AcceptApplicationResponses];
+
+export type RejectApplicationData = {
+    body: DecisionIn;
+    path: {
+        /**
+         * App Id
+         */
+        app_id: string;
+    };
+    query?: never;
+    url: '/api/applications/{app_id}/reject';
+};
+
+export type RejectApplicationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RejectApplicationError = RejectApplicationErrors[keyof RejectApplicationErrors];
+
+export type RejectApplicationResponses = {
+    /**
+     * Successful Response
+     */
+    200: ApplicationOut;
+};
+
+export type RejectApplicationResponse = RejectApplicationResponses[keyof RejectApplicationResponses];
+
+export type PublicStatsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/stats';
+};
+
+export type PublicStatsResponses = {
+    /**
+     * Successful Response
+     */
+    200: StatsOut;
+};
+
+export type PublicStatsResponse = PublicStatsResponses[keyof PublicStatsResponses];
+
+export type CreateReportData = {
+    body: ReportIn;
+    path?: never;
+    query?: never;
+    url: '/api/reports';
+};
+
+export type CreateReportErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateReportError = CreateReportErrors[keyof CreateReportErrors];
+
+export type CreateReportResponses = {
+    /**
+     * Successful Response
+     */
+    201: OkOut;
+};
+
+export type CreateReportResponse = CreateReportResponses[keyof CreateReportResponses];
+
+export type SendFeedbackData = {
+    body: FeedbackIn;
+    path?: never;
+    query?: never;
+    url: '/api/feedback';
+};
+
+export type SendFeedbackErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SendFeedbackError = SendFeedbackErrors[keyof SendFeedbackErrors];
+
+export type SendFeedbackResponses = {
+    /**
+     * Successful Response
+     */
+    201: OkOut;
+};
+
+export type SendFeedbackResponse = SendFeedbackResponses[keyof SendFeedbackResponses];
+
+export type AdminMetricsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Days
+         */
+        days?: number;
+    };
+    url: '/api/admin/metrics';
+};
+
+export type AdminMetricsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminMetricsError = AdminMetricsErrors[keyof AdminMetricsErrors];
+
+export type AdminMetricsResponses = {
+    /**
+     * Successful Response
+     */
+    200: MetricsOut;
+};
+
+export type AdminMetricsResponse = AdminMetricsResponses[keyof AdminMetricsResponses];
+
+export type AdminListUsersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Q
+         */
+        q?: string | null;
+    };
+    url: '/api/admin/users';
+};
+
+export type AdminListUsersErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminListUsersError = AdminListUsersErrors[keyof AdminListUsersErrors];
+
+export type AdminListUsersResponses = {
+    /**
+     * Response Admin List Users
+     *
+     * Successful Response
+     */
+    200: Array<AdminUserOut>;
+};
+
+export type AdminListUsersResponse = AdminListUsersResponses[keyof AdminListUsersResponses];
+
+export type AdminBlockUserData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/admin/users/{user_id}/block';
+};
+
+export type AdminBlockUserErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminBlockUserError = AdminBlockUserErrors[keyof AdminBlockUserErrors];
+
+export type AdminBlockUserResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type AdminBlockUserResponse = AdminBlockUserResponses[keyof AdminBlockUserResponses];
+
+export type AdminUnblockUserData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/admin/users/{user_id}/unblock';
+};
+
+export type AdminUnblockUserErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminUnblockUserError = AdminUnblockUserErrors[keyof AdminUnblockUserErrors];
+
+export type AdminUnblockUserResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type AdminUnblockUserResponse = AdminUnblockUserResponses[keyof AdminUnblockUserResponses];
+
+export type AdminListStartupsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/admin/startups';
+};
+
+export type AdminListStartupsResponses = {
+    /**
+     * Response Admin List Startups
+     *
+     * Successful Response
+     */
+    200: Array<AdminStartupOut>;
+};
+
+export type AdminListStartupsResponse = AdminListStartupsResponses[keyof AdminListStartupsResponses];
+
+export type AdminHideStartupData = {
+    body?: never;
+    path: {
+        /**
+         * Startup Id
+         */
+        startup_id: string;
+    };
+    query?: never;
+    url: '/api/admin/startups/{startup_id}/hide';
+};
+
+export type AdminHideStartupErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminHideStartupError = AdminHideStartupErrors[keyof AdminHideStartupErrors];
+
+export type AdminHideStartupResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type AdminHideStartupResponse = AdminHideStartupResponses[keyof AdminHideStartupResponses];
+
+export type AdminUnhideStartupData = {
+    body?: never;
+    path: {
+        /**
+         * Startup Id
+         */
+        startup_id: string;
+    };
+    query?: never;
+    url: '/api/admin/startups/{startup_id}/unhide';
+};
+
+export type AdminUnhideStartupErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminUnhideStartupError = AdminUnhideStartupErrors[keyof AdminUnhideStartupErrors];
+
+export type AdminUnhideStartupResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type AdminUnhideStartupResponse = AdminUnhideStartupResponses[keyof AdminUnhideStartupResponses];
+
+export type AdminListReportsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Status
+         */
+        status?: string;
+    };
+    url: '/api/admin/reports';
+};
+
+export type AdminListReportsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminListReportsError = AdminListReportsErrors[keyof AdminListReportsErrors];
+
+export type AdminListReportsResponses = {
+    /**
+     * Response Admin List Reports
+     *
+     * Successful Response
+     */
+    200: Array<ReportOut>;
+};
+
+export type AdminListReportsResponse = AdminListReportsResponses[keyof AdminListReportsResponses];
+
+export type AdminResolveReportData = {
+    body?: never;
+    path: {
+        /**
+         * Report Id
+         */
+        report_id: number;
+    };
+    query?: {
+        /**
+         * Dismiss
+         */
+        dismiss?: boolean;
+    };
+    url: '/api/admin/reports/{report_id}/resolve';
+};
+
+export type AdminResolveReportErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminResolveReportError = AdminResolveReportErrors[keyof AdminResolveReportErrors];
+
+export type AdminResolveReportResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type AdminResolveReportResponse = AdminResolveReportResponses[keyof AdminResolveReportResponses];
+
+export type AdminAuditLogData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/admin/audit';
+};
+
+export type AdminAuditLogResponses = {
+    /**
+     * Response Admin Audit Log
+     *
+     * Successful Response
+     */
+    200: Array<AdminActionOut>;
+};
+
+export type AdminAuditLogResponse = AdminAuditLogResponses[keyof AdminAuditLogResponses];

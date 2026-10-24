@@ -1,0 +1,6 @@
+# Миграции БД мержит только хранитель схемы.
+/apps/api/alembic/ @slvtveter
+/apps/api/app/models/ @slvtveter
+# Инфраструктура и деплой.
+/infra/ @slvtveter
+/.github/workflows/ @slvtveter

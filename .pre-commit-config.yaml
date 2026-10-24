@@ -1,0 +1,31 @@
+# Установка: uv tool install pre-commit && pre-commit install
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=800"]
+      - id: detect-private-key
+      - id: end-of-file-fixer
+        exclude: ^apps/web/src/lib/api/
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.0
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+        files: ^apps/api/
+      - id: ruff-format
+        files: ^apps/api/
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.28.0
+    hooks:
+      - id: gitleaks
+  - repo: local
+    hooks:
+      - id: eslint
+        name: eslint (web)
+        entry: bash -c 'cd apps/web && npx eslint --max-warnings=0'
+        language: system
+        files: ^apps/web/src/.*\.(ts|tsx)$
+        pass_filenames: false

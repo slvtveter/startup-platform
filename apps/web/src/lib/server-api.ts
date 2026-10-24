@@ -1,9 +1,35 @@
 import "server-only";
 
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { cache } from "react";
+
+import { me } from "@/lib/api";
 import { createClient, createConfig } from "@/lib/api/client";
 
 // Server Components ходят в FastAPI напрямую (внутри docker-сети),
 // браузер — через Caddy по относительному пути /api.
-export const serverClient = createClient(
-  createConfig({ baseUrl: process.env.API_INTERNAL_URL ?? "http://localhost:8000" }),
-);
+const API_URL = process.env.API_INTERNAL_URL ?? "http://localhost:8000";
+
+/** Клиент на один запрос: прокидывает cookie сессии пользователя в API. */
+export async function serverClient() {
+  const store = await cookies();
+  const cookie = store
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join("; ");
+  return createClient(createConfig({ baseUrl: API_URL, headers: cookie ? { cookie } : {} }));
+}
+
+/** Текущий пользователь или null. cache() — один запрос к API на рендер страницы. */
+export const getMe = cache(async () => {
+  const { data } = await me({ client: await serverClient() });
+  return data ?? null;
+});
+
+/** Для закрытых страниц: без входа уводим на /login и возвращаем обратно после. */
+export async function requireMe(next: string) {
+  const user = await getMe();
+  if (!user) redirect(`/login?next=${encodeURIComponent(next)}`);
+  return user;
+}

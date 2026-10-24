@@ -12,7 +12,8 @@
 - `docs` — продукт и исследования.
 
 ## Команды
-`make setup`, `make dev`, `make test`, `make lint`, `make fmt`, `make migration m="..."`, `make migrate`, `make gen-client`.
+`make setup`, `make dev`, `make seed`, `make test`, `make lint`, `make fmt`, `make migration m="..."`, `make migrate`, `make gen-client`, `make create-admin email=...`.
+E2E: `cd apps/web && npx playwright test` (против `make dev` + `make seed`). Деплой: `docs/deploy.md`.
 
 ## Правила
 1. **У агентов нет доступа к проду и staging**: никаких ключей БД, SSH, prod-секретов. Деплой только из CI после merge в `main` и подтверждения человеком.
@@ -24,6 +25,10 @@
 7. Во фронте никаких внешних скриптов, CDN, трекеров и шрифтов с чужих серверов (`next/font` скачивает шрифты на этапе сборки — это ок).
 8. Реальные пользовательские данные в local/staging не копировать — только синтетика.
 9. Новый эндпоинт = Pydantic-схемы в `app/schemas`, логика в `app/services`, роутер в `app/routers`, тест в `tests`.
+10. Ошибки API бросаем через `app.core.errors` (NotFound, Forbidden, Conflict, AppError): формат ответа единый.
+11. Списки отдаём как `Page[T]` (`items`, `total`, `limit`, `offset`), фильтры — повторяющимися query-параметрами (`?role=a&role=b`).
+12. Новое событие воронки — `track()` в сервисе + строка в `docs/events.md`.
+13. Async SQLAlchemy: ленивых загрузок нет. Связи грузим жадно (`lazy="selectin"/"joined"`), у новых объектов инициализируем коллекции.
 
 ## Владельцы модулей
 - Ядро, auth, профили — основатель-программист.
