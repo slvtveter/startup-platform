@@ -46,3 +46,15 @@ async def test_people_search_by_role_and_text(make_user, client):
 
     assert await _titles(client, "дизайнеры", "/api/people") == ["Мария Ким"]
     assert await _titles(client, "Ол", "/api/people") == ["Олег"]
+
+
+async def test_people_catalog_hides_empty_profiles(make_user, client):
+    empty = await make_user("pavel@mail.ru", published=True, name="Павел")
+    await empty.patch("/api/profile/me", json={"headline": ""})
+    await make_user("maria@mail.ru", published=True, name="Мария Ким")
+
+    names = [p["display_name"] for p in (await client.get("/api/people")).json()["items"]]
+    assert names == ["Мария Ким"]
+    # По прямой ссылке профиль открывается.
+    slug = (await empty.get("/api/profile/me")).json()["slug"]
+    assert (await client.get(f"/api/people/{slug}")).status_code == 200

@@ -19,6 +19,8 @@ export function SettingsPanel({ email, verified }: { email: string; verified: bo
   const [newEmail, setNewEmail] = useState("");
   const [emailPassword, setEmailPassword] = useState("");
   const [pendingEmail, setPendingEmail] = useState("");
+  // Формы смены почты и пароля нужны редко: раскрываются по кнопке, а не висят открытыми.
+  const [editing, setEditing] = useState<"email" | "password" | null>(null);
 
   async function onChangeEmail(e: React.FormEvent) {
     e.preventDefault();
@@ -27,6 +29,7 @@ export function SettingsPanel({ email, verified }: { email: string; verified: bo
     setPendingEmail(newEmail.trim().toLowerCase());
     setNewEmail("");
     setEmailPassword("");
+    setEditing(null);
   }
 
   async function onChangePassword(e: React.FormEvent) {
@@ -36,6 +39,7 @@ export function SettingsPanel({ email, verified }: { email: string; verified: bo
     toast.success("Пароль изменён");
     setCurrent("");
     setNext("");
+    setEditing(null);
   }
 
   async function onResend() {
@@ -54,55 +58,79 @@ export function SettingsPanel({ email, verified }: { email: string; verified: bo
   return (
     <div className="grid gap-6">
       <section className="rounded-2xl border bg-card p-6">
-        <h2 className="text-lg">Почта</h2>
-        <p className="mt-1 text-muted-foreground">{email}</p>
-        {verified ? (
-          <p className="mt-3 text-sm font-bold text-success-ink">Подтверждена</p>
-        ) : (
-          <div className="mt-3 flex flex-wrap items-center gap-3">
-            <span className="text-sm font-bold text-warn-ink">Не подтверждена</span>
-            <Button variant="outline" size="sm" onClick={onResend}>
-              Отправить письмо ещё раз
-            </Button>
+        <h2 className="text-lg">Вход в аккаунт</h2>
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t pt-4">
+          <div className="min-w-0">
+            <div className="text-sm text-muted-foreground">Почта</div>
+            <div className="truncate font-medium">{email}</div>
           </div>
-        )}
-        {pendingEmail ? (
+          {verified ? (
+            <span className="rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-semibold text-success-ink">Подтверждена</span>
+          ) : (
+            <Button variant="outline" size="sm" onClick={onResend}>
+              Подтвердить почту
+            </Button>
+          )}
+          {!pendingEmail && editing !== "email" && (
+            <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setEditing("email")}>
+              Изменить
+            </Button>
+          )}
+        </div>
+        {pendingEmail && (
           <p className="mt-4 rounded-xl bg-secondary p-3 text-sm">
             Мы отправили ссылку на {pendingEmail}. Пока вы по ней не перейдёте, вход работает по текущему адресу.
           </p>
-        ) : (
-          <form onSubmit={onChangeEmail} className="mt-5 grid gap-4 border-t pt-5 sm:grid-cols-2">
+        )}
+        {editing === "email" && (
+          <form onSubmit={onChangeEmail} className="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="new-email">Новый адрес</Label>
-              <Input id="new-email" type="email" required className="mt-1.5 h-11" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
+              <Input id="new-email" type="email" required autoFocus className="mt-1.5 h-11" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
             </div>
             <div>
-              <Label htmlFor="email-password">Пароль</Label>
+              <Label htmlFor="email-password">Текущий пароль</Label>
               <Input id="email-password" type="password" required className="mt-1.5 h-11" value={emailPassword} onChange={(e) => setEmailPassword(e.target.value)} />
             </div>
-            <Button type="submit" variant="outline" className="w-fit">
-              Сменить почту
+            <div className="flex gap-2">
+              <Button type="submit">Сменить почту</Button>
+              <Button type="button" variant="ghost" onClick={() => setEditing(null)}>
+                Отмена
+              </Button>
+            </div>
+          </form>
+        )}
+
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t pt-4">
+          <div>
+            <div className="text-sm text-muted-foreground">Пароль</div>
+            <div className="font-medium tracking-widest">••••••••</div>
+          </div>
+          {editing !== "password" && (
+            <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setEditing("password")}>
+              Изменить
             </Button>
+          )}
+        </div>
+        {editing === "password" && (
+          <form onSubmit={onChangePassword} className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="cur">Текущий пароль</Label>
+              <Input id="cur" type="password" required autoFocus className="mt-1.5 h-11" value={current} onChange={(e) => setCurrent(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="new">Новый пароль</Label>
+              <Input id="new" type="password" minLength={8} required className="mt-1.5 h-11" value={next} onChange={(e) => setNext(e.target.value)} />
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit">Сменить пароль</Button>
+              <Button type="button" variant="ghost" onClick={() => setEditing(null)}>
+                Отмена
+              </Button>
+            </div>
           </form>
         )}
       </section>
-
-      <form onSubmit={onChangePassword} className="grid gap-4 rounded-2xl border bg-card p-6">
-        <h2 className="text-lg">Смена пароля</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <Label htmlFor="cur">Текущий пароль</Label>
-            <Input id="cur" type="password" required className="mt-1.5 h-11" value={current} onChange={(e) => setCurrent(e.target.value)} />
-          </div>
-          <div>
-            <Label htmlFor="new">Новый пароль</Label>
-            <Input id="new" type="password" minLength={8} required className="mt-1.5 h-11" value={next} onChange={(e) => setNext(e.target.value)} />
-          </div>
-        </div>
-        <Button type="submit" className="w-fit">
-          Сменить пароль
-        </Button>
-      </form>
 
       <section className="rounded-2xl border border-destructive/30 bg-card p-6">
         <h2 className="text-lg">Удаление аккаунта</h2>

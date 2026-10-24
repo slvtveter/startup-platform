@@ -134,6 +134,7 @@ async def make_user(catalog) -> AsyncIterator[MakeUser]:
                 "/api/profile/me",
                 json={
                     "display_name": name or email.split("@")[0].title(),
+                    "headline": "Ищу первый проект в команде",
                     "primary_role": role,
                     "skills": list(skills),
                     "looking_for": ["free", "equity"],

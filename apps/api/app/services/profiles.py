@@ -225,7 +225,13 @@ async def list_people(
     limit: int,
     offset: int,
 ) -> tuple[list[Profile], int]:
-    stmt = _people_query()
+    # Порог каталога: роль, описание в одну строку и хотя бы один навык. Пустые карточки
+    # отталкивают основателей; по прямой ссылке профиль по-прежнему открывается.
+    stmt = _people_query().where(
+        Profile.primary_role_id.is_not(None),
+        Profile.headline != "",
+        exists().where(profile_skills.c.profile_id == Profile.id),
+    )
     if roles:
         stmt = stmt.join(Role, Role.id == Profile.primary_role_id).where(Role.slug.in_(roles))
     if skills:
