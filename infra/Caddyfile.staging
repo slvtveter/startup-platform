@@ -11,7 +11,7 @@
 		X-Content-Type-Options "nosniff"
 		X-Frame-Options "DENY"
 		# Та же CSP, что в prod (Caddyfile.prod): staging должен ловить её нарушения раньше прода.
-		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' wss://{$SITE_DOMAIN}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
 	}
 	basic_auth {
 		{$STAGING_USER} {$STAGING_PASSWORD_HASH}
