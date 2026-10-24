@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -25,6 +26,13 @@ class ReportOut(BaseModel):
 class FeedbackIn(BaseModel):
     text: str = Field(min_length=3, max_length=3000)
     page_url: str = Field(default="", max_length=500)
+
+
+class ClientEventIn(BaseModel):
+    """События, которые видит только браузер (клик по развилке на лендинге)."""
+
+    name: Literal["landing_path_selected"]
+    path: Literal["seeker", "founder"]
 
 
 class StatsOut(BaseModel):

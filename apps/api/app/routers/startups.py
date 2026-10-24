@@ -10,6 +10,7 @@ from app.schemas.application import ApplicationOut
 from app.schemas.common import OkOut, Page
 from app.schemas.startup import (
     MyStartupOut,
+    OpenSeat,
     RecommendedStartup,
     RoleIn,
     RoleUpdate,
@@ -38,6 +39,13 @@ async def list_startups(
 ) -> Page[StartupCard]:
     rows, total = await service.list_public(db, role, skill, terms, stage, q, sort, limit, offset)
     return Page(items=[service.to_card(s) for s in rows], total=total, limit=limit, offset=offset)
+
+
+@router.get("/seats", response_model=list[OpenSeat])
+async def list_open_seats(
+    db: DbSession, limit: Annotated[int, Query(ge=1, le=24)] = 8
+) -> list[OpenSeat]:
+    return await service.open_seats(db, limit)
 
 
 @router.post("/startups", response_model=StartupDetail, status_code=201)
@@ -97,7 +105,7 @@ async def update_startup_role(
 ) -> StartupDetail:
     r = await service.get_owned_role(db, role_id, user)
     await service.update_role(db, r, data)
-    return await service.to_detail(db, r.startup, user)
+    return await service.to_detail(db, await service.reload(db, r.startup_id), user)
 
 
 @router.delete("/startup-roles/{role_id}", response_model=OkOut)

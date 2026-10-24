@@ -8,7 +8,8 @@ from app.db.session import DbSession
 from app.models import Event, Feedback, Profile, Report, Startup, StartupRole
 from app.models.enums import StartupStatus
 from app.schemas.common import OkOut
-from app.schemas.ops import FeedbackIn, ReportIn, StatsOut
+from app.schemas.ops import ClientEventIn, FeedbackIn, ReportIn, StatsOut
+from app.services.events import track
 
 router = APIRouter(tags=["ops"])
 
@@ -41,6 +42,13 @@ async def public_stats(db: DbSession) -> StatsOut:
         open_roles=open_roles or 0,
         intros_30d=intros or 0,
     )
+
+
+@router.post("/events", response_model=OkOut, status_code=201)
+async def track_client_event(data: ClientEventIn, user: OptionalUser, db: DbSession) -> OkOut:
+    track(db, data.name, user.id if user else None, path=data.path)
+    await db.commit()
+    return OkOut()
 
 
 @router.post("/reports", response_model=OkOut, status_code=201)

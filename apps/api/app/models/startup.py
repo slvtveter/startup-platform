@@ -73,6 +73,8 @@ class StartupRole(Base):
     title: Mapped[str] = mapped_column(String(100))
     description: Mapped[str] = mapped_column(Text, default="")
     slots: Mapped[int] = mapped_column(Integer, default=1)
+    hours_per_week: Mapped[int | None] = mapped_column(Integer)
+    outcome: Mapped[str] = mapped_column(Text, default="", server_default="")  # «что получишь»
     is_open: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 

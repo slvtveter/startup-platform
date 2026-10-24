@@ -885,6 +885,55 @@
         }
       }
     },
+    "/api/seats": {
+      "get": {
+        "tags": [
+          "startups"
+        ],
+        "summary": "List Open Seats",
+        "operationId": "list_open_seats",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 24,
+              "minimum": 1,
+              "default": 8,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OpenSeat"
+                  },
+                  "title": "Response List Open Seats"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/startups/{slug}": {
       "get": {
         "tags": [
@@ -1662,6 +1711,47 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/StatsOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/events": {
+      "post": {
+        "tags": [
+          "ops"
+        ],
+        "summary": "Track Client Event",
+        "operationId": "track_client_event",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClientEventIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -2473,6 +2563,30 @@
         ],
         "title": "ChangePasswordIn"
       },
+      "ClientEventIn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "const": "landing_path_selected",
+            "title": "Name"
+          },
+          "path": {
+            "type": "string",
+            "enum": [
+              "seeker",
+              "founder"
+            ],
+            "title": "Path"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "path"
+        ],
+        "title": "ClientEventIn",
+        "description": "\u0421\u043e\u0431\u044b\u0442\u0438\u044f, \u043a\u043e\u0442\u043e\u0440\u044b\u0435 \u0432\u0438\u0434\u0438\u0442 \u0442\u043e\u043b\u044c\u043a\u043e \u0431\u0440\u0430\u0443\u0437\u0435\u0440 (\u043a\u043b\u0438\u043a \u043f\u043e \u0440\u0430\u0437\u0432\u0438\u043b\u043a\u0435 \u043d\u0430 \u043b\u0435\u043d\u0434\u0438\u043d\u0433\u0435)."
+      },
       "ContactsOut": {
         "properties": {
           "display_name": {
@@ -3062,6 +3176,11 @@
             "type": "array",
             "title": "Open Roles"
           },
+          "team_size": {
+            "type": "integer",
+            "title": "Team Size",
+            "default": 1
+          },
           "pending_applications": {
             "type": "integer",
             "title": "Pending Applications"
@@ -3098,6 +3217,75 @@
         },
         "type": "object",
         "title": "OkOut"
+      },
+      "OpenSeat": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "role": {
+            "$ref": "#/components/schemas/RoleOut"
+          },
+          "slots": {
+            "type": "integer",
+            "title": "Slots",
+            "default": 1
+          },
+          "hours_per_week": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hours Per Week"
+          },
+          "startup": {
+            "$ref": "#/components/schemas/OpenSeatStartup"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "role",
+          "startup"
+        ],
+        "title": "OpenSeat",
+        "description": "\u0421\u0432\u043e\u0431\u043e\u0434\u043d\u043e\u0435 \u043c\u0435\u0441\u0442\u043e \u0432 \u043a\u043e\u043c\u0430\u043d\u0434\u0435: \u0440\u043e\u043b\u044c \u043e\u0442\u043a\u0440\u044b\u0442\u043e\u0433\u043e \u0441\u0442\u0430\u0440\u0442\u0430\u043f\u0430 (\u0434\u043e\u0441\u043a\u0430 \u043d\u0430 \u043b\u0435\u043d\u0434\u0438\u043d\u0433\u0435)."
+      },
+      "OpenSeatStartup": {
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "terms": {
+            "$ref": "#/components/schemas/Terms"
+          },
+          "stage": {
+            "$ref": "#/components/schemas/Stage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slug",
+          "title",
+          "terms",
+          "stage"
+        ],
+        "title": "OpenSeatStartup"
       },
       "Page_PersonCard_": {
         "properties": {
@@ -3677,6 +3865,32 @@
         ],
         "title": "ResetIn"
       },
+      "ResponseStats": {
+        "properties": {
+          "answered_share": {
+            "type": "number",
+            "title": "Answered Share"
+          },
+          "median_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Median Hours"
+          }
+        },
+        "type": "object",
+        "required": [
+          "answered_share",
+          "median_hours"
+        ],
+        "title": "ResponseStats",
+        "description": "\u041a\u0430\u043a \u043a\u043e\u043c\u0430\u043d\u0434\u0430 \u043e\u0442\u0432\u0435\u0447\u0430\u0435\u0442 \u043d\u0430 \u043e\u0442\u043a\u043b\u0438\u043a\u0438 \u0437\u0430 90 \u0434\u043d\u0435\u0439. \u0422\u043e\u043b\u044c\u043a\u043e \u043f\u0440\u0438 \u2265 3 \u043e\u0442\u043a\u043b\u0438\u043a\u0430\u0445."
+      },
       "RoleBrief": {
         "properties": {
           "id": {
@@ -3689,6 +3903,22 @@
           },
           "role": {
             "$ref": "#/components/schemas/RoleOut"
+          },
+          "slots": {
+            "type": "integer",
+            "title": "Slots",
+            "default": 1
+          },
+          "hours_per_week": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hours Per Week"
           }
         },
         "type": "object",
@@ -3724,6 +3954,25 @@
             "minimum": 1.0,
             "title": "Slots",
             "default": 1
+          },
+          "hours_per_week": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 40.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hours Per Week"
+          },
+          "outcome": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Outcome",
+            "default": ""
           },
           "skills": {
             "items": {
@@ -3798,6 +4047,31 @@
               }
             ],
             "title": "Slots"
+          },
+          "hours_per_week": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 40.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hours Per Week"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome"
           },
           "skills": {
             "anyOf": [
@@ -3929,6 +4203,11 @@
             },
             "type": "array",
             "title": "Open Roles"
+          },
+          "team_size": {
+            "type": "integer",
+            "title": "Team Size",
+            "default": 1
           }
         },
         "type": "object",
@@ -3996,6 +4275,11 @@
             "type": "array",
             "title": "Open Roles"
           },
+          "team_size": {
+            "type": "integer",
+            "title": "Team Size",
+            "default": 1
+          },
           "description": {
             "type": "string",
             "title": "Description"
@@ -4037,6 +4321,16 @@
             "type": "array",
             "title": "My Active Role Ids",
             "default": []
+          },
+          "response_stats": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResponseStats"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -4127,13 +4421,30 @@
           "role": {
             "$ref": "#/components/schemas/RoleOut"
           },
+          "slots": {
+            "type": "integer",
+            "title": "Slots",
+            "default": 1
+          },
+          "hours_per_week": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hours Per Week"
+          },
           "description": {
             "type": "string",
             "title": "Description"
           },
-          "slots": {
-            "type": "integer",
-            "title": "Slots"
+          "outcome": {
+            "type": "string",
+            "title": "Outcome",
+            "default": ""
           },
           "is_open": {
             "type": "boolean",
@@ -4158,7 +4469,6 @@
           "title",
           "role",
           "description",
-          "slots",
           "is_open",
           "skills"
         ],
