@@ -41,6 +41,7 @@ from app.schemas.ops import (
 from app.schemas.startup import StartupDetail, StartupIn
 from app.services import catalog_admin
 from app.services import hypotheses as hypotheses_service
+from app.services import jobs as jobs_service
 from app.services import startups as startup_service
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -116,8 +117,11 @@ async def admin_metrics(
             .group_by(src)
         )
     ).all()
+    queue = await jobs_service.stats(db)
     return MetricsOut(
         days=days,
+        jobs_pending=queue["pending"],
+        jobs_failed=queue["failed"],
         funnel=[
             FunnelStep(name=n, label=label, count=counts.get(n, 0) or 0) for n, label in FUNNEL
         ],

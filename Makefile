@@ -1,6 +1,6 @@
 COMPOSE := docker compose -f infra/docker-compose.yml
 
-.PHONY: help setup dev down logs test lint fmt migrate migration gen-client seed create-admin
+.PHONY: help setup dev down logs test lint fmt migrate migration gen-client seed create-admin restart-worker
 
 help: ## Показать команды
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "}; {printf "  %-12s %s\n", $$1, $$2}'
@@ -46,3 +46,6 @@ seed: ## Демо-данные (синтетика): make seed
 
 create-admin: ## Выдать права админа: make create-admin email=you@example.com
 	$(COMPOSE) exec api python -m app.scripts.create_admin $(email)
+
+restart-worker: ## Перезапустить воркер фоновых задач после правок в apps/api
+	docker compose -f infra/docker-compose.yml restart worker

@@ -4,6 +4,8 @@ import smtplib
 from email.message import EmailMessage
 
 from app.core.config import get_settings
+from app.db.session import SessionLocal
+from app.services import jobs
 
 logger = logging.getLogger("app.mail")
 
@@ -20,21 +22,36 @@ def _send_smtp(msg: EmailMessage) -> None:
         smtp.send_message(msg)
 
 
-async def send_mail(to: str, subject: str, body: str) -> None:
-    s = get_settings()
+def _message(to: str, subject: str, body: str) -> EmailMessage:
     msg = EmailMessage()
-    msg["From"] = s.mail_from
+    msg["From"] = get_settings().mail_from
     msg["To"] = to
     msg["Subject"] = subject
     msg.set_content(body)
-    if s.mail_backend == "memory":
+    return msg
+
+
+async def send_mail(to: str, subject: str, body: str) -> None:
+    """Поставить письмо в очередь (KAN-91): медленный или недоступный SMTP не тормозит запрос.
+
+    В тестах (mail_backend=memory) письмо сразу попадает в outbox.
+    """
+    if get_settings().mail_backend == "memory":
+        outbox.append(_message(to, subject, body))
+        return
+    async with SessionLocal() as db:
+        jobs.enqueue(db, "send_mail", {"to": to, "subject": subject, "body": body})
+        await db.commit()
+
+
+@jobs.handler("send_mail")
+async def deliver(payload: dict) -> None:
+    """Обработчик воркера: ошибка SMTP вызовет повтор задачи."""
+    msg = _message(payload["to"], payload["subject"], payload["body"])
+    if get_settings().mail_backend == "memory":
         outbox.append(msg)
         return
-    try:
-        await asyncio.to_thread(_send_smtp, msg)
-    except Exception:
-        # Письмо не должно ронять запрос пользователя.
-        logger.exception("mail send failed")
+    await asyncio.to_thread(_send_smtp, msg)
 
 
 def link(path: str) -> str:

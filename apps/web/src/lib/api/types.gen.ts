@@ -544,6 +544,14 @@ export type MetricsOut = {
      * Sources
      */
     sources: Array<SourceRow>;
+    /**
+     * Jobs Pending
+     */
+    jobs_pending?: number;
+    /**
+     * Jobs Failed
+     */
+    jobs_failed?: number;
 };
 
 /**

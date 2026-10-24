@@ -3400,6 +3400,16 @@
             },
             "type": "array",
             "title": "Sources"
+          },
+          "jobs_pending": {
+            "type": "integer",
+            "title": "Jobs Pending",
+            "default": 0
+          },
+          "jobs_failed": {
+            "type": "integer",
+            "title": "Jobs Failed",
+            "default": 0
           }
         },
         "type": "object",
