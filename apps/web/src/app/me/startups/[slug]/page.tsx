@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ApplicationCard } from "@/components/domain/application-card";
+import { MarkSeen } from "@/components/site/mark-seen";
 import { Container, EmptyState, PageHeader } from "@/components/domain/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { getStartup, listStartupApplications } from "@/lib/api";
@@ -22,6 +23,7 @@ export default async function IncomingPage({ params }: { params: Promise<{ slug:
 
   return (
     <Container className="max-w-4xl">
+      <MarkSeen section="incoming" />
       <Link href="/me/startups" className="text-sm font-semibold text-muted-foreground hover:text-foreground">
         ← Мои стартапы
       </Link>

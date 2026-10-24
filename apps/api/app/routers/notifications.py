@@ -2,7 +2,16 @@ from fastapi import APIRouter
 
 from app.core.deps import CurrentUser
 from app.db.session import DbSession
-from app.schemas.notifications import EmailPrefOut, EmailPrefsIn, UnsubscribeIn, UnsubscribeOut
+from app.schemas.common import OkOut
+from app.schemas.notifications import (
+    EmailPrefOut,
+    EmailPrefsIn,
+    InboxCountOut,
+    InboxSeenIn,
+    UnsubscribeIn,
+    UnsubscribeOut,
+)
+from app.services import inbox
 from app.services import notifications as service
 
 router = APIRouter(tags=["notifications"])
@@ -32,3 +41,14 @@ async def update_email_prefs(
 async def unsubscribe(data: UnsubscribeIn, db: DbSession) -> UnsubscribeOut:
     """Отписка по ссылке из письма, без входа. Подпись проверяется в сервисе."""
     return UnsubscribeOut(label=await service.unsubscribe(db, data.u, data.k, data.t))
+
+
+@router.get("/me/inbox-count", response_model=InboxCountOut)
+async def inbox_count(user: CurrentUser, db: DbSession) -> InboxCountOut:
+    return await inbox.counts(db, user)
+
+
+@router.post("/me/inbox-seen", response_model=OkOut)
+async def inbox_seen(data: InboxSeenIn, user: CurrentUser, db: DbSession) -> OkOut:
+    await inbox.mark_seen(db, user, data.section)
+    return OkOut()

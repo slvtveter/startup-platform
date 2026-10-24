@@ -1916,6 +1916,68 @@
         }
       }
     },
+    "/api/me/inbox-count": {
+      "get": {
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Inbox Count",
+        "operationId": "inbox_count",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InboxCountOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/me/inbox-seen": {
+      "post": {
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Inbox Seen",
+        "operationId": "inbox_seen",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InboxSeenIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/stats": {
       "get": {
         "tags": [
@@ -3430,6 +3492,43 @@
           "previous"
         ],
         "title": "HypothesisRow"
+      },
+      "InboxCountOut": {
+        "properties": {
+          "mine": {
+            "type": "integer",
+            "title": "Mine",
+            "description": "\u0420\u0435\u0448\u0435\u043d\u0438\u044f \u043f\u043e \u043c\u043e\u0438\u043c \u043e\u0442\u043a\u043b\u0438\u043a\u0430\u043c \u0438 \u043d\u043e\u0432\u044b\u0435 \u043f\u0440\u0438\u0433\u043b\u0430\u0448\u0435\u043d\u0438\u044f"
+          },
+          "incoming": {
+            "type": "integer",
+            "title": "Incoming",
+            "description": "\u041d\u043e\u0432\u044b\u0435 \u043e\u0442\u043a\u043b\u0438\u043a\u0438 \u043d\u0430 \u043c\u043e\u0438 \u0441\u0442\u0430\u0440\u0442\u0430\u043f\u044b"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mine",
+          "incoming"
+        ],
+        "title": "InboxCountOut"
+      },
+      "InboxSeenIn": {
+        "properties": {
+          "section": {
+            "type": "string",
+            "enum": [
+              "mine",
+              "incoming"
+            ],
+            "title": "Section"
+          }
+        },
+        "type": "object",
+        "required": [
+          "section"
+        ],
+        "title": "InboxSeenIn"
       },
       "InviteIn": {
         "properties": {

@@ -2,19 +2,22 @@ import Link from "next/link";
 
 import { MobileNav } from "@/components/site/mobile-nav";
 import { NavLink } from "@/components/site/nav-link";
+import { InboxBadge } from "@/components/site/inbox-badge";
 import { Logo } from "@/components/site/logo";
 import { UserMenu } from "@/components/site/user-menu";
 import { buttonVariants } from "@/components/ui/button";
-import { getMe } from "@/lib/server-api";
+import { inboxCount } from "@/lib/api";
+import { getMe, serverClient } from "@/lib/server-api";
 
 export async function SiteHeader() {
   const user = await getMe();
+  const inbox = user ? (await inboxCount({ client: await serverClient() })).data : undefined;
   const links = user
     ? [
         { href: "/startups", label: "Стартапы" },
         { href: "/people", label: "Люди" },
-        { href: "/me/applications", label: "Мои заявки" },
-        { href: "/me/startups", label: "Мои стартапы" },
+        { href: "/me/applications", label: "Мои заявки", badge: inbox?.mine ?? 0 },
+        { href: "/me/startups", label: "Мои стартапы", badge: inbox?.incoming ?? 0 },
       ]
     : [
         { href: "/startups", label: "Стартапы" },
@@ -29,6 +32,7 @@ export async function SiteHeader() {
           {links.map((l) => (
             <NavLink key={l.href} href={l.href}>
               {l.label}
+              <InboxBadge count={"badge" in l ? (l.badge ?? 0) : 0} />
             </NavLink>
           ))}
         </nav>

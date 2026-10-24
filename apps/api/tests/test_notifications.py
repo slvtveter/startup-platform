@@ -76,3 +76,24 @@ async def test_email_prefs_update_and_service_mail_has_no_unsubscribe(make_user,
     )
     text, html = _parts(mail.outbox[-1])
     assert "Отписаться" not in text and "служебное письмо" in html
+
+
+async def test_inbox_counts_grow_and_reset(make_user):
+    founder = await make_user("alina@mail.ru", published=True)
+    maria = await make_user("maria@mail.ru", published=True)
+    assert (await founder.get("/api/me/inbox-count")).json() == {"mine": 0, "incoming": 0}
+
+    s = await create_published(founder)
+    r = await maria.post(
+        f"/api/startup-roles/{s['roles'][0]['id']}/applications", json={"message": MESSAGE}
+    )
+    assert (await founder.get("/api/me/inbox-count")).json()["incoming"] == 1
+    assert (
+        await founder.post("/api/me/inbox-seen", json={"section": "incoming"})
+    ).status_code == 200
+    assert (await founder.get("/api/me/inbox-count")).json()["incoming"] == 0
+
+    await founder.post(f"/api/applications/{r.json()['id']}/accept", json={})
+    assert (await maria.get("/api/me/inbox-count")).json()["mine"] == 1
+    await maria.post("/api/me/inbox-seen", json={"section": "mine"})
+    assert (await maria.get("/api/me/inbox-count")).json()["mine"] == 0
