@@ -1841,6 +1841,55 @@
         }
       }
     },
+    "/api/admin/hypotheses": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin Hypotheses",
+        "operationId": "admin_hypotheses",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 180,
+              "minimum": 1,
+              "default": 30,
+              "title": "Days"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HypothesisRow"
+                  },
+                  "title": "Response Admin Hypotheses"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/metrics": {
       "get": {
         "tags": [
@@ -2567,25 +2616,49 @@
         "properties": {
           "name": {
             "type": "string",
-            "const": "landing_path_selected",
+            "enum": [
+              "landing_viewed",
+              "landing_path_selected",
+              "startup_viewed",
+              "apply_started"
+            ],
             "title": "Name"
           },
           "path": {
-            "type": "string",
-            "enum": [
-              "seeker",
-              "founder"
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "seeker",
+                  "founder"
+                ]
+              },
+              {
+                "type": "null"
+              }
             ],
             "title": "Path"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100,
+                "pattern": "^[a-z0-9-]+$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
           }
         },
         "type": "object",
         "required": [
-          "name",
-          "path"
+          "name"
         ],
         "title": "ClientEventIn",
-        "description": "\u0421\u043e\u0431\u044b\u0442\u0438\u044f, \u043a\u043e\u0442\u043e\u0440\u044b\u0435 \u0432\u0438\u0434\u0438\u0442 \u0442\u043e\u043b\u044c\u043a\u043e \u0431\u0440\u0430\u0443\u0437\u0435\u0440 (\u043a\u043b\u0438\u043a \u043f\u043e \u0440\u0430\u0437\u0432\u0438\u043b\u043a\u0435 \u043d\u0430 \u043b\u0435\u043d\u0434\u0438\u043d\u0433\u0435)."
+        "description": "\u0421\u043e\u0431\u044b\u0442\u0438\u044f, \u043a\u043e\u0442\u043e\u0440\u044b\u0435 \u0432\u0438\u0434\u0438\u0442 \u0442\u043e\u043b\u044c\u043a\u043e \u0431\u0440\u0430\u0443\u0437\u0435\u0440 (docs/events.md). \u0411\u0435\u043b\u044b\u0439 \u0441\u043f\u0438\u0441\u043e\u043a \u0438\u043c\u0451\u043d."
       },
       "ContactsOut": {
         "properties": {
@@ -2739,6 +2812,63 @@
           "db"
         ],
         "title": "HealthOut"
+      },
+      "HypothesisRow": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "metric": {
+            "type": "string",
+            "title": "Metric"
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "%",
+              "\u0447",
+              "\u0448\u0442"
+            ],
+            "title": "Unit"
+          },
+          "current": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current"
+          },
+          "previous": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "title",
+          "metric",
+          "unit",
+          "current",
+          "previous"
+        ],
+        "title": "HypothesisRow"
       },
       "InviteIn": {
         "properties": {

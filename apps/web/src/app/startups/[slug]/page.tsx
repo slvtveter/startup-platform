@@ -8,6 +8,7 @@ import { SkillChip, StageBadge, StartupStatusBadge, TermsBadge } from "@/compone
 import { Container } from "@/components/domain/page-header";
 import { ReportButton } from "@/components/domain/report-button";
 import { initialsOf, Seat } from "@/components/domain/seats";
+import { TrackView } from "@/components/site/track-view";
 import { buttonVariants } from "@/components/ui/button";
 import { getMyProfile, getStartup, listRoles, type StartupDetail } from "@/lib/api";
 import { TERMS, TERMS_HINT, plural } from "@/lib/labels";
@@ -59,6 +60,7 @@ export default async function StartupPage({ params }: Props) {
 
   return (
     <Container className="pb-28 lg:pb-10">
+      {!s.is_owner && <TrackView name="startup_viewed" slug={s.slug} />}
       <Link href="/startups" className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-foreground">
         <ChevronLeftIcon className="size-4" /> Все стартапы
       </Link>

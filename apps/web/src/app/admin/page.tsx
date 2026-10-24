@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { AdminAction } from "@/components/domain/admin-actions";
 import { Container, PageHeader } from "@/components/domain/page-header";
-import { adminAuditLog, adminListReports, adminListStartups, adminListUsers, adminMetrics } from "@/lib/api";
+import { adminAuditLog, adminHypotheses, adminListReports, adminListStartups, adminListUsers, adminMetrics, type HypothesisRow } from "@/lib/api";
 import { STARTUP_STATUS, timeAgo } from "@/lib/labels";
 import { requireMe, serverClient } from "@/lib/server-api";
 
@@ -14,12 +14,13 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   if (!user.is_admin) notFound();
   const { days = "7", q } = await searchParams;
   const client = await serverClient();
-  const [{ data: m }, { data: users }, { data: startups }, { data: reports }, { data: audit }] = await Promise.all([
+  const [{ data: m }, { data: users }, { data: startups }, { data: reports }, { data: audit }, { data: hyp }] = await Promise.all([
     adminMetrics({ client, query: { days: Number(days) } }),
     adminListUsers({ client, query: { q } }),
     adminListStartups({ client }),
     adminListReports({ client }),
     adminAuditLog({ client }),
+    adminHypotheses({ client, query: { days: Number(days) } }),
   ]);
   const top = Math.max(1, ...(m?.funnel.map((f) => f.count) ?? [1]));
 
@@ -77,6 +78,38 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               )}
             </ul>
           </div>
+        </div>
+      </section>
+
+      <section className="mt-8 rounded-2xl border bg-card p-6">
+        <h2 className="font-sans text-base font-bold">Гипотезы редизайна за {days} дней</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Сравнение с предыдущими {days} днями. Описание гипотез: docs/ux/research.md.
+        </p>
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full min-w-[640px] text-sm">
+            <thead className="text-left text-muted-foreground">
+              <tr className="border-b">
+                <th className="py-2 pr-3 font-semibold">Гипотеза</th>
+                <th className="py-2 pr-3 font-semibold">Метрика</th>
+                <th className="py-2 pr-3 text-right font-semibold">Сейчас</th>
+                <th className="py-2 text-right font-semibold">Было</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(hyp ?? []).map((h) => (
+                <tr key={h.key} className="border-b last:border-0">
+                  <td className="py-3 pr-3">
+                    <span className="mr-2 font-bold">{h.key}</span>
+                    {h.title}
+                  </td>
+                  <td className="py-3 pr-3 text-muted-foreground">{h.metric}</td>
+                  <td className="py-3 pr-3 text-right font-semibold tabular-nums">{fmtMetric(h.current, h.unit)}</td>
+                  <td className="py-3 text-right text-muted-foreground tabular-nums">{fmtMetric(h.previous, h.unit)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
 
@@ -173,4 +206,10 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
       </section>
     </Container>
   );
+}
+
+function fmtMetric(v: number | null | undefined, unit: HypothesisRow["unit"]) {
+  if (v == null) return "нет данных";
+  if (unit === "%") return `${Math.round(v * 1000) / 10}%`;
+  return unit === "ч" ? `${v} ч` : String(v);
 }

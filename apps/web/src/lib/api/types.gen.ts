@@ -198,17 +198,21 @@ export type ChangePasswordIn = {
 /**
  * ClientEventIn
  *
- * События, которые видит только браузер (клик по развилке на лендинге).
+ * События, которые видит только браузер (docs/events.md). Белый список имён.
  */
 export type ClientEventIn = {
     /**
      * Name
      */
-    name: 'landing_path_selected';
+    name: 'landing_viewed' | 'landing_path_selected' | 'startup_viewed' | 'apply_started';
     /**
      * Path
      */
-    path: 'seeker' | 'founder';
+    path?: 'seeker' | 'founder' | null;
+    /**
+     * Slug
+     */
+    slug?: string | null;
 };
 
 /**
@@ -308,6 +312,36 @@ export type HealthOut = {
      * Db
      */
     db: 'ok' | 'error';
+};
+
+/**
+ * HypothesisRow
+ */
+export type HypothesisRow = {
+    /**
+     * Key
+     */
+    key: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Metric
+     */
+    metric: string;
+    /**
+     * Unit
+     */
+    unit: '%' | 'ч' | 'шт';
+    /**
+     * Current
+     */
+    current: number | null;
+    /**
+     * Previous
+     */
+    previous: number | null;
 };
 
 /**
@@ -2508,6 +2542,38 @@ export type SendFeedbackResponses = {
 };
 
 export type SendFeedbackResponse = SendFeedbackResponses[keyof SendFeedbackResponses];
+
+export type AdminHypothesesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Days
+         */
+        days?: number;
+    };
+    url: '/api/admin/hypotheses';
+};
+
+export type AdminHypothesesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminHypothesesError = AdminHypothesesErrors[keyof AdminHypothesesErrors];
+
+export type AdminHypothesesResponses = {
+    /**
+     * Response Admin Hypotheses
+     *
+     * Successful Response
+     */
+    200: Array<HypothesisRow>;
+};
+
+export type AdminHypothesesResponse = AdminHypothesesResponses[keyof AdminHypothesesResponses];
 
 export type AdminMetricsData = {
     body?: never;

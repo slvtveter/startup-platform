@@ -18,10 +18,12 @@ from app.schemas.ops import (
     AdminStartupOut,
     AdminUserOut,
     FunnelStep,
+    HypothesisRow,
     MetricsOut,
     ReportOut,
     SourceRow,
 )
+from app.services import hypotheses as hypotheses_service
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -45,6 +47,13 @@ def _log(db, admin: User, action: str, target_type: str, target_id: object, **de
             details=details,
         )
     )
+
+
+@router.get("/hypotheses", response_model=list[HypothesisRow])
+async def admin_hypotheses(
+    admin: AdminUser, db: DbSession, days: Annotated[int, Query(ge=1, le=180)] = 30
+) -> list[HypothesisRow]:
+    return await hypotheses_service.hypotheses(db, days)
 
 
 @router.get("/metrics", response_model=MetricsOut)

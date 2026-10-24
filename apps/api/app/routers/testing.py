@@ -1,12 +1,12 @@
 """Служебные ручки для E2E. Работают только в local/test: в staging и prod отвечают 404."""
 
 from fastapi import APIRouter
-from sqlalchemy import delete
+from sqlalchemy import delete, select
 
 from app.core.config import get_settings
 from app.core.errors import NotFound
 from app.db.session import DbSession
-from app.models import User
+from app.models import Event, User
 from app.schemas.common import OkOut
 
 router = APIRouter(tags=["testing"], include_in_schema=False)
@@ -18,6 +18,9 @@ E2E_EMAIL_DOMAIN = "@e2e.example.com"
 async def cleanup_e2e(db: DbSession) -> OkOut:
     if get_settings().env not in ("local", "test"):
         raise NotFound("Не найдено")
+    e2e_users = select(User.id).where(User.email.endswith(E2E_EMAIL_DOMAIN))
+    # События при удалении пользователя обнуляют user_id и портили бы метрики — удаляем их явно.
+    await db.execute(delete(Event).where(Event.user_id.in_(e2e_users)))
     # Стартапы, профили и отклики E2E-пользователей удаляются каскадом.
     await db.execute(delete(User).where(User.email.endswith(E2E_EMAIL_DOMAIN)))
     await db.commit()

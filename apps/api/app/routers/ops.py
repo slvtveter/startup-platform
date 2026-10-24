@@ -46,7 +46,8 @@ async def public_stats(db: DbSession) -> StatsOut:
 
 @router.post("/events", response_model=OkOut, status_code=201)
 async def track_client_event(data: ClientEventIn, user: OptionalUser, db: DbSession) -> OkOut:
-    track(db, data.name, user.id if user else None, path=data.path)
+    props = {k: v for k, v in (("path", data.path), ("slug", data.slug)) if v is not None}
+    track(db, data.name, user.id if user else None, **props)
     await db.commit()
     return OkOut()
 

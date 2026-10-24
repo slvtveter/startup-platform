@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { applyToRole, resendVerification, updateMyProfile, type ProfileUpdate } from "@/lib/api";
+import { applyToRole, resendVerification, trackClientEvent, updateMyProfile, type ProfileUpdate } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 
 export type ApplyState = "guest" | "unverified" | "incomplete" | "can_apply" | "applied";
@@ -97,7 +97,13 @@ export function ApplyDialog({ roleId, roleTitle, startupTitle, state, needs, rol
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (next) void trackClientEvent({ body: { name: "apply_started" } }).catch(() => {});
+        setOpen(next);
+      }}
+    >
       <DialogTrigger render={<Button variant={variant} />}>Откликнуться</DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
