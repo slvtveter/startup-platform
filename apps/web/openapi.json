@@ -613,6 +613,66 @@
         }
       }
     },
+    "/api/profile/me/avatar": {
+      "post": {
+        "tags": [
+          "profiles"
+        ],
+        "summary": "Upload My Avatar",
+        "operationId": "upload_my_avatar",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_my_avatar"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyProfileOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "profiles"
+        ],
+        "summary": "Delete My Avatar",
+        "operationId": "delete_my_avatar",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyProfileOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/profile/me/publish": {
       "post": {
         "tags": [
@@ -3197,6 +3257,20 @@
         ],
         "title": "Availability"
       },
+      "Body_upload_my_avatar": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_my_avatar"
+      },
       "CatalogItemIn": {
         "properties": {
           "name": {
@@ -4008,6 +4082,17 @@
             "type": "array",
             "title": "Skills"
           },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
           "bio": {
             "type": "string",
             "title": "Bio"
@@ -4374,6 +4459,17 @@
             },
             "type": "array",
             "title": "Skills"
+          },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
           }
         },
         "type": "object",
@@ -4451,6 +4547,17 @@
             },
             "type": "array",
             "title": "Skills"
+          },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
           },
           "bio": {
             "type": "string",

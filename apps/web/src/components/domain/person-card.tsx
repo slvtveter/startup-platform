@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { Avatar } from "@/components/domain/avatar-upload";
 import { SkillChip } from "@/components/domain/badges";
 import type { PersonCard as PersonCardData } from "@/lib/api";
 import { LEVEL, TERMS, initials } from "@/lib/labels";
@@ -20,7 +21,7 @@ export function PersonCard({ person }: { person: PersonCardData }) {
       className="group flex flex-col rounded-2xl border bg-card p-5 transition-colors hover:border-foreground"
     >
       <div className="flex items-center gap-3">
-        <PersonAvatar name={person.display_name} />
+        <Avatar name={person.display_name} url={person.avatar_url} className="size-12 rounded-xl text-base" />
         <div className="min-w-0">
           <div className="truncate text-lg font-bold group-hover:text-brand-ink">{person.display_name}</div>
           <div className="truncate text-sm text-muted-foreground">

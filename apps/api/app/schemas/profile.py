@@ -46,6 +46,7 @@ class PersonCard(ORM):
     looking_for: list[str]
     city: str
     skills: list[SkillOut]
+    avatar_url: str | None = None
 
 
 class MembershipOut(BaseModel):

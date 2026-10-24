@@ -41,6 +41,13 @@ class Profile(TimestampMixin, Base):
 
     user: Mapped["User"] = relationship(back_populates="profile", lazy="joined")  # noqa: F821
     primary_role: Mapped[Role | None] = relationship(lazy="joined")
+    # Ключ аватара в хранилище (KAN-34): файлы <key>-256.webp и <key>-64.webp.
+    avatar_key: Mapped[str | None] = mapped_column(String(120))
+
+    @property
+    def avatar_url(self) -> str | None:
+        return f"/media/{self.avatar_key}-256.webp" if self.avatar_key else None
+
     skills: Mapped[list[Skill]] = relationship(secondary=profile_skills, lazy="selectin")
     links: Mapped[list["ProfileLink"]] = relationship(
         cascade="all, delete-orphan", lazy="selectin", order_by="ProfileLink.id"

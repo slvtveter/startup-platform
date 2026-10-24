@@ -49,6 +49,8 @@
   ```bash
   docker compose -f compose.prod.yml --env-file .env.prod exec backup sh /scripts/restore.sh /backups/<файл>.dump
   ```
+- Файлы (аватары) лежат рядом: `backups/media-<время>.tar.gz`. Восстановить:
+  `docker compose -f compose.prod.yml --env-file .env.prod run --rm -v "$PWD/backups:/b" --entrypoint sh api -c "tar -xzf /b/media-<время>.tar.gz -C /media"`.
 - Раз в месяц проверяйте восстановление на отдельной машине.
 
 ## Напоминания об откликах

@@ -87,6 +87,7 @@ def to_card(p: Profile) -> PersonCard:
         looking_for=list(p.looking_for or []),
         city=p.city,
         skills=[SkillOut.model_validate(s) for s in p.skills],
+        avatar_url=p.avatar_url,
     )
 
 

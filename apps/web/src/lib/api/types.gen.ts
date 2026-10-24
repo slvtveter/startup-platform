@@ -182,6 +182,16 @@ export type ApplyIn = {
 export type Availability = 'few_hours' | 'part_time' | 'full_time';
 
 /**
+ * Body_upload_my_avatar
+ */
+export type BodyUploadMyAvatar = {
+    /**
+     * File
+     */
+    file: Blob | File;
+};
+
+/**
  * CatalogItemIn
  */
 export type CatalogItemIn = {
@@ -684,6 +694,10 @@ export type MyProfileOut = {
      */
     skills: Array<SkillOut>;
     /**
+     * Avatar Url
+     */
+    avatar_url?: string | null;
+    /**
      * Bio
      */
     bio: string;
@@ -905,6 +919,10 @@ export type PersonCard = {
      * Skills
      */
     skills: Array<SkillOut>;
+    /**
+     * Avatar Url
+     */
+    avatar_url?: string | null;
 };
 
 /**
@@ -938,6 +956,10 @@ export type PersonDetail = {
      * Skills
      */
     skills: Array<SkillOut>;
+    /**
+     * Avatar Url
+     */
+    avatar_url?: string | null;
     /**
      * Bio
      */
@@ -2058,6 +2080,47 @@ export type UpdateMyProfileResponses = {
 };
 
 export type UpdateMyProfileResponse = UpdateMyProfileResponses[keyof UpdateMyProfileResponses];
+
+export type DeleteMyAvatarData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/profile/me/avatar';
+};
+
+export type DeleteMyAvatarResponses = {
+    /**
+     * Successful Response
+     */
+    200: MyProfileOut;
+};
+
+export type DeleteMyAvatarResponse = DeleteMyAvatarResponses[keyof DeleteMyAvatarResponses];
+
+export type UploadMyAvatarData = {
+    body: BodyUploadMyAvatar;
+    path?: never;
+    query?: never;
+    url: '/api/profile/me/avatar';
+};
+
+export type UploadMyAvatarErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UploadMyAvatarError = UploadMyAvatarErrors[keyof UploadMyAvatarErrors];
+
+export type UploadMyAvatarResponses = {
+    /**
+     * Successful Response
+     */
+    200: MyProfileOut;
+};
+
+export type UploadMyAvatarResponse = UploadMyAvatarResponses[keyof UploadMyAvatarResponses];
 
 export type PublishMyProfileData = {
     body: PublishIn;
