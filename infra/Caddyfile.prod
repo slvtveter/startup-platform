@@ -9,6 +9,10 @@
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
 		X-Frame-Options "DENY"
+		# Только свои ресурсы (AGENTS.md, правило 7): внешние скрипты, шрифты и трекеры браузер не загрузит.
+		# 'unsafe-inline' для скриптов нужен инлайн-данным гидрации Next; eval запрещён.
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
 		-Server
 	}
 	handle /api/* {

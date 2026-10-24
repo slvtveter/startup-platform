@@ -55,8 +55,13 @@ async def test_public_stats(make_user, client):
 
 async def test_hypotheses_panel(make_user, client):
     admin = await make_user("admin@mail.ru", admin=True)
-    for _ in range(4):
-        await client.post("/api/events", json={"name": "landing_viewed"})
+    # Разные посетители: одинаковые просмотры с одного IP схлопываются (KAN-95).
+    for i in range(4):
+        await client.post(
+            "/api/events",
+            json={"name": "landing_viewed"},
+            headers={"x-forwarded-for": f"10.0.0.{i}"},
+        )
     await client.post("/api/events", json={"name": "landing_path_selected", "path": "seeker"})
     await client.post("/api/events", json={"name": "startup_viewed", "slug": "vkusnoryadom"})
     assert (

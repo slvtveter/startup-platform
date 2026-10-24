@@ -29,6 +29,11 @@ class Settings(BaseSettings):
     auth_rate_limit: int = 5
     auth_rate_window_minutes: int = 15
 
+    # Соль для хеша посетителя в клиентских событиях (дедупликация без хранения IP).
+    # Пусто — случайная соль на процесс: дедупликация работает, но сбрасывается при рестарте.
+    events_salt: str = ""
+    client_events_per_minute: int = 60
+
     @property
     def cookie_secure(self) -> bool:
         return self.env not in ("local", "test")
