@@ -1,9 +1,9 @@
 """Синтетические данные для local/staging: `make seed`. Идемпотентно, реальных данных нет.
 
 Демо-аккаунты (пароль у всех demo12345):
-  maria@demo.local   — дизайнер, ищет первый опыт
-  alina@demo.local   — основатель ВкусноРядом
-  admin@demo.local   — администратор
+  maria@example.com   — дизайнер, ищет первый опыт
+  alina@example.com   — основатель ВкусноРядом
+  admin@example.com   — администратор
 """
 
 import asyncio
@@ -318,7 +318,7 @@ async def main() -> None:
         for login, name, role, level, headline, skill_names, looking in PEOPLE:
             user = await _user(
                 db,
-                f"{login}@demo.local",
+                f"{login}@example.com",
                 name,
                 headline=headline,
                 bio=f"{headline}. Готов(а) уделять проекту 8–12 часов в неделю и быстро учиться.",
@@ -337,7 +337,7 @@ async def main() -> None:
             if not p.links:
                 p.links = [ProfileLink(kind=LinkKind.portfolio, url=f"https://example.com/{login}")]
 
-        admin = await _user(db, "admin@demo.local", "Админ")
+        admin = await _user(db, "admin@example.com", "Админ")
         admin.is_admin = True
 
         now = datetime.now(UTC)
@@ -354,7 +354,7 @@ async def main() -> None:
         ) in enumerate(STARTUPS):
             owner = await _user(
                 db,
-                f"{login}@demo.local",
+                f"{login}@example.com",
                 owner_name,
                 primary_role_id=roles["product"].id,
                 contact_telegram=login,
@@ -389,8 +389,8 @@ async def main() -> None:
         await db.flush()
 
         # Пара откликов, чтобы «Входящие» и «Мои заявки» не были пустыми.
-        maria = await db.scalar(select(User).where(User.email == "maria@demo.local"))
-        oleg = await db.scalar(select(User).where(User.email == "oleg@demo.local"))
+        maria = await db.scalar(select(User).where(User.email == "maria@example.com"))
+        oleg = await db.scalar(select(User).where(User.email == "oleg@example.com"))
         vkusno = await db.scalar(select(Startup).where(Startup.slug == "vkusnoryadom"))
         if vkusno and not await db.scalar(
             select(Application.id).where(Application.applicant_id == maria.id)

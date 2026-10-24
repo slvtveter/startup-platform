@@ -30,6 +30,7 @@ class FeedbackIn(BaseModel):
 class StatsOut(BaseModel):
     startups: int
     people: int
+    open_roles: int
     intros_30d: int
 
 

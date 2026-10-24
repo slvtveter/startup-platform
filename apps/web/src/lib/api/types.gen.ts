@@ -1213,6 +1213,10 @@ export type StatsOut = {
      */
     people: number;
     /**
+     * Open Roles
+     */
+    open_roles: number;
+    /**
      * Intros 30D
      */
     intros_30d: number;

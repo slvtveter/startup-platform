@@ -45,4 +45,9 @@ async def test_reports_and_feedback(make_user, client):
 async def test_public_stats(make_user, client):
     founder = await make_user("alina@mail.ru", published=True)
     await create_published(founder)
-    assert (await client.get("/api/stats")).json() == {"startups": 1, "people": 1, "intros_30d": 0}
+    assert (await client.get("/api/stats")).json() == {
+        "startups": 1,
+        "people": 1,
+        "open_roles": 1,
+        "intros_30d": 0,
+    }

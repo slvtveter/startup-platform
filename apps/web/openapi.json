@@ -4283,6 +4283,10 @@
             "type": "integer",
             "title": "People"
           },
+          "open_roles": {
+            "type": "integer",
+            "title": "Open Roles"
+          },
           "intros_30d": {
             "type": "integer",
             "title": "Intros 30D"
@@ -4292,6 +4296,7 @@
         "required": [
           "startups",
           "people",
+          "open_roles",
           "intros_30d"
         ],
         "title": "StatsOut"

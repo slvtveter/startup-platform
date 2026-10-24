@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 
 from app.core.deps import OptionalUser
 from app.db.session import DbSession
-from app.models import Event, Feedback, Profile, Report, Startup
+from app.models import Event, Feedback, Profile, Report, Startup, StartupRole
 from app.models.enums import StartupStatus
 from app.schemas.common import OkOut
 from app.schemas.ops import FeedbackIn, ReportIn, StatsOut
@@ -22,10 +22,25 @@ async def public_stats(db: DbSession) -> StatsOut:
         )
     )
     people = await db.scalar(select(func.count()).where(Profile.is_published.is_(True)))
+    open_roles = await db.scalar(
+        select(func.count())
+        .select_from(StartupRole)
+        .join(Startup, Startup.id == StartupRole.startup_id)
+        .where(
+            StartupRole.is_open.is_(True),
+            Startup.status == StartupStatus.recruiting,
+            Startup.is_hidden.is_(False),
+        )
+    )
     intros = await db.scalar(
         select(func.count()).where(Event.name == "contacts_exchanged", Event.created_at > since)
     )
-    return StatsOut(startups=startups or 0, people=people or 0, intros_30d=intros or 0)
+    return StatsOut(
+        startups=startups or 0,
+        people=people or 0,
+        open_roles=open_roles or 0,
+        intros_30d=intros or 0,
+    )
 
 
 @router.post("/reports", response_model=OkOut, status_code=201)
