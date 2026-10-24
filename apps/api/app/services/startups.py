@@ -1,18 +1,22 @@
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
+from statistics import median
 
 from sqlalchemy import Select, exists, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import AppError, Forbidden, NotFound
 from app.models import Application, Profile, Role, Skill, Startup, StartupMember, StartupRole, User
-from app.models.enums import ApplicationStatus, StartupStatus
+from app.models.enums import ApplicationDirection, ApplicationStatus, StartupStatus
 from app.models.startup import startup_role_skills
 from app.schemas.catalog import RoleOut, SkillOut
 from app.schemas.startup import (
     MemberOut,
     MyStartupOut,
+    OpenSeat,
+    OpenSeatStartup,
     RecommendedStartup,
+    ResponseStats,
     RoleBrief,
     RoleIn,
     RoleUpdate,
@@ -46,11 +50,18 @@ def to_card(s: Startup) -> StartupCard:
         status=s.status,
         published_at=s.published_at,
         owner_name=_display_name(s.owner),
-        open_roles=[
-            RoleBrief(id=str(r.id), title=r.title, role=RoleOut.model_validate(r.role))
-            for r in s.roles
-            if r.is_open
-        ],
+        open_roles=[_brief(r) for r in s.roles if r.is_open],
+        team_size=1 + sum(1 for m in s.members if m.user_id != s.owner_id),
+    )
+
+
+def _brief(r: StartupRole) -> RoleBrief:
+    return RoleBrief(
+        id=str(r.id),
+        title=r.title,
+        role=RoleOut.model_validate(r.role),
+        slots=r.slots,
+        hours_per_week=r.hours_per_week,
     )
 
 
@@ -105,6 +116,8 @@ async def to_detail(db: AsyncSession, s: Startup, viewer: User | None) -> Startu
                 role=RoleOut.model_validate(r.role),
                 description=r.description,
                 slots=r.slots,
+                hours_per_week=r.hours_per_week,
+                outcome=r.outcome,
                 is_open=r.is_open,
                 skills=[SkillOut.model_validate(sk) for sk in r.skills],
                 filled=filled.get(r.id, 0),
@@ -114,7 +127,67 @@ async def to_detail(db: AsyncSession, s: Startup, viewer: User | None) -> Startu
         team=team,
         is_owner=viewer is not None and viewer.id == s.owner_id,
         my_active_role_ids=my_roles,
+        response_stats=await response_stats(db, s),
     )
+
+
+async def response_stats(db: AsyncSession, s: Startup) -> ResponseStats | None:
+    """Доля отвеченных откликов и медиана часов до ответа за 90 дней (гипотеза H5)."""
+    since = datetime.now(UTC) - timedelta(days=90)
+    rows = (
+        await db.execute(
+            select(Application.created_at, Application.decided_at)
+            .join(StartupRole, StartupRole.id == Application.startup_role_id)
+            .where(
+                StartupRole.startup_id == s.id,
+                Application.direction == ApplicationDirection.apply,
+                Application.status != ApplicationStatus.withdrawn,
+                Application.created_at > since,
+            )
+        )
+    ).all()
+    if len(rows) < 3:
+        return None
+    hours = sorted(
+        (decided - created).total_seconds() / 3600 for created, decided in rows if decided
+    )
+    return ResponseStats(
+        answered_share=round(len(hours) / len(rows), 2),
+        median_hours=round(median(hours), 1) if hours else None,
+    )
+
+
+async def open_seats(db: AsyncSession, limit: int) -> list[OpenSeat]:
+    """Свежие свободные места во всех открытых стартапах, не больше двух на стартап."""
+    rows = await db.scalars(
+        select(StartupRole)
+        .join(Startup, Startup.id == StartupRole.startup_id)
+        .where(
+            StartupRole.is_open.is_(True),
+            Startup.status == StartupStatus.recruiting,
+            Startup.is_hidden.is_(False),
+        )
+        .order_by(Startup.published_at.desc(), StartupRole.created_at)
+        .limit(limit * 3)
+    )
+    seats: list[OpenSeat] = []
+    per_startup: dict[uuid.UUID, int] = {}
+    for r in rows.unique():
+        if per_startup.get(r.startup_id, 0) >= 2:
+            continue
+        per_startup[r.startup_id] = per_startup.get(r.startup_id, 0) + 1
+        st = r.startup
+        seats.append(
+            OpenSeat(
+                **_brief(r).model_dump(),
+                startup=OpenSeatStartup(
+                    slug=st.slug, title=st.title, terms=st.terms, stage=st.stage
+                ),
+            )
+        )
+        if len(seats) == limit:
+            break
+    return seats
 
 
 def _pub_slug(user: User) -> str | None:
@@ -131,6 +204,12 @@ async def get_by_slug(db: AsyncSession, slug: str, viewer: User | None) -> Start
     ):
         raise NotFound("Стартап не найден")
     return s
+
+
+async def reload(db: AsyncSession, startup_id: uuid.UUID) -> Startup:
+    """Перечитать стартап со всеми связями: при загрузке через роль коллекции не подгружены."""
+    stmt = select(Startup).where(Startup.id == startup_id)
+    return (await db.scalars(stmt.execution_options(populate_existing=True))).one()
 
 
 async def get_owned(db: AsyncSession, startup_id: uuid.UUID, user: User) -> Startup:
@@ -212,6 +291,8 @@ async def add_role(db: AsyncSession, s: Startup, data: RoleIn) -> StartupRole:
         title=data.title,
         description=data.description,
         slots=data.slots,
+        hours_per_week=data.hours_per_week,
+        outcome=data.outcome,
         skills=await _skills(db, data.skills),
     )
     db.add(r)

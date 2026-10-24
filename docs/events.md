@@ -15,6 +15,7 @@
 | `invite_sent` | основатель пригласил человека | startup_role | `startup_id` |
 | `application_answered` | ответ на отклик/приглашение | application | `accepted`, `hours`, `direction` |
 | `contacts_exchanged` | знакомство состоялось (принят отклик или приглашение) | application | `startup_id` |
+| `landing_path_selected` | клик по развилке на лендинге (гипотеза H2), пишется с клиента через `POST /api/events` | | `path`: `seeker` / `founder` |
 | `recommendation_shown` | стартап показан в блоке «Подходят тебе» | startup | |
 
 **Главная метрика фазы 1** — `contacts_exchanged` и доля откликов с ответом за 72 часа.

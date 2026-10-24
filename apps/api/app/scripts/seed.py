@@ -15,8 +15,17 @@ from sqlalchemy import select
 from app.core.security import hash_password
 from app.db.session import SessionLocal
 from app.models import Application, Profile, ProfileLink, Role, Skill, Startup, StartupRole, User
-from app.models.enums import ApplicationDirection, ApplicationStatus, LinkKind, StartupStatus
+from app.models.enums import ApplicationDirection, ApplicationStatus, LinkKind, StartupStatus, Terms
 from app.services.slug import slugify
+
+# Демо-нагрузка по типу роли и что человек получает при разных условиях участия.
+HOURS = {"frontend": 10, "backend": 10, "mobile": 10, "ml": 8, "designer": 8, "analyst": 6}
+OUTCOME = {
+    Terms.free: "Кейс в портфолио, рекомендация от основателя и опыт работы в команде",
+    Terms.paid: "Оплата по договорённости за задачи, кейс в портфолио",
+    Terms.equity: "Доля в проекте с вестингом после MVP, кейс в портфолио",
+    Terms.mixed: "Небольшая оплата сейчас и доля в проекте после первых продаж",
+}
 
 ROLES = [
     ("frontend", "Frontend-разработчик"),
@@ -381,12 +390,24 @@ async def main() -> None:
                     title=t,
                     description=d,
                     slots=1,
+                    hours_per_week=HOURS.get(r, 6),
+                    outcome=OUTCOME[terms],
                     skills=[skills[x] for x in sk],
                 )
                 for r, t, d, sk in role_rows
             ]
             db.add(s)
         await db.flush()
+
+        # Роли, созданные до появления часов и «что получишь», дозаполняем (идемпотентно).
+        stale = await db.scalars(
+            select(StartupRole).where(
+                StartupRole.hours_per_week.is_(None), StartupRole.outcome == ""
+            )
+        )
+        for role in stale:
+            role.hours_per_week = HOURS.get(role.role.slug, 6)
+            role.outcome = OUTCOME[role.startup.terms]
 
         # Пара откликов, чтобы «Входящие» и «Мои заявки» не были пустыми.
         maria = await db.scalar(select(User).where(User.email == "maria@example.com"))

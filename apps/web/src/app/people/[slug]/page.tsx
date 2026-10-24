@@ -54,7 +54,7 @@ export default async function PersonPage({ params }: Props) {
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
             <PersonAvatar name={p.display_name} size="lg" />
             <div>
-              <h1 className="text-3xl font-extrabold sm:text-4xl">{p.display_name}</h1>
+              <h1 className="text-3xl sm:text-4xl">{p.display_name}</h1>
               <p className="mt-1 text-lg text-muted-foreground">{p.primary_role?.name ?? "Роль не указана"}</p>
               {facts.length > 0 && <p className="mt-1 text-sm text-muted-foreground">{facts.join(" · ")}</p>}
             </div>
@@ -62,14 +62,14 @@ export default async function PersonPage({ params }: Props) {
           {p.headline && <p className="mt-6 text-xl font-semibold">{p.headline}</p>}
           {p.bio && <p className="mt-4 leading-relaxed whitespace-pre-line text-foreground/85">{p.bio}</p>}
 
-          <h2 className="mt-8 text-lg font-extrabold">Навыки</h2>
+          <h2 className="mt-8 text-lg">Навыки</h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {p.skills.length ? p.skills.map((s) => <SkillChip key={s.slug} name={s.name} />) : <span className="text-muted-foreground">Не указаны</span>}
           </div>
 
           {p.links.length > 0 && (
             <>
-              <h2 className="mt-8 text-lg font-extrabold">Работы</h2>
+              <h2 className="mt-8 text-lg">Работы</h2>
               <ul className="mt-3 grid gap-2">
                 {p.links.map((l) => (
                   <li key={l.url}>
@@ -84,7 +84,7 @@ export default async function PersonPage({ params }: Props) {
 
           {(p.memberships ?? []).length > 0 && (
             <>
-              <h2 className="mt-8 text-lg font-extrabold">В командах</h2>
+              <h2 className="mt-8 text-lg">В командах</h2>
               <ul className="mt-3 grid gap-2">
                 {(p.memberships ?? []).map((m) => (
                   <li key={m.startup_slug}>

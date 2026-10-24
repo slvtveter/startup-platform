@@ -3,6 +3,7 @@ import { defineConfig } from "@playwright/test";
 // E2E идут против поднятого docker compose (Caddy на :8080, Mailpit на :8025) с seed-данными.
 export default defineConfig({
   testDir: "./e2e",
+  globalTeardown: "./e2e/global-teardown.ts",
   timeout: 90_000,
   expect: { timeout: 15_000 },
   fullyParallel: false,

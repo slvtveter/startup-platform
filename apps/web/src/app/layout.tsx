@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
+import { Golos_Text, Unbounded } from "next/font/google";
 
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
@@ -8,7 +8,8 @@ import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 // next/font скачивает шрифт на этапе сборки и раздаёт его с нашего домена.
-const manrope = Manrope({ variable: "--font-sans", subsets: ["latin", "cyrillic"] });
+const golos = Golos_Text({ variable: "--font-sans", subsets: ["latin", "cyrillic"] });
+const unbounded = Unbounded({ variable: "--font-display", subsets: ["latin", "cyrillic"], weight: ["500", "600"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.SITE_URL ?? "http://localhost:8080"),
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="ru" className={`${manrope.variable} h-full antialiased`}>
+    <html lang="ru" className={`${golos.variable} ${unbounded.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <SiteHeader />
         <main className="flex-1">{children}</main>

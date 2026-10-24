@@ -196,6 +196,22 @@ export type ChangePasswordIn = {
 };
 
 /**
+ * ClientEventIn
+ *
+ * События, которые видит только браузер (клик по развилке на лендинге).
+ */
+export type ClientEventIn = {
+    /**
+     * Name
+     */
+    name: 'landing_path_selected';
+    /**
+     * Path
+     */
+    path: 'seeker' | 'founder';
+};
+
+/**
  * ContactsOut
  */
 export type ContactsOut = {
@@ -561,6 +577,10 @@ export type MyStartupOut = {
      */
     open_roles: Array<RoleBrief>;
     /**
+     * Team Size
+     */
+    team_size?: number;
+    /**
      * Pending Applications
      */
     pending_applications: number;
@@ -578,6 +598,48 @@ export type OkOut = {
      * Ok
      */
     ok?: boolean;
+};
+
+/**
+ * OpenSeat
+ *
+ * Свободное место в команде: роль открытого стартапа (доска на лендинге).
+ */
+export type OpenSeat = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Title
+     */
+    title: string;
+    role: RoleOut;
+    /**
+     * Slots
+     */
+    slots?: number;
+    /**
+     * Hours Per Week
+     */
+    hours_per_week?: number | null;
+    startup: OpenSeatStartup;
+};
+
+/**
+ * OpenSeatStartup
+ */
+export type OpenSeatStartup = {
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Title
+     */
+    title: string;
+    terms: Terms;
+    stage: Stage;
 };
 
 /**
@@ -871,6 +933,22 @@ export type ResetIn = {
 };
 
 /**
+ * ResponseStats
+ *
+ * Как команда отвечает на отклики за 90 дней. Только при ≥ 3 откликах.
+ */
+export type ResponseStats = {
+    /**
+     * Answered Share
+     */
+    answered_share: number;
+    /**
+     * Median Hours
+     */
+    median_hours: number | null;
+};
+
+/**
  * RoleBrief
  */
 export type RoleBrief = {
@@ -883,6 +961,14 @@ export type RoleBrief = {
      */
     title: string;
     role: RoleOut;
+    /**
+     * Slots
+     */
+    slots?: number;
+    /**
+     * Hours Per Week
+     */
+    hours_per_week?: number | null;
 };
 
 /**
@@ -907,6 +993,14 @@ export type RoleIn = {
      * Slots
      */
     slots?: number;
+    /**
+     * Hours Per Week
+     */
+    hours_per_week?: number | null;
+    /**
+     * Outcome
+     */
+    outcome?: string;
     /**
      * Skills
      */
@@ -943,6 +1037,14 @@ export type RoleUpdate = {
      * Slots
      */
     slots?: number | null;
+    /**
+     * Hours Per Week
+     */
+    hours_per_week?: number | null;
+    /**
+     * Outcome
+     */
+    outcome?: string | null;
     /**
      * Skills
      */
@@ -1025,6 +1127,10 @@ export type StartupCard = {
      * Open Roles
      */
     open_roles: Array<RoleBrief>;
+    /**
+     * Team Size
+     */
+    team_size?: number;
 };
 
 /**
@@ -1063,6 +1169,10 @@ export type StartupDetail = {
      */
     open_roles: Array<RoleBrief>;
     /**
+     * Team Size
+     */
+    team_size?: number;
+    /**
      * Description
      */
     description: string;
@@ -1094,6 +1204,7 @@ export type StartupDetail = {
      * My Active Role Ids
      */
     my_active_role_ids?: Array<string>;
+    response_stats?: ResponseStats | null;
 };
 
 /**
@@ -1142,13 +1253,21 @@ export type StartupRoleOut = {
     title: string;
     role: RoleOut;
     /**
+     * Slots
+     */
+    slots?: number;
+    /**
+     * Hours Per Week
+     */
+    hours_per_week?: number | null;
+    /**
      * Description
      */
     description: string;
     /**
-     * Slots
+     * Outcome
      */
-    slots: number;
+    outcome?: string;
     /**
      * Is Open
      */
@@ -1782,6 +1901,38 @@ export type CreateStartupResponses = {
 
 export type CreateStartupResponse = CreateStartupResponses[keyof CreateStartupResponses];
 
+export type ListOpenSeatsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/seats';
+};
+
+export type ListOpenSeatsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListOpenSeatsError = ListOpenSeatsErrors[keyof ListOpenSeatsErrors];
+
+export type ListOpenSeatsResponses = {
+    /**
+     * Response List Open Seats
+     *
+     * Successful Response
+     */
+    200: Array<OpenSeat>;
+};
+
+export type ListOpenSeatsResponse = ListOpenSeatsResponses[keyof ListOpenSeatsResponses];
+
 export type GetStartupData = {
     body?: never;
     path: {
@@ -2278,6 +2429,31 @@ export type PublicStatsResponses = {
 };
 
 export type PublicStatsResponse = PublicStatsResponses[keyof PublicStatsResponses];
+
+export type TrackClientEventData = {
+    body: ClientEventIn;
+    path?: never;
+    query?: never;
+    url: '/api/events';
+};
+
+export type TrackClientEventErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type TrackClientEventError = TrackClientEventErrors[keyof TrackClientEventErrors];
+
+export type TrackClientEventResponses = {
+    /**
+     * Successful Response
+     */
+    201: OkOut;
+};
+
+export type TrackClientEventResponse = TrackClientEventResponses[keyof TrackClientEventResponses];
 
 export type CreateReportData = {
     body: ReportIn;

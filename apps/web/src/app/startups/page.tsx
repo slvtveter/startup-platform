@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { FilterActions, FilterGroup, Pager, asList, type SearchParams } from "@/components/domain/filters";
+import { ChipFilter, Pager, SearchBox, asList, toggleHref, type SearchParams } from "@/components/domain/filters";
 import { Container, EmptyState, PageHeader } from "@/components/domain/page-header";
 import { StartupCard } from "@/components/domain/startup-card";
 import { buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { listRoles, listStartups } from "@/lib/api";
 import { STAGE, TERMS, plural } from "@/lib/labels";
 import { serverClient } from "@/lib/server-api";
@@ -34,57 +33,70 @@ export default async function StartupsPage({ searchParams }: { searchParams: Pro
   ]);
   const total = data?.total ?? 0;
 
+  const active = ["role", "terms", "stage", "q"].some((k) => asList(params[k]).length > 0);
+
   return (
     <Container>
       <PageHeader
         title="Стартапы"
-        description="Проекты, которые прямо сейчас ищут людей в команду. Условия участия указаны в каждой карточке."
+        description="Проекты, которые прямо сейчас ищут людей в команду. Жёлтые места свободны: на них можно откликнуться."
         actions={
-          <Link href="/startups/new" className={buttonVariants({ variant: "brand" })}>
+          <Link href="/startups/new" className={buttonVariants({ variant: "outline" })}>
             Создать стартап
           </Link>
         }
       />
-      <form className="mt-8 grid gap-8 lg:grid-cols-[240px_1fr]">
-        <aside className="grid h-fit gap-6 rounded-2xl border bg-card p-5 lg:sticky lg:top-24">
-          <FilterGroup name="role" title="Кого ищут" selected={selected.role} options={(roles ?? []).map((r) => ({ value: r.slug, label: r.name }))} />
-          <FilterGroup name="terms" title="Условия" selected={selected.terms} options={Object.entries(TERMS).map(([value, label]) => ({ value, label }))} />
-          <FilterGroup name="stage" title="Стадия" selected={selected.stage} options={Object.entries(STAGE).map(([value, label]) => ({ value, label }))} />
-          <FilterActions resetHref="/startups" />
-        </aside>
-        <section>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Input name="q" defaultValue={q} placeholder="Поиск по названию и описанию" className="h-11 bg-card sm:flex-1" />
-            <select name="sort" defaultValue={sort} className="h-11 rounded-lg border bg-card px-3 text-sm font-semibold">
-              <option value="new">Сначала новые</option>
-              <option value="roles">Больше открытых ролей</option>
-            </select>
-          </div>
-          <p className="mt-4 text-sm text-muted-foreground">
-            Найдено {total} {plural(total, "стартап", "стартапа", "стартапов")}
-          </p>
-          {data && data.items.length > 0 ? (
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              {data.items.map((s) => (
-                <StartupCard key={s.id} startup={s} />
-              ))}
-            </div>
-          ) : (
-            <div className="mt-4">
-              <EmptyState
-                title="Под этот фильтр ничего нет"
-                text="Попробуй убрать часть условий. Или создай свой стартап: возможно, именно его здесь не хватает."
-                action={
-                  <Link href="/startups/new" className={buttonVariants({ variant: "brand" })}>
-                    Создать стартап
-                  </Link>
-                }
-              />
-            </div>
-          )}
-          <Pager basePath="/startups" params={params} total={total} limit={LIMIT} page={page} />
-        </section>
-      </form>
+      <div className="mt-8 space-y-3">
+        <SearchBox params={params} placeholder="Поиск по названию и описанию" />
+        <ChipFilter basePath="/startups" params={params} name="role" title="Кого ищут" options={(roles ?? []).map((r) => ({ value: r.slug, label: r.name }))} />
+        <ChipFilter basePath="/startups" params={params} name="terms" title="Условия" options={Object.entries(TERMS).map(([value, label]) => ({ value, label }))} />
+        <ChipFilter basePath="/startups" params={params} name="stage" title="Стадия" options={Object.entries(STAGE).map(([value, label]) => ({ value, label }))} />
+      </div>
+      <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 border-t pt-5 text-sm">
+        <span className="font-semibold">
+          {total} {plural(total, "стартап", "стартапа", "стартапов")}
+        </span>
+        {active && (
+          <Link href="/startups" className="text-muted-foreground underline-offset-4 hover:underline">
+            Сбросить фильтры
+          </Link>
+        )}
+        <span className="ml-auto flex gap-1">
+          {[
+            ["new", "Сначала новые"],
+            ["roles", "Больше мест"],
+          ].map(([value, label]) => (
+            <Link
+              key={value}
+              href={toggleHref("/startups", { ...params, sort: undefined }, "sort", value === "new" ? null : value)}
+              aria-current={sort === value ? "true" : undefined}
+              className={`rounded-lg px-3 py-1.5 font-medium ${sort === value ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              {label}
+            </Link>
+          ))}
+        </span>
+      </div>
+      {data && data.items.length > 0 ? (
+        <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {data.items.map((s) => (
+            <StartupCard key={s.id} startup={s} />
+          ))}
+        </div>
+      ) : (
+        <div className="mt-5">
+          <EmptyState
+            title="Под этот фильтр ничего нет"
+            text="Попробуй убрать часть условий. Или создай свой стартап: возможно, именно его здесь не хватает."
+            action={
+              <Link href="/startups/new" className={buttonVariants({ variant: "brand" })}>
+                Создать стартап
+              </Link>
+            }
+          />
+        </div>
+      )}
+      <Pager basePath="/startups" params={params} total={total} limit={LIMIT} page={page} />
     </Container>
   );
 }

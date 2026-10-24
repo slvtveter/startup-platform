@@ -5,9 +5,9 @@ import type { PersonCard as PersonCardData } from "@/lib/api";
 import { LEVEL, TERMS, initials } from "@/lib/labels";
 
 export function PersonAvatar({ name, size = "md" }: { name: string; size?: "md" | "lg" }) {
-  const cls = size === "lg" ? "size-20 text-2xl" : "size-12 text-base";
+  const cls = size === "lg" ? "size-20 rounded-2xl text-2xl" : "size-12 text-base";
   return (
-    <span className={`grid shrink-0 place-items-center rounded-full bg-brand-soft font-extrabold text-brand-ink ${cls}`}>
+    <span className={`grid shrink-0 place-items-center rounded-xl bg-foreground font-bold text-background ${cls}`}>
       {initials(name)}
     </span>
   );
@@ -22,10 +22,10 @@ export function PersonCard({ person }: { person: PersonCardData }) {
       <div className="flex items-center gap-3">
         <PersonAvatar name={person.display_name} />
         <div className="min-w-0">
-          <div className="truncate text-lg font-extrabold group-hover:text-brand-ink">{person.display_name}</div>
+          <div className="truncate text-lg font-bold group-hover:text-brand-ink">{person.display_name}</div>
           <div className="truncate text-sm text-muted-foreground">
             {person.primary_role?.name ?? "Роль не указана"}
-            {person.experience_level ? ` · ${LEVEL[person.experience_level]}` : ""}
+            {person.experience_level ? `, ${LEVEL[person.experience_level].toLowerCase()}` : ""}
           </div>
         </div>
       </div>
@@ -36,8 +36,12 @@ export function PersonCard({ person }: { person: PersonCardData }) {
         ))}
       </div>
       {person.looking_for.length > 0 && (
-        <div className="mt-auto pt-4 text-xs font-bold text-warn-ink">
-          {person.looking_for.map((t) => TERMS[t]).join(" · ")}
+        <div className="mt-auto flex flex-wrap gap-1.5 pt-4">
+          {person.looking_for.map((t) => (
+            <span key={t} className="rounded-full border px-2 py-0.5 text-xs font-semibold text-muted-foreground">
+              {TERMS[t]}
+            </span>
+          ))}
         </div>
       )}
     </Link>

@@ -42,7 +42,7 @@ export function SettingsPanel({ email, verified }: { email: string; verified: bo
   return (
     <div className="grid gap-6">
       <section className="rounded-2xl border bg-card p-6">
-        <h2 className="text-lg font-extrabold">Почта</h2>
+        <h2 className="text-lg">Почта</h2>
         <p className="mt-1 text-muted-foreground">{email}</p>
         {verified ? (
           <p className="mt-3 text-sm font-bold text-success-ink">Подтверждена</p>
@@ -57,7 +57,7 @@ export function SettingsPanel({ email, verified }: { email: string; verified: bo
       </section>
 
       <form onSubmit={onChangePassword} className="grid gap-4 rounded-2xl border bg-card p-6">
-        <h2 className="text-lg font-extrabold">Смена пароля</h2>
+        <h2 className="text-lg">Смена пароля</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label htmlFor="cur">Текущий пароль</Label>
@@ -74,7 +74,7 @@ export function SettingsPanel({ email, verified }: { email: string; verified: bo
       </form>
 
       <section className="rounded-2xl border border-destructive/30 bg-card p-6">
-        <h2 className="text-lg font-extrabold">Удаление аккаунта</h2>
+        <h2 className="text-lg">Удаление аккаунта</h2>
         <p className="mt-1 text-sm text-muted-foreground">Профиль, стартапы и отклики будут удалены без возможности восстановления.</p>
         <Dialog>
           <DialogTrigger render={<Button variant="destructive" className="mt-4" />}>Удалить аккаунт</DialogTrigger>
