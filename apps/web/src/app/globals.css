@@ -159,6 +159,11 @@
   h2 {
     @apply font-heading font-semibold tracking-[-0.02em];
   }
+  /* По умолчанию одна колонка шириной контейнера: иначе длинный контент в неявном треке
+     раздувает страницу на мобильных. Классы grid-cols-* (слой utilities) это перекрывают. */
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
   ::selection {
     background: var(--marker);
     color: var(--foreground);

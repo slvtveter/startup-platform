@@ -48,6 +48,9 @@ class Startup(TimestampMixin, Base):
     website: Mapped[str] = mapped_column(String(300), default="")
     telegram: Mapped[str] = mapped_column(String(100), default="")
     is_hidden: Mapped[bool] = mapped_column(Boolean, default=False)  # скрыт модератором
+    # Стартап перенесён на платформу админом (KAN-75): права перейдут человеку с этим email,
+    # когда он подтвердит почту. До этого владелец — админ.
+    pending_owner_email: Mapped[str | None] = mapped_column(String(320), index=True)
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     owner: Mapped["User"] = relationship(lazy="joined")  # noqa: F821

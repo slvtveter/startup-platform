@@ -182,6 +182,42 @@ export type ApplyIn = {
 export type Availability = 'few_hours' | 'part_time' | 'full_time';
 
 /**
+ * CatalogItemIn
+ */
+export type CatalogItemIn = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Category
+     */
+    category?: string | null;
+};
+
+/**
+ * CatalogMergeIn
+ */
+export type CatalogMergeIn = {
+    /**
+     * Into
+     *
+     * slug элемента, в который сливаем дубль
+     */
+    into: string;
+};
+
+/**
+ * CatalogRenameIn
+ */
+export type CatalogRenameIn = {
+    /**
+     * Name
+     */
+    name: string;
+};
+
+/**
  * ChangePasswordIn
  */
 export type ChangePasswordIn = {
@@ -804,6 +840,44 @@ export type PersonDetail = {
      * Memberships
      */
     memberships?: Array<MembershipOut>;
+};
+
+/**
+ * PlatformStartupIn
+ *
+ * Стартап, который админ переносит на платформу за основателя (KAN-75).
+ */
+export type PlatformStartupIn = {
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Pitch
+     */
+    pitch?: string;
+    /**
+     * Description
+     */
+    description?: string;
+    stage: Stage;
+    terms: Terms;
+    /**
+     * Terms Details
+     */
+    terms_details?: string;
+    /**
+     * Website
+     */
+    website?: string;
+    /**
+     * Telegram
+     */
+    telegram?: string;
+    /**
+     * Owner Email
+     */
+    owner_email: string;
 };
 
 /**
@@ -2719,6 +2793,31 @@ export type AdminListStartupsResponses = {
 
 export type AdminListStartupsResponse = AdminListStartupsResponses[keyof AdminListStartupsResponses];
 
+export type AdminCreatePlatformStartupData = {
+    body: PlatformStartupIn;
+    path?: never;
+    query?: never;
+    url: '/api/admin/startups';
+};
+
+export type AdminCreatePlatformStartupErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminCreatePlatformStartupError = AdminCreatePlatformStartupErrors[keyof AdminCreatePlatformStartupErrors];
+
+export type AdminCreatePlatformStartupResponses = {
+    /**
+     * Successful Response
+     */
+    201: StartupDetail;
+};
+
+export type AdminCreatePlatformStartupResponse = AdminCreatePlatformStartupResponses[keyof AdminCreatePlatformStartupResponses];
+
 export type AdminHideStartupData = {
     body?: never;
     path: {
@@ -2863,3 +2962,101 @@ export type AdminAuditLogResponses = {
 };
 
 export type AdminAuditLogResponse = AdminAuditLogResponses[keyof AdminAuditLogResponses];
+
+export type AdminCatalogCreateData = {
+    body: CatalogItemIn;
+    path: {
+        /**
+         * Kind
+         */
+        kind: 'roles' | 'skills';
+    };
+    query?: never;
+    url: '/api/admin/catalog/{kind}';
+};
+
+export type AdminCatalogCreateErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminCatalogCreateError = AdminCatalogCreateErrors[keyof AdminCatalogCreateErrors];
+
+export type AdminCatalogCreateResponses = {
+    /**
+     * Successful Response
+     */
+    201: OkOut;
+};
+
+export type AdminCatalogCreateResponse = AdminCatalogCreateResponses[keyof AdminCatalogCreateResponses];
+
+export type AdminCatalogRenameData = {
+    body: CatalogRenameIn;
+    path: {
+        /**
+         * Kind
+         */
+        kind: 'roles' | 'skills';
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/admin/catalog/{kind}/{slug}';
+};
+
+export type AdminCatalogRenameErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminCatalogRenameError = AdminCatalogRenameErrors[keyof AdminCatalogRenameErrors];
+
+export type AdminCatalogRenameResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type AdminCatalogRenameResponse = AdminCatalogRenameResponses[keyof AdminCatalogRenameResponses];
+
+export type AdminCatalogMergeData = {
+    body: CatalogMergeIn;
+    path: {
+        /**
+         * Kind
+         */
+        kind: 'roles' | 'skills';
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/admin/catalog/{kind}/{slug}/merge';
+};
+
+export type AdminCatalogMergeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminCatalogMergeError = AdminCatalogMergeErrors[keyof AdminCatalogMergeErrors];
+
+export type AdminCatalogMergeResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type AdminCatalogMergeResponse = AdminCatalogMergeResponses[keyof AdminCatalogMergeResponses];

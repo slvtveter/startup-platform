@@ -10,6 +10,7 @@ from app.core.security import hash_password, hash_token, new_token, verify_passw
 from app.models import EmailToken, Profile, Session, User
 from app.models.enums import TokenPurpose
 from app.services import mail, ratelimit
+from app.services import startups as startup_service
 from app.services.events import track
 
 
@@ -125,6 +126,8 @@ async def verify_email(db: AsyncSession, token: str) -> User:
     if user.email_verified_at is None:
         user.email_verified_at = _now()
         track(db, "email_verified", user.id, "user", user.id)
+        # Стартап, который админ перенёс на этот email, переходит к владельцу (KAN-75).
+        await startup_service.claim_pending(db, user)
     await db.commit()
     return user
 

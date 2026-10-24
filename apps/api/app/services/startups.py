@@ -221,6 +221,43 @@ async def get_owned(db: AsyncSession, startup_id: uuid.UUID, user: User) -> Star
     return s
 
 
+async def create_for_platform(
+    db: AsyncSession, admin: User, data: StartupIn, owner_email: str
+) -> Startup:
+    """Админ переносит чужой проект на платформу (KAN-75) без лимита активных стартапов.
+
+    Если человек с этим email уже подтвердил почту, он сразу становится владельцем;
+    иначе права перейдут к нему при подтверждении почты (claim_pending).
+    """
+    email = owner_email.strip().lower()
+    owner = await db.scalar(select(User).where(func.lower(User.email) == email))
+    ready = owner is not None and owner.is_active and owner.email_verified
+    s = Startup(
+        owner_id=owner.id if ready else admin.id,
+        pending_owner_email=None if ready else email,
+        slug=await unique_slug(db, Startup, data.title),
+        **data.model_dump(),
+    )
+    db.add(s)
+    track(db, "startup_created", admin.id, "startup", s.id, by_admin=True)
+    await db.commit()
+    return await reload(db, s.id)
+
+
+async def claim_pending(db: AsyncSession, user: User) -> int:
+    """Передаёт пользователю стартапы, перенесённые на платформу на его email. Без commit."""
+    rows = await db.scalars(
+        select(Startup).where(func.lower(Startup.pending_owner_email) == user.email.lower())
+    )
+    claimed = 0
+    for s in rows:
+        s.owner_id = user.id
+        s.pending_owner_email = None
+        track(db, "startup_claimed", user.id, "startup", s.id)
+        claimed += 1
+    return claimed
+
+
 async def create(db: AsyncSession, user: User, data: StartupIn) -> Startup:
     active = await db.scalar(
         select(func.count()).where(Startup.owner_id == user.id, Startup.status.in_(ACTIVE))
