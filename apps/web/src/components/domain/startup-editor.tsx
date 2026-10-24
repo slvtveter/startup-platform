@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Seat, SeatRow } from "@/components/domain/seats";
@@ -16,10 +16,12 @@ import {
   closeStartup,
   createStartup,
   deleteStartupRole,
+  listRoleTemplates,
   publishStartup,
   updateStartup,
   updateStartupRole,
   type RoleOut,
+  type RoleTemplateOut,
   type SkillOut,
   type Stage,
   type StartupDetail,
@@ -236,11 +238,31 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
   };
   const [draft, setDraft] = useState(empty);
   const [adding, setAdding] = useState(startup.roles.length === 0);
+  const [templates, setTemplates] = useState<Record<string, RoleTemplateOut>>({});
+
+  // Шаблоны ролей (KAN-98): пример задач, часов и «что получишь» для каждой роли справочника.
+  useEffect(() => {
+    void listRoleTemplates().then(({ data }) => {
+      const byRole = Object.fromEntries((data ?? []).map((t) => [t.role, t]));
+      setTemplates(byRole);
+      setDraft((d) => fillFromTemplate(d, undefined, byRole[d.role], startup.terms));
+    });
+  }, [startup.terms]);
+
+  function chooseRole(role: string) {
+    setDraft((d) => fillFromTemplate({ ...d, role }, templates[d.role], templates[role], startup.terms));
+  }
+
+  function applyExample() {
+    const t = templates[draft.role];
+    if (!t) return;
+    setDraft((d) => ({ ...d, title: t.title, description: t.description, hours_per_week: t.hours_per_week, outcome: t.outcome[startup.terms] ?? "" }));
+  }
 
   async function add() {
     const { error } = await addStartupRole({ path: { startup_id: startup.id }, body: draft });
     if (error) return toast.error(errorMessage(error));
-    setDraft(empty);
+    setDraft(fillFromTemplate(empty, undefined, templates[empty.role], startup.terms));
     setAdding(false);
     router.refresh();
   }
@@ -300,7 +322,13 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
       </ul>
       {adding ? (
         <div className="mt-4 grid gap-3 border-t pt-4">
-          <select value={draft.role} onChange={(e) => setDraft({ ...draft, role: e.target.value })} className="h-10 rounded-lg border bg-card px-3 text-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">Поля заполнены примером для этой роли: поправь под свой проект.</span>
+            <button type="button" onClick={applyExample} className="ml-auto shrink-0 text-xs font-semibold text-brand-ink hover:underline">
+              Подставить пример
+            </button>
+          </div>
+          <select value={draft.role} onChange={(e) => chooseRole(e.target.value)} aria-label="Роль" className="h-10 rounded-lg border bg-card px-3 text-sm">
             {roles.map((r) => (
               <option key={r.slug} value={r.slug}>
                 {r.name}
@@ -357,4 +385,30 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
       )}
     </div>
   );
+}
+
+type RoleDraft = {
+  role: string;
+  title: string;
+  description: string;
+  outcome: string;
+  hours_per_week: number | null;
+  slots: number;
+  skills: string[];
+};
+
+/**
+ * Подставляет шаблон новой роли только в поля, которые основатель не менял:
+ * пустые или всё ещё равные шаблону предыдущей роли. Свой текст не затирается.
+ */
+export function fillFromTemplate(d: RoleDraft, prev: RoleTemplateOut | undefined, next: RoleTemplateOut | undefined, terms: string): RoleDraft {
+  if (!next) return d;
+  const untouched = <T,>(value: T, prevValue: T | undefined) => value === "" || value === null || value === prevValue;
+  return {
+    ...d,
+    title: untouched(d.title, prev?.title) ? next.title : d.title,
+    description: untouched(d.description, prev?.description) ? next.description : d.description,
+    hours_per_week: untouched(d.hours_per_week, prev?.hours_per_week) ? next.hours_per_week : d.hours_per_week,
+    outcome: untouched(d.outcome, prev?.outcome[terms]) ? (next.outcome[terms] ?? "") : d.outcome,
+  };
 }

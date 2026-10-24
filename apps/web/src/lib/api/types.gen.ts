@@ -1196,6 +1196,34 @@ export type RoleOut = {
 };
 
 /**
+ * RoleTemplateOut
+ */
+export type RoleTemplateOut = {
+    /**
+     * Role
+     */
+    role: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Description
+     */
+    description: string;
+    /**
+     * Hours Per Week
+     */
+    hours_per_week: number;
+    /**
+     * Outcome
+     */
+    outcome: {
+        [key: string]: string;
+    };
+};
+
+/**
  * RoleUpdate
  */
 export type RoleUpdate = {
@@ -1919,6 +1947,24 @@ export type ListSkillsResponses = {
 };
 
 export type ListSkillsResponse = ListSkillsResponses[keyof ListSkillsResponses];
+
+export type ListRoleTemplatesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/role-templates';
+};
+
+export type ListRoleTemplatesResponses = {
+    /**
+     * Response List Role Templates
+     *
+     * Successful Response
+     */
+    200: Array<RoleTemplateOut>;
+};
+
+export type ListRoleTemplatesResponse = ListRoleTemplatesResponses[keyof ListRoleTemplatesResponses];
 
 export type GetMyProfileData = {
     body?: never;
