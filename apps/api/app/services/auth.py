@@ -44,18 +44,28 @@ async def logout(db: AsyncSession, token: str) -> None:
 
 
 async def _issue_email_token(
-    db: AsyncSession, user: User, purpose: TokenPurpose, ttl: timedelta
+    db: AsyncSession,
+    user: User,
+    purpose: TokenPurpose,
+    ttl: timedelta,
+    new_email: str | None = None,
 ) -> str:
     token = new_token()
     db.add(
         EmailToken(
-            user_id=user.id, purpose=purpose, token_hash=hash_token(token), expires_at=_now() + ttl
+            user_id=user.id,
+            purpose=purpose,
+            token_hash=hash_token(token),
+            expires_at=_now() + ttl,
+            new_email=new_email,
         )
     )
     return token
 
 
-async def _consume_email_token(db: AsyncSession, token: str, purpose: TokenPurpose) -> User:
+async def _consume_email_token(
+    db: AsyncSession, token: str, purpose: TokenPurpose
+) -> tuple[User, EmailToken]:
     row = await db.scalar(
         select(EmailToken).where(
             EmailToken.token_hash == hash_token(token), EmailToken.purpose == purpose
@@ -67,7 +77,7 @@ async def _consume_email_token(db: AsyncSession, token: str, purpose: TokenPurpo
     user = await db.get(User, row.user_id)
     if user is None:
         raise AppError("Ссылка недействительна или устарела. Запросите новую.")
-    return user
+    return user, row
 
 
 async def send_verification(db: AsyncSession, user: User) -> None:
@@ -122,7 +132,7 @@ async def login(db: AsyncSession, email: str, password: str, ip: str) -> tuple[U
 
 
 async def verify_email(db: AsyncSession, token: str) -> User:
-    user = await _consume_email_token(db, token, TokenPurpose.verify_email)
+    user, _ = await _consume_email_token(db, token, TokenPurpose.verify_email)
     if user.email_verified_at is None:
         user.email_verified_at = _now()
         track(db, "email_verified", user.id, "user", user.id)
@@ -152,7 +162,7 @@ async def forgot_password(db: AsyncSession, email: str, ip: str) -> None:
 
 
 async def reset_password(db: AsyncSession, token: str, password: str) -> None:
-    user = await _consume_email_token(db, token, TokenPurpose.reset_password)
+    user, _ = await _consume_email_token(db, token, TokenPurpose.reset_password)
     user.password_hash = hash_password(password)
     await db.execute(delete(Session).where(Session.user_id == user.id))
     await db.commit()
@@ -163,6 +173,49 @@ async def change_password(db: AsyncSession, user: User, current: str, new: str) 
         raise AppError("Текущий пароль указан неверно")
     user.password_hash = hash_password(new)
     await db.commit()
+
+
+async def request_email_change(db: AsyncSession, user: User, new_email: str, password: str) -> None:
+    """KAN-72: письмо со ссылкой уходит на новый адрес; старый работает до подтверждения."""
+    if user.password_hash is None or not verify_password(password, user.password_hash):
+        raise AppError("Пароль указан неверно")
+    new_email = new_email.lower()
+    if new_email == user.email:
+        raise AppError("Это ваш текущий адрес")
+    key = f"change-email:{user.id}"
+    await ratelimit.ensure_allowed(db, key)
+    ratelimit.hit(db, key)
+    if await db.scalar(select(User.id).where(User.email == new_email)):
+        raise Conflict("Этот адрес уже занят другим аккаунтом")
+    token = await _issue_email_token(
+        db, user, TokenPurpose.change_email, timedelta(hours=24), new_email=new_email
+    )
+    await db.commit()
+    await mail.send_mail(
+        new_email,
+        "Подтвердите новый адрес почты",
+        "Здравствуйте!\n\nЧтобы сделать этот адрес основным для входа, перейдите по ссылке:\n"
+        f"{mail.link('/confirm-email?token=' + token)}\n\n"
+        "Ссылка действует 24 часа. Если вы ничего не меняли, просто проигнорируйте письмо.",
+    )
+    await mail.send_mail(
+        user.email,
+        "Запрошена смена почты",
+        f"Для вашего аккаунта запросили смену почты на {new_email}. Пока новый адрес не "
+        "подтверждён, вход работает по этому. Если это были не вы, смените пароль в настройках.",
+    )
+
+
+async def confirm_email_change(db: AsyncSession, token: str) -> User:
+    user, row = await _consume_email_token(db, token, TokenPurpose.change_email)
+    if await db.scalar(select(User.id).where(User.email == row.new_email, User.id != user.id)):
+        raise Conflict("Этот адрес уже занят другим аккаунтом")
+    user.email = row.new_email
+    user.email_verified_at = _now()  # переход по ссылке из письма доказывает владение адресом
+    track(db, "email_changed", user.id, "user", user.id)
+    await startup_service.claim_pending(db, user)
+    await db.commit()
+    return user
 
 
 async def delete_account(db: AsyncSession, user: User) -> None:

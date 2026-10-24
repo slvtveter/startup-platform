@@ -114,3 +114,37 @@ async def test_change_password_and_delete_account(client):
     assert (await client.delete("/api/auth/account")).status_code == 200
     r = await client.post("/api/auth/login", json={"email": "a@a.ru", "password": "another-pass"})
     assert r.status_code == 401
+
+
+async def test_change_email_requires_confirmation_from_new_address(make_user, client):
+    maria = await make_user("maria@mail.ru")
+    await make_user("taken@mail.ru")
+    body = {"new_email": "maria.new@mail.ru", "password": "secret-pass-1"}
+    assert (
+        await maria.post("/api/auth/change-email", json=body | {"password": "wrong"})
+    ).status_code == 400
+    r = await maria.post("/api/auth/change-email", json=body | {"new_email": "taken@mail.ru"})
+    assert r.status_code == 409
+
+    mail.outbox.clear()
+    assert (await maria.post("/api/auth/change-email", json=body)).status_code == 200
+    to = [m["To"] for m in mail.outbox]
+    assert to == ["maria.new@mail.ru", "maria@mail.ru"]  # ссылка на новый, уведомление на старый
+    token = _token_from_mail(0)
+
+    # До подтверждения работает старый адрес.
+    assert (await maria.get("/api/auth/me")).json()["email"] == "maria@mail.ru"
+    r = await client.post(
+        "/api/auth/login", json={"email": "maria@mail.ru", "password": "secret-pass-1"}
+    )
+    assert r.status_code == 200
+
+    assert (await client.post("/api/auth/confirm-email", json={"token": token})).status_code == 200
+    me = (await maria.get("/api/auth/me")).json()
+    assert me["email"] == "maria.new@mail.ru" and me["email_verified"] is True
+    r = await client.post(
+        "/api/auth/login", json={"email": "maria.new@mail.ru", "password": "secret-pass-1"}
+    )
+    assert r.status_code == 200
+    # Ссылка одноразовая.
+    assert (await client.post("/api/auth/confirm-email", json={"token": token})).status_code == 400

@@ -5,6 +5,7 @@ from app.core.deps import CurrentUser, client_ip
 from app.db.session import DbSession
 from app.models import User
 from app.schemas.auth import (
+    ChangeEmailIn,
     ChangePasswordIn,
     ForgotIn,
     LoginIn,
@@ -111,6 +112,19 @@ async def reset_password(data: ResetIn, db: DbSession) -> OkOut:
 @router.post("/password/change", response_model=OkOut)
 async def change_password(data: ChangePasswordIn, user: CurrentUser, db: DbSession) -> OkOut:
     await auth_service.change_password(db, user, data.current_password, data.new_password)
+    return OkOut()
+
+
+@router.post("/change-email", response_model=OkOut)
+async def change_email(data: ChangeEmailIn, user: CurrentUser, db: DbSession) -> OkOut:
+    await auth_service.request_email_change(db, user, data.new_email, data.password)
+    return OkOut()
+
+
+@router.post("/confirm-email", response_model=OkOut)
+async def confirm_email_change(data: TokenIn, db: DbSession) -> OkOut:
+    """Переход по ссылке из письма на новый адрес. Вход не нужен: доказательство — сама ссылка."""
+    await auth_service.confirm_email_change(db, data.token)
     return OkOut()
 
 
