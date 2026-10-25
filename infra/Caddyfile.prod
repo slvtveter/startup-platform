@@ -33,3 +33,8 @@
 		reverse_proxy web:3000
 	}
 }
+
+# www ведёт на основной домен: одна каноническая версия для SEO и cookie.
+www.{$SITE_DOMAIN} {
+	redir https://{$SITE_DOMAIN}{uri} permanent
+}
