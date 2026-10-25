@@ -9,7 +9,8 @@ PREV=$(cat .deployed-tag 2>/dev/null || true)
 
 healthy() {
   for _ in $(seq 1 40); do
-    if $C ps api | grep -q healthy &&
+    # Ровно healthy: grep по тексту совпал бы и с unhealthy.
+    if [ "$($C ps api --format '{{.Health}}')" = "healthy" ] &&
       $C exec -T api python -c "import urllib.request; urllib.request.urlopen('http://web:3000/', timeout=5)" 2>/dev/null; then
       return 0
     fi
@@ -22,7 +23,7 @@ export IMAGE_TAG="$TAG"
 $C pull api web
 
 # Бэкап до миграций нового релиза. Не получился — не выкатываем.
-if $C ps --status running db | grep -q db; then
+if [ -n "$($C ps -q --status running db)" ]; then
   $C run --rm --no-deps --entrypoint /bin/sh backup /scripts/backup.sh
 fi
 
