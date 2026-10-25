@@ -5,6 +5,7 @@ from statistics import median
 from sqlalchemy import Select, exists, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.demo import is_demo
 from app.core.errors import AppError, Forbidden, NotFound
 from app.db import search
 from app.models import (
@@ -63,6 +64,7 @@ def to_card(s: Startup) -> StartupCard:
         owner_name=_display_name(s.owner),
         open_roles=[_brief(r) for r in s.roles if r.is_open],
         team_size=1 + sum(1 for m in s.members if m.user_id != s.owner_id),
+        is_demo=is_demo(s.owner),
     )
 
 

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { SkillChip } from "@/components/domain/badges";
+import { DemoBadge, DemoNotice, SkillChip } from "@/components/domain/badges";
 import { WriteDialog } from "@/components/domain/chat/write-dialog";
 import { InviteDialog, type InviteOption } from "@/components/domain/invite-dialog";
 import { Container } from "@/components/domain/page-header";
@@ -61,6 +61,7 @@ export default async function PersonPage({ params }: Props) {
             <Avatar name={p.display_name} url={p.avatar_url} className="size-20 rounded-2xl text-2xl" />
             <div className="min-w-0">
               <h1 className="text-[30px] leading-tight sm:text-[40px]">{p.display_name}</h1>
+              {p.is_demo && <DemoBadge className="mt-2" />}
               <p className="mt-1 text-lg text-muted-foreground">{facts.join(", ")}</p>
             </div>
           </header>
@@ -141,7 +142,9 @@ export default async function PersonPage({ params }: Props) {
               </>
             )}
             <div className="mt-5">
-              {!user ? (
+              {p.is_demo ? (
+                <DemoNotice kind="person" />
+              ) : !user ? (
                 <Link href={`/login?next=/people/${p.slug}`} className={buttonVariants({ variant: "brand", className: "w-full" })}>
                   Войти, чтобы написать
                 </Link>

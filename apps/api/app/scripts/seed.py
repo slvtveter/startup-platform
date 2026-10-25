@@ -14,8 +14,9 @@ from sqlalchemy import select
 
 from app.core.security import hash_password
 from app.db.session import SessionLocal
-from app.models import Application, Profile, ProfileLink, Role, Skill, Startup, StartupRole, User
+from app.models import Application, Profile, ProfileLink, Startup, StartupRole, User
 from app.models.enums import ApplicationDirection, ApplicationStatus, LinkKind, StartupStatus, Terms
+from app.scripts.catalog import ensure_catalog
 from app.services.slug import slugify
 
 # Демо-нагрузка по типу роли и что человек получает при разных условиях участия.
@@ -25,32 +26,6 @@ OUTCOME = {
     Terms.paid: "Оплата по договорённости за задачи, кейс в портфолио",
     Terms.equity: "Доля в проекте с вестингом после MVP, кейс в портфолио",
     Terms.mixed: "Небольшая оплата сейчас и доля в проекте после первых продаж",
-}
-
-ROLES = [
-    ("frontend", "Frontend-разработчик"),
-    ("backend", "Backend-разработчик"),
-    ("mobile", "Mobile-разработчик"),
-    ("designer", "Дизайнер"),
-    ("product", "Продакт-менеджер"),
-    ("marketer", "Маркетолог"),
-    ("smm", "SMM-специалист"),
-    ("analyst", "Аналитик данных"),
-    ("ml", "ML-инженер"),
-    ("qa", "QA-инженер"),
-    ("devops", "DevOps-инженер"),
-    ("copywriter", "Копирайтер"),
-]
-
-SKILLS = {
-    "dev": "Python FastAPI Django JavaScript TypeScript React Next.js Vue Node.js Go Java Kotlin Swift "
-    "Flutter PostgreSQL Docker Git Linux REST GraphQL",
-    "design": "Figma UX-исследования Прототипирование Дизайн-системы Мобильные-интерфейсы Иллюстрация "
-    "Брендинг Motion Tilda Adobe-Illustrator",
-    "data": "SQL pandas scikit-learn PyTorch Статистика A/B-тесты Power-BI Excel",
-    "marketing": "SMM Таргет-VK SEO Контент-маркетинг Email-маркетинг Аналитика-трафика Копирайтинг "
-    "Customer-Development",
-    "product": "Jira Roadmap Unit-экономика Интервью-с-пользователями",
 }
 
 PEOPLE = [
@@ -284,10 +259,6 @@ STARTUPS = [
 ]
 
 
-def _slug_skill(name: str) -> str:
-    return slugify(name)
-
-
 async def _user(db, email: str, name: str, **profile) -> User:
     user = await db.scalar(select(User).where(User.email == email))
     if user:
@@ -305,24 +276,7 @@ async def _user(db, email: str, name: str, **profile) -> User:
 async def main() -> None:
     random.seed(7)
     async with SessionLocal() as db:
-        roles: dict[str, Role] = {}
-        for i, (slug, name) in enumerate(ROLES):
-            role = await db.scalar(select(Role).where(Role.slug == slug)) or Role(
-                slug=slug, name=name, sort=i
-            )
-            db.add(role)
-            roles[slug] = role
-        skills: dict[str, Skill] = {}
-        for category, names in SKILLS.items():
-            for raw in names.split():
-                name = raw.replace("-", " ")
-                slug = _slug_skill(raw)
-                skill = await db.scalar(select(Skill).where(Skill.slug == slug)) or Skill(
-                    slug=slug, name=name, category=category
-                )
-                db.add(skill)
-                skills[raw] = skill
-        await db.flush()
+        roles, skills = await ensure_catalog(db)
 
         for login, name, role, level, headline, skill_names, looking in PEOPLE:
             user = await _user(

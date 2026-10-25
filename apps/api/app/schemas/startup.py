@@ -83,6 +83,7 @@ class StartupCard(BaseModel):
     owner_name: str
     open_roles: list[RoleBrief]
     team_size: int = 1
+    is_demo: bool = False
 
 
 class ResponseStats(BaseModel):

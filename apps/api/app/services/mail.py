@@ -8,6 +8,7 @@ from pathlib import Path
 from string import Template
 
 from app.core.config import get_settings
+from app.core.demo import is_demo_email
 from app.db.session import SessionLocal
 from app.models import User
 from app.services import jobs, notifications
@@ -71,6 +72,8 @@ async def send_mail(
     не будет, иначе в письмо добавится ссылка отписки. Без kind письмо служебное.
     В тестах (mail_backend=memory) письмо сразу попадает в outbox.
     """
+    if is_demo_email(to):
+        return
     unsubscribe = None
     if kind is not None and user is not None:
         if not notifications.enabled(user, kind):

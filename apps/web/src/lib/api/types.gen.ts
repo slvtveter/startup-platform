@@ -829,6 +829,10 @@ export type MyProfileOut = {
      */
     avatar_url?: string | null;
     /**
+     * Is Demo
+     */
+    is_demo?: boolean;
+    /**
      * Bio
      */
     bio: string;
@@ -909,6 +913,10 @@ export type MyStartupOut = {
      * Team Size
      */
     team_size?: number;
+    /**
+     * Is Demo
+     */
+    is_demo?: boolean;
     /**
      * Pending Applications
      */
@@ -1076,6 +1084,10 @@ export type PersonCard = {
      * Avatar Url
      */
     avatar_url?: string | null;
+    /**
+     * Is Demo
+     */
+    is_demo?: boolean;
 };
 
 /**
@@ -1113,6 +1125,10 @@ export type PersonDetail = {
      * Avatar Url
      */
     avatar_url?: string | null;
+    /**
+     * Is Demo
+     */
+    is_demo?: boolean;
     /**
      * Bio
      */
@@ -1574,6 +1590,10 @@ export type StartupCard = {
      * Team Size
      */
     team_size?: number;
+    /**
+     * Is Demo
+     */
+    is_demo?: boolean;
 };
 
 /**
@@ -1615,6 +1635,10 @@ export type StartupDetail = {
      * Team Size
      */
     team_size?: number;
+    /**
+     * Is Demo
+     */
+    is_demo?: boolean;
     /**
      * Description
      */

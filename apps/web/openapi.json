@@ -4669,6 +4669,11 @@
             ],
             "title": "Avatar Url"
           },
+          "is_demo": {
+            "type": "boolean",
+            "title": "Is Demo",
+            "default": false
+          },
           "bio": {
             "type": "string",
             "title": "Bio"
@@ -4800,6 +4805,11 @@
             "type": "integer",
             "title": "Team Size",
             "default": 1
+          },
+          "is_demo": {
+            "type": "boolean",
+            "title": "Is Demo",
+            "default": false
           },
           "pending_applications": {
             "type": "integer",
@@ -5077,6 +5087,11 @@
               }
             ],
             "title": "Avatar Url"
+          },
+          "is_demo": {
+            "type": "boolean",
+            "title": "Is Demo",
+            "default": false
           }
         },
         "type": "object",
@@ -5165,6 +5180,11 @@
               }
             ],
             "title": "Avatar Url"
+          },
+          "is_demo": {
+            "type": "boolean",
+            "title": "Is Demo",
+            "default": false
           },
           "bio": {
             "type": "string",
@@ -6004,6 +6024,11 @@
             "type": "integer",
             "title": "Team Size",
             "default": 1
+          },
+          "is_demo": {
+            "type": "boolean",
+            "title": "Is Demo",
+            "default": false
           }
         },
         "type": "object",
@@ -6075,6 +6100,11 @@
             "type": "integer",
             "title": "Team Size",
             "default": 1
+          },
+          "is_demo": {
+            "type": "boolean",
+            "title": "Is Demo",
+            "default": false
           },
           "description": {
             "type": "string",
