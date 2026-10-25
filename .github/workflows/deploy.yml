@@ -1,46 +1,60 @@
 name: Deploy
 
-# Только вручную и только через GitHub Environment с обязательным подтверждением человеком.
-# У агентов доступа к секретам сервера нет. Настройка: docs/deploy.md.
+# Merge в main = релиз в прод: CI вызывает этот workflow после зелёных проверок и публикации образов.
+# Вручную (Actions → Deploy → Run workflow) — откат на любой прошлый sha-xxxxxxx. Настройка: docs/deploy.md.
 on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        default: production
+      image_tag:
+        type: string
+        required: true
   workflow_dispatch:
     inputs:
       environment:
         description: "Куда деплоим"
         type: choice
-        options: [staging, production]
-        default: staging
+        options: [production, staging]
+        default: production
       image_tag:
         description: "Тег образа (sha-xxxxxxx или main)"
         required: true
         default: main
 
-concurrency:
-  group: deploy-${{ inputs.environment }}
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
+    # Выкатки в одно окружение идут по очереди и не прерывают друг друга.
+    concurrency:
+      group: deploy-${{ inputs.environment }}
+      cancel-in-progress: false
+    environment:
+      name: ${{ inputs.environment }}
+      url: https://envola.ru
     steps:
+      - name: Check image tag
+        env:
+          TAG: ${{ inputs.image_tag }}
+        run: |
+          echo "$TAG" | grep -qxE 'main|sha-[0-9a-f]{7}' || { echo "bad image tag: $TAG"; exit 1; }
       - uses: actions/checkout@v7
       - name: Configure SSH
+        env:
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+          # Ключ хоста из секрета: подменённый сервер не получит ни код, ни команды.
+          if [ -n "$KNOWN_HOSTS" ]; then echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts; fi
       - name: Upload infra files
         run: |
-          scp -r infra/compose.prod.yml infra/Caddyfile.prod infra/Caddyfile.staging infra/backup \
+          scp -r infra/compose.prod.yml infra/Caddyfile.prod infra/Caddyfile.staging infra/backup infra/deploy.sh \
             "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ vars.DEPLOY_PATH || '/opt/startup-platform' }}/"
-      - name: Pull and restart
+      - name: Backup, release, health check, rollback on failure
         run: |
-          ssh "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" "set -e
-            cd ${{ vars.DEPLOY_PATH || '/opt/startup-platform' }}
-            export IMAGE_TAG=${{ inputs.image_tag }}
-            docker compose -f compose.prod.yml --env-file .env.prod pull api web
-            docker compose -f compose.prod.yml --env-file .env.prod up -d
-            for i in \$(seq 1 40); do curl -sf -o /dev/null http://localhost:80 -H 'Host: x' || true; docker compose -f compose.prod.yml --env-file .env.prod ps api | grep -q healthy && exit 0; sleep 3; done
-            docker compose -f compose.prod.yml --env-file .env.prod logs --tail=100 api
-            exit 1"
+          ssh "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            "sh ${{ vars.DEPLOY_PATH || '/opt/startup-platform' }}/deploy.sh '${{ inputs.image_tag }}'"
