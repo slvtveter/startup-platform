@@ -30,7 +30,7 @@ async def test_notification_has_html_and_unsubscribe_works_without_login(make_us
 
     msg = next(m for m in mail.outbox if m["To"] == "alina@mail.ru")
     text, html = _parts(msg)
-    assert "Отписаться от таких писем" in text and "startup.platform" in html
+    assert "Отписаться от таких писем" in text and "envola" in html
     assert "<script" not in html and "<img" not in html
     url = re.search(r"(http\S+/unsubscribe\?\S+)", text).group(1)
     assert msg["List-Unsubscribe"] == f"<{url}>"

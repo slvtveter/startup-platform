@@ -32,7 +32,7 @@ _docs = get_settings().env in ("local", "test")
 # Всё API живёт под /api: Caddy проксирует этот префикс на FastAPI,
 # остальное отдаёт Next.js — один origin, без CORS.
 app = FastAPI(
-    title="Startup Platform API",
+    title="Envola API",
     openapi_url="/api/openapi.json" if _docs else None,
     docs_url="/api/docs" if _docs else None,
     redoc_url=None,
