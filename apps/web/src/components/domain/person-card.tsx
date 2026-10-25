@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { Avatar } from "@/components/domain/avatar-upload";
-import { SkillChip } from "@/components/domain/badges";
+import { DemoBadge, SkillChip } from "@/components/domain/badges";
 import type { PersonCard as PersonCardData } from "@/lib/api";
 import { LEVEL, TERMS, initials } from "@/lib/labels";
 
@@ -35,6 +35,7 @@ export function PersonCard({ person }: { person: PersonCardData }) {
           <div className="truncate text-lg font-bold group-hover:text-brand-ink">{person.display_name}</div>
           {role && <div className="truncate text-sm text-muted-foreground">{role}</div>}
         </div>
+        {person.is_demo && <DemoBadge className="ml-auto self-start" />}
       </div>
       {person.headline && <p className="mt-3 line-clamp-2 text-sm text-foreground/80">{person.headline}</p>}
       {skills.length > 0 && (

@@ -1,6 +1,7 @@
 from sqlalchemy import Select, and_, exists, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.demo import is_demo
 from app.core.errors import AppError, NotFound
 from app.db import search
 from app.models import (
@@ -89,6 +90,7 @@ def to_card(p: Profile) -> PersonCard:
         city=p.city,
         skills=[SkillOut.model_validate(s) for s in p.skills],
         avatar_url=p.avatar_url,
+        is_demo=is_demo(p.user),
     )
 
 

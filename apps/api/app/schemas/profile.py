@@ -47,6 +47,7 @@ class PersonCard(ORM):
     city: str
     skills: list[SkillOut]
     avatar_url: str | None = None
+    is_demo: bool = False
 
 
 class MembershipOut(BaseModel):

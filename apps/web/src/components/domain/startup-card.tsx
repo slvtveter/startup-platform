@@ -1,7 +1,7 @@
 import { Check } from "lucide-react";
 import Link from "next/link";
 
-import { StageBadge, TermsBadge } from "@/components/domain/badges";
+import { DemoBadge, StageBadge, TermsBadge } from "@/components/domain/badges";
 import { SeatRow } from "@/components/domain/seats";
 import type { StartupCard as StartupCardData } from "@/lib/api";
 import { plural, timeAgo } from "@/lib/labels";
@@ -61,6 +61,7 @@ export function StartupCard({ startup, reasons }: { startup: StartupCardData; re
       )}
       <div className="mt-auto flex items-center gap-2 pt-4 text-xs text-muted-foreground">
         <StageBadge stage={startup.stage} />
+        {startup.is_demo && <DemoBadge />}
         <span className="ml-auto">{timeAgo(startup.published_at)}</span>
       </div>
     </Link>

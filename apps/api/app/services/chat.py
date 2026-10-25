@@ -12,6 +12,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import and_, func, or_, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.demo import ensure_not_demo
 from app.core.errors import AppError, Forbidden, NotFound, TooManyRequests
 from app.models import Application, Conversation, Message, User
 from app.schemas.chat import ChatApplicationRef, ChatPeer, ConversationOut, MessageOut
@@ -229,6 +230,7 @@ async def start(db: AsyncSession, user: User, slug: str, body: str) -> Conversat
     target = await profile_service.get_public(db, slug)
     if target.user_id == user.id:
         raise AppError("Нельзя написать самому себе")
+    ensure_not_demo(target.user)
     a, b = _pair(user.id, target.user_id)
     exists_ = await db.scalar(
         select(Conversation.id).where(Conversation.user_a_id == a, Conversation.user_b_id == b)

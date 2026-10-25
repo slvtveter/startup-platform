@@ -1,13 +1,20 @@
 # Деплой
 
-Схема: GitHub Actions собирает образы `api` и `web` на каждый merge в `main`, проверяет их
-настоящим prod-стеком (HTTPS через Caddy, миграции, health) и публикует в GHCR:
+Схема: **merge в `main` = релиз в прод.** GitHub Actions на каждый merge собирает образы `api` и `web`,
+проверяет их настоящим prod-стеком (HTTPS через Caddy, миграции, health), публикует в GHCR и сразу выкатывает:
 
-- `ghcr.io/slvtveter/startup-platform-api:main` и `:sha-xxxxxxx`
-- `ghcr.io/slvtveter/startup-platform-web:main` и `:sha-xxxxxxx`
+- `ghcr.io/slvtveter/startup-platform-api:sha-xxxxxxx` (и `:main`)
+- `ghcr.io/slvtveter/startup-platform-web:sha-xxxxxxx` (и `:main`)
 
-Выкатка на сервер — workflow **Deploy** (Actions → Deploy → Run workflow), только вручную
-и только через GitHub Environment с подтверждением человеком.
+Выкатка (`infra/deploy.sh` на сервере):
+1. `pg_dump` базы и архив аватаров в `backups/` — до миграций нового релиза. Бэкап не удался — релиз не выкатывается.
+2. Новые образы, миграции применяются при старте `api`.
+3. Проверка: `api` healthy и `web` отвечает. Не поднялось за 2 минуты — автоматический откат на прошлый тег
+   (он хранится в `.deployed-tag`). Схему назад не откатываем, поэтому миграции пишем обратно совместимыми.
+
+Отдельных веток `prod`/`dev` нет: в прод уходит тот же образ, что прошёл проверки. Незаконченное прячем за флагом.
+Staging (`staging.envola.ru`, автодеплой из `main`, прод — кнопкой тем же образом) включим, когда появятся
+живые пользователи и рискованные миграции; для двух стеков нужен сервер с 4 ГБ.
 
 ## Какой сервер нужен
 
@@ -61,17 +68,18 @@
    docker compose -f compose.prod.yml --env-file .env.prod up -d
    docker compose -f compose.prod.yml --env-file .env.prod exec api python -m app.scripts.create_admin you@example.com
    ```
-4. В GitHub → Settings → Environments создать `staging` и `production`:
-   - Required reviewers: хранитель прода.
-   - Secrets: `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY` (отдельный ключ только для деплоя).
+4. В GitHub → Settings → Environments создать `production`:
+   - Secrets: `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY` (отдельный ключ только для деплоя),
+     `DEPLOY_KNOWN_HOSTS` (`ssh-keyscan -H <host>`: workflow проверяет, что подключается к своему серверу).
    - Variable (опционально): `DEPLOY_PATH` (по умолчанию `/opt/startup-platform`).
+   - Required reviewers на бесплатном тарифе для приватного репо недоступны; ворота — merge PR.
 
 ## Выкатка и откат
 
-- Выкатить: Actions → Deploy → environment, `image_tag` = `main` или конкретный `sha-xxxxxxx`.
-- Откатить: тот же workflow с предыдущим `sha-...` (теги неизменяемые).
-- Миграции применяются автоматически при старте контейнера `api`. Откат схемы — только руками
-  хранителя схемы (`alembic downgrade`), поэтому миграции пишем обратно совместимыми.
+- Выкатить: merge PR в `main`. Ход выкатки — в Actions → CI → job `deploy`.
+- Откатить: Actions → Deploy → Run workflow, `image_tag` = предыдущий `sha-xxxxxxx` (теги неизменяемые).
+- Руками на сервере: `sh /opt/startup-platform/deploy.sh sha-xxxxxxx`.
+- Откат схемы — только руками хранителя схемы (`alembic downgrade`).
 
 ## Staging
 
@@ -105,3 +113,11 @@ GlitchTip для ошибок и Uptime Kuma для доступности ст�
 ## Фоновые задачи
 
 Сервис `worker` (`python -m app.worker`) разбирает очередь `jobs`: письма отправляются с повторами (1, 2, 4, 8 минут, после 5 неудач задача помечается упавшей) и раз в час идут напоминания основателям. Cron для `app.scripts.remind` больше не нужен. Очередь и упавшие задачи видны в `/admin`.
+
+## Справочник и примеры на пустом проде
+
+- Роли и навыки: `docker compose -f compose.prod.yml --env-file .env.prod exec api python -m app.scripts.catalog`.
+  Идемпотентно, уже существующие записи не трогает.
+- Примеры (3 стартапа и 7 человек с пометкой «Пример»): `... exec api python -m app.scripts.demo add`.
+  Почта у них `@demo.invalid`: войти нельзя, писем нет, откликнуться, пригласить и написать нельзя.
+  Когда появятся настоящие стартапы: `... exec api python -m app.scripts.demo remove` — удалит и аватарки.
