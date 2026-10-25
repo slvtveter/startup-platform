@@ -34,6 +34,10 @@ async def test_notification_has_html_and_unsubscribe_works_without_login(make_us
     assert "<script" not in html and "<img" not in html
     url = re.search(r"(http\S+/unsubscribe\?\S+)", text).group(1)
     assert msg["List-Unsubscribe"] == f"<{url}>"
+    # Отслеживание переходов и открытий у почтового сервиса выключено.
+    assert (
+        '"track_links": 0' in msg["X-UNISENDER-GO"] and '"track_read": 0' in msg["X-UNISENDER-GO"]
+    )
     q = {k: v[0] for k, v in parse_qs(urlparse(url).query).items()}
 
     # Подделанная подпись и чужой тип не принимаются.
