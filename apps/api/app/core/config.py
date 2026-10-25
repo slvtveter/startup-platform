@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     smtp_port: int = 1025
     smtp_user: str = ""
     smtp_password: str = ""
-    mail_from: str = "Startup Platform <noreply@startup-platform.local>"
+    mail_from: str = "Envola <noreply@envola.ru>"
 
     # Rate limiting для auth-эндпоинтов: столько попыток за окно.
     auth_rate_limit: int = 5

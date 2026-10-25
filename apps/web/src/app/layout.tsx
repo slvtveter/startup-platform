@@ -14,10 +14,10 @@ const unbounded = Unbounded({ variable: "--font-display", subsets: ["latin", "cy
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.SITE_URL ?? "http://localhost:8080"),
-  title: { default: "Startup Platform: первый опыт в IT и команда для стартапа", template: "%s · Startup Platform" },
+  title: { default: "Envola: первый опыт в IT и команда для стартапа", template: "%s · Envola" },
   description:
     "Стажёры и выпускники находят стартапы для первого реального опыта, а основатели собирают команду: дизайнеров, разработчиков, маркетологов.",
-  openGraph: { type: "website", locale: "ru_RU", siteName: "Startup Platform" },
+  openGraph: { type: "website", locale: "ru_RU", siteName: "Envola" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
