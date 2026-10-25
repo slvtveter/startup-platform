@@ -5,9 +5,10 @@ on:
   push:
     branches: [main]
 
+# На PR старый прогон отменяем. На main нет: иначе новый push оборвал бы выкатку на полпути.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   REGISTRY: ghcr.io/${{ github.repository }}
@@ -118,8 +119,12 @@ jobs:
     permissions:
       contents: read
       packages: write
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
     steps:
       - uses: actions/checkout@v7
+      - id: tag
+        run: echo "tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
       - name: Build images
         run: |
           docker build -t $REGISTRY-api:sha-${GITHUB_SHA::7} apps/api
@@ -184,3 +189,13 @@ jobs:
             docker push $REGISTRY-$svc:sha-${GITHUB_SHA::7}
             docker push $REGISTRY-$svc:main
           done
+
+  # Merge в main = релиз в прод (docs/deploy.md): тот же образ, что прошёл проверки выше.
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [api, web, e2e, images]
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: production
+      image_tag: ${{ needs.images.outputs.tag }}
+    secrets: inherit
