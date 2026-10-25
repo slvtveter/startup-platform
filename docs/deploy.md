@@ -50,7 +50,7 @@
    sudo sshd -t && sudo systemctl restart ssh
    sudo apt install -y unattended-upgrades && sudo dpkg-reconfigure -plow unattended-upgrades
    ```
-2. DNS: A-запись домена на IP сервера. HTTPS-сертификат Caddy выпустит сам.
+2. DNS: A-записи `@` и `www` на IP сервера (prod: envola.ru → 195.58.56.117). HTTPS-сертификаты для обоих Caddy выпустит сам, www редиректит на основной домен.
 3. На сервере:
    ```bash
    sudo mkdir -p /opt/startup-platform && sudo chown $USER /opt/startup-platform
