@@ -200,7 +200,11 @@ async def open_seats(db: AsyncSession, limit: int) -> list[OpenSeat]:
             OpenSeat(
                 **_brief(r).model_dump(),
                 startup=OpenSeatStartup(
-                    slug=st.slug, title=st.title, terms=st.terms, stage=st.stage
+                    slug=st.slug,
+                    title=st.title,
+                    terms=st.terms,
+                    stage=st.stage,
+                    is_demo=is_demo(st.owner),
                 ),
             )
         )

@@ -981,6 +981,10 @@ export type OpenSeatStartup = {
     title: string;
     terms: Terms;
     stage: Stage;
+    /**
+     * Is Demo
+     */
+    is_demo?: boolean;
 };
 
 /**
