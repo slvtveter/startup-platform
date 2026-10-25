@@ -177,7 +177,123 @@
     *::before,
     *::after {
       animation-duration: 0.01ms !important;
+      animation-delay: 0s !important;
       transition-duration: 0.01ms !important;
+      transition-delay: 0s !important;
     }
   }
+}
+
+/* ===== Движение (docs/ux/design-system.md) =====
+   Короткое и по делу: новое появляется снизу вверх и проявляется, ничего не прыгает.
+   Длительности 200–450 мс, кривая «быстрый старт, мягкая остановка». Reduced motion — выше. */
+:root {
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --enter-ms: 420ms;
+}
+
+@keyframes enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Смена страницы (app/template.tsx и шаблоны разделов): лёгкое проявление, без сдвига вёрстки. */
+.page-enter {
+  animation: enter-up 340ms var(--ease-out) both;
+}
+
+/* Списки карточек появляются волной: каждый следующий на 40 мс позже, не дольше ~0.5 с на всё. */
+.stagger > * {
+  animation: enter-up var(--enter-ms) var(--ease-out) both;
+}
+.stagger > :nth-child(2) {
+  animation-delay: 40ms;
+}
+.stagger > :nth-child(3) {
+  animation-delay: 80ms;
+}
+.stagger > :nth-child(4) {
+  animation-delay: 120ms;
+}
+.stagger > :nth-child(5) {
+  animation-delay: 160ms;
+}
+.stagger > :nth-child(6) {
+  animation-delay: 200ms;
+}
+.stagger > :nth-child(7) {
+  animation-delay: 240ms;
+}
+.stagger > :nth-child(8) {
+  animation-delay: 280ms;
+}
+.stagger > :nth-child(n + 9) {
+  animation-delay: 320ms;
+}
+
+/* Появление при прокрутке (components/site/reveal.tsx). Пока JS не загрузился, всё видно;
+   после загрузки блок прячется до момента, когда попадёт в экран. Задержка шага — --d. */
+[data-reveal="armed"] .reveal-item {
+  opacity: 0;
+  transform: translateY(14px);
+}
+[data-reveal] .reveal-item {
+  transition:
+    opacity 480ms var(--ease-out) var(--d, 0ms),
+    transform 480ms var(--ease-out) var(--d, 0ms);
+}
+
+/* Линия между шагами прорисовывается слева направо, бейдж «Принят» мягко «встаёт» на место,
+   контакты проявляются из размытия — как будто их только что открыли. */
+[data-reveal] .reveal-line {
+  transform-origin: left;
+  transition: transform 600ms var(--ease-out) var(--d, 0ms);
+}
+[data-reveal="armed"] .reveal-line {
+  transform: scaleX(0);
+}
+[data-reveal] .reveal-pop {
+  transition:
+    opacity 300ms var(--ease-out) var(--d, 0ms),
+    transform 420ms cubic-bezier(0.3, 1.4, 0.5, 1) var(--d, 0ms);
+}
+[data-reveal="armed"] .reveal-pop {
+  opacity: 0;
+  transform: scale(0.6);
+}
+[data-reveal] .reveal-unblur {
+  transition:
+    filter 600ms var(--ease-out) var(--d, 0ms),
+    opacity 600ms var(--ease-out) var(--d, 0ms);
+}
+[data-reveal="armed"] .reveal-unblur {
+  filter: blur(6px);
+  opacity: 0.4;
+}
+
+/* Частые вопросы: ответ раскрывается по высоте, а не появляется рывком.
+   Работает в браузерах с ::details-content и interpolate-size, в остальных — мгновенно. */
+@supports selector(::details-content) {
+  :root {
+    interpolate-size: allow-keywords;
+  }
+  .faq::details-content {
+    block-size: 0;
+    overflow: hidden;
+    transition:
+      block-size 320ms var(--ease-out),
+      content-visibility 320ms allow-discrete;
+  }
+  .faq[open]::details-content {
+    block-size: auto;
+  }
+}
+.faq[open] .faq-answer {
+  animation: enter-up 360ms var(--ease-out) both;
 }

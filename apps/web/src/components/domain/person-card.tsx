@@ -27,7 +27,7 @@ export function PersonCard({ person }: { person: PersonCardData }) {
   return (
     <Link
       href={`/people/${person.slug}`}
-      className="group flex flex-col rounded-2xl border bg-card p-5 transition-colors hover:border-foreground"
+      className="group flex flex-col rounded-2xl border bg-card p-5 transition-[border-color,transform,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:border-foreground hover:shadow-[0_8px_24px_-12px_rgb(18_22_51/0.25)]"
     >
       <div className="flex items-center gap-3">
         <Avatar name={person.display_name} url={person.avatar_url} className="size-12 rounded-xl text-base" />
