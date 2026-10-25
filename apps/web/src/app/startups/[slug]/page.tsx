@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ApplyDialog, type ApplyState } from "@/components/domain/apply-dialog";
-import { SkillChip, StageBadge, StartupStatusBadge, TermsBadge } from "@/components/domain/badges";
+import { DemoBadge, DemoNotice, SkillChip, StageBadge, StartupStatusBadge, TermsBadge } from "@/components/domain/badges";
 import { Container } from "@/components/domain/page-header";
 import { ReportButton } from "@/components/domain/report-button";
 import { Avatar } from "@/components/domain/avatar-upload";
@@ -70,6 +70,7 @@ export default async function StartupPage({ params }: Props) {
         <div className="flex flex-wrap gap-2">
           <TermsBadge terms={s.terms} />
           <StageBadge stage={s.stage} />
+          {s.is_demo && <DemoBadge />}
           {s.status === "closed" && openSeats === 0 ? (
             <span className="inline-flex items-center rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-bold text-success-ink">
               Команда собрана
@@ -154,7 +155,7 @@ export default async function StartupPage({ params }: Props) {
                         )}
                       </div>
                     )}
-                    {!s.is_owner && (
+                    {!s.is_owner && !s.is_demo && (
                       <div className="mt-5">
                         <ApplyDialog
                           roleId={r.id}
@@ -236,7 +237,12 @@ export default async function StartupPage({ params }: Props) {
               <div className="text-sm text-muted-foreground">Как команда отвечает</div>
               <div className="mt-1 font-semibold">{responseText(s.response_stats)}</div>
             </div>
-            {openSeats > 0 && !s.is_owner && (
+            {s.is_demo && (
+              <div className="mt-5">
+                <DemoNotice kind="startup" />
+              </div>
+            )}
+            {openSeats > 0 && !s.is_owner && !s.is_demo && (
               <a href="#roles" className={buttonVariants({ variant: "brand", size: "lg", className: "mt-5 w-full max-lg:hidden" })}>
                 Выбрать место
               </a>
@@ -248,7 +254,7 @@ export default async function StartupPage({ params }: Props) {
         </aside>
       </div>
 
-      {openSeats > 0 && !s.is_owner && (
+      {openSeats > 0 && !s.is_owner && !s.is_demo && (
         <div className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 px-4 py-3 backdrop-blur lg:hidden">
           <div className="mx-auto flex max-w-6xl items-center gap-3">
             <span className="text-sm">

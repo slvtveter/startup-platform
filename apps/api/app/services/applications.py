@@ -5,6 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.demo import ensure_not_demo
 from app.core.errors import AppError, Conflict, Forbidden, NotFound
 from app.models import Application, Profile, Startup, StartupRole, User
 from app.models.enums import ApplicationDirection, ApplicationStatus, StartupStatus
@@ -102,6 +103,7 @@ async def apply(db: AsyncSession, user: User, role_id: uuid.UUID, message: str) 
     role = await _open_role(db, role_id)
     if role.startup.owner_id == user.id:
         raise AppError("Нельзя откликнуться на свой стартап")
+    ensure_not_demo(role.startup.owner)
     blockers = profile_service.apply_blockers(user, user.profile)
     if blockers:
         raise AppError("Чтобы откликнуться, дополните профиль", blockers)
@@ -140,6 +142,7 @@ async def invite(
     target: Profile = await profile_service.get_public(db, person_slug)
     if target.user_id == founder.id:
         raise AppError("Нельзя пригласить самого себя")
+    ensure_not_demo(target.user)
     # Счётчик приглашений считаем по стартапам основателя.
     since = _now() - timedelta(days=1)
     sent = await db.scalar(
