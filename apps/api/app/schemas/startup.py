@@ -116,6 +116,7 @@ class OpenSeatStartup(BaseModel):
     title: str
     terms: Terms
     stage: Stage
+    is_demo: bool = False
 
 
 class OpenSeat(RoleBrief):

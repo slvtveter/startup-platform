@@ -3,9 +3,10 @@ from datetime import UTC, datetime, timedelta
 from fastapi import APIRouter, Request
 from sqlalchemy import func, select
 
+from app.core.demo import real_user
 from app.core.deps import OptionalUser, client_ip
 from app.db.session import DbSession
-from app.models import Event, Feedback, Profile, Report, Startup, StartupRole
+from app.models import Event, Feedback, Profile, Report, Startup, StartupRole, User
 from app.models.enums import StartupStatus
 from app.schemas.common import OkOut
 from app.schemas.ops import ClientEventIn, FeedbackIn, ReportIn, StatsOut
@@ -25,19 +26,29 @@ async def _limit(db: DbSession, kind: str, request: Request) -> None:
 async def public_stats(db: DbSession) -> StatsOut:
     since = datetime.now(UTC) - timedelta(days=30)
     startups = await db.scalar(
-        select(func.count()).where(
-            Startup.status == StartupStatus.recruiting, Startup.is_hidden.is_(False)
+        select(func.count())
+        .select_from(Startup)
+        .join(User, User.id == Startup.owner_id)
+        .where(
+            Startup.status == StartupStatus.recruiting, Startup.is_hidden.is_(False), real_user()
         )
     )
-    people = await db.scalar(select(func.count()).where(Profile.is_published.is_(True)))
+    people = await db.scalar(
+        select(func.count())
+        .select_from(Profile)
+        .join(User, User.id == Profile.user_id)
+        .where(Profile.is_published.is_(True), real_user())
+    )
     open_roles = await db.scalar(
         select(func.count())
         .select_from(StartupRole)
         .join(Startup, Startup.id == StartupRole.startup_id)
+        .join(User, User.id == Startup.owner_id)
         .where(
             StartupRole.is_open.is_(True),
             Startup.status == StartupStatus.recruiting,
             Startup.is_hidden.is_(False),
+            real_user(),
         )
     )
     intros = await db.scalar(

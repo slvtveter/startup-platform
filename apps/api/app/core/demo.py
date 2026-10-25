@@ -14,6 +14,11 @@ def is_demo_email(email: str) -> bool:
     return email.lower().endswith("@" + DEMO_EMAIL_DOMAIN)
 
 
+def real_user():
+    """Условие для запросов: пользователь не демо. Счётчики на лендинге — только настоящие."""
+    return User.email.not_like(f"%@{DEMO_EMAIL_DOMAIN}")
+
+
 def is_demo(user: User) -> bool:
     return is_demo_email(user.email)
 

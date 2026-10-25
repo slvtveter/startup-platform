@@ -1,7 +1,7 @@
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
 
-import { TermsBadge } from "@/components/domain/badges";
+import { DemoBadge, TermsBadge } from "@/components/domain/badges";
 import { Container, EmptyState } from "@/components/domain/page-header";
 import { initialsOf, Seat, SeatRow } from "@/components/domain/seats";
 import { StartupCard } from "@/components/domain/startup-card";
@@ -62,10 +62,13 @@ async function Landing() {
               <span className="mt-1 block text-sm text-muted-foreground">Опиши идею и открой места в команде</span>
             </PathLink>
           </div>
-          <p className="mt-6 text-sm text-muted-foreground">
-            {stats?.startups ?? 0} {plural(stats?.startups ?? 0, "стартап", "стартапа", "стартапов")} и{" "}
-            {stats?.people ?? 0} {plural(stats?.people ?? 0, "человек", "человека", "человек")} уже здесь
-          </p>
+          {/* Считаются только настоящие: примеры (is_demo) в счётчик не входят, а при нуле строку не показываем. */}
+          {(stats?.startups || stats?.people) ? (
+            <p className="mt-6 text-sm text-muted-foreground">
+              {stats?.startups ?? 0} {plural(stats?.startups ?? 0, "стартап", "стартапа", "стартапов")} и{" "}
+              {stats?.people ?? 0} {plural(stats?.people ?? 0, "человек", "человека", "человек")} уже здесь
+            </p>
+          ) : null}
         </div>
 
         <SeatBoard seats={seats ?? []} total={openRoles} />
@@ -136,9 +139,11 @@ function SeatBoard({ seats, total }: { seats: OpenSeat[]; total: number }) {
     <div className="rounded-3xl bg-secondary p-5 sm:p-6">
       <div className="flex items-baseline gap-3">
         <h2 className="font-sans text-base font-bold tracking-normal">Свободные места сейчас</h2>
-        <span className="ml-auto text-sm text-muted-foreground">
-          {total} {plural(total, "роль", "роли", "ролей")}
-        </span>
+        {total > 0 && (
+          <span className="ml-auto text-sm text-muted-foreground">
+            {total} {plural(total, "роль", "роли", "ролей")}
+          </span>
+        )}
       </div>
       {seats.length ? (
         <ul className="mt-4 space-y-2">
@@ -156,7 +161,11 @@ function SeatBoard({ seats, total }: { seats: OpenSeat[]; total: number }) {
                     {s.hours_per_week ? `, ${s.hours_per_week} ч в неделю` : ""}
                   </span>
                 </span>
-                <TermsBadge terms={s.startup.terms} className="ml-auto" />
+                {s.startup.is_demo ? (
+                  <DemoBadge className="ml-auto" />
+                ) : (
+                  <TermsBadge terms={s.startup.terms} className="ml-auto" />
+                )}
               </Link>
             </li>
           ))}

@@ -25,6 +25,11 @@ async def test_demo_is_marked_and_unreachable(make_user, client, media):
     assert people["total"] == 7
     assert all(p["is_demo"] and p["avatar_url"] for p in people["items"])
     assert len(list(media.rglob("*.webp"))) == 14  # 7 аватарок × 2 размера
+    # Счётчики на лендинге — только настоящие, места на доске помечены.
+    stats = (await client.get("/api/stats")).json()
+    assert stats["startups"] == stats["people"] == stats["open_roles"] == 0
+    seats = (await client.get("/api/seats")).json()
+    assert seats and all(s["startup"]["is_demo"] for s in seats)
 
     maria = await make_user("maria@mail.ru", published=True)
     detail = (await client.get(f"/api/startups/{startups['items'][0]['slug']}")).json()
