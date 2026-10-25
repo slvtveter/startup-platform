@@ -1,5 +1,6 @@
 import asyncio
 import html
+import json
 import logging
 import re
 import smtplib
@@ -60,6 +61,9 @@ def _message(to: str, subject: str, body: str, unsubscribe: str | None = None) -
     msg.add_alternative(_html(subject, body, unsubscribe), subtype="html")
     if unsubscribe:
         msg["List-Unsubscribe"] = f"<{unsubscribe}>"
+    # Unisender Go: не подменять ссылки и не вставлять пиксель открытия. Письма служебные,
+    # а ссылки подтверждения и отписки должны вести прямо на сайт. Другие SMTP заголовок игнорируют.
+    msg["X-UNISENDER-GO"] = json.dumps({"track_links": 0, "track_read": 0})
     return msg
 
 
