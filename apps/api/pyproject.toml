@@ -1,7 +1,7 @@
 [project]
 name = "api"
 version = "0.1.0"
-description = "Startup Platform backend"
+description = "Envola backend"
 requires-python = ">=3.13"
 dependencies = [
     "alembic>=1.20.1",

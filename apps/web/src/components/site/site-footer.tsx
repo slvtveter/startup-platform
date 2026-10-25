@@ -31,7 +31,7 @@ export function SiteFooter() {
         <div>
           <div className="flex items-center gap-2 font-heading text-[15px] font-semibold">
             <LogoMark />
-            startup.platform
+            envola
           </div>
           <p className="mt-3 max-w-xs text-muted-foreground">
             Новички в IT получают первый реальный опыт, а основатели — людей в команду. Без резюме и откликов в пустоту.
@@ -57,7 +57,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t">
         <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 px-4 py-4 text-xs text-muted-foreground sm:px-6">
-          <span>© {new Date().getFullYear()} startup.platform</span>
+          <span>© {new Date().getFullYear()} envola</span>
           <Link href="/cookies" className="hover:text-foreground">
             Cookie и данные
           </Link>

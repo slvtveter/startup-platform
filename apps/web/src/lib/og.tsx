@@ -87,7 +87,7 @@ export async function ogImage({
           <div style={{ width: 18, height: 18, borderRadius: 5, background: INK }} />
           <div style={{ width: 18, height: 18, borderRadius: 5, background: INK }} />
           <div style={{ width: 18, height: 18, borderRadius: 5, background: MARKER, border: `2px dashed ${INK}` }} />
-          <div style={{ marginLeft: 12, fontFamily: DISPLAY }}>startup.platform</div>
+          <div style={{ marginLeft: 12, fontFamily: DISPLAY }}>envola</div>
         </div>
         <div style={{ marginTop: 64, fontFamily: DISPLAY, fontSize: title.length > 24 ? 64 : 84, lineHeight: 1.1 }}>
           {title}

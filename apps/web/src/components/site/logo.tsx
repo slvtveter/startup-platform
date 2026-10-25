@@ -15,7 +15,7 @@ export function Logo() {
   return (
     <Link href="/" className="flex shrink-0 items-center gap-2 font-heading text-[13px] font-semibold tracking-tight sm:gap-2.5 sm:text-[15px]">
       <LogoMark />
-      startup.platform
+      envola
     </Link>
   );
 }
