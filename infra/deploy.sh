@@ -29,6 +29,8 @@ fi
 
 $C up -d --remove-orphans
 if healthy; then
+  # Справочник ролей и навыков: без него в профиле нечего выбрать. Идемпотентно.
+  $C exec -T api python -m app.scripts.catalog || echo "catalog step failed (old image?)" >&2
   echo "$TAG" > .deployed-tag
   docker image prune -f > /dev/null
   echo "deployed $TAG"
