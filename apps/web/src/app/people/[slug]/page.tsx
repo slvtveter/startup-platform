@@ -49,8 +49,10 @@ export default async function PersonPage({ params }: Props) {
   const experience = p.memberships ?? [];
   const month = new Intl.DateTimeFormat("ru-RU", { month: "long", year: "numeric" });
 
+  const showBar = !p.is_demo && user?.profile?.slug !== p.slug;
+
   return (
-    <Container>
+    <Container className={showBar ? "pb-28 lg:pb-10" : undefined}>
       <Link href="/people" className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-foreground">
         <ChevronLeftIcon className="size-4" /> Все люди
       </Link>
@@ -121,7 +123,7 @@ export default async function PersonPage({ params }: Props) {
           </div>
         </div>
 
-        <aside className="h-fit space-y-4 lg:sticky lg:top-24">
+        <aside id="contact" className="h-fit scroll-mt-24 space-y-4 lg:sticky lg:top-24">
           <div className="rounded-2xl bg-secondary p-5">
             <div className="text-sm text-muted-foreground">Ищет проект</div>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -165,6 +167,31 @@ export default async function PersonPage({ params }: Props) {
           <p className="px-1 text-sm text-muted-foreground">Контакты откроются, если человек примет приглашение в команду.</p>
         </aside>
       </div>
+
+      {/* На телефоне блок с кнопкой оказывается в самом конце — дублируем действие внизу экрана, как на странице стартапа. */}
+      {showBar && (
+        <div className="fixed inset-x-0 bottom-[var(--cookie-offset,0px)] z-30 border-t bg-background/95 px-4 py-3 backdrop-blur lg:hidden">
+          <div className="mx-auto flex max-w-6xl items-center gap-3">
+            <span className="min-w-0 text-sm">
+              <span className="block truncate font-semibold">{p.display_name}</span>
+              {p.looking_for.length > 0 && (
+                <span className="block truncate text-muted-foreground">
+                  Ищет проект: {p.looking_for.map((t) => TERMS[t].toLowerCase()).join(", ")}
+                </span>
+              )}
+            </span>
+            {user ? (
+              <a href="#contact" className={buttonVariants({ variant: "brand", size: "lg", className: "ml-auto shrink-0" })}>
+                {options.length > 0 ? "Пригласить" : "Написать"}
+              </a>
+            ) : (
+              <Link href={`/login?next=/people/${p.slug}`} className={buttonVariants({ variant: "brand", size: "lg", className: "ml-auto shrink-0" })}>
+                Войти и написать
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
     </Container>
   );
 }
