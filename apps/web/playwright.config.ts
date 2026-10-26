@@ -8,7 +8,8 @@ export default defineConfig({
   globalTeardown: "./e2e/global-teardown.ts",
   timeout: 90_000,
   expect: { timeout: 15_000 },
-  fullyParallel: false,
+  // Делим по отдельным тестам, а не по файлам: иначе шарды в CI неравные (visual.spec — половина времени).
+  fullyParallel: true,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["github"], ["list"]] : "list",
   use: {
