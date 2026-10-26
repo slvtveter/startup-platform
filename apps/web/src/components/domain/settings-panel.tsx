@@ -58,7 +58,7 @@ export function SettingsPanel({ email, verified }: { email: string; verified: bo
   return (
     <div className="grid gap-6">
       <section className="rounded-2xl border bg-card p-6">
-        <h2 className="text-lg">Вход в аккаунт</h2>
+        <h2 className="font-sans text-lg font-bold tracking-normal">Вход в аккаунт</h2>
         <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t pt-4">
           <div className="min-w-0">
             <div className="text-sm text-muted-foreground">Почта</div>
@@ -133,7 +133,7 @@ export function SettingsPanel({ email, verified }: { email: string; verified: bo
       </section>
 
       <section className="rounded-2xl border border-destructive/30 bg-card p-6">
-        <h2 className="text-lg">Удаление аккаунта</h2>
+        <h2 className="font-sans text-lg font-bold tracking-normal">Удаление аккаунта</h2>
         <p className="mt-1 text-sm text-muted-foreground">Профиль, стартапы и отклики будут удалены без возможности восстановления.</p>
         <Dialog>
           <DialogTrigger render={<Button variant="destructive" className="mt-4" />}>Удалить аккаунт</DialogTrigger>
