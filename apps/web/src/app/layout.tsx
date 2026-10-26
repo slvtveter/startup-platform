@@ -25,8 +25,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="ru" className={`${golos.variable} ${unbounded.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
+        {/* Для тех, кто ходит клавиатурой: первым Tab — сразу к содержимому, мимо меню. */}
+        <a
+          href="#main"
+          className="sr-only z-50 rounded-lg bg-foreground px-4 py-2 font-semibold text-background focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+        >
+          Перейти к содержимому
+        </a>
         <SiteHeader />
-        <main className="flex-1">{children}</main>
+        <main id="main" tabIndex={-1} className="flex-1 outline-none">
+          {children}
+        </main>
         <SiteFooter />
         <CookieNotice />
         <HydratedFlag />

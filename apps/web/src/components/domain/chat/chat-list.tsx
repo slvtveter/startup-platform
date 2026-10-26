@@ -1,9 +1,11 @@
 "use client";
 
+import { MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
 import { Avatar } from "@/components/domain/avatar-upload";
+import { buttonVariants } from "@/components/ui/button";
 import type { ConversationOut } from "@/lib/api";
 import { timeAgo } from "@/lib/labels";
 import { useChatSocket } from "@/lib/use-chat-socket";
@@ -28,9 +30,21 @@ export function ChatList({ items }: { items: ConversationOut[] }) {
       aria-label="Диалоги"
     >
       {items.length === 0 ? (
-        <p className="p-6 text-sm text-muted-foreground">
-          Пока нет диалогов. Откликнись на роль или напиши человеку из раздела «Люди».
-        </p>
+        <div className="grid place-items-center gap-4 px-6 py-16 text-center">
+          <MessageCircle aria-hidden className="size-10 text-muted-foreground/60" />
+          <div>
+            <p className="font-semibold">Пока нет диалогов</p>
+            <p className="mt-1 text-sm text-muted-foreground">Откликнись на свободное место или напиши человеку из каталога.</p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-2">
+            <Link href="/startups" className={buttonVariants({ variant: "brand", size: "sm" })}>
+              Стартапы
+            </Link>
+            <Link href="/people" className={buttonVariants({ variant: "outline", size: "sm" })}>
+              Люди
+            </Link>
+          </div>
+        </div>
       ) : (
         <ul>
           {items.map((c) => {

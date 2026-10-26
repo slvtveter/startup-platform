@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "Вход" };
 
 export default function LoginPage() {
   return (
-    <AuthCard title="С возвращением" subtitle="Войди, чтобы откликаться на роли и управлять стартапами.">
+    <AuthCard title={"С\u00a0возвращением"} subtitle="Войди, чтобы откликаться на роли и управлять стартапами.">
       <Suspense>
         <AuthForm mode="login" />
       </Suspense>
