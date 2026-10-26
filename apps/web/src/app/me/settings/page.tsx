@@ -11,7 +11,7 @@ export default async function SettingsPage() {
   const { data: prefs } = await getEmailPrefs({ client: await serverClient() });
   return (
     <Container className="max-w-3xl">
-      <PageHeader title="Настройки" description="Вход через GitHub, VK ID, Яндекс и Telegram появится в следующих версиях." />
+      <PageHeader title="Настройки" description="Какие письма присылать, почта и пароль для входа, удаление аккаунта." />
       <div className="mt-8 grid gap-6">
         <EmailPrefs initial={prefs ?? []} />
         <SettingsPanel email={user.email} verified={user.email_verified} />

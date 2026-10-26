@@ -299,3 +299,15 @@
 .faq[open] .faq-answer {
   animation: enter-up 360ms var(--ease-out) both;
 }
+
+/* При печати показываем всё сразу: блоки «появления при прокрутке» иначе остались бы пустыми. */
+@media print {
+  [data-reveal] .reveal-item,
+  [data-reveal] .reveal-line,
+  [data-reveal] .reveal-pop,
+  [data-reveal] .reveal-unblur {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}
