@@ -67,3 +67,83 @@ export function StartupCard({ startup, reasons }: { startup: StartupCardData; re
     </Link>
   );
 }
+
+const LOGO_TONES = [
+  "bg-brand-soft text-brand-ink",
+  "bg-success-soft text-success-ink",
+  "bg-warn-soft text-warn-ink",
+  "bg-marker-soft text-marker-ink",
+  "bg-secondary text-foreground",
+];
+
+/** «Логотип» стартапа: первая буква названия; цвет стабилен для одного и того же slug. */
+function StartupLogo({ title, slug }: { title: string; slug: string }) {
+  const tone = LOGO_TONES[[...slug].reduce((n, c) => n + c.charCodeAt(0), 0) % LOGO_TONES.length];
+  return (
+    <span aria-hidden className={`grid size-20 shrink-0 place-items-center rounded-2xl font-heading text-3xl sm:size-28 sm:text-4xl ${tone}`}>
+      {title.trim()[0]?.toUpperCase() ?? "•"}
+    </span>
+  );
+}
+
+/**
+ * Стартап в каталоге (KAN-138): отдельная крупная карточка в списке, как у людей —
+ * шапка (логотип, название, основатель, метки) и строки «подпись — значение».
+ */
+export function StartupListCard({ startup }: { startup: StartupCardData }) {
+  const open = startup.open_roles.reduce((n, r) => n + (r.slots ?? 1), 0);
+  const team = startup.team_size ?? 1;
+  const roles = startup.open_roles.slice(0, 4);
+  const rows: [string, React.ReactNode][] = [];
+  if (startup.pitch) rows.push(["Идея", startup.pitch]);
+  if (roles.length)
+    rows.push([
+      "Ищут",
+      <ul key="r" className="grid gap-1">
+        {roles.map((r) => (
+          <li key={r.id}>
+            <span className="font-semibold">{r.title}</span>
+            {r.hours_per_week ? <span className="text-muted-foreground"> · {r.hours_per_week} ч в неделю</span> : null}
+          </li>
+        ))}
+        {startup.open_roles.length > roles.length && (
+          <li className="text-muted-foreground">и ещё {startup.open_roles.length - roles.length}</li>
+        )}
+      </ul>,
+    ]);
+  rows.push(["Команда", <SeatRow key="t" filled={team} open={open} />]);
+
+  return (
+    <li>
+      <Link
+        href={`/startups/${startup.slug}`}
+        className="group block rounded-3xl border bg-card p-5 transition-[border-color,box-shadow] duration-200 ease-out hover:border-foreground/30 hover:shadow-[0_12px_32px_-16px_rgb(18_22_51/0.25)] sm:p-7"
+      >
+        <div className="flex gap-4 sm:gap-6">
+          <StartupLogo title={startup.title} slug={startup.slug} />
+          <div className="min-w-0 flex-1">
+            <h3 className="font-sans text-xl leading-tight font-bold tracking-normal text-brand-ink group-hover:underline sm:text-2xl">{startup.title}</h3>
+            <p className="mt-1.5 text-[15px]">
+              <span className="font-medium">{startup.owner_name}</span>
+              {startup.published_at && <span className="text-muted-foreground"> · {timeAgo(startup.published_at)}</span>}
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {open > 0 && <span className="rounded-lg bg-success-soft px-2.5 py-1 text-sm font-medium text-success-ink">Набирает команду</span>}
+              <TermsBadge terms={startup.terms} />
+              <StageBadge stage={startup.stage} />
+              {startup.is_demo && <DemoBadge />}
+            </div>
+          </div>
+        </div>
+        <dl className="mt-5 divide-y border-t text-sm sm:text-[15px]">
+          {rows.map(([label, value]) => (
+            <div key={label} className="grid grid-cols-[5.5rem_1fr] gap-3 py-3 sm:grid-cols-[10rem_1fr] sm:gap-4">
+              <dt className="text-muted-foreground">{label}</dt>
+              <dd className="min-w-0">{value}</dd>
+            </div>
+          ))}
+        </dl>
+      </Link>
+    </li>
+  );
+}
