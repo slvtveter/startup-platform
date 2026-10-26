@@ -1,4 +1,6 @@
-/** Новый ключ на каждую навигацию в этом разделе: страница заново проявляется (.page-enter в globals.css). */
+import { PageEnter } from "@/components/site/page-enter";
+
+/** Новый ключ на каждую навигацию в этом разделе: страница заново проявляется (PageEnter). */
 export default function Template({ children }: { children: React.ReactNode }) {
-  return <div className="page-enter">{children}</div>;
+  return <PageEnter>{children}</PageEnter>;
 }

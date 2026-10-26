@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -31,6 +31,23 @@ function isDismissed() {
 export function CookieNotice() {
   // На сервере плашку не рисуем: о localStorage знает только браузер.
   const open = !useSyncExternalStore(subscribe, isDismissed, () => true);
+  const ref = useRef<HTMLElement>(null);
+
+  // Пока плашка на экране, закреплённые снизу панели (кнопка «Выбрать место» на телефоне)
+  // поднимаются над ней через --cookie-offset, а не прячутся под ней.
+  useEffect(() => {
+    const el = ref.current;
+    if (!open || !el) return;
+    const root = document.documentElement;
+    const update = () => root.style.setProperty("--cookie-offset", `${el.offsetHeight + 12}px`);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      root.style.removeProperty("--cookie-offset");
+    };
+  }, [open]);
 
   function dismiss() {
     dismissed = true;
@@ -43,6 +60,7 @@ export function CookieNotice() {
   if (!open) return null;
   return (
     <section
+      ref={ref}
       role="region"
       aria-label="Cookie"
       className="fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-xl items-center gap-3 rounded-xl border bg-card p-3 text-sm shadow-lg sm:inset-x-auto sm:left-4"
