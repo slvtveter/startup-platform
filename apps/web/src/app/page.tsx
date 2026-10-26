@@ -3,25 +3,20 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 
 import { DemoBadge, TermsBadge } from "@/components/domain/badges";
-import { Container, EmptyState } from "@/components/domain/page-header";
-import { initialsOf, Seat, SeatRow } from "@/components/domain/seats";
-import { StartupCard } from "@/components/domain/startup-card";
+import { Dashboard } from "@/components/domain/dashboard";
+import { Container } from "@/components/domain/page-header";
+import { initialsOf, Seat } from "@/components/domain/seats";
 import { JsonLd, siteUrl } from "@/components/site/json-ld";
 import { PathLink } from "@/components/site/path-link";
 import { Reveal } from "@/components/site/reveal";
 import { TrackView } from "@/components/site/track-view";
 import { buttonVariants } from "@/components/ui/button";
 import {
-  getMyProfile,
-  listMyApplications,
-  listMyStartups,
   listOpenSeats,
-  listRecommendedStartups,
   publicStats,
   type OpenSeat,
 } from "@/lib/api";
 import { plural } from "@/lib/labels";
-import { nextStep } from "@/lib/next-step";
 import { getMe, serverClient } from "@/lib/server-api";
 
 export default async function Home() {
@@ -426,145 +421,5 @@ function TeamPreview() {
         </ul>
       </figure>
     </Reveal>
-  );
-}
-
-async function Dashboard() {
-  const user = (await getMe())!;
-  const client = await serverClient();
-  const [{ data: recs }, { data: profile }, { data: apps }, { data: mine }] =
-    await Promise.all([
-      listRecommendedStartups({ client }),
-      getMyProfile({ client }),
-      listMyApplications({ client }),
-      listMyStartups({ client }),
-    ]);
-  const name = profile?.display_name;
-  const myStartups = mine ?? [];
-  const step = nextStep({
-    emailVerified: user.email_verified,
-    applyBlockers: profile?.apply_blockers ?? [],
-    pendingIncoming: myStartups.map((m) => ({
-      slug: m.slug,
-      title: m.title,
-      count: m.pending_applications,
-    })),
-    applications: (apps ?? []).map((a) => ({
-      status: a.status,
-      startupTitle: a.startup_title,
-      decidedAt: a.decided_at ?? null,
-    })),
-    hasStartups: myStartups.length > 0,
-  });
-
-  return (
-    <Container>
-      <h1 className="text-2xl sm:text-[34px]">{name ? `Привет, ${name}` : "Привет!"}</h1>
-
-      <section
-        aria-labelledby="next-step"
-        className="mt-5 flex flex-col gap-3 rounded-2xl border border-l-4 border-l-brand px-4 py-3 sm:flex-row sm:items-center sm:gap-4"
-      >
-        <div className="min-w-0">
-          <h2
-            id="next-step"
-            className="font-sans text-base font-semibold tracking-normal"
-          >
-            {step.title}
-          </h2>
-          <p className="text-sm text-muted-foreground">{step.text}</p>
-        </div>
-        <Link
-          href={step.href}
-          className={buttonVariants({
-            variant: "brand",
-            size: "sm",
-            className: "shrink-0 sm:ml-auto",
-          })}
-        >
-          {step.cta}
-        </Link>
-      </section>
-
-      {myStartups.length > 0 && (
-        <section className="mt-12">
-          <h2 className="text-xl sm:text-2xl">Мои стартапы</h2>
-          <ul className="mt-4 divide-y border-y">
-            {myStartups.map((m) => {
-              const open = m.open_roles.reduce((n, r) => n + (r.slots ?? 1), 0);
-              return (
-                <li key={m.id}>
-                  <Link
-                    href={`/me/startups/${m.slug}`}
-                    className="flex flex-wrap items-center gap-x-4 gap-y-2 py-4 hover:text-brand-ink"
-                  >
-                    <span className="font-semibold">{m.title}</span>
-                    <SeatRow filled={m.team_size ?? 1} open={open} />
-                    <span className="ml-auto text-sm text-muted-foreground">
-                      {plural(
-                        m.views_30d ?? 0,
-                        `${m.views_30d ?? 0} просмотр`,
-                        `${m.views_30d ?? 0} просмотра`,
-                        `${m.views_30d ?? 0} просмотров`,
-                      )}{" "}
-                      за 30 дней,{" "}
-                      {m.pending_applications
-                        ? plural(
-                            m.pending_applications,
-                            `${m.pending_applications} новый отклик`,
-                            `${m.pending_applications} новых отклика`,
-                            `${m.pending_applications} новых откликов`,
-                          )
-                        : "новых откликов нет"}
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      )}
-
-      <section className="mt-12">
-        <div className="flex flex-wrap items-end gap-2">
-          <div>
-            <h2 className="text-xl sm:text-2xl">Подходят тебе</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Подбор по твоей роли, навыкам и условиям
-            </p>
-          </div>
-          <Link
-            href="/startups"
-            className="ml-auto text-sm font-semibold text-brand-ink hover:underline"
-          >
-            Все стартапы
-          </Link>
-        </div>
-        {recs && recs.length > 0 ? (
-          <div className="stagger mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {recs.map((r) => (
-              <StartupCard
-                key={r.startup.id}
-                startup={r.startup}
-                reasons={r.reasons}
-              />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            title="Пока нечего предложить"
-            text="Укажи роль и навыки в профиле, и здесь появятся стартапы, которым ты нужен."
-            action={
-              <Link
-                href="/me/profile"
-                className={buttonVariants({ variant: "brand" })}
-              >
-                Заполнить профиль
-              </Link>
-            }
-          />
-        )}
-      </section>
-    </Container>
   );
 }
