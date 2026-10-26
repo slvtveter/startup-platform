@@ -2,7 +2,7 @@ export function AuthCard({ title, subtitle, children }: { title: string; subtitl
   return (
     <div className="grid min-h-[calc(100vh-4rem)] place-items-center px-4 py-12">
       <div className="w-full max-w-[440px] rounded-3xl border bg-card p-6 sm:p-10">
-        <h1 className="text-3xl">{title}</h1>
+        <h1 className="text-[26px] sm:text-3xl">{title}</h1>
         {subtitle && <p className="mt-2 text-muted-foreground">{subtitle}</p>}
         <div className="mt-6">{children}</div>
       </div>
@@ -10,7 +10,11 @@ export function AuthCard({ title, subtitle, children }: { title: string; subtitl
   );
 }
 
-export function FieldError({ message }: { message?: string }) {
+export function FieldError({ message, id }: { message?: string; id?: string }) {
   if (!message) return null;
-  return <p className="mt-1 text-sm text-destructive">{message}</p>;
+  return (
+    <p id={id} className="mt-1 text-sm text-destructive">
+      {message}
+    </p>
+  );
 }

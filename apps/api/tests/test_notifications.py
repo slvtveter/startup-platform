@@ -107,3 +107,16 @@ async def test_inbox_counts_grow_and_reset(make_user):
     assert (await maria.get("/api/me/inbox-count")).json()["mine"] == 1
     await maria.post("/api/me/inbox-seen", json={"section": "mine"})
     assert (await maria.get("/api/me/inbox-count")).json()["mine"] == 0
+
+
+def test_site_links_on_own_line_become_buttons():
+    from app.core.config import get_settings
+    from app.services.mail import _BUTTON_STYLE, _html
+
+    site = get_settings().site_url.rstrip("/")
+    html = _html("Подтвердите email", f"Перейдите по ссылке:\n{site}/verify-email?token=t", None)
+    assert ">Подтвердить почту</a>" in html and _BUTTON_STYLE in html
+    reply = _html("Отклик", f"Ответить: {site}/me/startups/x", None)
+    assert ">Ответить</a>" in reply
+    # Чужие ссылки кнопкой не становятся.
+    assert _BUTTON_STYLE not in _html("x", "Смотри: https://example.org/a", None)
