@@ -1,5 +1,6 @@
 "use client";
 
+import { UserRound } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -61,6 +62,13 @@ export function AvatarUpload({ name, initialUrl }: { name: string; initialUrl: s
 
 /** Фото, если есть, иначе занятое место с инициалами. */
 export function Avatar({ name, url, className }: { name: string; url: string | null | undefined; className?: string }) {
+  if (!url && !name.trim())
+    // Имя ещё не заполнено: силуэт вместо безликой точки.
+    return (
+      <span aria-hidden className={`inline-flex shrink-0 items-center justify-center bg-foreground text-background ${className ?? ""}`}>
+        <UserRound className="size-1/2" />
+      </span>
+    );
   if (!url) return <Seat filled initials={initialsOf(name)} className={className} />;
   // eslint-disable-next-line @next/next/no-img-element -- файлы уже нужного размера, оптимизатор Next не нужен
   return <img src={url} alt="" width={80} height={80} className={`shrink-0 object-cover ${className ?? ""}`} />;
