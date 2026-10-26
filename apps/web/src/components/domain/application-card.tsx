@@ -128,12 +128,12 @@ export function ApplicationCard({ app, perspective }: { app: ApplicationOut; per
       {app.contacts && (
         <div className="mt-4 grid gap-4 rounded-xl bg-success-soft p-4 text-sm sm:grid-cols-3">
           <div>
-            <div className="text-success-ink/80">{perspective === "candidate" ? "Основатель" : "Участник"}</div>
+            <div className="text-success-ink">{perspective === "candidate" ? "Основатель" : "Участник"}</div>
             <div className="font-bold">{app.contacts.display_name}</div>
           </div>
           {app.contacts.telegram && (
             <div>
-              <div className="text-success-ink/80">Telegram</div>
+              <div className="text-success-ink">Telegram</div>
               <a href={`https://t.me/${app.contacts.telegram}`} target="_blank" rel="noopener noreferrer" className="font-bold underline">
                 @{app.contacts.telegram}
               </a>
@@ -141,7 +141,7 @@ export function ApplicationCard({ app, perspective }: { app: ApplicationOut; per
           )}
           {app.contacts.email && (
             <div>
-              <div className="text-success-ink/80">Email</div>
+              <div className="text-success-ink">Email</div>
               <a href={`mailto:${app.contacts.email}`} className="font-bold underline">
                 {app.contacts.email}
               </a>

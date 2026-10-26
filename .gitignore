@@ -8,12 +8,12 @@
 # Python
 __pycache__/
 *.pyc
-.venv/
+.venv
 .pytest_cache/
 .ruff_cache/
 
 # Node
-node_modules/
+node_modules
 
 # prod env
 infra/.env.prod
