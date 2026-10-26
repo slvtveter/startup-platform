@@ -203,6 +203,14 @@
   }
 }
 
+/* Анимации появления — только при переходах внутри сайта. Первая загрузка рисуется сразу:
+   иначе заголовок и карточки стартуют прозрачными и браузер позже засчитывает их отрисовку (LCP).
+   data-hydrated ставит components/site/hydrated-flag.tsx после загрузки JS. */
+html:not([data-hydrated]) .page-enter,
+html:not([data-hydrated]) .stagger > * {
+  animation: none;
+}
+
 /* Смена страницы (app/template.tsx и шаблоны разделов): лёгкое проявление, без сдвига вёрстки. */
 .page-enter {
   animation: enter-up 340ms var(--ease-out) both;
