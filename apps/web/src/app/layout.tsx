@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Golos_Text, Unbounded } from "next/font/google";
 
 import { CookieNotice } from "@/components/site/cookie-notice";
+import { HydratedFlag } from "@/components/site/hydrated-flag";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { Toaster } from "@/components/ui/sonner";
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </main>
         <SiteFooter />
         <CookieNotice />
+        <HydratedFlag />
         <Toaster position="bottom-right" />
       </body>
     </html>

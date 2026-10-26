@@ -40,10 +40,11 @@ function StatusTimeline({ app }: { app: ApplicationOut }) {
     { label: decision, done: decided, at: app.decided_at },
   ];
   return (
-    <ol className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs" aria-label="Статус заявки">
+    <ol className="mt-4 flex flex-col items-start gap-1.5 text-xs sm:flex-row sm:items-center sm:gap-2" aria-label="Статус заявки">
       {steps.map((step, i) => (
         <li key={step.label} className="flex items-center gap-2">
-          {i > 0 && <span aria-hidden className={`h-px w-6 ${step.done ? "bg-foreground" : "bg-border"}`} />}
+          {/* На узком экране шаги идут столбиком, и соединительная черта только мешает. */}
+          {i > 0 && <span aria-hidden className={`hidden h-px w-6 sm:block ${step.done ? "bg-foreground" : "bg-border"}`} />}
           <span
             className={`rounded-full px-2.5 py-1 font-semibold ${
               step.done
@@ -116,7 +117,7 @@ export function ApplicationCard({ app, perspective }: { app: ApplicationOut; per
             </div>
           )}
         </div>
-        <ApplicationStatusBadge status={app.status} />
+        <ApplicationStatusBadge status={app.status} className="self-start" />
       </div>
 
       <StatusTimeline app={app} />
