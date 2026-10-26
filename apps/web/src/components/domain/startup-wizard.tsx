@@ -157,7 +157,7 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
         <span>
           Шаг {step + 1} из {STEPS.length}
         </span>
-        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary" role="progressbar" aria-valuemin={1} aria-valuemax={STEPS.length} aria-valuenow={step + 1}>
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary" role="progressbar" aria-label="Прогресс создания стартапа" aria-valuemin={1} aria-valuemax={STEPS.length} aria-valuenow={step + 1}>
           <div className="h-full rounded-full bg-brand transition-[width] duration-500 ease-out" style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
         </div>
       </div>
