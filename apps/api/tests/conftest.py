@@ -137,7 +137,7 @@ async def make_user(catalog) -> AsyncIterator[MakeUser]:
                     "headline": "Ищу первый проект в команде",
                     "primary_role": role,
                     "skills": list(skills),
-                    "looking_for": ["free", "equity"],
+                    "looking_for": ["free", "negotiable"],
                     "contact_telegram": "@" + email.split("@")[0],
                 },
             )

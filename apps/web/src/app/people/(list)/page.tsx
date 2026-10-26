@@ -39,7 +39,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
           params={params}
           groups={[
             { name: "role", title: "Роль", options: (roles ?? []).map((r) => ({ value: r.slug, label: r.name })) },
-            { name: "looking_for", title: "Условия", options: Object.entries(TERMS).filter(([v]) => v !== "mixed").map(([value, label]) => ({ value, label })) },
+            { name: "looking_for", title: "Условия", options: Object.entries(TERMS).map(([value, label]) => ({ value, label })) },
             { name: "level", title: "Опыт", options: Object.entries(LEVEL).map(([value, label]) => ({ value, label })) },
           ]}
         />
