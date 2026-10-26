@@ -1505,6 +1505,28 @@ export type RoleUpdate = {
 };
 
 /**
+ * SessionOut
+ */
+export type SessionOut = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * User Agent
+     */
+    user_agent: string;
+    /**
+     * Current
+     */
+    current: boolean;
+};
+
+/**
  * SkillOut
  */
 export type SkillOut = {
@@ -2156,6 +2178,70 @@ export type ConfirmEmailChangeResponses = {
 };
 
 export type ConfirmEmailChangeResponse = ConfirmEmailChangeResponses[keyof ConfirmEmailChangeResponses];
+
+export type ListSessionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/sessions';
+};
+
+export type ListSessionsResponses = {
+    /**
+     * Response List Sessions
+     *
+     * Successful Response
+     */
+    200: Array<SessionOut>;
+};
+
+export type ListSessionsResponse = ListSessionsResponses[keyof ListSessionsResponses];
+
+export type RevokeSessionData = {
+    body?: never;
+    path: {
+        /**
+         * Session Id
+         */
+        session_id: string;
+    };
+    query?: never;
+    url: '/api/auth/sessions/{session_id}';
+};
+
+export type RevokeSessionErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RevokeSessionError = RevokeSessionErrors[keyof RevokeSessionErrors];
+
+export type RevokeSessionResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type RevokeSessionResponse = RevokeSessionResponses[keyof RevokeSessionResponses];
+
+export type RevokeOtherSessionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/sessions/revoke-others';
+};
+
+export type RevokeOtherSessionsResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type RevokeOtherSessionsResponse = RevokeOtherSessionsResponses[keyof RevokeOtherSessionsResponses];
 
 export type DeleteAccountData = {
     body?: never;

@@ -1,4 +1,5 @@
 import secrets
+import uuid
 from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import delete, select
@@ -18,15 +19,42 @@ def _now() -> datetime:
     return datetime.now(UTC)
 
 
-async def create_session(db: AsyncSession, user: User) -> str:
+async def create_session(db: AsyncSession, user: User, user_agent: str = "") -> str:
     token = new_token()
     days = get_settings().session_ttl_days
     db.add(
         Session(
-            user_id=user.id, token_hash=hash_token(token), expires_at=_now() + timedelta(days=days)
+            user_id=user.id,
+            token_hash=hash_token(token),
+            expires_at=_now() + timedelta(days=days),
+            user_agent=user_agent[:300],
         )
     )
     return token
+
+
+async def list_sessions(db: AsyncSession, user: User) -> list[Session]:
+    rows = await db.scalars(
+        select(Session)
+        .where(Session.user_id == user.id, Session.expires_at > _now())
+        .order_by(Session.created_at.desc())
+    )
+    return list(rows)
+
+
+async def revoke_session(db: AsyncSession, user: User, session_id: uuid.UUID) -> None:
+    await db.execute(delete(Session).where(Session.id == session_id, Session.user_id == user.id))
+    await db.commit()
+
+
+async def revoke_other_sessions(db: AsyncSession, user: User, current_token: str) -> None:
+    """«Выйти на всех других устройствах»: текущая сессия остаётся."""
+    await db.execute(
+        delete(Session).where(
+            Session.user_id == user.id, Session.token_hash != hash_token(current_token)
+        )
+    )
+    await db.commit()
 
 
 async def user_by_session(db: AsyncSession, token: str) -> User | None:
@@ -99,7 +127,12 @@ async def send_verification(db: AsyncSession, user: User) -> None:
 
 
 async def register(
-    db: AsyncSession, email: str, password: str, ip: str, utm_source: str | None
+    db: AsyncSession,
+    email: str,
+    password: str,
+    ip: str,
+    utm_source: str | None,
+    user_agent: str = "",
 ) -> tuple[User, str]:
     key = f"register:{ip}"
     await ratelimit.ensure_allowed(db, key)
@@ -111,13 +144,15 @@ async def register(
     user.profile = Profile(slug=f"u-{secrets.token_hex(4)}", looking_for=[], skills=[], links=[])
     db.add(user)
     await db.flush()
-    token = await create_session(db, user)
+    token = await create_session(db, user, user_agent)
     track(db, "signup", user.id, "user", user.id, method="email", utm_source=utm_source or "direct")
     await send_verification(db, user)  # делает commit
     return user, token
 
 
-async def login(db: AsyncSession, email: str, password: str, ip: str) -> tuple[User, str]:
+async def login(
+    db: AsyncSession, email: str, password: str, ip: str, user_agent: str = ""
+) -> tuple[User, str]:
     key = f"login:{email}"
     await ratelimit.ensure_allowed(db, key)
     # Перебор паролей сразу по многим адресам с одного IP: лимит шире, чем на один адрес.
@@ -132,7 +167,7 @@ async def login(db: AsyncSession, email: str, password: str, ip: str) -> tuple[U
     if not user.is_active:
         raise Unauthorized("Аккаунт заблокирован")
     await ratelimit.reset(db, key)
-    token = await create_session(db, user)
+    token = await create_session(db, user, user_agent)
     await db.commit()
     return user, token
 

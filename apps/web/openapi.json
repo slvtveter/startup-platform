@@ -418,6 +418,95 @@
         }
       }
     },
+    "/api/auth/sessions": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "List Sessions",
+        "operationId": "list_sessions",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SessionOut"
+                  },
+                  "type": "array",
+                  "title": "Response List Sessions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/sessions/{session_id}": {
+      "delete": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Revoke Session",
+        "operationId": "revoke_session",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/sessions/revoke-others": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Revoke Other Sessions",
+        "operationId": "revoke_other_sessions",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/account": {
       "delete": {
         "tags": [
@@ -5901,6 +5990,35 @@
         },
         "type": "object",
         "title": "RoleUpdate"
+      },
+      "SessionOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "user_agent": {
+            "type": "string",
+            "title": "User Agent"
+          },
+          "current": {
+            "type": "boolean",
+            "title": "Current"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "user_agent",
+          "current"
+        ],
+        "title": "SessionOut"
       },
       "SkillOut": {
         "properties": {

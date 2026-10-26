@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
@@ -50,6 +52,13 @@ class MeProfile(BaseModel):
     display_name: str
     is_published: bool
     completeness: int
+
+
+class SessionOut(BaseModel):
+    id: str
+    created_at: datetime
+    user_agent: str
+    current: bool
 
 
 class MeOut(BaseModel):
