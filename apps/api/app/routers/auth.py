@@ -1,7 +1,10 @@
+import uuid
+
 from fastapi import APIRouter, Request, Response
 
 from app.core.config import get_settings
 from app.core.deps import CurrentUser, client_ip
+from app.core.security import hash_token
 from app.db.session import DbSession
 from app.models import User
 from app.schemas.auth import (
@@ -13,6 +16,7 @@ from app.schemas.auth import (
     MeProfile,
     RegisterIn,
     ResetIn,
+    SessionOut,
     TokenIn,
 )
 from app.schemas.common import OkOut
@@ -20,6 +24,10 @@ from app.services import auth as auth_service
 from app.services.profiles import completeness
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+def _ua(request: Request) -> str:
+    return request.headers.get("user-agent", "")[:300]
 
 
 def _set_cookie(response: Response, token: str) -> None:
@@ -56,7 +64,7 @@ def me_out(user: User) -> MeOut:
 @router.post("/register", response_model=MeOut, status_code=201)
 async def register(data: RegisterIn, request: Request, response: Response, db: DbSession) -> MeOut:
     user, token = await auth_service.register(
-        db, data.email, data.password, client_ip(request), data.utm_source
+        db, data.email, data.password, client_ip(request), data.utm_source, _ua(request)
     )
     _set_cookie(response, token)
     return me_out(user)
@@ -64,7 +72,9 @@ async def register(data: RegisterIn, request: Request, response: Response, db: D
 
 @router.post("/login", response_model=MeOut)
 async def login(data: LoginIn, request: Request, response: Response, db: DbSession) -> MeOut:
-    user, token = await auth_service.login(db, data.email, data.password, client_ip(request))
+    user, token = await auth_service.login(
+        db, data.email, data.password, client_ip(request), _ua(request)
+    )
     _set_cookie(response, token)
     return me_out(user)
 
@@ -128,6 +138,33 @@ async def change_email(data: ChangeEmailIn, user: CurrentUser, db: DbSession) ->
 async def confirm_email_change(data: TokenIn, db: DbSession) -> OkOut:
     """Переход по ссылке из письма на новый адрес. Вход не нужен: доказательство — сама ссылка."""
     await auth_service.confirm_email_change(db, data.token)
+    return OkOut()
+
+
+@router.get("/sessions", response_model=list[SessionOut])
+async def list_sessions(request: Request, user: CurrentUser, db: DbSession) -> list[SessionOut]:
+    current = hash_token(request.cookies.get(get_settings().session_cookie_name, ""))
+    return [
+        SessionOut(
+            id=str(s.id),
+            created_at=s.created_at,
+            user_agent=s.user_agent,
+            current=s.token_hash == current,
+        )
+        for s in await auth_service.list_sessions(db, user)
+    ]
+
+
+@router.delete("/sessions/{session_id}", response_model=OkOut)
+async def revoke_session(session_id: uuid.UUID, user: CurrentUser, db: DbSession) -> OkOut:
+    await auth_service.revoke_session(db, user, session_id)
+    return OkOut()
+
+
+@router.post("/sessions/revoke-others", response_model=OkOut)
+async def revoke_other_sessions(request: Request, user: CurrentUser, db: DbSession) -> OkOut:
+    token = request.cookies.get(get_settings().session_cookie_name, "")
+    await auth_service.revoke_other_sessions(db, user, token)
     return OkOut()
 
 

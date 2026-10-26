@@ -182,3 +182,34 @@ async def test_login_limited_per_ip_across_emails(client):
         assert codes[8] == 429
     finally:
         s.auth_rate_limit = old
+
+
+async def test_sessions_list_and_revoke_others(make_user, client):
+    maria = await make_user("maria@mail.ru")
+    other = await client.post(
+        "/api/auth/login",
+        json={"email": "maria@mail.ru", "password": "secret-pass-1"},
+        headers={"User-Agent": "Mozilla/5.0 (iPhone) Safari"},
+    )
+    assert other.status_code == 200
+
+    sessions = (await maria.get("/api/auth/sessions")).json()
+    assert len(sessions) == 2
+    assert [s["current"] for s in sessions].count(True) == 1
+    assert any("iPhone" in s["user_agent"] for s in sessions)
+
+    assert (await maria.post("/api/auth/sessions/revoke-others")).status_code == 200
+    assert (await client.get("/api/auth/me")).status_code == 401
+    left = (await maria.get("/api/auth/sessions")).json()
+    assert len(left) == 1 and left[0]["current"]
+
+
+async def test_revoke_session_only_own(make_user):
+    maria = await make_user("maria@mail.ru")
+    oleg = await make_user("oleg@mail.ru")
+    maria_session = (await maria.get("/api/auth/sessions")).json()[0]["id"]
+    # Чужую сессию удалить нельзя: запрос проходит, но ничего не меняет.
+    assert (await oleg.delete(f"/api/auth/sessions/{maria_session}")).status_code == 200
+    assert (await maria.get("/api/auth/me")).status_code == 200
+    assert (await maria.delete(f"/api/auth/sessions/{maria_session}")).status_code == 200
+    assert (await maria.get("/api/auth/me")).status_code == 401
