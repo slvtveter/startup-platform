@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Golos_Text, Unbounded } from "next/font/google";
 
 import { CookieNotice } from "@/components/site/cookie-notice";
@@ -20,6 +20,9 @@ export const metadata: Metadata = {
     "Стажёры и выпускники находят стартапы для первого реального опыта, а основатели собирают команду: дизайнеров, разработчиков, маркетологов.",
   openGraph: { type: "website", locale: "ru_RU", siteName: "Envola" },
 };
+
+// Цвет панели браузера на телефоне — как фон шапки.
+export const viewport: Viewport = { themeColor: "#ffffff" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
