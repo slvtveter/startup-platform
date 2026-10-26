@@ -21,7 +21,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { data } = await getPerson({ client: await serverClient(), path: { slug } });
   if (!data) return { title: "Профиль не найден" };
   const title = `${data.display_name}${data.primary_role ? `, ${data.primary_role.name.toLowerCase()}` : ""}`;
-  return { title, description: data.headline || undefined, alternates: { canonical: `/people/${data.slug}` } };
+  return {
+    title,
+    description: data.headline || undefined,
+    alternates: { canonical: `/people/${data.slug}` },
+    // Примеры (app.scripts.demo) не должны попасть в поиск как настоящие люди.
+    ...(data.is_demo ? { robots: { index: false, follow: true } } : {}),
+  };
 }
 
 export default async function PersonPage({ params }: Props) {
