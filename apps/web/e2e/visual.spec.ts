@@ -46,6 +46,16 @@ for (const [vpName, viewport] of VIEWPORTS) {
         expect(res?.status(), `${path} отдаёт ошибку`).toBeLessThan(400);
         await page.waitForLoadState("networkidle");
         await page.screenshot({ path: `${DIR}/${vpName}-${name}.png`, fullPage: true });
+        // Блоки с появлением при прокрутке (Reveal) открылись во время снимка: ждём конца анимаций,
+        // иначе axe замерит контраст полупрозрачного текста посреди перехода. Бесконечные (пульс) не ждём.
+        await page.evaluate(() =>
+          Promise.all(
+            document
+              .getAnimations()
+              .filter((a) => a.effect?.getTiming().iterations !== Infinity)
+              .map((a) => a.finished),
+          ),
+        );
 
         const width = await page.evaluate(() => document.documentElement.scrollWidth);
         expect(width, "горизонтальный скролл").toBeLessThanOrEqual(viewport.width);

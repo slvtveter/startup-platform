@@ -55,7 +55,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
         )}
       </div>
       {data && data.items.length > 0 ? (
-        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="stagger mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {data.items.map((p) => (
             <PersonCard key={p.slug} person={p} />
           ))}
