@@ -17,16 +17,30 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
   await register(founder, founderEmail);
   await verifyEmailViaMailpit(founder, founderEmail);
 
+  // Мастер создания (KAN-138 п.4): по одному вопросу на экран.
   await founder.goto("/startups/new");
-  await founder.getByLabel("Название").fill(startupTitle);
+  const next = founder.getByRole("button", { name: "Дальше" });
+  await founder.getByLabel("Название", { exact: true }).fill(startupTitle);
+  await next.click();
   await founder.getByLabel("Идея одной фразой").fill("Сервис, который проверяет весь путь фазы 1");
+  await next.click();
   await founder
-    .getByLabel("Подробнее")
+    .getByLabel("Подробнее о проекте")
     .fill("Мы автоматически проверяем, что новичок может найти стартап, откликнуться и познакомиться с основателем.");
+  await next.click();
+  await next.click(); // стадия по умолчанию
   await founder.getByRole("button", { name: /^Обсуждается/ }).click();
-  await founder.getByRole("button", { name: "Создать черновик" }).click();
+  await next.click();
+  await founder.getByRole("button", { name: "Маркетолог", exact: true }).click();
+  await next.click();
+  await founder.getByRole("button", { name: "В черновик" }).click();
   await founder.waitForURL(/\/edit$/);
 
+  // Роль с навыком — через редактор: в мастере роли создаются по шаблону без навыков.
+  // Роль из мастера убираем, чтобы у стартапа было одно место и одна кнопка «Откликнуться».
+  await founder.getByRole("button", { name: "Удалить" }).click();
+  await expect(founder.getByRole("button", { name: "Удалить" })).toHaveCount(0);
+  await founder.getByRole("button", { name: "Добавить место" }).click();
   await founder.getByPlaceholder("Название роли").fill("UI/UX дизайнер");
   await founder.getByPlaceholder("Начни вводить").fill("Figma");
   await founder.getByRole("button", { name: "+ Figma" }).click();
