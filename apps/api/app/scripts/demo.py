@@ -23,7 +23,7 @@ from app.models import Profile, ProfileLink, Startup, StartupRole, User
 from app.models.enums import LinkKind, StartupStatus
 from app.scripts.catalog import ensure_catalog
 from app.services.avatars import SIZES
-from app.services.slug import slugify
+from app.services.slug import unique_slug
 from app.services.storage import get_storage
 
 # (логин, имя, роль, уровень, город, заголовок, о себе, навыки, условия, доступность, ссылка)
@@ -291,7 +291,7 @@ async def add() -> None:
                 # Пароля нет: в демо-аккаунт нельзя войти.
                 user = User(email=email, password_hash=None, email_verified_at=datetime.now(UTC))
                 user.profile = Profile(
-                    slug=slugify(name),
+                    slug=await unique_slug(db, Profile, name),
                     display_name=name,
                     headline=headline,
                     bio=bio,
@@ -318,13 +318,17 @@ async def add() -> None:
 
         now = datetime.now(UTC)
         for i, (login, title, pitch, stage, terms, details, desc, role_rows) in enumerate(STARTUPS):
-            if await db.scalar(select(Startup.id).where(Startup.slug == slugify(title))):
-                continue
             owner = users[login]
+            # Свой стартап у демо-основателя уже есть — не дублируем. Адрес уникальный: настоящий
+            # стартап с тем же названием мог появиться раньше.
+            if await db.scalar(
+                select(Startup.id).where(Startup.owner_id == owner.id, Startup.title == title)
+            ):
+                continue
             s = Startup(
                 owner_id=owner.id,
                 title=title,
-                slug=slugify(title),
+                slug=await unique_slug(db, Startup, title),
                 pitch=pitch,
                 description=desc,
                 stage=stage,

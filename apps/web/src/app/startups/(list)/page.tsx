@@ -55,9 +55,10 @@ export default async function StartupsPage({ searchParams }: { searchParams: Pro
         />
       </div>
       <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 border-t pt-5 text-sm">
-        <span className="font-semibold">
+        {/* h2 между h1 страницы и h3 карточек: порядок заголовков для экранных читалок. */}
+        <h2 className="font-sans text-sm font-semibold tracking-normal">
           {total} {plural(total, "стартап", "стартапа", "стартапов")}
-        </span>
+        </h2>
         {active && (
           <Link href="/startups" className="text-muted-foreground underline-offset-4 hover:underline">
             Сбросить фильтры
