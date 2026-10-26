@@ -19,6 +19,17 @@ healthy() {
   return 1
 }
 
+# Образы релизов копятся (~300 МБ на релиз) и забивают диск: оставляем 5 последних каждого
+# сервиса — их хватает для отката. Образ, который сейчас запущен, docker удалить не даст.
+prune_old_images() {
+  for svc in api web; do
+    docker images --format '{{.CreatedAt}}|{{.Repository}}:{{.Tag}}' |
+      grep "startup-platform-$svc:sha-" | sort -r | tail -n +6 | cut -d'|' -f2 |
+      xargs -r docker rmi > /dev/null 2>&1 || true
+  done
+  docker image prune -f > /dev/null
+}
+
 export IMAGE_TAG="$TAG"
 $C pull api web
 
@@ -32,7 +43,7 @@ if healthy; then
   # Справочник ролей и навыков: без него в профиле нечего выбрать. Идемпотентно.
   $C exec -T api python -m app.scripts.catalog || echo "catalog step failed (old image?)" >&2
   echo "$TAG" > .deployed-tag
-  docker image prune -f > /dev/null
+  prune_old_images
   echo "deployed $TAG"
   exit 0
 fi
