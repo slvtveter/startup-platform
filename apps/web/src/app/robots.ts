@@ -6,7 +6,25 @@ export const dynamic = "force-dynamic";
 export default function robots(): MetadataRoute.Robots {
   const site = process.env.SITE_URL ?? "http://localhost:8080";
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/me", "/admin", "/api", "/login", "/register"] },
+    rules: {
+      userAgent: "*",
+      allow: "/",
+      disallow: [
+        "/me",
+        "/admin",
+        "/api",
+        "/chats",
+        "/login",
+        "/register",
+        "/forgot-password",
+        "/reset-password",
+        "/verify-email",
+        "/confirm-email",
+        "/unsubscribe",
+        "/startups/new",
+        "/startups/*/edit",
+      ],
+    },
     sitemap: `${site}/sitemap.xml`,
   };
 }
