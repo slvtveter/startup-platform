@@ -2,10 +2,10 @@
 
 import { useEffect } from "react";
 
-/** Отмечает, что приложение загрузилось: с этого момента включаются анимации переходов (globals.css). */
+/** Отмечает, что приложение загрузилось: следующие страницы появляются с анимацией (PageEnter). */
 export function HydratedFlag() {
   useEffect(() => {
-    document.documentElement.dataset.hydrated = "";
+    window.__envolaHydrated = true;
   }, []);
   return null;
 }
