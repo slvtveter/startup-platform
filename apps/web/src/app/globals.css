@@ -311,3 +311,10 @@
     filter: none !important;
   }
 }
+
+/* Панель с кнопкой внизу экрана (.sticky-cta, только < lg) не должна закрывать нижнюю строку футера. */
+@media (width < 64rem) {
+  body:has(.sticky-cta) footer {
+    padding-bottom: 5.5rem;
+  }
+}
