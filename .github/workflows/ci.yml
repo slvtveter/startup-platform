@@ -71,9 +71,14 @@ jobs:
       - run: npm run typecheck
       - run: npm run build
 
-  e2e:
-    # Сквозной сценарий фазы 1 в настоящем браузере против поднятого docker compose.
+  e2e-shard:
+    # Сквозные сценарии в настоящем браузере против поднятого docker compose.
+    # Тесты делим на две параллельные джобы, у каждой свой стенд: так вдвое быстрее и без общих данных.
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -81,6 +86,10 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: apps/web/package-lock.json
+      # Зависимости Playwright ставим, пока поднимается стек.
+      - name: npm ci (background)
+        working-directory: apps/web
+        run: (npm ci > /tmp/npm-ci.log 2>&1; echo $? > /tmp/npm-ci.exit) &
       - name: Start stack
         run: |
           cp infra/.env.example infra/.env
@@ -91,15 +100,18 @@ jobs:
           docker compose -f infra/docker-compose.yml exec -T api python -m app.scripts.seed
           # Прогреваем dev-сервер Next, чтобы первая компиляция не съела таймауты тестов.
           for p in / /startups /startups/vkusnoryadom /people /people/mariya-kim /register /login /me/profile /me/settings /admin /startups/new; do curl -s -o /dev/null localhost:8080$p; done
-      - run: npm ci
-        working-directory: apps/web
-      - run: npx playwright test
+      - name: Wait for npm ci
+        run: |
+          until [ -f /tmp/npm-ci.exit ]; do sleep 1; done
+          cat /tmp/npm-ci.log | tail -5
+          exit "$(cat /tmp/npm-ci.exit)"
+      - run: npx playwright test --shard=${{ matrix.shard }}/2
         working-directory: apps/web
       - name: Screenshots of key pages (KAN-86)
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: screens
+          name: screens-${{ matrix.shard }}
           path: apps/web/test-results/screens
           retention-days: 14
           if-no-files-found: ignore
@@ -109,9 +121,17 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
-          name: playwright-traces
+          name: playwright-traces-${{ matrix.shard }}
           path: apps/web/test-results
           retention-days: 7
+
+  # Обязательная проверка в защите main называется «e2e»: собираем итог шардов в одну джобу.
+  e2e:
+    if: always()
+    needs: e2e-shard
+    runs-on: ubuntu-latest
+    steps:
+      - run: test "${{ needs.e2e-shard.result }}" = "success"
 
   images:
     # Собираем prod-образы и поднимаем их через compose.prod.yml с HTTPS: так проверяем, что деплой соберётся.
@@ -190,10 +210,27 @@ jobs:
             docker push $REGISTRY-$svc:main
           done
 
-  # Merge в main = релиз в прод (docs/deploy.md): тот же образ, что прошёл проверки выше.
-  deploy:
+  # Несколько PR смержили подряд — выкатываем только последний коммит main: он содержит все
+  # изменения. Старые прогоны проверки проходят, но деплой пропускают.
+  latest:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [api, web, e2e, images]
+    runs-on: ubuntu-latest
+    outputs:
+      is_latest: ${{ steps.check.outputs.is_latest }}
+    steps:
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          head=$(gh api repos/${{ github.repository }}/commits/main -q .sha)
+          echo "main=$head this=$GITHUB_SHA"
+          echo "is_latest=$([ "$head" = "$GITHUB_SHA" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+  # Merge в main = релиз в прод (docs/deploy.md): тот же образ, что прошёл проверки выше.
+  deploy:
+    if: needs.latest.outputs.is_latest == 'true'
+    needs: [images, latest]
     uses: ./.github/workflows/deploy.yml
     with:
       environment: production

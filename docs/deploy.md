@@ -77,6 +77,7 @@ Staging (`staging.envola.ru`, автодеплой из `main`, прод — к�
 ## Выкатка и откат
 
 - Выкатить: merge PR в `main`. Ход выкатки — в Actions → CI → job `deploy`.
+- PR можно мержить подряд, не дожидаясь выкатки предыдущего: ветка не обязана быть свежей (защита `main` без strict), а прогон на `main` всё равно проверяет всё вместе (api, web, e2e в двух шардах, prod-образы) перед деплоем. Выкатывается только последний коммит `main` (job `latest`), промежуточные прогоны деплой пропускают.
 - Откатить: Actions → Deploy → Run workflow, `image_tag` = предыдущий `sha-xxxxxxx` (теги неизменяемые).
 - Руками на сервере: `sh /opt/startup-platform/deploy.sh sha-xxxxxxx`.
 - Откат схемы — только руками хранителя схемы (`alembic downgrade`).
