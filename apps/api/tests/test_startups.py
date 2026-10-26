@@ -3,7 +3,7 @@ STARTUP = {
     "pitch": "Домашняя еда от соседей с доставкой",
     "description": "Люди, которые любят готовить, продают порции соседям. Делаем мобильное приложение.",
     "stage": "prototype",
-    "terms": "equity",
+    "terms": "negotiable",
 }
 ROLE = {"role": "designer", "title": "UI/UX дизайнер", "skills": ["figma"], "slots": 1}
 

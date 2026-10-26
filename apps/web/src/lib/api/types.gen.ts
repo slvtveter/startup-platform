@@ -1815,7 +1815,7 @@ export type StatsOut = {
 /**
  * Terms
  */
-export type Terms = 'free' | 'paid' | 'equity' | 'mixed';
+export type Terms = 'free' | 'paid' | 'negotiable';
 
 /**
  * TokenIn

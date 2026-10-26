@@ -3,15 +3,13 @@
 export const TERMS: Record<string, string> = {
   free: "Бесплатно",
   paid: "За деньги",
-  equity: "За долю",
-  mixed: "Деньги и доля",
+  negotiable: "Обсуждается",
 };
 
 export const TERMS_HINT: Record<string, string> = {
   free: "Опыт и проект в портфолио, без оплаты",
-  paid: "Фиксированная оплата за работу или часы",
-  equity: "Доля в компании, обычно с вестингом",
-  mixed: "Часть деньгами, часть долей",
+  paid: "Оплата в месяц или за весь проект",
+  negotiable: "Формат и оплату договоритесь на созвоне",
 };
 
 export const STAGE: Record<string, string> = {

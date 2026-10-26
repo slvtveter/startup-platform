@@ -23,7 +23,7 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
   await founder
     .getByLabel("Подробнее")
     .fill("Мы автоматически проверяем, что новичок может найти стартап, откликнуться и познакомиться с основателем.");
-  await founder.getByRole("button", { name: /^За долю/ }).click();
+  await founder.getByRole("button", { name: /^Обсуждается/ }).click();
   await founder.getByRole("button", { name: "Создать черновик" }).click();
   await founder.waitForURL(/\/edit$/);
 
@@ -61,7 +61,7 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
   await candidate.getByRole("button", { name: "Дальше" }).click();
 
   await candidate.getByRole("button", { name: /^Бесплатно/ }).click();
-  await candidate.getByRole("button", { name: /^За долю/ }).click();
+  await candidate.getByRole("button", { name: /^Обсуждается/ }).click();
   await candidate.getByLabel("Telegram").fill(`@${tg}`);
   await candidate.getByRole("button", { name: "Сохранить и опубликовать" }).click();
   await candidate.waitForURL(/\/startups$/);
