@@ -103,5 +103,5 @@ async def test_every_catalog_role_has_a_template(make_user, client):
     assert set(templates) == roles
     assert templates["designer"]["title"] == "UI/UX дизайнер"
     assert templates["designer"]["hours_per_week"] == 8
-    assert set(templates["yurist"]["outcome"]) == {"free", "paid", "equity", "mixed"}
+    assert set(templates["yurist"]["outcome"]) == {"free", "paid", "negotiable"}
     assert templates["yurist"]["title"] == "Юрист" and templates["yurist"]["description"]
