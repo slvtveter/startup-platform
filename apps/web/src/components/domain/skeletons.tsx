@@ -2,26 +2,42 @@ import { Container } from "@/components/domain/page-header";
 
 /** Серый контур будущего контента: появляется сразу после клика, пока сервер готовит страницу. */
 function Bar({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-md bg-secondary ${className}`} />;
+  return (
+    <div className={`animate-pulse rounded-md bg-secondary ${className}`} />
+  );
 }
 
-export function ListSkeleton() {
+export function ListSkeleton({ rows = false }: { rows?: boolean }) {
   return (
     <Container>
       <div role="status" aria-label="Загружаем">
         <Bar className="h-10 w-56" />
         <Bar className="mt-4 h-4 w-full max-w-xl" />
         <Bar className="mt-8 h-11 w-full" />
-        <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }, (_, i) => (
-            <div key={i} className="rounded-2xl border p-5">
-              <Bar className="h-5 w-2/3" />
-              <Bar className="mt-3 h-4 w-full" />
-              <Bar className="mt-2 h-4 w-4/5" />
-              <Bar className="mt-6 h-4 w-1/2" />
-            </div>
-          ))}
-        </div>
+        {rows ? (
+          <div className="mt-8 divide-y rounded-2xl border">
+            {Array.from({ length: 8 }, (_, i) => (
+              <div key={i} className="flex items-center gap-3 px-5 py-4">
+                <Bar className="size-11 rounded-xl" />
+                <div className="flex-1">
+                  <Bar className="h-4 w-40" />
+                  <Bar className="mt-2 h-3 w-64 max-w-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }, (_, i) => (
+              <div key={i} className="rounded-2xl border p-5">
+                <Bar className="h-5 w-2/3" />
+                <Bar className="mt-3 h-4 w-full" />
+                <Bar className="mt-2 h-4 w-4/5" />
+                <Bar className="mt-6 h-4 w-1/2" />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </Container>
   );
