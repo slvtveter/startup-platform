@@ -6447,8 +6447,7 @@
         "enum": [
           "free",
           "paid",
-          "equity",
-          "mixed"
+          "negotiable"
         ],
         "title": "Terms"
       },

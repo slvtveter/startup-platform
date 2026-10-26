@@ -19,8 +19,7 @@ class Availability(StrEnum):
 class Terms(StrEnum):
     free = "free"
     paid = "paid"
-    equity = "equity"
-    mixed = "mixed"
+    negotiable = "negotiable"  # условия обсуждаются; «за долю» убрали (KAN-138)
 
 
 class Stage(StrEnum):

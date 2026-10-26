@@ -49,7 +49,7 @@ export function StartupEditor({ startup, roles, skills }: { startup?: StartupDet
     pitch: startup?.pitch ?? "",
     description: startup?.description ?? "",
     stage: startup?.stage ?? "idea",
-    terms: startup?.terms ?? "equity",
+    terms: startup?.terms ?? "free",
     terms_details: startup?.terms_details ?? "",
     website: startup?.website ?? "",
     telegram: startup?.telegram ?? "",
@@ -136,7 +136,7 @@ export function StartupEditor({ startup, roles, skills }: { startup?: StartupDet
         </fieldset>
         <fieldset>
           <legend className="text-sm font-medium">Условия участия</legend>
-          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+          <div className="mt-2 grid gap-2 sm:grid-cols-3">
             {(Object.keys(TERMS) as Terms[]).map((t) => (
               <button
                 key={t}
@@ -152,7 +152,7 @@ export function StartupEditor({ startup, roles, skills }: { startup?: StartupDet
           <Textarea
             rows={3}
             className="mt-3"
-            placeholder="Детали: размер доли и вестинг, оплата, сколько часов в неделю, как часто созвоны"
+            placeholder={form.terms === "paid" ? "Сколько и как платите: например, «20 000 ₽ в месяц» или «60 000 ₽ за весь проект»" : "Детали: сколько часов в неделю, как часто созвоны, что получит человек"}
             value={form.terms_details}
             onChange={(e) => set("terms_details", e.target.value)}
           />
@@ -344,7 +344,7 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
           <Textarea
             rows={2}
             maxLength={500}
-            placeholder="Что получит человек: например, «кейс в портфолио, рекомендация, доля 0,5% после MVP»"
+            placeholder="Что получит человек: например, «кейс в портфолио, рекомендация, оплата 15 000 ₽ в месяц»"
             value={draft.outcome}
             onChange={(e) => setDraft({ ...draft, outcome: e.target.value })}
           />

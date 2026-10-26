@@ -28,7 +28,7 @@ export function PlatformStartupForm() {
     pitch: "",
     description: "",
     stage: "idea",
-    terms: "equity",
+    terms: "negotiable",
     owner_email: "",
   });
   const [busy, setBusy] = useState(false);
