@@ -18,14 +18,14 @@ export function StartupStatusBadge({ status }: { status: string }) {
   return <span className={cn(pill, tone)}>{STARTUP_STATUS[status] ?? status}</span>;
 }
 
-export function ApplicationStatusBadge({ status }: { status: string }) {
+export function ApplicationStatusBadge({ status, className }: { status: string; className?: string }) {
   const tone =
     status === "accepted"
       ? "bg-success-soft text-success-ink"
       : status === "pending"
         ? "bg-warn-soft text-warn-ink"
         : "bg-secondary text-muted-foreground";
-  return <span className={cn(pill, tone)}>{APP_STATUS[status] ?? status}</span>;
+  return <span className={cn(pill, tone, className)}>{APP_STATUS[status] ?? status}</span>;
 }
 
 export function SkillChip({ name, highlight = false }: { name: string; highlight?: boolean }) {

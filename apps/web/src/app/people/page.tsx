@@ -45,9 +45,10 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
         />
       </div>
       <div className="mt-8 flex items-center gap-4 border-t pt-5 text-sm">
-        <span className="font-semibold">
+        {/* h2 между h1 страницы и h3 карточек: порядок заголовков для экранных читалок. */}
+        <h2 className="font-sans text-sm font-semibold tracking-normal">
           {total} {plural(total, "человек", "человека", "человек")}
-        </span>
+        </h2>
         {["role", "looking_for", "level", "q"].some((k) => asList(params[k]).length > 0) && (
           <Link href="/people" className="text-muted-foreground underline-offset-4 hover:underline">
             Сбросить фильтры
