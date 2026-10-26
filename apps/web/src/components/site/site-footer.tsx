@@ -19,7 +19,7 @@ const COLUMNS = [
     links: [
       { href: "/startups/new", label: "Разместить стартап" },
       { href: "/people?level=internship", label: "Люди после стажировки" },
-      { href: "/people?looking_for=equity", label: "Готовы работать за долю" },
+      { href: "/people?looking_for=negotiable", label: "Открыты к обсуждению условий" },
     ],
   },
 ];

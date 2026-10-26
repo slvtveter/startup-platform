@@ -212,7 +212,7 @@ export function ProfileEditor({
             <div>
               <Label>На каких условиях готов работать</Label>
               <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                {(["free", "paid", "equity"] as Terms[]).map((t) => {
+                {(["free", "paid", "negotiable"] as Terms[]).map((t) => {
                   const on = f.looking_for.includes(t);
                   return (
                     <button
