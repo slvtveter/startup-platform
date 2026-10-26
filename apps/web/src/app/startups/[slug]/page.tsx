@@ -9,6 +9,7 @@ import { Container } from "@/components/domain/page-header";
 import { ReportButton } from "@/components/domain/report-button";
 import { Avatar } from "@/components/domain/avatar-upload";
 import { Seat } from "@/components/domain/seats";
+import { ShareButton } from "@/components/domain/share-button";
 import { TrackView } from "@/components/site/track-view";
 import { buttonVariants } from "@/components/ui/button";
 import { getMyProfile, getStartup, listRoles, type StartupDetail } from "@/lib/api";
@@ -95,6 +96,11 @@ export default async function StartupPage({ params }: Props) {
             {openSeats > 0 && `, ${plural(openSeats, `свободно ${openSeats} место`, `свободно ${openSeats} места`, `свободно ${openSeats} мест`)}`}
           </span>
         </div>
+        {!s.is_demo && (
+          <div className="mt-5">
+            <ShareButton title={s.title} text={s.pitch} path={`/startups/${s.slug}`} />
+          </div>
+        )}
       </header>
 
       {s.is_owner && (
