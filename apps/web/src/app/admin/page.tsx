@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronDownIcon } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { AdminAction } from "@/components/domain/admin-actions";
@@ -43,7 +44,23 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         }
       />
 
-      <section className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr]">
+      {/* Страница длинная, особенно на телефоне: быстрый переход к разделам. */}
+      <nav aria-label="Разделы админки" className="mt-6 flex flex-wrap gap-2 text-sm font-semibold">
+        {[
+          ["#metrics", "Метрики"],
+          ["#reports", `Жалобы${reports?.length ? ` (${reports.length})` : ""}`],
+          ["#users", "Пользователи"],
+          ["#startups", "Стартапы"],
+          ["#catalog", "Справочники"],
+          ["#audit", "Журнал"],
+        ].map(([href, label]) => (
+          <a key={href} href={href} className="rounded-lg border bg-card px-3 py-1.5 hover:bg-secondary">
+            {label}
+          </a>
+        ))}
+      </nav>
+
+      <section id="metrics" className="mt-8 scroll-mt-20 grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr]">
         <div className="rounded-2xl border bg-card p-6">
           <h2 className="font-sans text-base font-bold">Воронка за {m?.days} дней</h2>
           <ol className="mt-4 grid gap-3">
@@ -170,18 +187,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <PlatformStartupForm />
       </section>
 
-      <section className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border bg-card p-6">
-          <h2 className="mb-4 font-sans text-base font-bold">Роли</h2>
-          <CatalogEditor kind="roles" items={roles ?? []} />
-        </div>
-        <div className="rounded-2xl border bg-card p-6">
-          <h2 className="mb-4 font-sans text-base font-bold">Навыки</h2>
-          <CatalogEditor kind="skills" items={skills ?? []} />
-        </div>
-      </section>
 
-      <section className="mt-10">
+      <section id="reports" className="mt-10 scroll-mt-20">
         <h2 className="text-xl">Жалобы</h2>
         <div className="mt-3 grid gap-2">
           {reports?.length ? (
@@ -205,7 +212,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
       </section>
 
       <section className="mt-10 grid gap-8 lg:grid-cols-2">
-        <div>
+        <div id="users" className="scroll-mt-20">
           <div className="flex items-center gap-3">
             <h2 className="text-xl">Пользователи</h2>
             <form className="ml-auto min-w-0">
@@ -235,7 +242,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             ))}
           </div>
         </div>
-        <div>
+        <div id="startups" className="scroll-mt-20">
           <h2 className="text-xl">Стартапы</h2>
           <div className="mt-3 divide-y rounded-xl border bg-card">
             {startups?.map((s) => (
@@ -258,7 +265,28 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         </div>
       </section>
 
-      <section className="mt-10">
+      {/* Справочники правят редко, а списки длинные: по умолчанию свёрнуты. */}
+      <section id="catalog" className="mt-10 grid scroll-mt-20 grid-cols-1 items-start gap-4 lg:grid-cols-2">
+        {(
+          [
+            ["roles", "Роли", roles],
+            ["skills", "Навыки", skills],
+          ] as const
+        ).map(([kind, title, items]) => (
+          <details key={kind} className="group rounded-2xl border bg-card p-6">
+            <summary className="flex cursor-pointer list-none items-center gap-2 font-sans text-base font-bold">
+              {title}
+              <span className="font-normal text-muted-foreground">{items?.length ?? 0}</span>
+              <ChevronDownIcon className="ml-auto size-4 transition-transform group-open:rotate-180" aria-hidden />
+            </summary>
+            <div className="mt-4">
+              <CatalogEditor kind={kind} items={items ?? []} />
+            </div>
+          </details>
+        ))}
+      </section>
+
+      <section id="audit" className="mt-10 scroll-mt-20">
         <h2 className="text-xl">Журнал действий</h2>
         <ul className="mt-3 grid gap-1 text-sm text-muted-foreground">
           {audit?.length ? (
