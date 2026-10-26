@@ -16,7 +16,9 @@ export async function SiteHeader() {
     ? await Promise.all([inboxCount({ client }).then((r) => r.data), unreadChats({ client }).then((r) => r.data)])
     : [undefined, undefined];
   // В шапке только каталог; личные разделы — в меню аккаунта (на телефоне — в общем меню).
+  // «Главная» — для вошедших это дашборд с моими стартапами и откликами (KAN-138 п.2): всегда видно, как вернуться.
   const links = [
+    ...(user ? [{ href: "/", label: "Главная" }] : []),
     { href: "/startups", label: "Стартапы" },
     { href: "/people", label: "Люди" },
   ];
