@@ -26,8 +26,25 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [error, setError] = useState("");
   const [fields, setFields] = useState<Record<string, string>>({});
 
+  /** Свои понятные сообщения вместо всплывающих подсказок браузера (они на языке браузера и пропадают). */
+  function validate(): Record<string, string> {
+    const errs: Record<string, string> = {};
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) errs.email = "Проверь адрес: нужен вид name@mail.ru";
+    if (mode === "register" && password.length < 8) errs.password = "Пароль короче 8 символов";
+    if (mode === "login" && !password) errs.password = "Введи пароль";
+    if (mode === "register" && !adult) errs.adult = "Подтверди, что тебе есть 18 лет и ты принимаешь условия";
+    return errs;
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length) {
+      setError("");
+      setFields(errs);
+      document.getElementById(Object.keys(errs)[0])?.focus();
+      return;
+    }
     setBusy(true);
     setError("");
     setFields({});
@@ -48,11 +65,21 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   }
 
   return (
-    <form onSubmit={submit} className="grid gap-4">
+    <form onSubmit={submit} noValidate className="grid gap-4">
       <div>
         <Label htmlFor="email">Email</Label>
-        <Input id="email" type="email" autoComplete="email" required className="mt-1.5 h-11" value={email} onChange={(e) => setEmail(e.target.value)} />
-        <FieldError message={fields.email} />
+        <Input
+          id="email"
+          type="email"
+          autoComplete="email"
+          required
+          aria-invalid={!!fields.email}
+          aria-describedby={fields.email ? "email-error" : undefined}
+          className="mt-1.5 h-11"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <FieldError id="email-error" message={fields.email} />
       </div>
       <div>
         <div className="flex items-baseline">
@@ -69,18 +96,36 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           autoComplete={mode === "login" ? "current-password" : "new-password"}
           required
           minLength={mode === "register" ? 8 : 1}
+          aria-invalid={!!fields.password}
+          aria-describedby={fields.password ? "password-error" : mode === "register" ? "password-hint" : undefined}
           className="mt-1.5 h-11"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        {mode === "register" && <p className="mt-1 text-xs text-muted-foreground">Минимум 8 символов</p>}
-        <FieldError message={fields.password} />
+        {mode === "register" && !fields.password && (
+          <p id="password-hint" className="mt-1 text-xs text-muted-foreground">
+            Минимум 8 символов
+          </p>
+        )}
+        <FieldError id="password-error" message={fields.password} />
       </div>
       {mode === "register" && (
-        <label className="flex gap-3 text-sm text-muted-foreground">
-          <input type="checkbox" required checked={adult} onChange={(e) => setAdult(e.target.checked)} className="mt-0.5 size-4 accent-[var(--brand)]" />
-          Мне есть 18 лет, я принимаю условия сервиса
-        </label>
+        <div>
+          <label className="flex gap-3 text-sm text-muted-foreground">
+            <input
+              id="adult"
+              type="checkbox"
+              required
+              aria-invalid={!!fields.adult}
+              aria-describedby={fields.adult ? "adult-error" : undefined}
+              checked={adult}
+              onChange={(e) => setAdult(e.target.checked)}
+              className="mt-0.5 size-4 accent-[var(--brand)]"
+            />
+            Мне есть 18 лет, я принимаю условия сервиса
+          </label>
+          <FieldError id="adult-error" message={fields.adult} />
+        </div>
       )}
       {error && <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
       <Button type="submit" variant="brand" size="lg" disabled={busy}>

@@ -6,6 +6,7 @@ import { DemoBadge, TermsBadge } from "@/components/domain/badges";
 import { Container, EmptyState } from "@/components/domain/page-header";
 import { initialsOf, Seat, SeatRow } from "@/components/domain/seats";
 import { StartupCard } from "@/components/domain/startup-card";
+import { JsonLd, siteUrl } from "@/components/site/json-ld";
 import { PathLink } from "@/components/site/path-link";
 import { Reveal } from "@/components/site/reveal";
 import { TrackView } from "@/components/site/track-view";
@@ -39,6 +40,27 @@ async function Landing() {
   return (
     <>
       <TrackView name="landing_viewed" />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebSite",
+              name: "Envola",
+              url: siteUrl("/"),
+              inLanguage: "ru",
+            },
+            {
+              "@type": "Organization",
+              name: "Envola",
+              url: siteUrl("/"),
+              logo: siteUrl("/apple-icon.png"),
+              description:
+                "Платформа, где новички в IT находят стартапы для первого опыта, а основатели собирают команду.",
+            },
+          ],
+        }}
+      />
       <Container className="grid grid-cols-1 gap-12 pt-12 pb-16 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:pt-20">
         <div className="flex min-w-0 flex-col">
           <h1 className="text-[32px] leading-[1.1] sm:text-[56px] sm:leading-[1.08]">
