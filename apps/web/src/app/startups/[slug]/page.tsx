@@ -43,6 +43,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: `${data.pitch}${roles ? `. Ищут: ${roles}` : ""}`,
     openGraph: { title: data.title, description: data.pitch },
     alternates: { canonical: `/startups/${data.slug}` },
+    // Примеры (app.scripts.demo) не должны попасть в поиск как настоящие проекты.
+    ...(data.is_demo ? { robots: { index: false, follow: true } } : {}),
   };
 }
 

@@ -32,6 +32,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description: data.headline || undefined,
     alternates: { canonical: `/people/${data.slug}` },
+    // Примеры (app.scripts.demo) не должны попасть в поиск как настоящие люди.
+    ...(data.is_demo ? { robots: { index: false, follow: true } } : {}),
   };
 }
 
