@@ -318,3 +318,23 @@
     padding-bottom: 5.5rem;
   }
 }
+
+/* Мастер создания стартапа: шаг въезжает с той стороны, куда идём (вперёд — справа, назад — слева). */
+@keyframes step-in-forward {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+@keyframes step-in-back {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+.wizard-step-forward {
+  animation: step-in-forward 320ms var(--ease-out) backwards;
+}
+.wizard-step-back {
+  animation: step-in-back 320ms var(--ease-out) backwards;
+}
