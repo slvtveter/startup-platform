@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FilterBar } from "@/components/domain/filter-bar";
 import { Pager, SearchBox, asList, type SearchParams } from "@/components/domain/filters";
 import { Container, EmptyState, PageHeader } from "@/components/domain/page-header";
-import { PersonRow } from "@/components/domain/person-card";
+import { PersonListCard } from "@/components/domain/person-card";
 import { buttonVariants } from "@/components/ui/button";
 import { listPeople, listRoles } from "@/lib/api";
 import { LEVEL, TERMS, plural } from "@/lib/labels";
@@ -56,9 +56,9 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
         )}
       </div>
       {data && data.items.length > 0 ? (
-        <ul className="stagger mt-5 divide-y overflow-hidden rounded-2xl border bg-card">
+        <ul className="stagger mt-5 grid gap-4">
           {data.items.map((p) => (
-            <PersonRow key={p.slug} person={p} />
+            <PersonListCard key={p.slug} person={p} />
           ))}
         </ul>
       ) : (

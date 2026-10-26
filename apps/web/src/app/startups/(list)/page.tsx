@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FilterBar } from "@/components/domain/filter-bar";
 import { Pager, SearchBox, asList, toggleHref, type SearchParams } from "@/components/domain/filters";
 import { Container, EmptyState, PageHeader } from "@/components/domain/page-header";
-import { StartupCard } from "@/components/domain/startup-card";
+import { StartupListCard } from "@/components/domain/startup-card";
 import { buttonVariants } from "@/components/ui/button";
 import { listRoles, listStartups } from "@/lib/api";
 import { STAGE, TERMS, plural } from "@/lib/labels";
@@ -81,11 +81,11 @@ export default async function StartupsPage({ searchParams }: { searchParams: Pro
         </span>
       </div>
       {data && data.items.length > 0 ? (
-        <div className="stagger mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <ul className="stagger mt-5 grid gap-4">
           {data.items.map((s) => (
-            <StartupCard key={s.id} startup={s} />
+            <StartupListCard key={s.id} startup={s} />
           ))}
-        </div>
+        </ul>
       ) : (
         <div className="mt-5">
           <EmptyState
