@@ -439,7 +439,7 @@ async function Dashboard() {
       listMyApplications({ client }),
       listMyStartups({ client }),
     ]);
-  const name = profile?.display_name || user.email.split("@")[0];
+  const name = profile?.display_name;
   const myStartups = mine ?? [];
   const step = nextStep({
     emailVerified: user.email_verified,
@@ -459,7 +459,7 @@ async function Dashboard() {
 
   return (
     <Container>
-      <h1 className="text-2xl sm:text-[34px]">Привет, {name}</h1>
+      <h1 className="text-2xl sm:text-[34px]">{name ? `Привет, ${name}` : "Привет!"}</h1>
 
       <section
         aria-labelledby="next-step"

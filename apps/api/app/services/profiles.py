@@ -145,8 +145,10 @@ async def my_profile(db: AsyncSession, user: User) -> MyProfileOut:
     assert p is not None
     score, missing = completeness(p)
     detail = await to_detail(db, p)
+    # Себе показываем имя как есть: заглушка «Без имени» нужна только в каталоге,
+    # а в кабинете давала «Привет, Без имени» и инициалы «БИ».
     return MyProfileOut(
-        **detail.model_dump(),
+        **(detail.model_dump() | {"display_name": p.display_name}),
         is_published=p.is_published,
         contact_telegram=p.contact_telegram,
         show_email=p.show_email,
