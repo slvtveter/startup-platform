@@ -43,7 +43,7 @@ export function PersonListCard({ person }: { person: PersonCardData }) {
     <li>
       <Link
         href={`/people/${person.slug}`}
-        className="group block rounded-3xl border bg-card p-5 transition-[border-color,box-shadow] duration-200 ease-out hover:border-foreground/30 hover:shadow-[0_12px_32px_-16px_rgb(18_22_51/0.25)] sm:p-7"
+        className="group block rounded-3xl border bg-card p-5 transition-[border-color,box-shadow] duration-300 ease-out hover:border-foreground/30 hover:shadow-[0_12px_32px_-16px_rgb(18_22_51/0.25)] sm:p-7"
       >
         <div className="flex gap-4 sm:gap-6">
           <Avatar name={person.display_name} url={person.avatar_url} className="size-20 rounded-2xl text-2xl sm:size-28 sm:text-3xl" />

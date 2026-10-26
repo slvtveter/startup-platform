@@ -20,7 +20,7 @@ export function StartupCard({ startup, reasons }: { startup: StartupCardData; re
   return (
     <Link
       href={`/startups/${startup.slug}`}
-      className="group flex h-full flex-col rounded-2xl border bg-card p-5 transition-[border-color,transform,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:border-foreground hover:shadow-[0_8px_24px_-12px_rgb(18_22_51/0.25)]"
+      className="group flex h-full flex-col rounded-2xl border bg-card p-5 transition-[border-color,box-shadow] duration-300 ease-out hover:border-foreground/30 hover:shadow-[0_12px_32px_-16px_rgb(18_22_51/0.25)]"
     >
       <div className="flex items-start gap-3">
         <h3 className="text-lg leading-snug font-bold group-hover:text-brand-ink">{startup.title}</h3>
@@ -117,7 +117,7 @@ export function StartupListCard({ startup }: { startup: StartupCardData }) {
     <li>
       <Link
         href={`/startups/${startup.slug}`}
-        className="group block rounded-3xl border bg-card p-5 transition-[border-color,box-shadow] duration-200 ease-out hover:border-foreground/30 hover:shadow-[0_12px_32px_-16px_rgb(18_22_51/0.25)] sm:p-7"
+        className="group block rounded-3xl border bg-card p-5 transition-[border-color,box-shadow] duration-300 ease-out hover:border-foreground/30 hover:shadow-[0_12px_32px_-16px_rgb(18_22_51/0.25)] sm:p-7"
       >
         <div className="flex gap-4 sm:gap-6">
           <StartupLogo title={startup.title} slug={startup.slug} />
