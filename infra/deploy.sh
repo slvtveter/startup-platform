@@ -30,6 +30,30 @@ prune_old_images() {
   docker image prune -f > /dev/null
 }
 
+# Кеш оптимизированных картинок Next живёт внутри контейнера web и пропадает при выкатке.
+# Прогреваем его сразу: запрашиваем все /_next/image с ключевых страниц, чтобы первый
+# посетитель получил готовые файлы, а не ждал, пока сервер их пережмёт.
+warm_images() {
+  $C exec -T api python - <<'PY'
+import html, re, urllib.request
+
+def get(url, accept="text/html"):
+    req = urllib.request.Request("http://web:3000" + url, headers={"Accept": accept})
+    return urllib.request.urlopen(req, timeout=30).read()
+
+urls = set()
+for page in ["/", "/startups", "/people", "/cofounders", "/login", "/register"]:
+    try:
+        body = html.unescape(get(page).decode())
+    except Exception:
+        continue
+    urls.update(re.findall(r'/_next/image\?url=[^"\s,]+', body))
+for u in sorted(urls):
+    get(u, "image/avif,image/webp,image/*")
+print(f"warmed {len(urls)} images")
+PY
+}
+
 export IMAGE_TAG="$TAG"
 $C pull api web
 
@@ -42,6 +66,7 @@ $C up -d --remove-orphans
 if healthy; then
   # Справочник ролей и навыков: без него в профиле нечего выбрать. Идемпотентно.
   $C exec -T api python -m app.scripts.catalog || echo "catalog step failed (old image?)" >&2
+  warm_images || echo "image warm-up failed" >&2
   echo "$TAG" > .deployed-tag
   prune_old_images
   echo "deployed $TAG"

@@ -82,7 +82,7 @@ export async function Dashboard() {
 
       <section
         aria-labelledby="next-step"
-        className="mt-6 flex flex-col gap-3 rounded-2xl border border-l-4 border-l-brand bg-card px-4 py-3 sm:flex-row sm:items-center sm:gap-4"
+        className="mt-6 flex flex-col gap-3 rounded-[26px] bg-brand-soft px-5 py-5 sm:flex-row sm:items-center sm:gap-6 sm:px-6"
       >
         <div className="min-w-0">
           <h2 id="next-step" className="font-sans text-base font-semibold tracking-normal">
@@ -152,21 +152,21 @@ export async function Dashboard() {
         </Panel>
       </div>
 
-      <ul aria-label="Что ждёт ответа" className="stagger mt-4 grid grid-cols-4 gap-2 sm:gap-3">
+      <ul aria-label="Что ждёт ответа" className="mt-4 grid grid-cols-4 gap-2 sm:gap-3">
         {stats.map((s) => (
           <li key={s.label}>
             <Link
               href={s.href}
               className={cn(
-                "group flex h-full flex-col rounded-xl border bg-card p-2.5 transition-colors hover:border-foreground sm:rounded-2xl sm:p-4",
-                s.value > 0 && "border-brand/40 bg-brand-soft/40",
+                "group flex h-full flex-col rounded-2xl bg-tone p-3 transition-colors duration-200 hover:bg-tone-2 sm:rounded-[22px] sm:p-4",
+                s.value > 0 && "bg-brand-soft hover:bg-marker",
               )}
             >
               <span className="flex items-center gap-2 text-[11px] leading-tight font-semibold sm:text-sm">
                 <s.icon aria-hidden className={cn("size-4 max-sm:hidden", s.value > 0 ? "text-brand-ink" : "text-muted-foreground")} />
                 {s.label}
               </span>
-              <span className="mt-1 font-heading text-xl tabular-nums sm:mt-3 sm:text-3xl">{s.value}</span>
+              <span className="mt-1 text-xl font-extrabold tracking-[-0.03em] tabular-nums sm:mt-3 sm:text-3xl">{s.value}</span>
               <span className="mt-0.5 hidden text-xs text-muted-foreground sm:block">{s.hint}</span>
             </Link>
           </li>
@@ -185,7 +185,7 @@ export async function Dashboard() {
           </Link>
         </div>
         {recs && recs.length > 0 ? (
-          <div className="stagger mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {recs.map((r) => (
               <StartupCard key={r.startup.id} startup={r.startup} reasons={r.reasons} />
             ))}
@@ -208,7 +208,7 @@ export async function Dashboard() {
 
 function Panel({ title, href, more, children }: { title: string; href: string; more?: string; children: React.ReactNode }) {
   return (
-    <section className="flex flex-col rounded-2xl border bg-card p-5">
+    <section className="flex flex-col rounded-[26px] bg-tone p-6">
       <div className="flex items-center gap-2">
         <h2 className="font-sans text-lg font-bold tracking-normal">{title}</h2>
         {more && (

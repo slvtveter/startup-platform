@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, HttpUrl
 
-from app.models.enums import Availability, ExperienceLevel, LinkKind, Terms
+from app.models.enums import Availability, ExperienceLevel, LinkKind, LookingFor
 from app.schemas.catalog import RoleOut, SkillOut
 from app.schemas.common import ORM
 
@@ -24,7 +24,7 @@ class ProfileUpdate(BaseModel):
     primary_role: str | None = Field(default=None, description="slug роли")
     experience_level: ExperienceLevel | None = None
     availability: Availability | None = None
-    looking_for: list[Terms] | None = None
+    looking_for: list[LookingFor] | None = None
     city: str | None = Field(default=None, max_length=80)
     contact_telegram: str | None = Field(default=None, max_length=64)
     show_email: bool | None = None
@@ -47,6 +47,7 @@ class PersonCard(ORM):
     city: str
     skills: list[SkillOut]
     avatar_url: str | None = None
+    avatar_url_lg: str | None = None
     is_demo: bool = False
 
 

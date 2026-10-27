@@ -84,6 +84,8 @@ class StartupCard(BaseModel):
     open_roles: list[RoleBrief]
     team_size: int = 1
     is_demo: bool = False
+    cover_url: str | None = None
+    cover_url_lg: str | None = None
 
 
 class ResponseStats(BaseModel):

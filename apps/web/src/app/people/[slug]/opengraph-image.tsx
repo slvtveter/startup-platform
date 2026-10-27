@@ -13,7 +13,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const { data: p } = await getPerson({ client: publicClient(), path: { slug } });
   if (!p) return ogImage({ title: "Профиль не найден", subtitle: "", filled: 0, open: 0, footer: "" });
   const role = [p.primary_role?.name, p.experience_level && LEVEL[p.experience_level].toLowerCase()].filter(Boolean).join(", ");
-  const looking = p.looking_for.map((t) => TERMS[t].toLowerCase()).join(", ");
+  const looking = p.looking_for.map((t) => (t === "cofound" ? "ищет сообщников" : TERMS[t]?.toLowerCase())).filter(Boolean).join(", ");
   return ogImage({
     title: p.display_name,
     subtitle: p.headline || role,

@@ -12,6 +12,14 @@ export const TERMS_HINT: Record<string, string> = {
   negotiable: "Формат и оплату договоритесь на созвоне",
 };
 
+/** «Ищу сообщников»: хочу придумать и запустить стартап с нуля вместе с другими. Хранится в looking_for. */
+export const COFOUND = "cofound";
+
+/** Условия участия человека без отметки «сообщники» — для строки «Условия». */
+export function termsOf(lookingFor: string[]) {
+  return lookingFor.filter((t) => t in TERMS);
+}
+
 export const STAGE: Record<string, string> = {
   idea: "Идея",
   prototype: "Прототип",

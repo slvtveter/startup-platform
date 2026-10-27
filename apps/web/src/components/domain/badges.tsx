@@ -4,7 +4,7 @@ import { APP_STATUS, STAGE, STARTUP_STATUS, TERMS } from "@/lib/labels";
 const pill = "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold whitespace-nowrap";
 
 export function TermsBadge({ terms, className }: { terms: string; className?: string }) {
-  const tone = terms === "free" ? "bg-secondary text-foreground" : terms === "paid" ? "bg-success-soft text-success-ink" : "bg-warn-soft text-warn-ink";
+  const tone = terms === "free" ? "bg-white text-foreground shadow-[inset_0_0_0_1px_var(--border)]" : terms === "paid" ? "bg-success-soft text-success-ink" : "bg-warn-soft text-warn-ink";
   return <span className={cn(pill, tone, className)}>{TERMS[terms] ?? terms}</span>;
 }
 
@@ -44,7 +44,7 @@ export function SkillChip({ name, highlight = false }: { name: string; highlight
 /** Демо-карточка на пустом проде (app.scripts.demo): пример, а не настоящий человек или проект. */
 export function DemoBadge({ className }: { className?: string }) {
   return (
-    <span className={cn(pill, "bg-warn-soft text-warn-ink", className)} title="Пример: так выглядит карточка на платформе">
+    <span className={cn(pill, "bg-white/90 font-semibold text-muted-foreground shadow-[inset_0_0_0_1px_var(--border)]", className)} title="Пример: так выглядит карточка на платформе">
       Пример
     </span>
   );

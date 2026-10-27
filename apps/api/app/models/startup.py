@@ -50,6 +50,8 @@ class Startup(TimestampMixin, Base):
     )
     website: Mapped[str] = mapped_column(String(300), default="")
     telegram: Mapped[str] = mapped_column(String(100), default="")
+    # Ключ обложки в хранилище: файлы <key>-1600.webp и <key>-800.webp (16:9).
+    cover_key: Mapped[str | None] = mapped_column(String(120))
     is_hidden: Mapped[bool] = mapped_column(Boolean, default=False)  # скрыт модератором
     # Стартап перенесён на платформу админом (KAN-75): права перейдут человеку с этим email,
     # когда он подтвердит почту. До этого владелец — админ.

@@ -1,8 +1,11 @@
 import uuid
+from pathlib import Path
 
-from sqlalchemy import ARRAY, Boolean, Column, Enum, ForeignKey, String, Table, Text
+from sqlalchemy import Boolean, Column, Enum, ForeignKey, String, Table, Text
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.config import get_settings
 from app.db.base import Base, TimestampMixin
 from app.db.search import search_column, search_index
 from app.models.catalog import Role, Skill
@@ -50,6 +53,14 @@ class Profile(TimestampMixin, Base):
     @property
     def avatar_url(self) -> str | None:
         return f"/media/{self.avatar_key}-256.webp" if self.avatar_key else None
+
+    @property
+    def avatar_url_lg(self) -> str | None:
+        """512px для крупных карточек; у аватаров, загруженных до появления размера, — 256."""
+        if not self.avatar_key:
+            return None
+        big = Path(get_settings().media_dir) / f"{self.avatar_key}-512.webp"
+        return f"/media/{self.avatar_key}-512.webp" if big.exists() else self.avatar_url
 
     skills: Mapped[list[Skill]] = relationship(secondary=profile_skills, lazy="selectin")
     links: Mapped[list["ProfileLink"]] = relationship(

@@ -22,6 +22,15 @@ class Terms(StrEnum):
     negotiable = "negotiable"  # условия обсуждаются; «за долю» убрали (KAN-138)
 
 
+class LookingFor(StrEnum):
+    """Что человек ищет: условия участия (Terms) и «сообщники» — придумать стартап с нуля."""
+
+    free = "free"
+    paid = "paid"
+    negotiable = "negotiable"
+    cofound = "cofound"
+
+
 class Stage(StrEnum):
     idea = "idea"
     prototype = "prototype"

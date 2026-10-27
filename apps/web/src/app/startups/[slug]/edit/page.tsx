@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { StartupStatusBadge } from "@/components/domain/badges";
+import { CoverUpload } from "@/components/domain/cover-upload";
 import { Container, PageHeader } from "@/components/domain/page-header";
 import { StartupEditor } from "@/components/domain/startup-editor";
 import { buttonVariants } from "@/components/ui/button";
@@ -31,6 +32,9 @@ export default async function EditStartupPage({ params }: { params: Promise<{ sl
           </Link>
         }
       />
+      <div className="mt-8">
+        <CoverUpload startup={s} />
+      </div>
       <div className="mt-8">
         <StartupEditor startup={s} roles={roles ?? []} skills={skills ?? []} />
       </div>

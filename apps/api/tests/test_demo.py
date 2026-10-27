@@ -19,12 +19,14 @@ async def test_demo_is_marked_and_unreachable(make_user, client, media):
     await demo.add()  # повторный запуск ничего не дублирует
 
     startups = (await client.get("/api/startups")).json()
-    assert startups["total"] == 3
+    assert startups["total"] == 10
     assert all(s["is_demo"] for s in startups["items"])
-    people = (await client.get("/api/people")).json()
-    assert people["total"] == 7
+    people = (await client.get("/api/people", params={"limit": 100})).json()
+    assert people["total"] == 30
     assert all(p["is_demo"] and p["avatar_url"] for p in people["items"])
-    assert len(list(media.rglob("*.webp"))) == 14  # 7 аватарок × 2 размера
+    assert all(s["cover_url"] for s in startups["items"])
+    # 30 аватарок × 3 размера и 10 обложек × 2 размера.
+    assert len(list(media.rglob("*.webp"))) == 30 * 3 + 10 * 2
     # Счётчики на лендинге — только настоящие, места на доске помечены.
     stats = (await client.get("/api/stats")).json()
     assert stats["startups"] == stats["people"] == stats["open_roles"] == 0

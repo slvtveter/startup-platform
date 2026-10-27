@@ -20,7 +20,7 @@ import {
   type MyProfileOut,
   type RoleOut,
   type SkillOut,
-  type Terms,
+  type LookingFor,
 } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { AVAILABILITY, LEVEL, LINK_KIND, TERMS, TERMS_HINT } from "@/lib/labels";
@@ -66,7 +66,7 @@ export function ProfileEditor({
     city: profile.city,
     skills: profile.skills.map((s) => s.slug),
     links: profile.links.length ? profile.links.map((l) => ({ kind: l.kind, url: l.url })) : [{ kind: "portfolio" as LinkKind, url: "" }],
-    looking_for: profile.looking_for as Terms[],
+    looking_for: profile.looking_for as LookingFor[],
     contact_telegram: profile.contact_telegram,
     show_email: profile.show_email,
   });
@@ -186,7 +186,7 @@ export function ProfileEditor({
                     <select
                       value={l.kind}
                       onChange={(e) => set("links", f.links.map((x, j) => (j === i ? { ...x, kind: e.target.value as LinkKind } : x)))}
-                      className="h-11 rounded-lg border bg-card px-2 text-sm"
+                      className="h-11 rounded-xl bg-tone px-3 text-sm"
                     >
                       {Object.entries(LINK_KIND).map(([v, label]) => (
                         <option key={v} value={v}>
@@ -209,17 +209,50 @@ export function ProfileEditor({
 
         {step === 2 && (
           <div className="mt-8 grid gap-6">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={f.looking_for.includes("cofound")}
+              onClick={() =>
+                set("looking_for", f.looking_for.includes("cofound") ? f.looking_for.filter((x) => x !== "cofound") : [...f.looking_for, "cofound"])
+              }
+              className={cn(
+                "flex items-start gap-4 rounded-2xl p-5 text-left transition-colors duration-200",
+                f.looking_for.includes("cofound") ? "bg-brand-soft ring-2 ring-brand" : "bg-tone hover:bg-tone-2",
+              )}
+            >
+              <span
+                aria-hidden
+                className={cn(
+                  "mt-0.5 flex h-6 w-10 shrink-0 items-center rounded-full p-0.5 transition-colors duration-200",
+                  f.looking_for.includes("cofound") ? "bg-brand" : "bg-input",
+                )}
+              >
+                <span
+                  className={cn(
+                    "size-5 rounded-full bg-white shadow-sm transition-transform duration-200",
+                    f.looking_for.includes("cofound") && "translate-x-4",
+                  )}
+                />
+              </span>
+              <span>
+                <span className="block font-bold">Ищу сообщников, чтобы придумать стартап с нуля</span>
+                <span className="mt-1 block text-sm text-muted-foreground">
+                  Попадёшь в раздел «Сообщники»: там собираются те, кто хочет накидать идей и запустить своё вместе. Идея не нужна.
+                </span>
+              </span>
+            </button>
             <div>
               <Label>На каких условиях готов работать</Label>
               <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                {(["free", "paid", "negotiable"] as Terms[]).map((t) => {
+                {(["free", "paid", "negotiable"] as LookingFor[]).map((t) => {
                   const on = f.looking_for.includes(t);
                   return (
                     <button
                       key={t}
                       type="button"
                       onClick={() => set("looking_for", on ? f.looking_for.filter((x) => x !== t) : [...f.looking_for, t])}
-                      className={cn("rounded-xl border p-4 text-left", on ? "border-foreground ring-2 ring-foreground" : "hover:border-foreground/40")}
+                      className={cn("rounded-2xl p-4 text-left transition-colors duration-200", on ? "bg-brand-soft ring-2 ring-brand" : "bg-tone hover:bg-tone-2")}
                     >
                       <div className="font-bold">{TERMS[t]}</div>
                       <div className="mt-0.5 text-xs text-muted-foreground">{TERMS_HINT[t]}</div>
@@ -286,7 +319,7 @@ export function ProfileEditor({
             <span className="ml-auto text-2xl font-bold">{profile.completeness}%</span>
           </div>
           <div className="mt-3 h-2 overflow-hidden rounded-full bg-secondary">
-            <div className="h-full rounded-full bg-brand transition-all" style={{ width: `${profile.completeness}%` }} />
+            <div className="h-full rounded-full bg-brand transition-[width] duration-500" style={{ width: `${profile.completeness}%` }} />
           </div>
           {profile.missing.length > 0 && (
             <ul className="mt-4 grid gap-1 text-sm text-muted-foreground">

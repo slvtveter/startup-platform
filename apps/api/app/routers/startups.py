@@ -1,7 +1,7 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, UploadFile
 
 from app.core.deps import CurrentUser, OptionalUser
 from app.db.session import DbSession
@@ -20,6 +20,7 @@ from app.schemas.startup import (
     StartupUpdate,
 )
 from app.services import applications as app_service
+from app.services import covers
 from app.services import startups as service
 
 router = APIRouter(tags=["startups"])
@@ -66,6 +67,24 @@ async def update_startup(
 ) -> StartupDetail:
     s = await service.get_owned(db, startup_id, user)
     await service.update(db, s, data)
+    return await service.to_detail(db, s, user)
+
+
+@router.post("/startups/{startup_id}/cover", response_model=StartupDetail)
+async def upload_startup_cover(
+    startup_id: uuid.UUID, file: UploadFile, user: CurrentUser, db: DbSession
+) -> StartupDetail:
+    s = await service.get_owned(db, startup_id, user)
+    await covers.upload(db, s, await file.read(covers.MAX_BYTES + 1))
+    return await service.to_detail(db, s, user)
+
+
+@router.delete("/startups/{startup_id}/cover", response_model=StartupDetail)
+async def delete_startup_cover(
+    startup_id: uuid.UUID, user: CurrentUser, db: DbSession
+) -> StartupDetail:
+    s = await service.get_owned(db, startup_id, user)
+    await covers.remove(db, s)
     return await service.to_detail(db, s, user)
 
 
