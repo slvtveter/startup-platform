@@ -1,9 +1,9 @@
-import { Check } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 
-import { DemoBadge, TermsBadge } from "@/components/domain/badges";
+import { TermsBadge } from "@/components/domain/badges";
 import type { StartupCard as StartupCardData } from "@/lib/api";
-import { STAGE, plural, timeAgo } from "@/lib/labels";
+import { STAGE, plural } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 
 /** Причины подбора («Совпадает навыков: 2») — короткими метками внутри карточки. */
@@ -86,12 +86,11 @@ export function StartupCard({
         href={`/startups/${startup.slug}`}
         className="card-hover group flex h-full flex-col rounded-[28px] bg-tone p-2 hover:bg-tone-2"
       >
-        <span className="relative block aspect-[16/9] overflow-hidden rounded-[22px]">
+        <span className="relative block aspect-[16/9] overflow-hidden rounded-[20px]">
           <StartupCover startup={startup} eager={eager} />
           <span className="absolute top-3 left-3 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-foreground shadow-sm">
             {STAGE[startup.stage] ?? startup.stage}
           </span>
-          {startup.is_demo && <DemoBadge className="absolute top-3 right-3 shadow-sm" />}
         </span>
         <div className="flex flex-1 flex-col px-4 pt-4 pb-3">
           <div className="flex items-start gap-3">
@@ -100,7 +99,8 @@ export function StartupCard({
           </div>
           <span className="mt-1.5 line-clamp-2 text-[15px] leading-snug text-muted-foreground">{startup.pitch}</span>
           {roles.length > 0 && (
-            <span className="mt-4 flex flex-wrap gap-1.5" aria-label="Кого ищут">
+            <span className="mt-4 flex flex-wrap items-center gap-1.5" aria-label="Кого ищут">
+              <span className="mr-0.5 text-[13px] text-muted-foreground">Ищут:</span>
               {roles.map((r) => (
                 <span key={r.id} className="rounded-full bg-white px-2.5 py-1 text-[13px] font-semibold">
                   {r.title}
@@ -119,20 +119,14 @@ export function StartupCard({
               ))}
             </span>
           )}
-          <span className="mt-auto flex items-center gap-2 pt-4 text-[13px] text-muted-foreground">
-            <span className="truncate">
-              <span className="font-semibold text-foreground">{startup.owner_name}</span>
+          <span className="mt-auto flex items-center gap-2 border-t border-foreground/[0.06] pt-3.5 text-[13px] text-muted-foreground">
+            <span className="min-w-0 truncate">
+              Основатель <span className="font-semibold text-foreground">{startup.owner_name}</span>
               {team > 1 ? ` и ещё ${team - 1}` : ""}
             </span>
-            <span className="ml-auto shrink-0">
-              {open > 0 ? (
-                <span className="font-semibold text-brand-ink">
-                  {plural(open, `${open} место`, `${open} места`, `${open} мест`)}
-                </span>
-              ) : (
-                "Команда собрана"
-              )}
-              {startup.published_at ? ` · ${timeAgo(startup.published_at)}` : ""}
+            <span className="ml-auto inline-flex shrink-0 items-center gap-1 font-bold text-brand-ink">
+              {open > 0 ? plural(open, `${open} место`, `${open} места`, `${open} мест`) : "Подробнее"}
+              <ArrowRight aria-hidden className="size-3.5" />
             </span>
           </span>
         </div>

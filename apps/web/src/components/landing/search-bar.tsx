@@ -9,9 +9,9 @@ import { cn } from "@/lib/utils";
 // Один поиск на три каталога: люди, идеи (стартапы на стадии идеи) и стартапы. Это обычная GET-форма,
 // поэтому без JS она тоже работает — просто ищет по вкладке, выбранной по умолчанию.
 const TABS = [
-  { key: "people", label: "Люди", action: "/people", placeholder: "Например, дизайнер или Flutter" },
-  { key: "ideas", label: "Идеи", action: "/startups", placeholder: "Например, образование или бот" },
-  { key: "startups", label: "Стартапы", action: "/startups", placeholder: "Например, backend или маркетинг" },
+  { key: "people", label: "Люди", action: "/people", placeholder: "Роль или навык: Figma, Python" },
+  { key: "ideas", label: "Идеи", action: "/startups", placeholder: "Тема: учёба, еда, собаки" },
+  { key: "startups", label: "Стартапы", action: "/startups", placeholder: "Роль или тема: дизайнер, ML" },
 ] as const;
 
 export function SearchBar() {
@@ -31,8 +31,8 @@ export function SearchBar() {
             aria-checked={t.key === tab.key}
             onClick={() => setTab(t)}
             className={cn(
-              "h-[46px] flex-1 rounded-[14px] px-[18px] text-[15px] font-bold text-muted-foreground transition-colors duration-300",
-              t.key === tab.key && "bg-foreground text-background",
+              "h-[46px] flex-1 rounded-[14px] px-[18px] text-[15px] font-bold text-muted-foreground transition-colors",
+              t.key === tab.key ? "bg-foreground text-background" : "hover:bg-tone hover:text-foreground",
             )}
           >
             {t.label}

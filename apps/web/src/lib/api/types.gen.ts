@@ -2512,6 +2512,10 @@ export type ListPeopleData = {
          */
         looking_for?: Array<string>;
         /**
+         * Cofound
+         */
+        cofound?: boolean;
+        /**
          * Q
          */
         q?: string | null;

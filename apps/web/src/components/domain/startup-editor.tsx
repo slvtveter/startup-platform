@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { Seat, SeatRow } from "@/components/domain/seats";
+import { SeatRow } from "@/components/domain/seats";
 import { SkillPicker } from "@/components/domain/skill-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +28,7 @@ import {
   type Terms,
 } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
-import { STAGE, TERMS, TERMS_HINT } from "@/lib/labels";
+import { STAGE, TERMS, TERMS_HINT, plural } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 
 type Base = {
@@ -238,6 +238,8 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
   };
   const [draft, setDraft] = useState(empty);
   const [adding, setAdding] = useState(startup.roles.length === 0);
+  // id роли, которую сейчас правим в той же форме; null — добавляем новую.
+  const [editing, setEditing] = useState<string | null>(null);
   const [templates, setTemplates] = useState<Record<string, RoleTemplateOut>>({});
 
   // Шаблоны ролей (KAN-98): пример задач, часов и «что получишь» для каждой роли справочника.
@@ -260,11 +262,34 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
   }
 
   async function add() {
-    const { error } = await addStartupRole({ path: { startup_id: startup.id }, body: draft });
+    const { role, ...fields } = draft;
+    const { error } = editing
+      ? await updateStartupRole({ path: { role_id: editing }, body: fields })
+      : await addStartupRole({ path: { startup_id: startup.id }, body: { role, ...fields } });
     if (error) return toast.error(errorMessage(error));
-    setDraft(fillFromTemplate(empty, undefined, templates[empty.role], startup.terms));
-    setAdding(false);
+    toast.success(editing ? "Роль сохранена" : "Роль добавлена");
+    closeForm();
     router.refresh();
+  }
+
+  function closeForm() {
+    setDraft(fillFromTemplate(empty, undefined, templates[empty.role], startup.terms));
+    setEditing(null);
+    setAdding(false);
+  }
+
+  function edit(r: StartupDetail["roles"][number]) {
+    setDraft({
+      role: r.role.slug,
+      title: r.title,
+      description: r.description,
+      outcome: r.outcome ?? "",
+      hours_per_week: r.hours_per_week ?? null,
+      slots: r.slots ?? 1,
+      skills: r.skills.map((x) => x.slug),
+    });
+    setEditing(r.id);
+    setAdding(true);
   }
 
   async function toggle(id: string, is_open: boolean) {
@@ -280,13 +305,13 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
   }
 
   return (
-    <div className="rounded-2xl border bg-card p-5">
-      <div className="font-bold">Места в команде</div>
+    <div className="rounded-[26px] bg-tone p-5 sm:p-6">
+      <div className="text-lg font-extrabold tracking-[-0.02em]">Места в команде</div>
       <p className="mt-1 text-sm text-muted-foreground">
         Чем конкретнее задачи, часы и то, что человек получит, тем больше откликов.
       </p>
-      <div className="mt-4 rounded-xl bg-secondary p-3">
-        <div className="text-xs text-muted-foreground">Так команду увидят новички</div>
+      <div className="mt-4 rounded-2xl bg-white p-3">
+        <div className="text-xs text-muted-foreground">Так команду увидят на странице проекта</div>
         <div className="mt-2 flex items-center gap-3">
           <SeatRow
             filled={startup.team.length}
@@ -296,19 +321,24 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
       </div>
       <ul className="mt-3 grid gap-2">
         {startup.roles.map((r) => (
-          <li key={r.id} className="rounded-xl border p-3">
-            <div className="flex items-start gap-2">
-              <Seat filled={!r.is_open} size="sm" className="mt-0.5" />
-              <div className="min-w-0">
-                <div className="truncate font-bold">{r.title}</div>
-                <div className="text-xs text-muted-foreground">
-                  {[r.role.name, `мест: ${r.slots ?? 1}`, r.hours_per_week ? `${r.hours_per_week} ч в неделю` : null, r.is_open ? "открыта" : "закрыта"]
-                    .filter(Boolean)
-                    .join(", ")}
-                </div>
+          <li key={r.id} className={`rounded-2xl bg-white p-4 ${editing === r.id ? "ring-2 ring-brand" : ""}`}>
+            <div className="min-w-0">
+              <div className="truncate font-bold">{r.title}</div>
+              <div className="text-sm text-muted-foreground">
+                {[
+                  r.role.name !== r.title ? r.role.name : null,
+                  plural(r.slots ?? 1, `${r.slots ?? 1} место`, `${r.slots ?? 1} места`, `${r.slots ?? 1} мест`),
+                  r.hours_per_week ? `${r.hours_per_week} ч/нед` : null,
+                  r.is_open ? null : "набор закрыт",
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
               </div>
             </div>
-            <div className="mt-2 flex gap-3 text-xs font-semibold">
+            <div className="mt-3 flex gap-4 text-sm font-semibold">
+              <button type="button" onClick={() => edit(r)} className="text-brand-ink hover:underline">
+                Изменить
+              </button>
               <button type="button" onClick={() => toggle(r.id, !r.is_open)} className="hover:underline">
                 {r.is_open ? "Закрыть" : "Открыть"}
               </button>
@@ -321,13 +351,22 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
       </ul>
       {adding ? (
         <div className="mt-4 grid gap-3 border-t pt-4">
+          {editing && <div className="font-bold">Изменить роль</div>}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">Поля заполнены примером для этой роли: поправь под свой проект.</span>
+            <span className="text-xs text-muted-foreground">
+              {editing ? "Поправь задачи, часы и то, что человек получит." : "Поля заполнены примером для этой роли: поправь под свой проект."}
+            </span>
             <button type="button" onClick={applyExample} className="ml-auto shrink-0 text-xs font-semibold text-brand-ink hover:underline">
               Подставить пример
             </button>
           </div>
-          <select value={draft.role} onChange={(e) => chooseRole(e.target.value)} aria-label="Роль" className="h-10 rounded-lg border bg-card px-3 text-sm">
+          <select
+            value={draft.role}
+            onChange={(e) => chooseRole(e.target.value)}
+            disabled={!!editing}
+            aria-label="Роль"
+            className="h-11 rounded-xl bg-white px-3 text-sm disabled:opacity-60"
+          >
             {roles.map((r) => (
               <option key={r.slug} value={r.slug}>
                 {r.name}
@@ -368,10 +407,10 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
           <SkillPicker all={skills} value={draft.skills} max={12} onChange={(v) => setDraft({ ...draft, skills: v })} />
           <div className="flex gap-2">
             <Button onClick={add} disabled={draft.title.trim().length < 2}>
-              Добавить роль
+              {editing ? "Сохранить роль" : "Добавить роль"}
             </Button>
             {startup.roles.length > 0 && (
-              <Button variant="ghost" onClick={() => setAdding(false)}>
+              <Button variant="ghost" onClick={closeForm}>
                 Отмена
               </Button>
             )}

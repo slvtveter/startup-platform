@@ -1,9 +1,10 @@
 // Русские подписи для значений перечислений из API.
 
+// Условия оплаты: подпись сама говорит, что речь о деньгах («Обсуждается» читалось как «идею обсуждают»).
 export const TERMS: Record<string, string> = {
-  free: "Бесплатно",
-  paid: "За деньги",
-  negotiable: "Обсуждается",
+  free: "Без оплаты",
+  paid: "Оплачивается",
+  negotiable: "Оплата обсуждается",
 };
 
 export const TERMS_HINT: Record<string, string> = {
@@ -30,7 +31,7 @@ export const STAGE: Record<string, string> = {
 export const LEVEL: Record<string, string> = {
   no_experience: "Без опыта",
   courses: "После курсов",
-  internship: "Была стажировка",
+  internship: "После стажировки",
   junior: "Junior",
 };
 

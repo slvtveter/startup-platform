@@ -78,7 +78,7 @@ async function Landing() {
         >
           <Reveal className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {ideas.items.map((s, i) => (
-              <div key={s.id} className="reveal-item" style={delay(i * 80)}>
+              <div key={s.id} className="reveal-item" style={delay(i * 50)}>
                 <StartupCard startup={s} />
               </div>
             ))}
@@ -92,7 +92,7 @@ async function Landing() {
       )}
 
       {cofounders && cofounders.items.length > 0 && (
-        <section aria-labelledby="cof-h" className={`${wrap} pt-[clamp(88px,10vw,150px)]`}>
+        <section aria-labelledby="cof-h" className={`${wrap} pt-[clamp(72px,8vw,120px)]`}>
           <div className="rounded-[36px] bg-brand-soft p-4 sm:p-8 lg:p-10">
             <div className="flex flex-wrap items-end gap-x-10 gap-y-6 p-2 sm:p-0">
               <div>
@@ -114,9 +114,9 @@ async function Landing() {
                 </Link>
               </div>
             </div>
-            <Reveal className="mt-8 grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
+            <Reveal className="mt-8 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-4">
               {cofounders.items.map((p, i) => (
-                <div key={p.slug} className="reveal-item" style={delay(i * 70)}>
+                <div key={p.slug} className="reveal-item" style={delay(i * 50)}>
                   <PersonCard person={p} surface="white" />
                 </div>
               ))}
@@ -128,13 +128,13 @@ async function Landing() {
       {others.length > 0 && (
         <Section
           id="people"
-          title="Люди, которым можно написать прямо сейчас"
-          lead="Все открыты к разговору: про идею, совместный проект или просто про то, куда расти."
+          title="Кто уже здесь"
+          lead="Разработчики, дизайнеры, маркетологи и аналитики в начале пути. Открой профиль: навыки, опыт и что человек ищет."
           more={{ href: "/people", label: "Все люди" }}
         >
-          <Reveal className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
+          <Reveal className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-4">
             {others.map((p, i) => (
-              <div key={p.slug} className="reveal-item" style={delay(i * 70)}>
+              <div key={p.slug} className="reveal-item" style={delay(i * 50)}>
                 <PersonCard person={p} />
               </div>
             ))}
@@ -155,7 +155,7 @@ async function Landing() {
         >
           <Reveal className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {startups.items.map((s, i) => (
-              <div key={s.id} className="reveal-item" style={delay(i * 80)}>
+              <div key={s.id} className="reveal-item" style={delay(i * 50)}>
                 <StartupCard startup={s} />
               </div>
             ))}
@@ -165,7 +165,7 @@ async function Landing() {
 
       {/* Считаются только настоящие: примеры (is_demo) в счётчик не входят, а при нуле блок не показываем. */}
       {stats && (stats.people > 0 || stats.startups > 0) && (
-        <section aria-label="Envola в цифрах" className={`${wrap} pt-[clamp(88px,10vw,150px)]`}>
+        <section aria-label="Envola в цифрах" className={`${wrap} pt-[clamp(72px,8vw,120px)]`}>
           <Reveal className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             {[
               [stats.people, plural(stats.people, "человек открыт к разговору", "человека открыты к разговору", "человек открыты к разговору")],
@@ -185,16 +185,16 @@ async function Landing() {
         <Faq />
       </Section>
 
-      <section aria-labelledby="final-h" className={`${wrap} pt-[clamp(88px,10vw,150px)]`}>
+      <section aria-labelledby="final-h" className={`${wrap} pt-[clamp(72px,8vw,120px)]`}>
         <div className="relative isolate grid gap-8 overflow-hidden rounded-[40px] px-6 py-[clamp(48px,7vw,110px)] text-white sm:px-[clamp(24px,5vw,72px)] lg:grid-cols-[1.2fr_1fr] lg:items-end">
           <Image src={PHOTOS.teamEvening} alt="" fill placeholder="blur" sizes="(min-width: 1360px) 1360px, 100vw" className="-z-20 object-cover" />
           <div aria-hidden className="absolute inset-0 -z-10 bg-[rgb(14_26_52/0.72)]" />
           <div>
             <h2 id="final-h" className="max-w-[14ch] text-[clamp(36px,4.8vw,70px)] leading-[1.02]">
-              Напиши первое сообщение сегодня
+              Начни с профиля или идеи
             </h2>
             <p className="mt-4 max-w-[42ch] text-[17px] text-white/85">
-              Профиль занимает пять минут. Дальше люди, идеи и стартапы подстроятся под твои навыки.
+              Профиль занимает пять минут, идея — пару абзацев. Дальше тебя найдут люди с нужными навыками.
             </p>
           </div>
           <div className="flex flex-wrap gap-2.5 lg:justify-end">
@@ -226,7 +226,7 @@ function Section({
 }) {
   const hid = `${id ?? title.slice(0, 12).replace(/\s+/g, "-")}-h`;
   return (
-    <section id={id} aria-labelledby={hid} className={`${wrap} scroll-mt-24 pt-[clamp(88px,10vw,150px)]`}>
+    <section id={id} aria-labelledby={hid} className={`${wrap} scroll-mt-24 pt-[clamp(72px,8vw,120px)]`}>
       <div className="mb-10 flex flex-wrap items-end gap-x-10 gap-y-4">
         <h2 id={hid} className="max-w-[17ch] text-[clamp(32px,4vw,58px)] leading-[1.02]">
           {title}
@@ -235,9 +235,9 @@ function Section({
           <div className="flex max-w-[46ch] flex-col gap-3 sm:ml-auto">
             {lead && <p className="text-[17px] text-muted-foreground">{lead}</p>}
             {more && (
-              <Link href={more.href} className="group inline-flex items-center gap-1.5 font-bold text-brand-ink hover:underline">
+              <Link href={more.href} className="inline-flex items-center gap-1.5 font-bold text-brand-ink transition-colors hover:text-brand-hover">
                 {more.label}
-                <ArrowRight aria-hidden className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                <ArrowRight aria-hidden className="size-4" />
               </Link>
             )}
           </div>
@@ -275,20 +275,12 @@ function Hero() {
         </p>
         <div className="mt-8 flex flex-wrap gap-2.5">
           <Link href="/register" className={buttonVariants({ size: "lg" })}>
-            Начать бесплатно
+            Создать профиль
           </Link>
           <Link href="/cofounders" className={buttonVariants({ variant: "onphoto", size: "lg" })}>
             Найти сообщников
           </Link>
         </div>
-        <ul className="mt-7 flex flex-wrap gap-x-[18px] gap-y-2 text-[15px] font-semibold text-white/85">
-          {["Обсуждать идеи", "Искать сообщников", "Вступать в стартапы"].map((t) => (
-            <li key={t} className="flex items-center gap-2">
-              <span aria-hidden className="size-2 rounded-full bg-cornflower" />
-              {t}
-            </li>
-          ))}
-        </ul>
       </div>
       <figure aria-label="Пример переписки на Envola" className="flex w-full flex-col gap-2.5 justify-self-end lg:w-[min(420px,100%)]">
         {CHAT.map((m, i) => (
@@ -305,7 +297,7 @@ function Hero() {
           </div>
         ))}
         <figcaption className="chat-msg self-center rounded-full bg-white/18 px-3.5 py-1.5 text-[13px] font-bold backdrop-blur-md" style={delay(600 + 3 * 1100)}>
-          Алина опубликовала идею «Roomly»
+          Алина, Кирилл и Егор собрали команду
         </figcaption>
       </figure>
     </div>
@@ -332,7 +324,7 @@ const WAYS: Way[] = [
     path: "founder",
     photo: PHOTOS.tableTop,
     alt: "Обсуждение идеи за общим столом",
-    ui: { avatar: FACES.ilya, title: "Бот для расписания", sub: "Идея, 2 в команде", tag: "Ищут дизайнера" },
+    ui: { avatar: FACES.ilya, title: "Бот расписания", sub: "Идея", tag: "Нужен дизайнер" },
   },
   {
     title: "Нет идеи",
@@ -341,7 +333,7 @@ const WAYS: Way[] = [
     href: "/cofounders",
     photo: PHOTOS.whiteboardDuo,
     alt: "Двое накидывают идеи у доски",
-    ui: { avatar: FACES.vera, title: "Вера, ML-инженер", sub: "Хочет придумать стартап", tag: "Сообщник" },
+    ui: { avatar: FACES.vera, title: "Вера", sub: "ML-инженер", tag: "Ищет сообщников" },
   },
   {
     title: "Нужны люди",
@@ -350,7 +342,7 @@ const WAYS: Way[] = [
     href: "/people",
     photo: PHOTOS.handsLaptop,
     alt: "Работа за ноутбуком",
-    ui: { avatar: FACES.kirill, title: "Кирилл Морозов", sub: "Frontend, открыт к проектам", tag: "Написать" },
+    ui: { avatar: FACES.kirill, title: "Кирилл", sub: "Frontend", tag: "Открыт к проектам" },
   },
   {
     title: "Хочу в команду",
@@ -360,7 +352,7 @@ const WAYS: Way[] = [
     path: "seeker",
     photo: PHOTOS.officeBright,
     alt: "Команда стартапа за работой",
-    ui: { letter: "F", title: "Flowly", sub: "Frontend, 15 ч в неделю", tag: "Открыто" },
+    ui: { letter: "F", title: "Flowly", sub: "MVP", tag: "2 места" },
   },
 ];
 
@@ -370,7 +362,7 @@ function Ways() {
       {WAYS.map((w, i) => {
         const body = (
           <>
-            <span className="relative block aspect-[4/3] overflow-hidden rounded-[22px]">
+            <span className="relative block aspect-[4/3] overflow-hidden rounded-[20px]">
               <Image src={w.photo} alt={w.alt} fill placeholder="blur" sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
               <span aria-hidden className="absolute inset-x-3 bottom-3 flex items-center gap-2.5 rounded-2xl bg-white px-3 py-2.5 text-sm shadow-[0_12px_30px_rgb(0_0_0/0.15)]">
                 {w.ui.avatar ? (
@@ -378,11 +370,11 @@ function Ways() {
                 ) : (
                   <span className="grid size-8 place-items-center rounded-[10px] bg-brand font-extrabold text-white">{w.ui.letter}</span>
                 )}
-                <span className="min-w-0">
+                <span className="min-w-0 flex-1">
                   <b className="block truncate">{w.ui.title}</b>
                   <span className="block truncate text-[13px] text-muted-foreground">{w.ui.sub}</span>
                 </span>
-                <em className="ml-auto rounded-full bg-brand-soft px-2.5 py-1 text-xs font-bold whitespace-nowrap text-brand-ink not-italic">{w.ui.tag}</em>
+                <em className="shrink-0 rounded-full bg-brand-soft px-2.5 py-1 text-xs font-bold whitespace-nowrap text-brand-ink not-italic">{w.ui.tag}</em>
               </span>
             </span>
             <span className="flex flex-1 flex-col gap-2 px-4 pt-5 pb-4">
@@ -390,18 +382,18 @@ function Ways() {
               <span className="text-muted-foreground">{w.text}</span>
               <span className="mt-auto inline-flex items-center gap-1.5 pt-3 font-bold text-brand-ink">
                 {w.cta}
-                <ArrowRight aria-hidden className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                <ArrowRight aria-hidden className="size-4" />
               </span>
             </span>
           </>
         );
         const cls = "reveal-item card-hover group flex flex-col rounded-[28px] bg-tone p-2 hover:bg-tone-2";
         return w.path ? (
-          <PathLink key={w.title} path={w.path} href={w.href} className={cls} style={delay(i * 80)}>
+          <PathLink key={w.title} path={w.path} href={w.href} className={cls} style={delay(i * 50)}>
             {body}
           </PathLink>
         ) : (
-          <Link key={w.title} href={w.href} className={cls} style={delay(i * 80)}>
+          <Link key={w.title} href={w.href} className={cls} style={delay(i * 50)}>
             {body}
           </Link>
         );
@@ -444,7 +436,7 @@ function Flow() {
     <Reveal>
       <ol className="grid grid-cols-2 gap-x-2 gap-y-6 sm:gap-3 lg:grid-cols-4">
         {FLOW.map((f, i) => (
-          <li key={f.tag} className="reveal-item flex flex-col gap-3" style={delay(i * 120)}>
+          <li key={f.tag} className="reveal-item flex flex-col gap-3" style={delay(i * 60)}>
             <span className="relative block aspect-[3/3.4] overflow-hidden rounded-[20px] sm:rounded-3xl">
               <Image src={f.photo} alt="" fill placeholder="blur" sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />
               <span className="absolute top-2.5 left-2.5 rounded-full bg-white px-2.5 py-1 text-xs font-extrabold sm:top-3 sm:left-3 sm:px-3 sm:text-[13px]">
@@ -475,18 +467,24 @@ const FAQ = [
 ];
 
 function Faq() {
+  // Две независимые колонки: открытый вопрос не раздвигает соседнюю.
+  const half = Math.ceil(FAQ.length / 2);
   return (
     <div className="grid items-start gap-2 md:grid-cols-2">
-      {FAQ.map(([q, a]) => (
-        <details key={q} className="faq group rounded-[22px] bg-tone transition-colors duration-200 open:bg-brand-soft hover:bg-tone-2 open:hover:bg-brand-soft">
-          <summary className="flex cursor-pointer list-none items-center gap-4 px-[22px] py-5 text-[17px] font-bold [&::-webkit-details-marker]:hidden">
-            {q}
-            <span aria-hidden className="ml-auto grid size-7 shrink-0 place-items-center rounded-full bg-white">
-              <PlusIcon className="size-4 transition-transform duration-300 ease-[var(--ease-out)] group-open:rotate-45" />
-            </span>
-          </summary>
-          <p className="faq-answer px-[22px] pb-[22px] text-muted-foreground">{a}</p>
-        </details>
+      {[FAQ.slice(0, half), FAQ.slice(half)].map((col, c) => (
+        <div key={c} className="grid gap-2">
+          {col.map(([q, a]) => (
+            <details key={q} className="faq group rounded-[22px] bg-tone transition-colors open:bg-brand-soft hover:bg-tone-2 open:hover:bg-brand-soft">
+              <summary className="flex list-none items-center gap-4 px-[22px] py-5 text-[17px] font-bold [&::-webkit-details-marker]:hidden">
+                {q}
+                <span aria-hidden className="ml-auto grid size-7 shrink-0 place-items-center rounded-full bg-white">
+                  <PlusIcon className="size-4 transition-transform duration-300 group-open:rotate-45" />
+                </span>
+              </summary>
+              <p className="faq-answer px-[22px] pb-[22px] text-foreground/75">{a}</p>
+            </details>
+          ))}
+        </div>
       ))}
     </div>
   );

@@ -2,7 +2,7 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from statistics import median
 
-from sqlalchemy import Select, exists, func, or_, select
+from sqlalchemy import Select, and_, exists, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.demo import is_demo
@@ -443,18 +443,32 @@ async def list_public(
         stmt = stmt.where(Startup.stage.in_(stages))
     q = (q or "").strip()
     rank = None
-    if len(q) >= search.MIN_FTS_LEN:
-        tsq = search.query(q)
-        # Стартап находится по своему тексту или по названию и описанию открытой роли.
-        role_hit = (
-            exists()
-            .where(StartupRole.startup_id == Startup.id, StartupRole.is_open.is_(True))
-            .where(StartupRole.search.op("@@")(tsq))
+    if q:
+        # Стартап находится по своему тексту, по открытой роли (название, тип роли) и навыкам роли.
+        pattern = search.like(q)
+        open_role = exists().where(
+            StartupRole.startup_id == Startup.id, StartupRole.is_open.is_(True)
         )
-        stmt = stmt.where(or_(Startup.search.op("@@")(tsq), role_hit))
-        rank = func.ts_rank(Startup.search, tsq)
-    elif q:
-        stmt = stmt.where(Startup.title.ilike(f"{q}%"))
+        hits = [
+            search.word_start(Startup.title, q),
+            open_role.where(
+                or_(
+                    StartupRole.title.ilike(pattern),
+                    and_(Role.id == StartupRole.role_id, Role.name.ilike(pattern)),
+                )
+            ),
+            open_role.where(startup_role_skills.c.startup_role_id == StartupRole.id).where(
+                startup_role_skills.c.skill_id == Skill.id, Skill.name.ilike(pattern)
+            ),
+        ]
+        if len(q) >= search.MIN_FTS_LEN:
+            tsq = search.query(q)
+            hits += [
+                Startup.search.op("@@")(tsq),
+                open_role.where(StartupRole.search.op("@@")(tsq)),
+            ]
+            rank = func.ts_rank(Startup.search, tsq)
+        stmt = stmt.where(or_(*hits))
     total = await db.scalar(select(func.count()).select_from(stmt.subquery()))
     if rank is not None:
         # Совпадение в названии (вес A) выше, чем в описании; только по роли — в конце.

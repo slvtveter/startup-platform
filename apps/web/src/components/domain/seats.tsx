@@ -53,7 +53,7 @@ export function SeatRow({ filled, open }: { filled: number; open: number }) {
       {open > 0 ? (
         <span className="inline-flex items-center gap-1.5 font-semibold text-brand-ink">
           <UserPlus aria-hidden className="size-4" />
-          {plural(open, `Ищут ещё ${open} человека`, `Ищут ещё ${open} человек`, `Ищут ещё ${open} человек`)}
+          {plural(open, `Ищут ещё ${open} человека`, `Ищут ещё ${open} человека`, `Ищут ещё ${open} человек`)}
         </span>
       ) : (
         <span className="font-semibold text-muted-foreground">Команда собрана</span>

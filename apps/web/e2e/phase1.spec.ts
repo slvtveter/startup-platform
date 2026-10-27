@@ -29,7 +29,7 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
     .fill("Мы автоматически проверяем, что новичок может найти стартап, откликнуться и познакомиться с основателем.");
   await next.click();
   await next.click(); // стадия по умолчанию
-  await founder.getByRole("button", { name: /^Обсуждается/ }).click();
+  await founder.getByRole("button", { name: /^Оплата обсуждается/ }).click();
   await next.click();
   await founder.getByRole("button", { name: "Маркетолог", exact: true }).click();
   await next.click();
@@ -74,8 +74,8 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
   await shot(candidate, "onboarding-step2");
   await candidate.getByRole("button", { name: "Дальше" }).click();
 
-  await candidate.getByRole("button", { name: /^Бесплатно/ }).click();
-  await candidate.getByRole("button", { name: /^Обсуждается/ }).click();
+  await candidate.getByRole("button", { name: /^Без оплаты/ }).click();
+  await candidate.getByRole("button", { name: /^Оплата обсуждается/ }).click();
   await candidate.getByLabel("Telegram").fill(`@${tg}`);
   await candidate.getByRole("button", { name: "Сохранить и опубликовать" }).click();
   await candidate.waitForURL(/\/startups$/);

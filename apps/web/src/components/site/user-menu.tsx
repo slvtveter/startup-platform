@@ -53,7 +53,7 @@ export function UserMenu({
         className="relative rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         aria-label={unread ? `Меню аккаунта, новых событий: ${unread}` : "Меню аккаунта"}
       >
-        <Avatar className="size-9">
+        <Avatar aria-hidden className="size-9">
           <AvatarFallback className="bg-foreground text-sm font-bold text-background">{initials(name)}</AvatarFallback>
         </Avatar>
         {unread > 0 && (

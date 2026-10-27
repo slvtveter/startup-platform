@@ -33,7 +33,7 @@ test("admin moves a startup to the platform and the founder claims it", async ({
   await admin.getByRole("button", { name: "Опубликовать" }).click();
   await admin.waitForURL(/\/startups\/[^/]+$/);
   const url = new URL(admin.url()).pathname;
-  await expect(admin.getByText("Это ваш стартап")).toBeVisible();
+  await expect(admin.getByText("Это твой стартап")).toBeVisible();
 
   // Основатель регистрируется на тот же email и подтверждает почту.
   const founderCtx = await browser.newContext();
@@ -41,10 +41,10 @@ test("admin moves a startup to the platform and the founder claims it", async ({
   await register(founder, founderEmail);
   await verifyEmailViaMailpit(founder, founderEmail);
   await founder.goto(url);
-  await expect(founder.getByText("Это ваш стартап")).toBeVisible();
+  await expect(founder.getByText("Это твой стартап")).toBeVisible();
 
   await admin.reload();
-  await expect(admin.getByText("Это ваш стартап")).toHaveCount(0);
+  await expect(admin.getByText("Это твой стартап")).toHaveCount(0);
 
   await adminCtx.close();
   await founderCtx.close();

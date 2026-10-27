@@ -229,6 +229,7 @@ async def list_people(
     q: str | None,
     limit: int,
     offset: int,
+    cofound: bool = False,
 ) -> tuple[list[Profile], int]:
     # Порог каталога: роль, описание в одну строку и хотя бы один навык. Пустые карточки
     # отталкивают основателей; по прямой ссылке профиль по-прежнему открывается.
@@ -250,21 +251,36 @@ async def list_people(
         stmt = stmt.where(Profile.experience_level.in_(levels))
     if looking_for:
         stmt = stmt.where(Profile.looking_for.overlap(looking_for))
+    if cofound:
+        stmt = stmt.where(Profile.looking_for.contains(["cofound"]))
     q = (q or "").strip()
     # Сначала профили с описанием: пустые карточки в начале каталога отталкивают основателей.
     order = [(Profile.headline == "").asc(), Profile.updated_at.desc()]
-    if len(q) >= search.MIN_FTS_LEN:
-        tsq = search.query(q)
-        # Человек находится по своему тексту или по названию основной роли («дизайнеры»).
-        role_hit = (
+    if q:
+        # Человек находится по имени, тексту о себе, роли, навыкам и городу.
+        pattern = search.like(q)
+        role_hit = exists().where(Role.id == Profile.primary_role_id, Role.name.ilike(pattern))
+        skill_hit = (
             exists()
-            .where(Role.id == Profile.primary_role_id)
-            .where(func.to_tsvector(search.CONFIG, Role.name).op("@@")(tsq))
+            .where(profile_skills.c.profile_id == Profile.id)
+            .where(Skill.id == profile_skills.c.skill_id, Skill.name.ilike(pattern))
         )
-        stmt = stmt.where(or_(Profile.search.op("@@")(tsq), role_hit))
-        order.insert(0, func.ts_rank(Profile.search, tsq).desc())
-    elif q:
-        stmt = stmt.where(Profile.display_name.ilike(f"{q}%"))
+        hits = [
+            role_hit,
+            skill_hit,
+            search.word_start(Profile.city, q),
+            search.word_start(Profile.display_name, q),
+        ]
+        if len(q) >= search.MIN_FTS_LEN:
+            tsq = search.query(q)
+            role_fts = (
+                exists()
+                .where(Role.id == Profile.primary_role_id)
+                .where(func.to_tsvector(search.CONFIG, Role.name).op("@@")(tsq))
+            )
+            hits += [Profile.search.op("@@")(tsq), role_fts]
+            order.insert(0, func.ts_rank(Profile.search, tsq).desc())
+        stmt = stmt.where(or_(*hits))
     total = await db.scalar(select(func.count()).select_from(stmt.subquery()))
     rows = await db.scalars(stmt.order_by(*order).limit(limit).offset(offset))
     return list(rows.unique()), total or 0

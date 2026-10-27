@@ -27,16 +27,17 @@ export async function SiteHeader() {
   const mobileLinks = user
     ? [
         ...links,
-        { href: "/startups/new", label: "Предложить идею или стартап" },
+        { href: "/startups/new", label: "Предложить идею" },
         { href: "/chats", label: "Сообщения", badge: chats?.count ?? 0 },
         { href: "/me/profile", label: "Мой профиль" },
         { href: "/me/applications", label: "Мои отклики", badge: inbox?.mine ?? 0 },
         { href: "/me/startups", label: "Мои стартапы", badge: inbox?.incoming ?? 0 },
+        { href: "/me/settings", label: "Настройки" },
       ]
-    : [...links, { href: "/login", label: "Войти" }];
+    : [...links, { href: "/login", label: "Войти" }, { href: "/register", label: "Регистрация" }];
 
   return (
-    <header className="sticky top-0 z-40 bg-background/92 backdrop-blur-md">
+    <header className="sticky top-0 z-40 bg-background shadow-[0_1px_0_var(--border)]">
       <div className="mx-auto flex h-[72px] w-full max-w-[1360px] items-center gap-4 px-4 sm:gap-8 sm:px-6 lg:px-10">
         <Logo />
         <nav aria-label="Основное" className="hidden items-center gap-6 lg:flex xl:gap-7">

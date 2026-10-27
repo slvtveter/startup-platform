@@ -1,4 +1,4 @@
-import { ChevronLeftIcon } from "lucide-react";
+import { Check, ChevronLeftIcon, UserPlus } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -6,8 +6,7 @@ import { notFound } from "next/navigation";
 import { ApplyDialog, type ApplyState } from "@/components/domain/apply-dialog";
 import {
   DemoBadge,
-  DemoNotice,
-  SkillChip,
+    SkillChip,
   StageBadge,
   StartupStatusBadge,
   TermsBadge,
@@ -15,7 +14,6 @@ import {
 import { Container } from "@/components/domain/page-header";
 import { ReportButton } from "@/components/domain/report-button";
 import { Avatar } from "@/components/domain/avatar-upload";
-import { Seat } from "@/components/domain/seats";
 import { ShareButton } from "@/components/domain/share-button";
 import { StartupCover } from "@/components/domain/startup-card";
 import { WriteDialog } from "@/components/domain/chat/write-dialog";
@@ -175,7 +173,18 @@ export default async function StartupPage({ params }: Props) {
               )
             )}
             {!s.is_demo && <ShareButton title={s.title} text={s.pitch} path={`/startups/${s.slug}`} />}
+            {s.is_demo && (
+              <Link href="/startups/new" className={buttonVariants({ size: "lg" })}>
+                Опубликовать свою идею
+              </Link>
+            )}
           </div>
+          {s.is_demo && (
+            <p className="mt-4 max-w-[52ch] text-sm text-muted-foreground">
+              Это пример проекта: так выглядит стартап на Envola. Откликнуться на него нельзя — опубликуй свою идею, и
+              люди смогут откликаться уже на неё.
+            </p>
+          )}
         </div>
         <div className="relative aspect-[16/10] overflow-hidden rounded-[28px] bg-tone sm:rounded-[36px]">
           <StartupCover startup={s} eager sizes="(min-width: 1024px) 600px, 100vw" />
@@ -184,7 +193,7 @@ export default async function StartupPage({ params }: Props) {
 
       {s.is_owner && (
         <div className="mt-8 flex flex-wrap items-center gap-2 rounded-[22px] bg-brand-soft p-4">
-          <span className="mr-auto text-sm font-bold">Это ваш стартап</span>
+          <span className="mr-auto text-sm font-bold">Это твой стартап</span>
           <Link
             href={`/startups/${s.slug}/edit`}
             className={buttonVariants({ variant: "outline", size: "sm" })}
@@ -202,6 +211,14 @@ export default async function StartupPage({ params }: Props) {
 
       <div className="mt-14 grid gap-10 lg:grid-cols-[1fr_360px]">
         <div className="min-w-0">
+{s.stage === "idea" && (
+          <section className="mb-14">
+            <h2 className="text-[28px] sm:text-[34px]">Идея</h2>
+            <p className="mt-4 max-w-[68ch] text-[17px] leading-relaxed whitespace-pre-line text-foreground/85">
+              {s.description || "Описание пока не заполнено."}
+            </p>
+          </section>
+)}
           <section id="roles" className="scroll-mt-24">
             <h2 className="text-[28px] sm:text-[34px]">Свободные места</h2>
             {openRoles.length === 0 && (
@@ -218,7 +235,7 @@ export default async function StartupPage({ params }: Props) {
                 return (
                   <article key={r.id} className="rounded-[26px] bg-tone p-5 sm:p-7">
                     <div className="flex items-start gap-4">
-                      <Seat filled={false} size="lg" />
+                      <span aria-hidden className="grid size-11 shrink-0 place-items-center rounded-full bg-brand-soft text-brand-ink"><UserPlus className="size-5" /></span>
                       <div className="min-w-0 flex-1">
                         <h3 className="text-xl font-extrabold tracking-[-0.02em]">{r.title}</h3>
                         <p className="mt-0.5 text-sm text-muted-foreground">
@@ -262,6 +279,7 @@ export default async function StartupPage({ params }: Props) {
                             key={sk.slug}
                             name={sk.name}
                             highlight={mySkills.has(sk.slug)}
+                            onTone
                           />
                         ))}
                         {profile && matched > 0 && (
@@ -293,7 +311,7 @@ export default async function StartupPage({ params }: Props) {
                   key={r.id}
                   className="flex items-center gap-4 rounded-[22px] bg-tone p-4 text-muted-foreground"
                 >
-                  <Seat filled size="md" />
+                  <span aria-hidden className="grid size-9 shrink-0 place-items-center rounded-full bg-white text-muted-foreground"><Check className="size-4" /></span>
                   <span className="font-semibold">{r.title}</span>
                   <span className="ml-auto text-sm">Место занято</span>
                 </div>
@@ -301,12 +319,14 @@ export default async function StartupPage({ params }: Props) {
             </div>
           </section>
 
+{s.stage !== "idea" && (
           <section className="mt-14">
-            <h2 className="text-[28px] sm:text-[34px]">{s.stage === "idea" ? "Идея" : "О проекте"}</h2>
+            <h2 className="text-[28px] sm:text-[34px]">О проекте</h2>
             <p className="mt-4 max-w-[68ch] text-[17px] leading-relaxed whitespace-pre-line text-foreground/85">
               {s.description || "Описание пока не заполнено."}
             </p>
           </section>
+)}
 
           <section className="mt-14">
             <h2 className="text-[28px] sm:text-[34px]">Команда</h2>
@@ -379,17 +399,10 @@ export default async function StartupPage({ params }: Props) {
                 {s.terms_details}
               </p>
             )}
-            <div className="mt-5 border-t border-foreground/10 pt-4">
-              <div className="text-sm text-muted-foreground">
-                Как команда отвечает
-              </div>
-              <div className="mt-1 font-semibold">
-                {responseText(s.response_stats)}
-              </div>
-            </div>
-            {s.is_demo && (
-              <div className="mt-5">
-                <DemoNotice kind="startup" />
+            {s.response_stats && (
+              <div className="mt-5 border-t border-foreground/10 pt-4">
+                <div className="text-sm text-muted-foreground">Как команда отвечает</div>
+                <div className="mt-1 font-semibold">{responseText(s.response_stats)}</div>
               </div>
             )}
             {openSeats > 0 && !s.is_owner && !s.is_demo && (
@@ -404,10 +417,11 @@ export default async function StartupPage({ params }: Props) {
               </a>
             )}
           </div>
-          <p className="px-1 text-sm text-muted-foreground">
-            Контакты основателя откроются, когда он примет твой отклик. До этого
-            вы общаетесь только через отклик.
-          </p>
+          {!s.is_demo && (
+            <p className="px-1 text-sm text-muted-foreground">
+              Телеграм и почта основателя откроются, когда отклик примут. До этого — переписка на Envola.
+            </p>
+          )}
         </aside>
       </div>
 

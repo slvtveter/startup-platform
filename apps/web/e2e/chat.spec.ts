@@ -19,7 +19,7 @@ test("people can message each other in real time", async ({ browser }) => {
 
   // У Алины диалог появился в списке без перезагрузки страницы.
   await alina.getByRole("link", { name: /Мария Ким/ }).first().click();
-  await expect(alina.getByText(`Привет! Есть идея ${stamp}`)).toBeVisible();
+  await expect(alina.getByText(`Привет! Есть идея ${stamp}`).first()).toBeVisible();
 
   await alina.getByRole("textbox", { name: "Сообщение" }).fill(`Давай созвонимся ${stamp}`);
   await alina.keyboard.press("Enter");

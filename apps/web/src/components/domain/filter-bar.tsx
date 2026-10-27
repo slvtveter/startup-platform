@@ -1,31 +1,40 @@
 "use client";
 
-import { ChevronDown, X } from "lucide-react";
+import { Check, ChevronDown, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { asList, toggleHref, type Option, type SearchParams } from "@/components/domain/filters";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 export type FilterGroup = { name: string; title: string; options: Option[] };
 
 /**
- * Фильтры в одну строку, как на hh.ru и Ozon: у каждой группы своя кнопка с выпадающим списком,
- * а выбранные значения видны чипами под ней — их можно снять по одному или все сразу.
- * Состояние живёт в URL, поэтому ссылкой на подборку можно поделиться.
+ * Фильтры в одну строку: у каждой группы своя кнопка с выпадающим списком (можно отметить несколько),
+ * а все активные фильтры, включая текст поиска, видны чипами ниже — снимаются по одному или все сразу.
+ * Состояние живёт в URL; переключения внутри меню не плодят записи в истории браузера.
  */
-export function FilterBar({ basePath, params, groups }: { basePath: string; params: SearchParams; groups: FilterGroup[] }) {
+export function FilterBar({
+  basePath,
+  params,
+  groups,
+  chipGroups = [],
+}: {
+  basePath: string;
+  params: SearchParams;
+  groups: FilterGroup[];
+  /** Группы, выбранные быстрыми чипами над строкой: показываем их среди активных, чтобы было видно всё сразу. */
+  chipGroups?: FilterGroup[];
+}) {
   const router = useRouter();
-  const go = (href: string) => router.push(href, { scroll: false });
-  const chips = groups.flatMap((g) =>
-    asList(params[g.name]).map((v) => ({ group: g, value: v, label: g.options.find((o) => o.value === v)?.label ?? v })),
+  const all = [...chipGroups, ...groups];
+  const chips = all.flatMap((g) =>
+    asList(params[g.name]).map((v) => ({ name: g.name, value: v, label: g.options.find((o) => o.value === v)?.label ?? v })),
   );
+  const q = typeof params.q === "string" && params.q ? params.q : null;
+  if (q) chips.unshift({ name: "q", value: q, label: `«${q}»` });
+
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
@@ -35,8 +44,8 @@ export function FilterBar({ basePath, params, groups }: { basePath: string; para
             <DropdownMenu key={g.name}>
               <DropdownMenuTrigger
                 className={cn(
-                  "inline-flex h-10 items-center gap-1.5 rounded-full bg-white px-4 text-sm font-semibold shadow-[inset_0_0_0_1.5px_var(--border)] transition-colors duration-200 outline-none hover:bg-tone focus-visible:ring-3 focus-visible:ring-ring/50",
-                  selected.length > 0 && "bg-brand-soft text-brand-ink shadow-[inset_0_0_0_1.5px_var(--cornflower)] hover:bg-brand-soft",
+                  "inline-flex h-10 items-center gap-1.5 rounded-full bg-tone px-4 text-sm font-semibold transition-colors outline-none hover:bg-tone-2 focus-visible:ring-3 focus-visible:ring-ring/50",
+                  selected.length > 0 && "bg-brand-soft text-brand-ink hover:bg-marker",
                 )}
               >
                 {g.title}
@@ -45,17 +54,31 @@ export function FilterBar({ basePath, params, groups }: { basePath: string; para
                 )}
                 <ChevronDown aria-hidden className="size-4 opacity-70" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="max-h-80 w-64">
-                {g.options.map((o) => (
-                  <DropdownMenuCheckboxItem
-                    key={o.value}
-                    checked={selected.includes(o.value)}
-                    onCheckedChange={() => go(toggleHref(basePath, params, g.name, o.value))}
-                    className="py-2"
-                  >
-                    {o.label}
-                  </DropdownMenuCheckboxItem>
-                ))}
+              <DropdownMenuContent align="start" side="bottom" className="max-h-[min(22rem,var(--available-height))] w-72 p-1.5">
+                <p className="px-2 pt-1 pb-2 text-xs font-semibold text-muted-foreground">Можно выбрать несколько</p>
+                {g.options.map((o) => {
+                  const on = selected.includes(o.value);
+                  return (
+                    <DropdownMenuItem
+                      key={o.value}
+                      closeOnClick={false}
+                      onClick={() => router.replace(toggleHref(basePath, params, g.name, o.value), { scroll: false })}
+                      className="gap-2.5 rounded-lg py-2"
+                    >
+                      <span
+                        aria-hidden
+                        className={cn(
+                          "grid size-[18px] shrink-0 place-items-center rounded-[5px] border-[1.5px] transition-colors",
+                          on ? "border-brand bg-brand text-white" : "border-input bg-white",
+                        )}
+                      >
+                        {on && <Check className="size-3" strokeWidth={3} />}
+                      </span>
+                      <span className={cn(on && "font-semibold")}>{o.label}</span>
+                      <span className="sr-only">{on ? ", выбрано" : ""}</span>
+                    </DropdownMenuItem>
+                  );
+                })}
               </DropdownMenuContent>
             </DropdownMenu>
           );
@@ -65,17 +88,17 @@ export function FilterBar({ basePath, params, groups }: { basePath: string; para
         <div className="flex flex-wrap items-center gap-2">
           {chips.map((c) => (
             <Link
-              key={`${c.group.name}=${c.value}`}
-              href={toggleHref(basePath, params, c.group.name, c.value)}
+              key={`${c.name}=${c.value}`}
+              href={toggleHref(basePath, params, c.name, c.name === "q" ? null : c.value)}
               scroll={false}
               aria-label={`Убрать фильтр: ${c.label}`}
-              className="inline-flex h-8 items-center gap-1 rounded-full bg-tone pr-2 pl-3 text-sm font-medium transition-colors duration-200 hover:bg-tone-2"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-foreground pr-2.5 pl-3.5 text-sm font-semibold text-background transition-colors hover:bg-[#1d2a3f]"
             >
               {c.label}
               <X aria-hidden className="size-3.5" />
             </Link>
           ))}
-          <Link href={basePath} scroll={false} className="text-sm text-muted-foreground underline-offset-4 hover:underline">
+          <Link href={basePath} scroll={false} className="px-2 text-sm font-semibold text-brand-ink transition-colors hover:text-brand-hover">
             Сбросить всё
           </Link>
         </div>

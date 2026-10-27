@@ -156,7 +156,10 @@ if __name__ == "__main__":
     action = sys.argv[1] if len(sys.argv) > 1 else ""
     if action not in {"add", "remove", "reset"}:
         sys.exit("usage: python -m app.scripts.demo add|remove|reset")
-    if action == "reset":
-        asyncio.run(remove())
-        action = "add"
-    asyncio.run(add() if action == "add" else remove())
+
+    async def reset() -> None:
+        # Один цикл событий на оба шага: пул соединений привязан к циклу, где создан.
+        await remove()
+        await add()
+
+    asyncio.run({"add": add, "remove": remove, "reset": reset}[action]())
