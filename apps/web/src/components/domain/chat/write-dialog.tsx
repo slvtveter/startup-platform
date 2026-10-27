@@ -11,11 +11,28 @@ import { Textarea } from "@/components/ui/textarea";
 import { startChat } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 
-/** «Написать» с профиля: первое сообщение любому человеку, дальше — в разделе «Сообщения». */
-export function WriteDialog({ slug, name }: { slug: string; name: string }) {
+/**
+ * «Написать» с профиля или «Обсудить идею» со страницы стартапа: первое сообщение любому человеку,
+ * дальше — в разделе «Сообщения». Черновик можно подставить заранее, человек его поправит.
+ */
+export function WriteDialog({
+  slug,
+  name,
+  label = "Написать",
+  draft = "",
+  variant = "outline",
+  className = "w-full",
+}: {
+  slug: string;
+  name: string;
+  label?: string;
+  draft?: string;
+  variant?: "outline" | "default";
+  className?: string;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [body, setBody] = useState("");
+  const [body, setBody] = useState(draft);
   const [busy, setBusy] = useState(false);
 
   async function submit() {
@@ -28,9 +45,9 @@ export function WriteDialog({ slug, name }: { slug: string; name: string }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button variant="outline" size="lg" className="w-full" />}>
+      <DialogTrigger render={<Button variant={variant} size="lg" className={className} />}>
         <MessageCircle aria-hidden className="size-4" />
-        Написать
+        {label}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -46,7 +63,7 @@ export function WriteDialog({ slug, name }: { slug: string; name: string }) {
           placeholder="Привет! Увидел твой профиль: делаю сервис для… Хочешь обсудить?"
         />
         <DialogFooter>
-          <Button variant="brand" disabled={!body.trim() || busy} onClick={submit}>
+          <Button disabled={!body.trim() || busy} onClick={submit}>
             Отправить
           </Button>
         </DialogFooter>

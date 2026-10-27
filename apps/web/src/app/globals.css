@@ -201,14 +201,22 @@
   }
 }
 
-/* ===== Движение (docs/ux/design-system.md) =====
-   Короткое и по делу: новое появляется снизу вверх и проявляется, ничего не прыгает.
-   Длительности 200–450 мс, кривая «быстрый старт, мягкая остановка». Reduced motion — выше. */
+/* ===== Движение: одна система на весь сайт =====
+   1. Наведение — только цвет: фон карточки чуть темнеет (tone → tone-2), у ссылок меняется цвет.
+      Ничего не подпрыгивает и не увеличивается. 200 мс.
+   2. Переход между страницами — короткое проявление без сдвига. 220 мс.
+   3. Появление при прокрутке — только на главной: снизу на 16px и проявление. 700 мс, шаг 80 мс.
+   Кривая одна: быстрый старт, мягкая остановка. Reduced motion выключает всё (см. выше). */
 :root {
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --enter-ms: 420ms;
+  --dur-hover: 200ms;
 }
 
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
 @keyframes enter-up {
   from {
     opacity: 0;
@@ -220,100 +228,48 @@
   }
 }
 
-/* Лендинг: фото в hero мягко «отъезжает», реплики переписки появляются по очереди (задержка — --d). */
-@keyframes hero-zoom {
-  from {
-    transform: scale(1.05);
-  }
-}
-.hero-photo {
-  animation: hero-zoom 1.8s var(--ease-out) backwards;
-}
-@keyframes msg-in {
-  from {
-    opacity: 0;
-    transform: translateY(14px) scale(0.98);
-  }
-}
-.chat-msg {
-  animation: msg-in 600ms var(--ease-out) backwards;
-  animation-delay: var(--d, 0ms);
-}
-
-/* Смена страницы (PageEnter в шаблонах): лёгкое проявление, без сдвига вёрстки.
-   Только backwards: после окончания на обёртке не остаётся transform, иначе position: fixed
-   внутри страницы (кнопка «Выбрать место» на телефоне) считался бы от обёртки, а не от экрана. */
+/* Смена страницы (PageEnter в шаблонах): только прозрачность — вёрстка не сдвигается,
+   и position: fixed внутри страницы считается от экрана, а не от обёртки. */
 .page-enter {
-  animation: enter-up 340ms var(--ease-out) backwards;
-}
-
-/* Списки карточек появляются волной при переходе на страницу: каждый следующий на 40 мс позже. */
-.page-enter .stagger > * {
-  animation: enter-up var(--enter-ms) var(--ease-out) backwards;
-}
-.page-enter .stagger > :nth-child(2) {
-  animation-delay: 40ms;
-}
-.page-enter .stagger > :nth-child(3) {
-  animation-delay: 80ms;
-}
-.page-enter .stagger > :nth-child(4) {
-  animation-delay: 120ms;
-}
-.page-enter .stagger > :nth-child(5) {
-  animation-delay: 160ms;
-}
-.page-enter .stagger > :nth-child(6) {
-  animation-delay: 200ms;
-}
-.page-enter .stagger > :nth-child(7) {
-  animation-delay: 240ms;
-}
-.page-enter .stagger > :nth-child(8) {
-  animation-delay: 280ms;
-}
-.page-enter .stagger > :nth-child(n + 9) {
-  animation-delay: 320ms;
+  animation: fade-in 220ms var(--ease-out) backwards;
 }
 
 /* Появление при прокрутке (components/site/reveal.tsx). Пока JS не загрузился, всё видно;
    после загрузки блок прячется до момента, когда попадёт в экран. Задержка шага — --d. */
 [data-reveal="armed"] .reveal-item {
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(16px);
 }
 [data-reveal] .reveal-item {
   transition:
-    opacity 480ms var(--ease-out) var(--d, 0ms),
-    transform 480ms var(--ease-out) var(--d, 0ms);
+    opacity 700ms var(--ease-out) var(--d, 0ms),
+    transform 700ms var(--ease-out) var(--d, 0ms);
 }
 
-/* Линия между шагами прорисовывается слева направо, бейдж «Принят» мягко «встаёт» на место,
-   контакты проявляются из размытия — как будто их только что открыли. */
+/* Полоска шага прорисовывается слева направо. */
 [data-reveal] .reveal-line {
   transform-origin: left;
-  transition: transform 600ms var(--ease-out) var(--d, 0ms);
+  transition: transform 900ms var(--ease-out) var(--d, 0ms);
 }
 [data-reveal="armed"] .reveal-line {
   transform: scaleX(0);
 }
-[data-reveal] .reveal-pop {
-  transition:
-    opacity 300ms var(--ease-out) var(--d, 0ms),
-    transform 420ms cubic-bezier(0.3, 1.4, 0.5, 1) var(--d, 0ms);
+
+/* Карточка-ссылка: на наведение фон чуть темнеет. Одинаково для всех карточек каталога. */
+.card-hover {
+  transition: background-color var(--dur-hover) var(--ease-out), box-shadow var(--dur-hover) var(--ease-out);
 }
-[data-reveal="armed"] .reveal-pop {
-  opacity: 0;
-  transform: scale(0.6);
+
+/* Лендинг: реплики переписки появляются по очереди (задержка — --d). */
+@keyframes msg-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
 }
-[data-reveal] .reveal-unblur {
-  transition:
-    filter 600ms var(--ease-out) var(--d, 0ms),
-    opacity 600ms var(--ease-out) var(--d, 0ms);
-}
-[data-reveal="armed"] .reveal-unblur {
-  filter: blur(6px);
-  opacity: 0.4;
+.chat-msg {
+  animation: msg-in 600ms var(--ease-out) backwards;
+  animation-delay: var(--d, 0ms);
 }
 
 /* Частые вопросы: ответ раскрывается по высоте, а не появляется рывком.
@@ -340,9 +296,7 @@
 /* При печати показываем всё сразу: блоки «появления при прокрутке» иначе остались бы пустыми. */
 @media print {
   [data-reveal] .reveal-item,
-  [data-reveal] .reveal-line,
-  [data-reveal] .reveal-pop,
-  [data-reveal] .reveal-unblur {
+  [data-reveal] .reveal-line {
     opacity: 1 !important;
     transform: none !important;
     filter: none !important;

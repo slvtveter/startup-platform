@@ -13,7 +13,7 @@ export function MobileNav({ links }: { links: { href: string; label: string; bad
   const unread = links.reduce((n, l) => n + (l.badge ?? 0), 0);
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger render={<Button variant="ghost" size="icon" className="relative md:hidden" aria-label={unread ? `Меню, новых: ${unread}` : "Меню"} />}>
+      <SheetTrigger render={<Button variant="ghost" size="icon" className="relative lg:hidden" aria-label={unread ? `Меню, новых: ${unread}` : "Меню"} />}>
         <MenuIcon />
         {unread > 0 && <span aria-hidden className="absolute top-1 right-1 size-2 rounded-full bg-brand" />}
       </SheetTrigger>

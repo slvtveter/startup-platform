@@ -11,11 +11,11 @@ import {
 } from "@/components/domain/invite-dialog";
 import { Container } from "@/components/domain/page-header";
 import { ReportButton } from "@/components/domain/report-button";
-import { Avatar } from "@/components/domain/avatar-upload";
+import { PersonPhoto } from "@/components/domain/person-card";
 import { buttonVariants } from "@/components/ui/button";
 import { JsonLd, breadcrumbs, siteUrl } from "@/components/site/json-ld";
 import { getPerson, getStartup, listMyStartups } from "@/lib/api";
-import { AVAILABILITY, LEVEL, LINK_KIND, TERMS } from "@/lib/labels";
+import { AVAILABILITY, COFOUND, LEVEL, LINK_KIND, TERMS, termsOf } from "@/lib/labels";
 import { getMe, serverClient } from "@/lib/server-api";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -112,39 +112,39 @@ export default async function PersonPage({ params }: Props) {
 
       <div className="mt-6 grid gap-10 lg:grid-cols-[1fr_320px]">
         <div className="min-w-0">
-          <header className="flex flex-col gap-5 sm:flex-row sm:items-center">
-            <Avatar
-              name={p.display_name}
-              url={p.avatar_url}
-              className="size-20 rounded-full text-2xl"
-            />
+          <header className="grid gap-6 sm:grid-cols-[220px_minmax(0,1fr)] sm:items-end md:grid-cols-[280px_minmax(0,1fr)]">
+            <div className="relative aspect-square w-full max-w-[280px] overflow-hidden rounded-[32px] bg-tone">
+              <PersonPhoto person={p} eager />
+            </div>
             <div className="min-w-0">
-              <h1 className="text-[30px] leading-tight sm:text-[40px]">
-                {p.display_name}
-              </h1>
-              {p.is_demo && <DemoBadge className="mt-2" />}
-              <p className="mt-1 text-lg text-muted-foreground">
-                {facts.join(", ")}
-              </p>
+              <div className="flex flex-wrap gap-2">
+                {p.looking_for.includes(COFOUND) && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-soft px-3 py-1 text-xs font-bold text-brand-ink">
+                    <span aria-hidden className="size-2 rounded-full bg-cornflower" />
+                    Ищет сообщников на свой стартап
+                  </span>
+                )}
+                {p.is_demo && <DemoBadge />}
+              </div>
+              <h1 className="mt-3 text-[36px] leading-[1.04] sm:text-[52px]">{p.display_name}</h1>
+              <p className="mt-2 text-lg text-muted-foreground">{facts.join(", ")}</p>
             </div>
           </header>
-          {p.headline && (
-            <p className="mt-6 max-w-2xl text-xl font-semibold">{p.headline}</p>
-          )}
+          {p.headline && <p className="mt-8 max-w-2xl text-[22px] leading-snug font-bold tracking-[-0.02em]">{p.headline}</p>}
           {p.bio && (
-            <p className="mt-3 max-w-2xl leading-relaxed whitespace-pre-line text-foreground/85">
+            <p className="mt-3 max-w-2xl text-[17px] leading-relaxed whitespace-pre-line text-foreground/85">
               {p.bio}
             </p>
           )}
 
           <section className="mt-10">
-            <h2 className="text-xl sm:text-2xl">Опыт на платформе</h2>
+            <h2 className="text-[26px] sm:text-[30px]">Опыт на платформе</h2>
             {experience.length ? (
-              <ol className="mt-4 divide-y border-y">
+              <ol className="mt-4 grid gap-2">
                 {experience.map((m) => (
                   <li
                     key={m.startup_slug + m.role_title}
-                    className="flex flex-wrap items-baseline gap-x-4 gap-y-1 py-4"
+                    className="flex flex-wrap items-baseline gap-x-4 gap-y-1 rounded-2xl bg-tone px-5 py-4"
                   >
                     <Link
                       href={`/startups/${m.startup_slug}`}
@@ -169,7 +169,7 @@ export default async function PersonPage({ params }: Props) {
           </section>
 
           <section className="mt-10">
-            <h2 className="text-xl sm:text-2xl">Навыки</h2>
+            <h2 className="text-[26px] sm:text-[30px]">Навыки</h2>
             <div className="mt-4 flex flex-wrap gap-2">
               {p.skills.length ? (
                 p.skills.map((s) => <SkillChip key={s.slug} name={s.name} />)
@@ -181,7 +181,7 @@ export default async function PersonPage({ params }: Props) {
 
           {p.links.length > 0 && (
             <section className="mt-10">
-              <h2 className="text-xl sm:text-2xl">Работы</h2>
+              <h2 className="text-[26px] sm:text-[30px]">Работы</h2>
               <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {p.links.map((l) => (
                   <li key={l.url}>
@@ -189,7 +189,7 @@ export default async function PersonPage({ params }: Props) {
                       href={l.url}
                       target="_blank"
                       rel="noopener noreferrer nofollow"
-                      className="flex h-full flex-col rounded-xl border p-4 transition-colors hover:border-foreground"
+                      className="flex h-full flex-col rounded-2xl bg-tone p-4 transition-colors duration-200 hover:bg-tone-2"
                     >
                       <span className="text-sm text-muted-foreground">
                         {LINK_KIND[l.kind]}
@@ -213,14 +213,14 @@ export default async function PersonPage({ params }: Props) {
         </div>
 
         <aside id="contact" className="h-fit scroll-mt-24 space-y-4 lg:sticky lg:top-24">
-          <div className="rounded-2xl bg-secondary p-5">
-            <div className="text-sm text-muted-foreground">Ищет проект</div>
+          <div className="rounded-[26px] bg-tone p-6">
+            <div className="text-sm text-muted-foreground">Условия участия</div>
             <div className="mt-2 flex flex-wrap gap-2">
-              {p.looking_for.length ? (
-                p.looking_for.map((t) => (
+              {termsOf(p.looking_for).length ? (
+                termsOf(p.looking_for).map((t) => (
                   <span
                     key={t}
-                    className="rounded-full bg-card px-3 py-1 text-sm font-semibold"
+                    className="rounded-full bg-white px-3 py-1 text-sm font-semibold"
                   >
                     {TERMS[t]}
                   </span>
@@ -244,7 +244,6 @@ export default async function PersonPage({ params }: Props) {
                 <Link
                   href={`/login?next=/people/${p.slug}`}
                   className={buttonVariants({
-                    variant: "brand",
                     className: "w-full",
                   })}
                 >
@@ -286,18 +285,18 @@ export default async function PersonPage({ params }: Props) {
           <div className="mx-auto flex max-w-[1360px] items-center gap-3">
             <span className="min-w-0 text-sm">
               <span className="block truncate font-semibold">{p.display_name}</span>
-              {p.looking_for.length > 0 && (
+              {termsOf(p.looking_for).length > 0 && (
                 <span className="block truncate text-muted-foreground">
-                  Ищет проект: {p.looking_for.map((t) => TERMS[t].toLowerCase()).join(", ")}
+                  Условия: {termsOf(p.looking_for).map((t) => TERMS[t].toLowerCase()).join(", ")}
                 </span>
               )}
             </span>
             {user ? (
-              <a href="#contact" className={buttonVariants({ variant: "brand", size: "lg", className: "ml-auto shrink-0" })}>
+              <a href="#contact" className={buttonVariants({ size: "lg", className: "ml-auto shrink-0" })}>
                 {options.length > 0 ? "Пригласить" : "Написать"}
               </a>
             ) : (
-              <Link href={`/login?next=/people/${p.slug}`} className={buttonVariants({ variant: "brand", size: "lg", className: "ml-auto shrink-0" })}>
+              <Link href={`/login?next=/people/${p.slug}`} className={buttonVariants({ size: "lg", className: "ml-auto shrink-0" })}>
                 Войти и написать
               </Link>
             )}

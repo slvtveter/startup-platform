@@ -1,5 +1,7 @@
 import Image from "next/image";
 
+import { FACES, PHOTOS } from "@/lib/photos";
+
 /** Вход и регистрация: форма слева, справа фото с репликой — тот же «разговор», что на главной. */
 export function AuthCard({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
@@ -12,10 +14,10 @@ export function AuthCard({ title, subtitle, children }: { title: string; subtitl
         </div>
       </div>
       <div className="relative isolate hidden overflow-hidden rounded-[36px] p-10 text-white lg:flex lg:flex-col lg:justify-end">
-        <Image src="/img/video-call.jpg" alt="" fill sizes="50vw" className="-z-20 object-cover" />
+        <Image src={PHOTOS.videoCall} alt="" fill preload placeholder="blur" sizes="50vw" className="-z-20 object-cover" />
         <div aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgb(10_18_34/0.1),rgb(10_18_34/0.78))]" />
         <div className="flex max-w-[400px] items-end gap-2.5">
-          <Image src="/img/a-kirill.jpg" alt="" width={36} height={36} className="size-9 rounded-full object-cover shadow-[0_0_0_2px_rgb(255_255_255/0.8)]" />
+          <Image src={FACES.kirill} alt="" width={36} height={36} className="size-9 rounded-full object-cover shadow-[0_0_0_2px_rgb(255_255_255/0.8)]" />
           <p className="rounded-[18px] rounded-bl-md bg-white px-3.5 py-2.5 text-[15px] leading-snug text-foreground shadow-[0_14px_40px_rgb(0_0_0/0.25)]">
             <small className="mb-0.5 block text-xs font-bold text-muted-foreground">Кирилл, frontend</small>
             Привет! Видел твою идею, могу взять на себя фронт. Созвонимся?

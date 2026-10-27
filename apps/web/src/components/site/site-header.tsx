@@ -20,6 +20,7 @@ export async function SiteHeader() {
   const links = [
     ...(user ? [{ href: "/", label: "Главная" }] : []),
     { href: "/startups?stage=idea", label: "Идеи" },
+    { href: "/cofounders", label: "Сообщники" },
     { href: "/people", label: "Люди" },
     { href: "/startups", label: "Стартапы" },
   ];
@@ -38,7 +39,7 @@ export async function SiteHeader() {
     <header className="sticky top-0 z-40 bg-background/92 backdrop-blur-md">
       <div className="mx-auto flex h-[72px] w-full max-w-[1360px] items-center gap-4 px-4 sm:gap-8 sm:px-6 lg:px-10">
         <Logo />
-        <nav aria-label="Основное" className="hidden items-center gap-7 md:flex">
+        <nav aria-label="Основное" className="hidden items-center gap-6 lg:flex xl:gap-7">
           {links.map((l) => (
             <NavLink key={l.href} href={l.href}>
               {l.label}

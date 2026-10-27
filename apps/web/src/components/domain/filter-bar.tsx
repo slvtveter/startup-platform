@@ -35,13 +35,13 @@ export function FilterBar({ basePath, params, groups }: { basePath: string; para
             <DropdownMenu key={g.name}>
               <DropdownMenuTrigger
                 className={cn(
-                  "inline-flex h-10 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-colors outline-none hover:border-foreground focus-visible:ring-3 focus-visible:ring-ring/50",
-                  selected.length > 0 && "border-foreground bg-foreground text-background",
+                  "inline-flex h-10 items-center gap-1.5 rounded-full bg-white px-4 text-sm font-semibold shadow-[inset_0_0_0_1.5px_var(--border)] transition-colors duration-200 outline-none hover:bg-tone focus-visible:ring-3 focus-visible:ring-ring/50",
+                  selected.length > 0 && "bg-brand-soft text-brand-ink shadow-[inset_0_0_0_1.5px_var(--cornflower)] hover:bg-brand-soft",
                 )}
               >
                 {g.title}
                 {selected.length > 0 && (
-                  <span className="rounded-full bg-background px-1.5 text-xs font-semibold text-foreground">{selected.length}</span>
+                  <span className="grid size-5 place-items-center rounded-full bg-brand text-[11px] font-bold text-white">{selected.length}</span>
                 )}
                 <ChevronDown aria-hidden className="size-4 opacity-70" />
               </DropdownMenuTrigger>
@@ -69,7 +69,7 @@ export function FilterBar({ basePath, params, groups }: { basePath: string; para
               href={toggleHref(basePath, params, c.group.name, c.value)}
               scroll={false}
               aria-label={`Убрать фильтр: ${c.label}`}
-              className="inline-flex items-center gap-1 rounded-full bg-secondary py-1 pr-2 pl-3 text-sm hover:bg-secondary/70"
+              className="inline-flex h-8 items-center gap-1 rounded-full bg-tone pr-2 pl-3 text-sm font-medium transition-colors duration-200 hover:bg-tone-2"
             >
               {c.label}
               <X aria-hidden className="size-3.5" />

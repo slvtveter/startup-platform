@@ -38,6 +38,7 @@ from app.schemas.startup import (
     StartupRoleOut,
     StartupUpdate,
 )
+from app.services import covers
 from app.services.events import track
 from app.services.slug import unique_slug
 
@@ -52,6 +53,7 @@ def _display_name(user: User) -> str:
 
 
 def to_card(s: Startup) -> StartupCard:
+    cover, cover_lg = covers.cover_urls(s)
     return StartupCard(
         id=str(s.id),
         slug=s.slug,
@@ -65,6 +67,8 @@ def to_card(s: Startup) -> StartupCard:
         open_roles=[_brief(r) for r in s.roles if r.is_open],
         team_size=1 + sum(1 for m in s.members if m.user_id != s.owner_id),
         is_demo=is_demo(s.owner),
+        cover_url=cover,
+        cover_url_lg=cover_lg,
     )
 
 

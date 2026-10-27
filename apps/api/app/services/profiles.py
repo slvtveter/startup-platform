@@ -90,6 +90,7 @@ def to_card(p: Profile) -> PersonCard:
         city=p.city,
         skills=[SkillOut.model_validate(s) for s in p.skills],
         avatar_url=p.avatar_url,
+        avatar_url_lg=p.avatar_url_lg,
         is_demo=is_demo(p.user),
     )
 

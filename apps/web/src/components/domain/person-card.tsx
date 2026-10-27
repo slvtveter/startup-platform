@@ -1,9 +1,9 @@
 import Link from "next/link";
 
-import { Avatar } from "@/components/domain/avatar-upload";
-import { DemoBadge, SkillChip } from "@/components/domain/badges";
+import { DemoBadge } from "@/components/domain/badges";
 import type { PersonCard as PersonCardData } from "@/lib/api";
-import { AVAILABILITY, LEVEL, TERMS, initials } from "@/lib/labels";
+import { COFOUND, LEVEL, TERMS, initials, termsOf } from "@/lib/labels";
+import { cn } from "@/lib/utils";
 
 export function PersonAvatar({ name, size = "md" }: { name: string; size?: "md" | "lg" }) {
   const cls = size === "lg" ? "size-20 text-2xl" : "size-12 text-base";
@@ -14,62 +14,87 @@ export function PersonAvatar({ name, size = "md" }: { name: string; size?: "md" 
   );
 }
 
-/**
- * Карточка человека в каталоге (KAN-138 п.3): отдельная крупная карточка в списке, как резюме —
- * шапка (фото, роль, имя, статус) и строки «подпись — значение». Пустые строки не рисуем.
- */
-export function PersonListCard({ person }: { person: PersonCardData }) {
-  const title = person.primary_role?.name || person.headline || "Ищет первый проект";
-  const terms = person.looking_for.map((t) => TERMS[t]?.toLowerCase()).filter(Boolean).join(", ");
-  const skills = person.skills.slice(0, 6);
-  const more = person.skills.length - skills.length;
-  const rows: [string, React.ReactNode][] = [];
-  if (person.headline && person.primary_role) rows.push(["О себе", person.headline]);
-  if (person.experience_level) rows.push(["Опыт", LEVEL[person.experience_level]]);
-  if (skills.length)
-    rows.push([
-      "Навыки",
-      <span key="s" className="flex flex-wrap gap-1">
-        {skills.map((s) => (
-          <SkillChip key={s.slug} name={s.name} />
-        ))}
-        {more > 0 && <span className="self-center px-1 text-xs text-muted-foreground">+{more}</span>}
-      </span>,
-    ]);
-  if (terms) rows.push(["Условия", terms[0].toUpperCase() + terms.slice(1)]);
-  if (person.availability) rows.push(["Время", AVAILABILITY[person.availability]]);
-
+/** Крупное фото человека или инициалы на мягком фоне, если фото нет. */
+export function PersonPhoto({ person, className, eager }: { person: PersonCardData; className?: string; eager?: boolean }) {
+  const url = person.avatar_url_lg ?? person.avatar_url;
+  if (url)
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP 512 px
+      <img
+        src={url}
+        alt=""
+        loading={eager ? "eager" : "lazy"}
+        decoding="async"
+        className={cn("size-full bg-tone-2 object-cover", className)}
+      />
+    );
   return (
-    <li>
-      <Link
-        href={`/people/${person.slug}`}
-        className="group block rounded-[28px] bg-card p-5 shadow-[0_0_0_1.5px_var(--border)] transition-[box-shadow,transform] duration-300 ease-[var(--ease-out)] hover:-translate-y-0.5 hover:shadow-[0_0_0_1.5px_var(--cornflower)] sm:p-7"
-      >
-        <div className="flex gap-4 sm:gap-6">
-          <Avatar name={person.display_name} url={person.avatar_url} className="size-20 rounded-full text-2xl sm:size-28 sm:text-3xl" />
-          <div className="min-w-0 flex-1">
-            <h3 className="text-xl leading-tight font-extrabold tracking-[-0.03em] group-hover:text-brand-ink sm:text-2xl">{title}</h3>
-            <p className="mt-1.5 text-[15px]">
-              <span className="font-medium">{person.display_name}</span>
-              {person.city && <span className="text-muted-foreground"> · {person.city}</span>}
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="rounded-full bg-success-soft px-3 py-1 text-sm font-medium text-success-ink">Ищет проект</span>
-              {person.is_demo && <DemoBadge className="self-center" />}
-            </div>
-          </div>
+    <span
+      aria-hidden
+      className={cn("grid size-full place-items-center bg-[radial-gradient(120%_100%_at_50%_0%,var(--brand-soft),var(--marker))]", className)}
+    >
+      <span className="text-[clamp(40px,5vw,64px)] font-extrabold tracking-[-0.04em] text-brand-ink">{initials(person.display_name)}</span>
+    </span>
+  );
+}
+
+/**
+ * Карточка человека — одна на весь сайт: каталог, главная, «Сообщники».
+ * Фото, имя, роль и опыт, о себе в двух строках, навыки, город и условия.
+ */
+export function PersonCard({
+  person,
+  as: Tag = "div",
+  eager,
+  surface = "tone",
+}: {
+  person: PersonCardData;
+  as?: "div" | "li";
+  eager?: boolean;
+  /** На цветной подложке карточка белая, чипы внутри — серые. */
+  surface?: "tone" | "white";
+}) {
+  const white = surface === "white";
+  const chip = white ? "bg-tone" : "bg-white";
+  const role = [person.primary_role?.name, person.experience_level ? LEVEL[person.experience_level]?.toLowerCase() : null]
+    .filter(Boolean)
+    .join(", ");
+  const cofound = person.looking_for.includes(COFOUND);
+  const terms = termsOf(person.looking_for).map((t) => TERMS[t].toLowerCase());
+  const skills = person.skills.slice(0, 3);
+  const more = person.skills.length - skills.length;
+  return (
+    <Tag className="h-full">
+      <Link href={`/people/${person.slug}`} className={cn("card-hover group flex h-full flex-col rounded-[28px] p-2", white ? "bg-white hover:bg-tone" : "bg-tone hover:bg-tone-2")}>
+        <span className="relative block aspect-square overflow-hidden rounded-[22px]">
+          <PersonPhoto person={person} eager={eager} />
+          {person.is_demo && <DemoBadge className="absolute top-3 left-3 shadow-sm" />}
+          {cofound && (
+            <span className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-foreground shadow-sm">
+              <span aria-hidden className="size-2 rounded-full bg-cornflower" />
+              Ищет сообщников
+            </span>
+          )}
+        </span>
+        <div className="flex flex-1 flex-col px-3 pt-4 pb-3">
+          <h3 className="text-lg leading-tight font-extrabold tracking-[-0.02em]">{person.display_name}</h3>
+          {role && <p className="mt-0.5 text-sm text-muted-foreground">{role}</p>}
+          {person.headline && <p className="mt-2.5 line-clamp-2 text-sm leading-snug">{person.headline}</p>}
+          {skills.length > 0 && (
+            <span className="mt-3 flex flex-wrap gap-1" aria-label="Навыки">
+              {skills.map((s) => (
+                <span key={s.slug} className={cn("rounded-full px-2.5 py-1 text-xs font-semibold", chip)}>
+                  {s.name}
+                </span>
+              ))}
+              {more > 0 && <span className="self-center px-1 text-xs text-muted-foreground">+{more}</span>}
+            </span>
+          )}
+          <p className="mt-auto truncate pt-3 text-[13px] text-muted-foreground">
+            {[person.city, terms.join(", ")].filter(Boolean).join(" · ")}
+          </p>
         </div>
-        {rows.length > 0 && (
-          <dl className="mt-5 divide-y border-t text-sm sm:text-[15px]">
-            {rows.map(([label, value]) => (
-              <div key={label} className="grid grid-cols-[5.5rem_1fr] gap-3 py-3 sm:grid-cols-[10rem_1fr] sm:gap-4">
-                <dt className="text-muted-foreground">{label}</dt>
-                <dd className="min-w-0">{value}</dd>
-              </div>
-            ))}
-          </dl>
-        )}
       </Link>
-    </li>
+    </Tag>
   );
 }

@@ -192,6 +192,16 @@ export type BodyUploadMyAvatar = {
 };
 
 /**
+ * Body_upload_startup_cover
+ */
+export type BodyUploadStartupCover = {
+    /**
+     * File
+     */
+    file: Blob | File;
+};
+
+/**
  * CatalogItemIn
  */
 export type CatalogItemIn = {
@@ -638,6 +648,13 @@ export type LoginIn = {
 };
 
 /**
+ * LookingFor
+ *
+ * Что человек ищет: условия участия (Terms) и «сообщники» — придумать стартап с нуля.
+ */
+export type LookingFor = 'free' | 'paid' | 'negotiable' | 'cofound';
+
+/**
  * MeOut
  */
 export type MeOut = {
@@ -829,6 +846,10 @@ export type MyProfileOut = {
      */
     avatar_url?: string | null;
     /**
+     * Avatar Url Lg
+     */
+    avatar_url_lg?: string | null;
+    /**
      * Is Demo
      */
     is_demo?: boolean;
@@ -917,6 +938,14 @@ export type MyStartupOut = {
      * Is Demo
      */
     is_demo?: boolean;
+    /**
+     * Cover Url
+     */
+    cover_url?: string | null;
+    /**
+     * Cover Url Lg
+     */
+    cover_url_lg?: string | null;
     /**
      * Pending Applications
      */
@@ -1089,6 +1118,10 @@ export type PersonCard = {
      */
     avatar_url?: string | null;
     /**
+     * Avatar Url Lg
+     */
+    avatar_url_lg?: string | null;
+    /**
      * Is Demo
      */
     is_demo?: boolean;
@@ -1129,6 +1162,10 @@ export type PersonDetail = {
      * Avatar Url
      */
     avatar_url?: string | null;
+    /**
+     * Avatar Url Lg
+     */
+    avatar_url_lg?: string | null;
     /**
      * Is Demo
      */
@@ -1212,7 +1249,7 @@ export type ProfileUpdate = {
     /**
      * Looking For
      */
-    looking_for?: Array<Terms> | null;
+    looking_for?: Array<LookingFor> | null;
     /**
      * City
      */
@@ -1620,6 +1657,14 @@ export type StartupCard = {
      * Is Demo
      */
     is_demo?: boolean;
+    /**
+     * Cover Url
+     */
+    cover_url?: string | null;
+    /**
+     * Cover Url Lg
+     */
+    cover_url_lg?: string | null;
 };
 
 /**
@@ -1665,6 +1710,14 @@ export type StartupDetail = {
      * Is Demo
      */
     is_demo?: boolean;
+    /**
+     * Cover Url
+     */
+    cover_url?: string | null;
+    /**
+     * Cover Url Lg
+     */
+    cover_url_lg?: string | null;
     /**
      * Description
      */
@@ -2696,6 +2749,66 @@ export type UpdateStartupResponses = {
 };
 
 export type UpdateStartupResponse = UpdateStartupResponses[keyof UpdateStartupResponses];
+
+export type DeleteStartupCoverData = {
+    body?: never;
+    path: {
+        /**
+         * Startup Id
+         */
+        startup_id: string;
+    };
+    query?: never;
+    url: '/api/startups/{startup_id}/cover';
+};
+
+export type DeleteStartupCoverErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteStartupCoverError = DeleteStartupCoverErrors[keyof DeleteStartupCoverErrors];
+
+export type DeleteStartupCoverResponses = {
+    /**
+     * Successful Response
+     */
+    200: StartupDetail;
+};
+
+export type DeleteStartupCoverResponse = DeleteStartupCoverResponses[keyof DeleteStartupCoverResponses];
+
+export type UploadStartupCoverData = {
+    body: BodyUploadStartupCover;
+    path: {
+        /**
+         * Startup Id
+         */
+        startup_id: string;
+    };
+    query?: never;
+    url: '/api/startups/{startup_id}/cover';
+};
+
+export type UploadStartupCoverErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UploadStartupCoverError = UploadStartupCoverErrors[keyof UploadStartupCoverErrors];
+
+export type UploadStartupCoverResponses = {
+    /**
+     * Successful Response
+     */
+    200: StartupDetail;
+};
+
+export type UploadStartupCoverResponse = UploadStartupCoverResponses[keyof UploadStartupCoverResponses];
 
 export type PublishStartupData = {
     body?: never;

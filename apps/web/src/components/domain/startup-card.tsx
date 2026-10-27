@@ -1,12 +1,12 @@
 import { Check } from "lucide-react";
 import Link from "next/link";
 
-import { DemoBadge, StageBadge, TermsBadge } from "@/components/domain/badges";
-import { SeatRow } from "@/components/domain/seats";
+import { DemoBadge, TermsBadge } from "@/components/domain/badges";
 import type { StartupCard as StartupCardData } from "@/lib/api";
-import { plural, timeAgo } from "@/lib/labels";
+import { STAGE, plural, timeAgo } from "@/lib/labels";
+import { cn } from "@/lib/utils";
 
-/** Причины подбора («Совпадает навыков: 2») — короткими метками внутри карточки, а не подписью под ней. */
+/** Причины подбора («Совпадает навыков: 2») — короткими метками внутри карточки. */
 function reasonLabel(r: string) {
   const skills = r.match(/^Совпадает навыков: (\d+)/);
   if (skills) return `${skills[1]} ${plural(Number(skills[1]), "навык совпадает", "навыка совпадают", "навыков совпадают")}`;
@@ -14,136 +14,129 @@ function reasonLabel(r: string) {
   return r;
 }
 
-export function StartupCard({ startup, reasons }: { startup: StartupCardData; reasons?: string[] }) {
-  const open = startup.open_roles.reduce((n, r) => n + (r.slots ?? 1), 0);
-  const team = startup.team_size ?? 1;
-  return (
-    <Link
-      href={`/startups/${startup.slug}`}
-      className="group flex h-full flex-col rounded-[26px] bg-card p-6 shadow-[0_0_0_1.5px_var(--border)] transition-[box-shadow,transform] duration-300 ease-[var(--ease-out)] hover:-translate-y-0.5 hover:shadow-[0_0_0_1.5px_var(--cornflower)]"
-    >
-      <div className="flex items-start gap-3">
-        <h3 className="text-xl leading-snug font-extrabold tracking-[-0.03em] group-hover:text-brand-ink">{startup.title}</h3>
-        <TermsBadge terms={startup.terms} className="mt-0.5 ml-auto" />
-      </div>
-      <p className="mt-1 line-clamp-2 text-[15px] text-muted-foreground">{startup.pitch}</p>
-
-      {startup.open_roles.length > 0 && (
-        <div className="mt-5 rounded-2xl bg-tone p-4">
-          <div className="text-xs font-bold text-muted-foreground">Ищут в команду</div>
-          <ul className="mt-2 space-y-1.5">
-            {startup.open_roles.slice(0, 3).map((r) => (
-              <li key={r.id} className="flex items-baseline gap-2 text-sm">
-                <span className="font-semibold">{r.title}</span>
-                {r.hours_per_week ? (
-                  <span className="ml-auto text-xs whitespace-nowrap text-muted-foreground">{r.hours_per_week} ч в неделю</span>
-                ) : null}
-              </li>
-            ))}
-            {startup.open_roles.length > 3 && (
-              <li className="text-xs text-muted-foreground">и ещё {startup.open_roles.length - 3}</li>
-            )}
-          </ul>
-        </div>
-      )}
-      <div className="mt-4">
-        <SeatRow filled={team} open={open} />
-      </div>
-      {reasons && reasons.length > 0 && (
-        <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Почему подходит">
-          {reasons.map((r) => (
-            <li key={r} className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2.5 py-1 text-xs font-bold text-brand-ink">
-              <Check aria-hidden className="size-3" />
-              {reasonLabel(r)}
-            </li>
-          ))}
-        </ul>
-      )}
-      <div className="mt-auto flex items-center gap-2 pt-4 text-xs text-muted-foreground">
-        <StageBadge stage={startup.stage} />
-        {startup.is_demo && <DemoBadge />}
-        <span className="ml-auto">{timeAgo(startup.published_at)}</span>
-      </div>
-    </Link>
-  );
-}
-
-const LOGO_TONES = [
-  "bg-brand-soft text-brand-ink",
-  "bg-success-soft text-success-ink",
-  "bg-warn-soft text-warn-ink",
-  "bg-marker-soft text-marker-ink",
-  "bg-secondary text-foreground",
+// Обложка без фото: мягкий градиент и первая буква. Палитра стабильна для одного и того же slug.
+const FALLBACK = [
+  ["#DCE6FD", "#F1F5FF", "#2B57C2"],
+  ["#E4DDFB", "#F5F2FF", "#5B3FC4"],
+  ["#D5F0EC", "#EFFAF8", "#0E6F6A"],
+  ["#FBE3D3", "#FFF5EE", "#A4460F"],
+  ["#E3E8F0", "#F6F8FB", "#0F1B2D"],
 ];
 
-/** «Логотип» стартапа: первая буква названия; цвет стабилен для одного и того же slug. */
-function StartupLogo({ title, slug }: { title: string; slug: string }) {
-  const tone = LOGO_TONES[[...slug].reduce((n, c) => n + c.charCodeAt(0), 0) % LOGO_TONES.length];
+export function StartupCover({
+  startup,
+  sizes = "(min-width: 1024px) 420px, (min-width: 640px) 50vw, 100vw",
+  className,
+  eager = false,
+}: {
+  startup: Pick<StartupCardData, "slug" | "title" | "cover_url" | "cover_url_lg">;
+  sizes?: string;
+  className?: string;
+  eager?: boolean;
+}) {
+  if (startup.cover_url)
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- обложки уже пережаты api в WebP 800 и 1600 px
+      <img
+        src={startup.cover_url}
+        srcSet={startup.cover_url_lg ? `${startup.cover_url} 800w, ${startup.cover_url_lg} 1600w` : undefined}
+        sizes={sizes}
+        alt=""
+        loading={eager ? "eager" : "lazy"}
+        decoding="async"
+        className={cn("size-full bg-tone-2 object-cover", className)}
+      />
+    );
+  const [from, to, ink] = FALLBACK[[...startup.slug].reduce((n, c) => n + c.charCodeAt(0), 0) % FALLBACK.length];
   return (
-    <span aria-hidden className={`grid size-20 shrink-0 place-items-center rounded-2xl font-heading text-3xl sm:size-28 sm:text-4xl ${tone}`}>
-      {title.trim()[0]?.toUpperCase() ?? "•"}
+    <span
+      aria-hidden
+      className={cn("grid size-full place-items-center", className)}
+      style={{ background: `radial-gradient(120% 120% at 15% 10%, ${to}, ${from})`, color: ink }}
+    >
+      <span className="text-[clamp(56px,7vw,88px)] leading-none font-extrabold tracking-[-0.05em] opacity-90">
+        {startup.title.trim()[0]?.toUpperCase() ?? "•"}
+      </span>
     </span>
   );
 }
 
 /**
- * Стартап в каталоге (KAN-138): отдельная крупная карточка в списке, как у людей —
- * шапка (логотип, название, основатель, метки) и строки «подпись — значение».
+ * Карточка стартапа — одна на весь сайт: каталог, главная, подборка в кабинете.
+ * Обложка со стадией, название и условия, суть в двух строках, кого ищут, кто основатель.
  */
-export function StartupListCard({ startup }: { startup: StartupCardData }) {
+export function StartupCard({
+  startup,
+  reasons,
+  as: Tag = "div",
+  eager,
+}: {
+  startup: StartupCardData;
+  reasons?: string[];
+  as?: "div" | "li";
+  eager?: boolean;
+}) {
   const open = startup.open_roles.reduce((n, r) => n + (r.slots ?? 1), 0);
   const team = startup.team_size ?? 1;
-  const roles = startup.open_roles.slice(0, 4);
-  const rows: [string, React.ReactNode][] = [];
-  if (startup.pitch) rows.push(["Идея", startup.pitch]);
-  if (roles.length)
-    rows.push([
-      "Ищут",
-      <ul key="r" className="grid gap-1">
-        {roles.map((r) => (
-          <li key={r.id}>
-            <span className="font-semibold">{r.title}</span>
-            {r.hours_per_week ? <span className="text-muted-foreground"> · {r.hours_per_week} ч в неделю</span> : null}
-          </li>
-        ))}
-        {startup.open_roles.length > roles.length && (
-          <li className="text-muted-foreground">и ещё {startup.open_roles.length - roles.length}</li>
-        )}
-      </ul>,
-    ]);
-  rows.push(["Команда", <SeatRow key="t" filled={team} open={open} />]);
-
+  const roles = startup.open_roles.slice(0, 3);
+  const more = startup.open_roles.length - roles.length;
   return (
-    <li>
+    <Tag className="h-full">
       <Link
         href={`/startups/${startup.slug}`}
-        className="group block rounded-3xl border bg-card p-5 transition-[border-color,box-shadow] duration-300 ease-out hover:border-foreground/30 hover:shadow-[0_12px_32px_-16px_rgb(18_22_51/0.25)] sm:p-7"
+        className="card-hover group flex h-full flex-col rounded-[28px] bg-tone p-2 hover:bg-tone-2"
       >
-        <div className="flex gap-4 sm:gap-6">
-          <StartupLogo title={startup.title} slug={startup.slug} />
-          <div className="min-w-0 flex-1">
-            <h3 className="font-sans text-xl leading-tight font-bold tracking-normal text-brand-ink group-hover:underline sm:text-2xl">{startup.title}</h3>
-            <p className="mt-1.5 text-[15px]">
-              <span className="font-medium">{startup.owner_name}</span>
-              {startup.published_at && <span className="text-muted-foreground"> · {timeAgo(startup.published_at)}</span>}
-            </p>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              {open > 0 && <span className="rounded-lg bg-success-soft px-2.5 py-1 text-sm font-medium text-success-ink">Набирает команду</span>}
-              <TermsBadge terms={startup.terms} />
-              <StageBadge stage={startup.stage} />
-              {startup.is_demo && <DemoBadge />}
-            </div>
+        <span className="relative block aspect-[16/9] overflow-hidden rounded-[22px]">
+          <StartupCover startup={startup} eager={eager} />
+          <span className="absolute top-3 left-3 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-foreground shadow-sm">
+            {STAGE[startup.stage] ?? startup.stage}
+          </span>
+          {startup.is_demo && <DemoBadge className="absolute top-3 right-3 shadow-sm" />}
+        </span>
+        <div className="flex flex-1 flex-col px-4 pt-4 pb-3">
+          <div className="flex items-start gap-3">
+            <h3 className="text-xl leading-tight font-extrabold tracking-[-0.03em]">{startup.title}</h3>
+            <TermsBadge terms={startup.terms} className="mt-0.5 ml-auto" />
           </div>
+          <span className="mt-1.5 line-clamp-2 text-[15px] leading-snug text-muted-foreground">{startup.pitch}</span>
+          {roles.length > 0 && (
+            <span className="mt-4 flex flex-wrap gap-1.5" aria-label="Кого ищут">
+              {roles.map((r) => (
+                <span key={r.id} className="rounded-full bg-white px-2.5 py-1 text-[13px] font-semibold">
+                  {r.title}
+                </span>
+              ))}
+              {more > 0 && <span className="self-center px-1 text-[13px] text-muted-foreground">+{more}</span>}
+            </span>
+          )}
+          {reasons && reasons.length > 0 && (
+            <span className="mt-3 flex flex-wrap gap-1.5" aria-label="Почему подходит">
+              {reasons.map((r) => (
+                <span key={r} className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2.5 py-1 text-xs font-bold text-brand-ink">
+                  <Check aria-hidden className="size-3" />
+                  {reasonLabel(r)}
+                </span>
+              ))}
+            </span>
+          )}
+          <span className="mt-auto flex items-center gap-2 pt-4 text-[13px] text-muted-foreground">
+            <span className="truncate">
+              <span className="font-semibold text-foreground">{startup.owner_name}</span>
+              {team > 1 ? ` и ещё ${team - 1}` : ""}
+            </span>
+            <span className="ml-auto shrink-0">
+              {open > 0 ? (
+                <span className="font-semibold text-brand-ink">
+                  {plural(open, `${open} место`, `${open} места`, `${open} мест`)}
+                </span>
+              ) : (
+                "Команда собрана"
+              )}
+              {startup.published_at ? ` · ${timeAgo(startup.published_at)}` : ""}
+            </span>
+          </span>
         </div>
-        <dl className="mt-5 divide-y border-t text-sm sm:text-[15px]">
-          {rows.map(([label, value]) => (
-            <div key={label} className="grid grid-cols-[5.5rem_1fr] gap-3 py-3 sm:grid-cols-[10rem_1fr] sm:gap-4">
-              <dt className="text-muted-foreground">{label}</dt>
-              <dd className="min-w-0">{value}</dd>
-            </div>
-          ))}
-        </dl>
       </Link>
-    </li>
+    </Tag>
   );
 }
