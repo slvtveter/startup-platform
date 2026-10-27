@@ -3,12 +3,14 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
+import { DemoNote } from "@/components/domain/badges";
 import { Container } from "@/components/domain/page-header";
 import { PersonCard } from "@/components/domain/person-card";
 import { StartupCard } from "@/components/domain/startup-card";
 import { CopyStarter } from "@/components/landing/copy-starter";
 import { buttonVariants } from "@/components/ui/button";
-import { listPeople, listStartups } from "@/lib/api";
+import { asList, QuickChips, type SearchParams } from "@/components/domain/filters";
+import { listPeople, listRoles, listStartups } from "@/lib/api";
 import { plural } from "@/lib/labels";
 import { PHOTOS } from "@/lib/photos";
 import { getMe, serverClient } from "@/lib/server-api";
@@ -31,12 +33,15 @@ const STARTERS = [
   "Привет! Есть пара сырых идей, но хочется обсудить их с кем-то, кто думает иначе. Расскажу в двух словах — интересно?",
 ];
 
-export default async function CofoundersPage() {
+export default async function CofoundersPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const params = await searchParams;
+  const role = asList(params.role);
   const user = await getMe();
   const client = await serverClient();
-  const [{ data: people }, { data: ideas }] = await Promise.all([
-    listPeople({ client, query: { looking_for: ["cofound"], limit: 12 } }),
+  const [{ data: people }, { data: ideas }, { data: roles }] = await Promise.all([
+    listPeople({ client, query: { cofound: true, role, limit: 24 } }),
     listStartups({ client, query: { stage: ["idea"], limit: 3 } }),
+    listRoles({ client }),
   ]);
   const total = people?.total ?? 0;
   const join = user ? "/me/profile" : "/register?next=/me/profile";
@@ -85,7 +90,7 @@ export default async function CofoundersPage() {
           ))}
         </ol>
 
-        <section id="people" aria-labelledby="people-h" className="scroll-mt-24 pt-20">
+        <section id="people" aria-labelledby="people-h" className="scroll-mt-24 pt-16">
           <div className="mb-8 flex flex-wrap items-end gap-x-10 gap-y-3">
             <h2 id="people-h" className="max-w-[16ch] text-[clamp(30px,3.6vw,48px)] leading-[1.04]">
               Ищут сообщников прямо сейчас
@@ -96,15 +101,23 @@ export default async function CofoundersPage() {
                 : "Пока никто не отметился. Стань первым — тебе напишут, когда появятся люди с подходящими навыками."}
             </p>
           </div>
+          <div className="mb-5">
+            <QuickChips basePath="/cofounders" params={params} name="role" allLabel="Все роли" options={(roles ?? []).map((r) => ({ value: r.slug, label: r.name }))} />
+          </div>
+          {people?.items.some((p) => p.is_demo) && (
+            <div className="mb-5">
+              <DemoNote kind="people" />
+            </div>
+          )}
           {people && people.items.length > 0 && (
-            <ul className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+            <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 md:grid-cols-3 xl:grid-cols-4">
               {people.items.map((p) => (
                 <PersonCard key={p.slug} person={p} as="li" />
               ))}
             </ul>
           )}
           {total > (people?.items.length ?? 0) && (
-            <Link href="/people?looking_for=cofound" className={buttonVariants({ variant: "outline", className: "mt-6" })}>
+            <Link href="/people?cofound=1" className={buttonVariants({ variant: "outline", className: "mt-6" })}>
               Все, кто ищет сообщников
               <ArrowRight aria-hidden />
             </Link>

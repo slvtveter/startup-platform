@@ -58,3 +58,21 @@ async def test_people_catalog_hides_empty_profiles(make_user, client):
     # По прямой ссылке профиль открывается.
     slug = (await empty.get("/api/profile/me")).json()["slug"]
     assert (await client.get(f"/api/people/{slug}")).status_code == 200
+
+
+async def test_search_by_skill_role_prefix_and_city(make_user, client):
+    from tests.test_startups import create_published
+
+    founder = await make_user(
+        "alina@mail.ru", published=True, name="Алина", role="designer", skills=("figma",)
+    )
+    await create_published(founder)
+    await make_user("ivan@mail.ru", published=True, name="Иван", role="backend", skills=("python",))
+
+    names = lambda r: [p["display_name"] for p in r.json()["items"]]  # noqa: E731
+    assert names(await client.get("/api/people", params={"q": "Figma"})) == ["Алина"]
+    assert names(await client.get("/api/people", params={"q": "дизайн"})) == ["Алина"]
+    assert names(await client.get("/api/people", params={"q": "py"})) == ["Иван"]
+    # Стартап находится по началу слова роли и по навыку роли.
+    assert (await client.get("/api/startups", params={"q": "дизайн"})).json()["total"] == 1
+    assert (await client.get("/api/startups", params={"q": "figma"})).json()["total"] == 1

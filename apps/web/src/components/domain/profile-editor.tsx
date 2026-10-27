@@ -32,8 +32,9 @@ function Choice({ active, onClick, children }: { active: boolean; onClick: () =>
   return (
     <button
       type="button"
+      aria-pressed={active}
       onClick={onClick}
-      className={cn("rounded-full border px-4 py-2 text-sm font-semibold transition-colors", active ? "border-foreground bg-foreground text-background" : "bg-card hover:border-foreground/40")}
+      className={cn("rounded-full px-4 py-2 text-sm font-semibold transition-colors", active ? "bg-foreground text-background" : "bg-tone hover:bg-tone-2")}
     >
       {children}
     </button>
@@ -184,6 +185,7 @@ export function ProfileEditor({
                 {f.links.map((l, i) => (
                   <div key={i} className="flex gap-2">
                     <select
+                      aria-label="Тип ссылки"
                       value={l.kind}
                       onChange={(e) => set("links", f.links.map((x, j) => (j === i ? { ...x, kind: e.target.value as LinkKind } : x)))}
                       className="h-11 rounded-xl bg-tone px-3 text-sm"
@@ -251,6 +253,7 @@ export function ProfileEditor({
                     <button
                       key={t}
                       type="button"
+                      aria-pressed={on}
                       onClick={() => set("looking_for", on ? f.looking_for.filter((x) => x !== t) : [...f.looking_for, t])}
                       className={cn("rounded-2xl p-4 text-left transition-colors duration-200", on ? "bg-brand-soft ring-2 ring-brand" : "bg-tone hover:bg-tone-2")}
                     >

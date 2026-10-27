@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { DemoNote } from "@/components/domain/badges";
 import { FilterBar } from "@/components/domain/filter-bar";
 import { Pager, QuickChips, SearchBox, asList, type SearchParams } from "@/components/domain/filters";
 import { Container, EmptyState, PageHeader } from "@/components/domain/page-header";
@@ -22,14 +23,15 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
   const params = await searchParams;
   const page = Math.max(1, Number(params.page) || 1);
   const selected = { role: asList(params.role), level: asList(params.level), looking_for: asList(params.looking_for) };
+  const cofound = params.cofound === "1";
   const q = typeof params.q === "string" ? params.q : "";
   const client = await serverClient();
   const [{ data: roles }, { data }] = await Promise.all([
     listRoles({ client }),
-    listPeople({ client, query: { ...selected, q: q || undefined, limit: LIMIT, offset: (page - 1) * LIMIT } }),
+    listPeople({ client, query: { ...selected, cofound, q: q || undefined, limit: LIMIT, offset: (page - 1) * LIMIT } }),
   ]);
   const total = data?.total ?? 0;
-  const active = ["role", "looking_for", "level", "q"].some((k) => asList(params[k]).length > 0);
+  const roleGroup = { name: "role", title: "Роль", options: (roles ?? []).map((r) => ({ value: r.slug, label: r.name })) };
 
   return (
     <Container>
@@ -44,23 +46,15 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
       />
 
       <div className="mt-8 grid gap-4">
-        <SearchBox params={params} placeholder="Имя, роль или навык, например Figma или Python" />
-        <QuickChips
-          basePath="/people"
-          params={params}
-          name="role"
-          allLabel="Все роли"
-          options={(roles ?? []).slice(0, 7).map((r) => ({ value: r.slug, label: r.name }))}
-        />
+        <SearchBox params={params} placeholder="Имя, роль, навык или город" />
+        <QuickChips basePath="/people" params={params} name="role" allLabel="Все роли" options={roleGroup.options} />
         <FilterBar
           basePath="/people"
           params={params}
+          chipGroups={[roleGroup]}
           groups={[
-            {
-              name: "looking_for",
-              title: "Что ищет",
-              options: [{ value: "cofound", label: "Сообщников на свой стартап" }, ...Object.entries(TERMS).map(([value, label]) => ({ value, label }))],
-            },
+            { name: "cofound", title: "Ищет сообщников", options: [{ value: "1", label: "Только те, кто хочет придумать стартап с нуля" }] },
+            { name: "looking_for", title: "Оплата", options: Object.entries(TERMS).map(([value, label]) => ({ value, label })) },
             { name: "level", title: "Опыт", options: Object.entries(LEVEL).map(([value, label]) => ({ value, label })) },
           ]}
         />
@@ -71,14 +65,14 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
         <h2 className="text-base font-bold tracking-normal">
           {total} {plural(total, "человек", "человека", "человек")}
         </h2>
-        {active && (
-          <Link href="/people" className="text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline">
-            Сбросить фильтры
-          </Link>
-        )}
       </div>
+      {data?.items.some((x) => x.is_demo) && (
+        <div className="mt-5">
+          <DemoNote kind="people" />
+        </div>
+      )}
       {data && data.items.length > 0 ? (
-        <ul className="mt-5 grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+        <ul className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 md:grid-cols-3 xl:grid-cols-4">
           {data.items.map((p, i) => (
             <PersonCard key={p.slug} person={p} as="li" eager={i < 4} />
           ))}
@@ -87,11 +81,16 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
         <div className="mt-5">
           <EmptyState
             title="Никого не нашли"
-            text="Попробуй убрать часть фильтров."
+            text={q ? `По запросу «${q}» никого нет. Попробуй другое слово или убери часть фильтров.` : "Попробуй убрать часть фильтров."}
             action={
-              <Link href="/people" className={buttonVariants({ variant: "outline" })}>
-                Сбросить фильтры
-              </Link>
+              <span className="flex flex-wrap justify-center gap-2">
+                <Link href="/people" className={buttonVariants({ variant: "outline" })}>
+                  Сбросить фильтры
+                </Link>
+                <Link href="/cofounders" className={buttonVariants()}>
+                  Кто ищет сообщников
+                </Link>
+              </span>
             }
           />
         </div>

@@ -19,9 +19,11 @@ export default async function MyStartupsPage() {
         title="Мои стартапы"
         description="Отклики, роли и статус набора по каждому проекту."
         actions={
-          <Link href="/startups/new" className={buttonVariants({ variant: "brand" })}>
-            Создать стартап
-          </Link>
+          items.length > 0 ? (
+            <Link href="/startups/new" className={buttonVariants()}>
+              Предложить идею
+            </Link>
+          ) : undefined
         }
       />
       {items.length === 0 ? (
@@ -30,8 +32,8 @@ export default async function MyStartupsPage() {
             title="У тебя пока нет стартапов"
             text="Опиши идею, открой роли и собери первую команду."
             action={
-              <Link href="/startups/new" className={buttonVariants({ variant: "brand" })}>
-                Создать стартап
+              <Link href="/startups/new" className={buttonVariants()}>
+                Предложить идею
               </Link>
             }
           />

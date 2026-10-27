@@ -61,6 +61,9 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  /* Все transition-* без явной длительности — 200 мс и одна кривая. */
+  --default-transition-duration: 200ms;
+  --default-transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 :root {
@@ -92,7 +95,7 @@
   --brand-ink: #2b57c2;
   --cornflower: #5b8cf0;
   --tone: #f4f6fa;
-  --tone-2: #eaeef6;
+  --tone-2: #e6ebf4;
   /* Бывший «маркер» свободных мест теперь тоже васильковый: одно акцентное семейство на весь сайт. */
   --marker: #d6e2fd;
   --marker-soft: #ecf1fe;
@@ -181,6 +184,11 @@
   .grid {
     grid-template-columns: minmax(0, 1fr);
   }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  summary {
+    cursor: pointer;
+  }
   ::selection {
     background: var(--marker);
     color: var(--foreground);
@@ -238,18 +246,25 @@
    после загрузки блок прячется до момента, когда попадёт в экран. Задержка шага — --d. */
 [data-reveal="armed"] .reveal-item {
   opacity: 0;
-  transform: translateY(16px);
+  transform: translateY(12px);
 }
 [data-reveal] .reveal-item {
   transition:
-    opacity 700ms var(--ease-out) var(--d, 0ms),
-    transform 700ms var(--ease-out) var(--d, 0ms);
+    opacity 500ms var(--ease-out) var(--d, 0ms),
+    transform 500ms var(--ease-out) var(--d, 0ms);
+}
+/* Карточка, которая и появляется, и реагирует на наведение: фон меняется без задержки появления. */
+[data-reveal] .reveal-item.card-hover {
+  transition:
+    opacity 500ms var(--ease-out) var(--d, 0ms),
+    transform 500ms var(--ease-out) var(--d, 0ms),
+    background-color var(--dur-hover) var(--ease-out);
 }
 
 /* Полоска шага прорисовывается слева направо. */
 [data-reveal] .reveal-line {
   transform-origin: left;
-  transition: transform 900ms var(--ease-out) var(--d, 0ms);
+  transition: transform 600ms var(--ease-out) var(--d, 0ms);
 }
 [data-reveal="armed"] .reveal-line {
   transform: scaleX(0);
@@ -270,6 +285,21 @@
 .chat-msg {
   animation: msg-in 600ms var(--ease-out) backwards;
   animation-delay: var(--d, 0ms);
+}
+/* При переходе внутри сайта переписка уже «случилась»: не проигрываем её второй раз поверх смены страницы. */
+.page-enter .chat-msg {
+  animation: none;
+}
+
+/* Плашка cookie появляется мягко и не сразу, чтобы не перебивать первый экран. */
+@keyframes cookie-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.cookie-in {
+  animation: cookie-in 320ms var(--ease-out) 1200ms backwards;
 }
 
 /* Частые вопросы: ответ раскрывается по высоте, а не появляется рывком.

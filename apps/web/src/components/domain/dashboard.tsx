@@ -65,17 +65,25 @@ export async function Dashboard() {
     <Container>
       <div className="flex flex-wrap items-end gap-x-6 gap-y-4">
         <div className="min-w-0">
-          <h1 className="text-2xl sm:text-[34px]">{name ? `Привет, ${name}` : "Привет!"}</h1>
+          <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">{name ? `Привет, ${name}` : "Привет!"}</h1>
           <p className="mt-1 text-muted-foreground max-sm:hidden">Всё важное по твоим стартапам и откликам — здесь.</p>
         </div>
-        <div className="flex gap-2 sm:ml-auto">
-          <Link href="/startups" className={buttonVariants({ variant: "outline" })}>
-            <SearchIcon aria-hidden className="size-4" />
-            Найти стартап
-          </Link>
-          <Link href="/startups/new" className={buttonVariants({ variant: "brand" })}>
+        <div className="grid w-full grid-cols-2 gap-2 sm:ml-auto sm:flex sm:w-auto">
+          {/* Основателю с открытыми местами нужнее люди, остальным — проекты. */}
+          {myStartups.some((m) => m.open_roles.length > 0) ? (
+            <Link href={`/people?${myStartups.flatMap((m) => m.open_roles.map((r) => `role=${r.role.slug}`)).filter((v, i, a) => a.indexOf(v) === i).join("&")}`} className={buttonVariants({ variant: "outline" })}>
+              <SearchIcon aria-hidden className="size-4" />
+              Найти людей
+            </Link>
+          ) : (
+            <Link href="/startups" className={buttonVariants({ variant: "outline" })}>
+              <SearchIcon aria-hidden className="size-4" />
+              Найти стартап
+            </Link>
+          )}
+          <Link href="/startups/new" className={buttonVariants()}>
             <PlusIcon aria-hidden className="size-4" />
-            Разместить
+            Предложить идею
           </Link>
         </div>
       </div>
@@ -130,12 +138,12 @@ export async function Dashboard() {
             <PanelEmpty
               text="Есть идея? Опиши её за пару минут — и люди начнут откликаться на роли в команде."
               href="/startups/new"
-              cta="Разместить стартап"
+              cta="Предложить идею"
             />
           )}
         </Panel>
 
-        <Panel title="Мои отклики" href="/me/applications" more={myApps.length > 0 ? "Все заявки" : undefined}>
+        <Panel title="Мои отклики" href="/me/applications" more={myApps.length > 0 ? "Все отклики" : undefined}>
           {activeApps.length > 0 ? (
             <ul className="divide-y">
               {activeApps.slice(0, 5).map((a) => (

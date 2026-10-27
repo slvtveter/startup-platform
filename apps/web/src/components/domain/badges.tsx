@@ -28,12 +28,12 @@ export function ApplicationStatusBadge({ status, className }: { status: string; 
   return <span className={cn(pill, tone, className)}>{APP_STATUS[status] ?? status}</span>;
 }
 
-export function SkillChip({ name, highlight = false }: { name: string; highlight?: boolean }) {
+export function SkillChip({ name, highlight = false, onTone = false }: { name: string; highlight?: boolean; onTone?: boolean }) {
   return (
     <span
       className={cn(
         "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold",
-        highlight ? "bg-brand-soft text-brand-ink" : "bg-tone text-foreground",
+        highlight ? "bg-brand-soft text-brand-ink" : onTone ? "bg-white text-foreground" : "bg-tone text-foreground",
       )}
     >
       {name}
@@ -50,12 +50,24 @@ export function DemoBadge({ className }: { className?: string }) {
   );
 }
 
+/** Одна заметка над выдачей вместо плашки «Пример» на каждой карточке. */
+export function DemoNote({ kind }: { kind: "startups" | "people" }) {
+  return (
+    <p className="rounded-2xl bg-tone px-4 py-3 text-sm text-muted-foreground">
+      <span className="font-semibold text-foreground">Платформа только открылась.</span>{" "}
+      {kind === "startups"
+        ? "Часть проектов — примеры, чтобы было видно, как всё устроено: откликнуться на них нельзя. Опубликуй свою идею — она появится здесь первой."
+        : "Часть профилей — примеры, чтобы было видно, как всё устроено: написать им нельзя. Заполни свой профиль — тебя увидят первым."}
+    </p>
+  );
+}
+
 export function DemoNotice({ kind }: { kind: "startup" | "person" }) {
   return (
-    <p className="rounded-2xl bg-tone p-4 text-sm text-muted-foreground">
+    <p className="rounded-2xl bg-white p-4 text-sm text-muted-foreground">
       {kind === "startup"
-        ? "Это пример: так выглядит стартап на платформе. Откликнуться на него нельзя, настоящие проекты появятся совсем скоро."
-        : "Это пример: так выглядит профиль на платформе. Написать или пригласить этого человека нельзя."}
+        ? "Это пример проекта: так выглядит стартап на Envola. Откликнуться на него нельзя."
+        : "Это пример профиля: так выглядит человек на Envola. Написать ему нельзя."}
     </p>
   );
 }

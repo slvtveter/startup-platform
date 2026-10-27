@@ -61,7 +61,7 @@ export function ChatThread({ chat, initial }: { chat: ConversationOut; initial: 
   const [messages, setMessages] = useState(initial);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
-  const bottom = useRef<HTMLDivElement>(null);
+  const bottom = useRef<HTMLLIElement>(null);
   const peer = chat.peer;
 
   const reload = useCallback(async () => {
@@ -136,7 +136,7 @@ export function ChatThread({ chat, initial }: { chat: ConversationOut; initial: 
                     )}
                   >
                     {m.body}
-                    <span className={cn("ml-2 align-bottom text-[11px]", m.mine ? "text-white/70" : "text-muted-foreground")}>
+                    <span className={cn("ml-2 align-bottom text-[11px]", m.mine ? "text-white/90" : "text-muted-foreground")}>
                       {time(m.created_at)}
                     </span>
                   </div>
@@ -145,7 +145,7 @@ export function ChatThread({ chat, initial }: { chat: ConversationOut; initial: 
             </li>
           );
         })}
-        <div ref={bottom} />
+        <li ref={bottom} aria-hidden />
       </ol>
 
       <form

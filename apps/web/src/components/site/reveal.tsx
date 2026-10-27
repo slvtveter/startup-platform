@@ -22,7 +22,7 @@ export function Reveal(props: ComponentProps<"div">) {
           io.disconnect();
         }
       },
-      { rootMargin: "0px 0px -15% 0px" },
+      { rootMargin: "0px 0px -5% 0px" },
     );
     io.observe(el);
     return () => io.disconnect();

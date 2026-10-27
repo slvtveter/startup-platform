@@ -11,7 +11,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { listMyApplications } from "@/lib/api";
 import { requireMe, serverClient } from "@/lib/server-api";
 
-export const metadata = { title: "Мои заявки" };
+export const metadata = { title: "Мои отклики" };
 
 const ARCHIVED = new Set(["rejected", "withdrawn"]);
 
@@ -40,8 +40,8 @@ export default async function MyApplicationsPage({
     <Container className="max-w-4xl">
       <MarkSeen section="mine" />
       <PageHeader
-        title="Мои заявки"
-        description="Отклики на роли и приглашения от основателей. Основатели обычно отвечают в течение 72 часов."
+        title="Мои отклики"
+        description="Отклики на роли и приглашения от основателей. Основатели обычно отвечают за 2–3 дня."
       />
       <nav
         aria-label="Фильтр заявок"

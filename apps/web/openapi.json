@@ -809,6 +809,7 @@
           "profiles"
         ],
         "summary": "List People",
+        "description": "looking_for \u2014 \u0443\u0441\u043b\u043e\u0432\u0438\u044f (\u043b\u044e\u0431\u043e\u0435 \u0438\u0437), cofound \u2014 \u0442\u043e\u043b\u044c\u043a\u043e \u0442\u0435, \u043a\u0442\u043e \u0438\u0449\u0435\u0442 \u0441\u043e\u043e\u0431\u0449\u043d\u0438\u043a\u043e\u0432 (\u0432\u043c\u0435\u0441\u0442\u0435 \u0441 \u0443\u0441\u043b\u043e\u0432\u0438\u044f\u043c\u0438).",
         "operationId": "list_people",
         "parameters": [
           {
@@ -861,6 +862,16 @@
               },
               "default": [],
               "title": "Looking For"
+            }
+          },
+          {
+            "name": "cofound",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Cofound"
             }
           },
           {

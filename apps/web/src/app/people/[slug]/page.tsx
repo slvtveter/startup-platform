@@ -137,9 +137,9 @@ export default async function PersonPage({ params }: Props) {
             </p>
           )}
 
+          {experience.length > 0 && (
           <section className="mt-10">
             <h2 className="text-[26px] sm:text-[30px]">Опыт на платформе</h2>
-            {experience.length ? (
               <ol className="mt-4 grid gap-2">
                 {experience.map((m) => (
                   <li
@@ -161,12 +161,8 @@ export default async function PersonPage({ params }: Props) {
                   </li>
                 ))}
               </ol>
-            ) : (
-              <p className="mt-3 text-muted-foreground">
-                Пока ни одной команды на платформе.
-              </p>
-            )}
           </section>
+          )}
 
           <section className="mt-10">
             <h2 className="text-[26px] sm:text-[30px]">Навыки</h2>
@@ -239,7 +235,12 @@ export default async function PersonPage({ params }: Props) {
             )}
             <div className="mt-5">
               {p.is_demo ? (
-                <DemoNotice kind="person" />
+                <div className="grid gap-3">
+                  <DemoNotice kind="person" />
+                  <Link href="/cofounders" className={buttonVariants({ className: "w-full" })}>
+                    Найти настоящих людей
+                  </Link>
+                </div>
               ) : !user ? (
                 <Link
                   href={`/login?next=/people/${p.slug}`}
@@ -273,9 +274,11 @@ export default async function PersonPage({ params }: Props) {
               )}
             </div>
           </div>
-          <p className="px-1 text-sm text-muted-foreground">
-            Контакты откроются, если человек примет приглашение в команду.
-          </p>
+          {!p.is_demo && (
+            <p className="px-1 text-sm text-muted-foreground">
+              Переписка идёт на Envola. Телеграм и почта откроются, когда человек примет приглашение в команду.
+            </p>
+          )}
         </aside>
       </div>
 

@@ -2,6 +2,7 @@ import { Plus } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { DemoNote } from "@/components/domain/badges";
 import { FilterBar } from "@/components/domain/filter-bar";
 import { Pager, QuickChips, SearchBox, asList, toggleHref, type SearchParams } from "@/components/domain/filters";
 import { Container, EmptyState, PageHeader } from "@/components/domain/page-header";
@@ -43,7 +44,6 @@ export default async function StartupsPage({ searchParams }: { searchParams: Pro
   ]);
   const total = data?.total ?? 0;
   const ideasOnly = selected.stage.length === 1 && selected.stage[0] === "idea";
-  const active = ["role", "terms", "stage", "q"].some((k) => asList(params[k]).length > 0);
 
   return (
     <Container>
@@ -63,14 +63,15 @@ export default async function StartupsPage({ searchParams }: { searchParams: Pro
       />
 
       <div className="mt-8 grid gap-4">
-        <SearchBox params={params} placeholder="Название, тема или навык, например «доставка» или React" />
+        <SearchBox params={params} placeholder="Тема, роль или навык: собаки, дизайнер, React" />
         <QuickChips basePath="/startups" params={params} name="stage" options={STAGES} allLabel="Все стадии" />
         <FilterBar
           basePath="/startups"
           params={params}
+          chipGroups={[{ name: "stage", title: "Стадия", options: STAGES }]}
           groups={[
             { name: "role", title: "Кого ищут", options: (roles ?? []).map((r) => ({ value: r.slug, label: r.name })) },
-            { name: "terms", title: "Условия", options: Object.entries(TERMS).map(([value, label]) => ({ value, label })) },
+            { name: "terms", title: "Оплата", options: Object.entries(TERMS).map(([value, label]) => ({ value, label })) },
           ]}
         />
       </div>
@@ -80,15 +81,10 @@ export default async function StartupsPage({ searchParams }: { searchParams: Pro
         <h2 className="text-base font-bold tracking-normal">
           {total} {plural(total, "проект", "проекта", "проектов")}
         </h2>
-        {active && (
-          <Link href="/startups" className="text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline">
-            Сбросить фильтры
-          </Link>
-        )}
         <span className="ml-auto inline-flex rounded-full bg-tone p-1" role="group" aria-label="Сортировка">
           {[
             ["new", "Сначала новые"],
-            ["roles", "Больше мест"],
+            ["roles", "Больше открытых ролей"],
           ].map(([value, label]) => (
             <Link
               key={value}
@@ -103,6 +99,11 @@ export default async function StartupsPage({ searchParams }: { searchParams: Pro
         </span>
       </div>
 
+      {data?.items.some((x) => x.is_demo) && (
+        <div className="mt-5">
+          <DemoNote kind="startups" />
+        </div>
+      )}
       {data && data.items.length > 0 ? (
         <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {data.items.map((s, i) => (
@@ -113,11 +114,16 @@ export default async function StartupsPage({ searchParams }: { searchParams: Pro
         <div className="mt-5">
           <EmptyState
             title="Под этот фильтр ничего нет"
-            text="Убери часть условий или предложи свою идею: возможно, именно её здесь не хватает."
+            text={q ? `По запросу «${q}» ничего нет. Попробуй другое слово или убери часть фильтров.` : "Убери часть фильтров или предложи свою идею: возможно, именно её здесь не хватает."}
             action={
-              <Link href="/startups/new" className={buttonVariants()}>
-                Предложить идею
-              </Link>
+              <span className="flex flex-wrap justify-center gap-2">
+                <Link href="/startups" className={buttonVariants({ variant: "outline" })}>
+                  Сбросить фильтры
+                </Link>
+                <Link href="/startups/new" className={buttonVariants()}>
+                  Предложить идею
+                </Link>
+              </span>
             }
           />
         </div>

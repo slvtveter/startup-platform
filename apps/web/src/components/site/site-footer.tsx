@@ -10,7 +10,15 @@ const COLUMNS = [
     links: [
       { href: "/startups/new", label: "Опубликовать идею" },
       { href: "/startups?stage=idea", label: "Идеи других" },
-      { href: "/people?looking_for=negotiable", label: "Открыты к обсуждению условий" },
+      { href: "/startups?stage=idea&terms=free", label: "Идеи без оплаты, на равных" },
+    ],
+  },
+  {
+    title: "Нет идеи",
+    links: [
+      { href: "/cofounders", label: "Найти сообщников" },
+      { href: "/people?cofound=1", label: "Кто хочет придумать стартап" },
+      { href: "/me/profile", label: "Отметить «Ищу сообщников»" },
     ],
   },
   {
@@ -34,9 +42,9 @@ const COLUMNS = [
 
 export function SiteFooter() {
   return (
-    <footer className="mt-24 px-2 pb-2 sm:px-3 sm:pb-3">
-      <div className="mx-auto w-full max-w-[1360px] rounded-[28px] bg-tone px-4 sm:px-8 lg:px-10">
-        <div className="grid gap-10 py-12 text-[15px] md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+    <footer className="mx-auto mt-24 w-full max-w-[1360px] px-4 pb-4 sm:px-6 lg:px-10">
+      <div className="rounded-[28px] bg-tone px-5 sm:px-8 lg:px-10">
+        <div className="grid gap-10 py-12 text-[15px] sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1fr]">
           <div>
             <Wordmark />
             <p className="mt-4 max-w-xs text-muted-foreground">
