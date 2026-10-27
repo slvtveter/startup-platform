@@ -9,17 +9,20 @@ export function PathLink({
   path,
   href,
   className,
+  style,
   children,
 }: {
   path: "seeker" | "founder";
   href: string;
   className?: string;
+  style?: React.CSSProperties;
   children: React.ReactNode;
 }) {
   return (
     <Link
       href={href}
       className={className}
+      style={style}
       onClick={() => {
         // Событие не должно задерживать переход: ошибку сети молча игнорируем.
         void trackClientEvent({ body: { name: "landing_path_selected", path } }).catch(() => {});

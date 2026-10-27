@@ -22,12 +22,12 @@ export function MobileNav({ links }: { links: { href: string; label: string; bad
           <SheetTitle>Меню</SheetTitle>
         </SheetHeader>
         <nav className="grid gap-1 px-4">
-          {[...links, { href: "/startups/new", label: "Создать стартап" }].map((l) => (
+          {(links.some((l) => l.href === "/startups/new") ? links : [...links, { href: "/startups/new", label: "Предложить идею или стартап" }]).map((l) => (
             <Link
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
-              className="rounded-lg px-3 py-2.5 text-[15px] font-semibold hover:bg-muted"
+              className="rounded-xl px-3 py-3 text-base font-semibold transition-colors hover:bg-muted"
             >
               {l.label}
               <InboxBadge count={l.badge ?? 0} />

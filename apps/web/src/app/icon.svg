@@ -1,7 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Знак Envola: ряд мест в команде, два заняты, третье (жёлтое) ждёт человека. -->
-  <rect width="32" height="32" rx="8" fill="#121633"/>
-  <rect x="3.5" y="12.5" width="7" height="7" rx="1.8" fill="#ffffff"/>
-  <rect x="12.5" y="12.5" width="7" height="7" rx="1.8" fill="#ffffff"/>
-  <rect x="21.5" y="12.5" width="7" height="7" rx="1.8" fill="#ffe45e"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Знак Envola: «e» в васильковом круге, точка отделилась и уходит вверх вправо. -->
+  <circle cx="32" cy="32" r="30" fill="#5B8CF0"/>
+  <path d="M17 33 H45 A14 14 0 1 0 40.7 43.2" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="47.5" cy="17.5" r="4.6" fill="#fff"/>
 </svg>

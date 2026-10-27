@@ -116,7 +116,7 @@ export default async function PersonPage({ params }: Props) {
             <Avatar
               name={p.display_name}
               url={p.avatar_url}
-              className="size-20 rounded-2xl text-2xl"
+              className="size-20 rounded-full text-2xl"
             />
             <div className="min-w-0">
               <h1 className="text-[30px] leading-tight sm:text-[40px]">
@@ -283,7 +283,7 @@ export default async function PersonPage({ params }: Props) {
       {/* На телефоне блок с кнопкой оказывается в самом конце — дублируем действие внизу экрана, как на странице стартапа. */}
       {showBar && (
         <div className="sticky-cta fixed inset-x-0 bottom-[var(--cookie-offset,0px)] z-30 border-t bg-background/95 px-4 py-3 backdrop-blur lg:hidden">
-          <div className="mx-auto flex max-w-6xl items-center gap-3">
+          <div className="mx-auto flex max-w-[1360px] items-center gap-3">
             <span className="min-w-0 text-sm">
               <span className="block truncate font-semibold">{p.display_name}</span>
               {p.looking_for.length > 0 && (

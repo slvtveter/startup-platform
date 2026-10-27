@@ -19,13 +19,14 @@ export async function SiteHeader() {
   // «Главная» — для вошедших это дашборд с моими стартапами и откликами (KAN-138 п.2): всегда видно, как вернуться.
   const links = [
     ...(user ? [{ href: "/", label: "Главная" }] : []),
-    { href: "/startups", label: "Стартапы" },
+    { href: "/startups?stage=idea", label: "Идеи" },
     { href: "/people", label: "Люди" },
+    { href: "/startups", label: "Стартапы" },
   ];
   const mobileLinks = user
     ? [
         ...links,
-        { href: "/startups/new", label: "Разместить стартап" },
+        { href: "/startups/new", label: "Предложить идею или стартап" },
         { href: "/chats", label: "Сообщения", badge: chats?.count ?? 0 },
         { href: "/me/profile", label: "Мой профиль" },
         { href: "/me/applications", label: "Мои отклики", badge: inbox?.mine ?? 0 },
@@ -34,10 +35,10 @@ export async function SiteHeader() {
     : [...links, { href: "/login", label: "Войти" }];
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4 sm:gap-8 sm:px-6">
+    <header className="sticky top-0 z-40 bg-background/92 backdrop-blur-md">
+      <div className="mx-auto flex h-[72px] w-full max-w-[1360px] items-center gap-4 px-4 sm:gap-8 sm:px-6 lg:px-10">
         <Logo />
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav aria-label="Основное" className="hidden items-center gap-7 md:flex">
           {links.map((l) => (
             <NavLink key={l.href} href={l.href}>
               {l.label}
@@ -49,11 +50,11 @@ export async function SiteHeader() {
             <>
               <Link href="/startups/new" className={buttonVariants({ variant: "ghost", className: "max-sm:hidden" })}>
                 <Plus aria-hidden className="size-4" />
-                Разместить стартап
+                Предложить идею
               </Link>
               <Link
                 href="/chats"
-                className="relative grid size-10 place-items-center rounded-full hover:bg-secondary"
+                className="relative grid size-10 place-items-center rounded-full transition-colors hover:bg-secondary"
                 aria-label={chats?.count ? `Сообщения, непрочитанных диалогов: ${chats.count}` : "Сообщения"}
               >
                 <MessageCircle aria-hidden className="size-5" />
@@ -72,10 +73,10 @@ export async function SiteHeader() {
             </>
           ) : (
             <>
-              <Link href="/login" className={buttonVariants({ variant: "ghost", className: "max-sm:hidden" })}>
+              <Link href="/login" className={buttonVariants({ variant: "ghost", className: "h-10 max-sm:hidden" })}>
                 Войти
               </Link>
-              <Link href="/register" className={buttonVariants()}>
+              <Link href="/register" className={buttonVariants({ size: "sm", className: "sm:h-10 sm:px-4 sm:text-[15px]" })}>
                 Регистрация
               </Link>
             </>

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Golos_Text, Unbounded } from "next/font/google";
+import { Manrope } from "next/font/google";
 
 import { CookieNotice } from "@/components/site/cookie-notice";
 import { HydratedFlag } from "@/components/site/hydrated-flag";
@@ -10,14 +10,14 @@ import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 // next/font скачивает шрифт на этапе сборки и раздаёт его с нашего домена.
-const golos = Golos_Text({ variable: "--font-sans", subsets: ["latin", "cyrillic"] });
-const unbounded = Unbounded({ variable: "--font-display", subsets: ["latin", "cyrillic"], weight: ["500", "600"] });
+// Один шрифт на весь сайт: Manrope и для текста, и для заголовков (800 с плотным трекингом).
+const manrope = Manrope({ variable: "--font-sans", subsets: ["latin", "cyrillic"], weight: ["400", "500", "600", "700", "800"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.SITE_URL ?? "http://localhost:8080"),
-  title: { default: "Envola: первый опыт в IT и команда для стартапа", template: "%s · Envola" },
+  title: { default: "Envola: здесь стартапы начинаются с разговора", template: "%s · Envola" },
   description:
-    "Стажёры и выпускники находят стартапы для первого реального опыта, а основатели собирают команду: дизайнеров, разработчиков, маркетологов.",
+    "Место для студентов и начинающих в IT: обсуждай идеи, находи сообщников и сооснователей, собирай команду или вступай в стартап, который уже ищет людей.",
   openGraph: { type: "website", locale: "ru_RU", siteName: "Envola" },
 };
 
@@ -26,7 +26,7 @@ export const viewport: Viewport = { themeColor: "#ffffff" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="ru" className={`${golos.variable} ${unbounded.variable} h-full antialiased`}>
+    <html lang="ru" className={`${manrope.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         {/* Для тех, кто ходит клавиатурой: первым Tab — сразу к содержимому, мимо меню. */}
         <a

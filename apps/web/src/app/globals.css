@@ -9,6 +9,11 @@
   --color-brand: var(--brand);
   --color-brand-soft: var(--brand-soft);
   --color-brand-ink: var(--brand-ink);
+  --color-brand-hover: var(--brand-hover);
+  --color-cornflower: var(--cornflower);
+  --color-tone: var(--tone);
+  --color-tone-2: var(--tone-2);
+  --color-ink: var(--foreground);
   --color-marker: var(--marker);
   --color-marker-soft: var(--marker-soft);
   --color-marker-ink: var(--marker-ink);
@@ -19,7 +24,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: ui-monospace, monospace;
-  --font-heading: var(--font-display);
+  --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -59,50 +64,56 @@
 }
 
 :root {
-  /* Дизайн-система v2 (docs/ux/design-system.md): белая бумага, чернила, ультрамарин шариковой ручки,
-     жёлтый маркер — только для свободных мест в команде. */
+  /* Дизайн-система v3 «Разговор» (design/concepts-v3/a-razgovor): белый фон, глубокие чернила,
+     васильковый акцент. #5B8CF0 — сам бренд (знак, точки, полосы), для белого текста на кнопках
+     темнее #3B6FE4 (контраст 4.6:1), для акцентного текста на светлом — #2B57C2. */
   --background: #ffffff;
-  --foreground: #121633;
+  --foreground: #0f1b2d;
   --card: #ffffff;
-  --card-foreground: #121633;
+  --card-foreground: #0f1b2d;
   --popover: #ffffff;
-  --popover-foreground: #121633;
-  --primary: #121633;
+  --popover-foreground: #0f1b2d;
+  --primary: #3b6fe4;
   --primary-foreground: #ffffff;
-  --secondary: #f1f2f7;
-  --secondary-foreground: #121633;
-  --muted: #f1f2f7;
-  --muted-foreground: #565b77;
-  --accent: #f1f2f7;
-  --accent-foreground: #121633;
+  --secondary: #f4f6fa;
+  --secondary-foreground: #0f1b2d;
+  --muted: #f4f6fa;
+  --muted-foreground: #5a6478;
+  --accent: #eaeef6;
+  --accent-foreground: #0f1b2d;
   --destructive: #c8102e;
-  --border: #e2e4ec;
-  --input: #cfd2de;
-  --ring: #3d3df5;
-  --radius: 0.75rem;
-  --brand: #3d3df5;
-  --brand-soft: #ececfe;
-  --brand-ink: #2b2bc4;
-  --marker: #ffe45e;
-  --marker-soft: #fff6c2;
-  --marker-ink: #5a4700;
+  --border: #e3e8f0;
+  --input: #d5dce7;
+  --ring: #5b8cf0;
+  --radius: 0.875rem;
+  --brand: #3b6fe4;
+  --brand-hover: #2f5fd0;
+  --brand-soft: #ecf1fe;
+  --brand-ink: #2b57c2;
+  --cornflower: #5b8cf0;
+  --tone: #f4f6fa;
+  --tone-2: #eaeef6;
+  /* Бывший «маркер» свободных мест теперь тоже васильковый: одно акцентное семейство на весь сайт. */
+  --marker: #d6e2fd;
+  --marker-soft: #ecf1fe;
+  --marker-ink: #2b57c2;
   --success-soft: #e2f5ea;
   --success-ink: #13693a;
-  --warn-soft: #fff1d6;
-  --warn-ink: #7a4f00;
-  --chart-1: #3d3df5;
-  --chart-2: #121633;
-  --chart-3: #565b77;
-  --chart-4: #cfd2de;
-  --chart-5: #f1f2f7;
+  --warn-soft: #fff1e0;
+  --warn-ink: #8a4700;
+  --chart-1: #5b8cf0;
+  --chart-2: #0f1b2d;
+  --chart-3: #5a6478;
+  --chart-4: #d5dce7;
+  --chart-5: #f4f6fa;
   --sidebar: #ffffff;
-  --sidebar-foreground: #121633;
-  --sidebar-primary: #121633;
+  --sidebar-foreground: #0f1b2d;
+  --sidebar-primary: #3b6fe4;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f1f2f7;
-  --sidebar-accent-foreground: #121633;
-  --sidebar-border: #e2e4ec;
-  --sidebar-ring: #3d3df5;
+  --sidebar-accent: #f4f6fa;
+  --sidebar-accent-foreground: #0f1b2d;
+  --sidebar-border: #e3e8f0;
+  --sidebar-ring: #5b8cf0;
 }
 
 .dark {
@@ -154,10 +165,16 @@
   h3 {
     @apply tracking-tight text-balance;
   }
-  /* Широкий Unbounded — только для крупных заголовков; h3 и ниже остаются в Golos. */
+  /* Manrope 800 с плотным трекингом — крупные заголовки; h3 тоже жирный, но чуть свободнее. */
   h1,
   h2 {
-    @apply font-heading font-semibold tracking-[-0.02em];
+    @apply font-heading font-extrabold tracking-[-0.04em];
+  }
+  h3 {
+    @apply tracking-[-0.02em];
+  }
+  body {
+    -webkit-font-smoothing: antialiased;
   }
   /* По умолчанию одна колонка шириной контейнера: иначе длинный контент в неявном треке
      раздувает страницу на мобильных. Классы grid-cols-* (слой utilities) это перекрывают. */
@@ -188,7 +205,7 @@
    Короткое и по делу: новое появляется снизу вверх и проявляется, ничего не прыгает.
    Длительности 200–450 мс, кривая «быстрый старт, мягкая остановка». Reduced motion — выше. */
 :root {
-  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --enter-ms: 420ms;
 }
 
@@ -201,6 +218,26 @@
     opacity: 1;
     transform: none;
   }
+}
+
+/* Лендинг: фото в hero мягко «отъезжает», реплики переписки появляются по очереди (задержка — --d). */
+@keyframes hero-zoom {
+  from {
+    transform: scale(1.05);
+  }
+}
+.hero-photo {
+  animation: hero-zoom 1.8s var(--ease-out) backwards;
+}
+@keyframes msg-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+}
+.chat-msg {
+  animation: msg-in 600ms var(--ease-out) backwards;
+  animation-delay: var(--d, 0ms);
 }
 
 /* Смена страницы (PageEnter в шаблонах): лёгкое проявление, без сдвига вёрстки.

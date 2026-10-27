@@ -7,13 +7,15 @@ import { cn } from "@/lib/utils";
 
 export function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   const pathname = usePathname();
-  const active = pathname === href || pathname.startsWith(href + "/");
+  // «Идеи» — это каталог стартапов с фильтром стадии, поэтому сравниваем только путь без query.
+  const path = href.split("?")[0];
+  const active = !href.includes("?") && (pathname === path || pathname.startsWith(path + "/"));
   return (
     <Link
       href={href}
       className={cn(
         "text-[15px] font-semibold text-muted-foreground transition-colors hover:text-foreground",
-        active && "text-foreground underline decoration-brand decoration-2 underline-offset-[22px]",
+        active && "text-foreground",
       )}
     >
       {children}

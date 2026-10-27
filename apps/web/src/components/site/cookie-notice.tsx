@@ -63,7 +63,7 @@ export function CookieNotice() {
       ref={ref}
       role="region"
       aria-label="Cookie"
-      className="fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-xl items-center gap-3 rounded-xl border bg-card p-3 text-sm shadow-lg sm:inset-x-auto sm:left-4"
+      className="fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-lg items-center gap-3 rounded-[20px] bg-card p-3 pl-4 text-sm shadow-[0_0_0_1px_var(--border),0_20px_50px_-12px_rgb(15_27_45/0.25)] sm:inset-x-auto sm:left-4"
     >
       <p className="flex-1 text-muted-foreground">
         Мы используем только необходимые cookie, чтобы вы могли войти в аккаунт.{" "}
@@ -71,7 +71,7 @@ export function CookieNotice() {
           Подробнее
         </Link>
       </p>
-      <Button size="sm" onClick={dismiss}>
+      <Button size="sm" variant="ink" onClick={dismiss}>
         Понятно
       </Button>
     </section>

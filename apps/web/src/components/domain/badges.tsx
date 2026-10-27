@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { APP_STATUS, STAGE, STARTUP_STATUS, TERMS } from "@/lib/labels";
 
-const pill = "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold whitespace-nowrap";
+const pill = "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold whitespace-nowrap";
 
 export function TermsBadge({ terms, className }: { terms: string; className?: string }) {
   const tone = terms === "free" ? "bg-secondary text-foreground" : terms === "paid" ? "bg-success-soft text-success-ink" : "bg-warn-soft text-warn-ink";
@@ -32,8 +32,8 @@ export function SkillChip({ name, highlight = false }: { name: string; highlight
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold",
-        highlight ? "bg-brand-soft text-brand-ink" : "bg-secondary text-foreground",
+        "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold",
+        highlight ? "bg-brand-soft text-brand-ink" : "bg-tone text-foreground",
       )}
     >
       {name}
@@ -52,7 +52,7 @@ export function DemoBadge({ className }: { className?: string }) {
 
 export function DemoNotice({ kind }: { kind: "startup" | "person" }) {
   return (
-    <p className="rounded-xl border border-dashed bg-card p-4 text-sm text-muted-foreground">
+    <p className="rounded-2xl bg-tone p-4 text-sm text-muted-foreground">
       {kind === "startup"
         ? "Это пример: так выглядит стартап на платформе. Откликнуться на него нельзя, настоящие проекты появятся совсем скоро."
         : "Это пример: так выглядит профиль на платформе. Написать или пригласить этого человека нельзя."}

@@ -8,9 +8,9 @@ import { ImageResponse } from "next/og";
 // OG-картинки (KAN-77): превью ссылки в Telegram и соцсетях в стиле дизайн-системы v2.
 export const OG_SIZE = { width: 1200, height: 630 };
 
-const INK = "#121633";
-const MUTED = "#565b77";
-const MARKER = "#ffe45e";
+const INK = "#0F1B2D";
+const MUTED = "#5A6478";
+const MARKER = "#5B8CF0";
 const TEXT = "GolosCyr, GolosLat";
 const DISPLAY = "UnbCyr, UnbLat";
 
