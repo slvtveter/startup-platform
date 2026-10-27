@@ -223,7 +223,7 @@ export const publishMyProfile = <ThrowOnError extends boolean = false>(options: 
 /**
  * List People
  *
- * looking_for — условия (любое из), cofound — только те, кто ищет сообщников (вместе с условиями).
+ * looking_for — условия (любое из); cofound — только ищущие сообщников, вместе с условиями.
  */
 export const listPeople = <ThrowOnError extends boolean = false>(options?: Options<ListPeopleData, ThrowOnError>): RequestResult<ListPeopleResponses, ListPeopleErrors, ThrowOnError> => (options?.client ?? client).get<ListPeopleResponses, ListPeopleErrors, ThrowOnError>({ url: '/api/people', ...options });
 
