@@ -6,9 +6,9 @@ import type { PersonCard as PersonCardData } from "@/lib/api";
 import { AVAILABILITY, LEVEL, TERMS, initials } from "@/lib/labels";
 
 export function PersonAvatar({ name, size = "md" }: { name: string; size?: "md" | "lg" }) {
-  const cls = size === "lg" ? "size-20 rounded-2xl text-2xl" : "size-12 text-base";
+  const cls = size === "lg" ? "size-20 text-2xl" : "size-12 text-base";
   return (
-    <span className={`grid shrink-0 place-items-center rounded-xl bg-foreground font-bold text-background ${cls}`}>
+    <span className={`grid shrink-0 place-items-center rounded-full bg-brand-soft font-extrabold text-brand-ink ${cls}`}>
       {initials(name)}
     </span>
   );
@@ -43,18 +43,18 @@ export function PersonListCard({ person }: { person: PersonCardData }) {
     <li>
       <Link
         href={`/people/${person.slug}`}
-        className="group block rounded-3xl border bg-card p-5 transition-[border-color,box-shadow] duration-300 ease-out hover:border-foreground/30 hover:shadow-[0_12px_32px_-16px_rgb(18_22_51/0.25)] sm:p-7"
+        className="group block rounded-[28px] bg-card p-5 shadow-[0_0_0_1.5px_var(--border)] transition-[box-shadow,transform] duration-300 ease-[var(--ease-out)] hover:-translate-y-0.5 hover:shadow-[0_0_0_1.5px_var(--cornflower)] sm:p-7"
       >
         <div className="flex gap-4 sm:gap-6">
-          <Avatar name={person.display_name} url={person.avatar_url} className="size-20 rounded-2xl text-2xl sm:size-28 sm:text-3xl" />
+          <Avatar name={person.display_name} url={person.avatar_url} className="size-20 rounded-full text-2xl sm:size-28 sm:text-3xl" />
           <div className="min-w-0 flex-1">
-            <h3 className="font-sans text-xl leading-tight font-bold tracking-normal text-brand-ink group-hover:underline sm:text-2xl">{title}</h3>
+            <h3 className="text-xl leading-tight font-extrabold tracking-[-0.03em] group-hover:text-brand-ink sm:text-2xl">{title}</h3>
             <p className="mt-1.5 text-[15px]">
               <span className="font-medium">{person.display_name}</span>
               {person.city && <span className="text-muted-foreground"> · {person.city}</span>}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <span className="rounded-lg bg-success-soft px-2.5 py-1 text-sm font-medium text-success-ink">Ищет проект</span>
+              <span className="rounded-full bg-success-soft px-3 py-1 text-sm font-medium text-success-ink">Ищет проект</span>
               {person.is_demo && <DemoBadge className="self-center" />}
             </div>
           </div>

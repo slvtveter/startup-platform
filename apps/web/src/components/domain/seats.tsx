@@ -25,7 +25,7 @@ export function Seat({
       className={cn(
         "inline-flex shrink-0 items-center justify-center font-bold",
         dims,
-        filled ? "bg-foreground text-background" : "border-[1.5px] border-dashed border-foreground/70 bg-marker",
+        filled ? "bg-foreground text-background" : "border-[1.5px] border-dashed border-cornflower bg-brand-soft",
         className,
       )}
     >

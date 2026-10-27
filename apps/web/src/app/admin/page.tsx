@@ -216,7 +216,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           <div className="flex items-center gap-3">
             <h2 className="text-xl">Пользователи</h2>
             <form className="ml-auto min-w-0">
-              <input name="q" defaultValue={q} placeholder="Поиск" aria-label="Поиск пользователей" className="h-9 w-36 rounded-lg border bg-card px-3 text-sm sm:w-56" />
+              <input name="q" defaultValue={q} placeholder="Поиск" aria-label="Поиск пользователей" className="h-9 w-36 rounded-xl bg-tone px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/25 sm:w-56" />
             </form>
           </div>
           <div className="mt-3 divide-y rounded-xl border bg-card">

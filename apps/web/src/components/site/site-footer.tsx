@@ -1,64 +1,69 @@
 import Link from "next/link";
 
 import { FeedbackButton } from "@/components/site/feedback-button";
-import { LogoMark } from "@/components/site/logo";
+import { Wordmark } from "@/components/site/logo";
 
-// Подвал не повторяет шапку: здесь короткие подсказки по сценариям для двух аудиторий.
+// Подвал не повторяет шапку: короткие подсказки по трём сценариям — есть идея, нужны люди, хочу в команду.
 const COLUMNS = [
   {
-    title: "Ищешь первый опыт",
+    title: "Есть идея",
     links: [
-      { href: "/me/profile", label: "Заполнить профиль" },
-      { href: "/startups?terms=free", label: "Проекты без оплаты для портфолио" },
-      { href: "/startups?stage=mvp&stage=launched", label: "Проекты с живым продуктом" },
-      { href: "/me/settings", label: "Подборка ролей на почту" },
+      { href: "/startups/new", label: "Опубликовать идею" },
+      { href: "/startups?stage=idea", label: "Идеи других" },
+      { href: "/people?looking_for=negotiable", label: "Открыты к обсуждению условий" },
     ],
   },
   {
-    title: "Собираешь команду",
+    title: "Нужны люди",
     links: [
-      { href: "/startups/new", label: "Разместить стартап" },
-      { href: "/people?level=internship", label: "Люди после стажировки" },
-      { href: "/people?looking_for=negotiable", label: "Открыты к обсуждению условий" },
+      { href: "/people", label: "Все люди" },
+      { href: "/people?level=internship", label: "После стажировки" },
+      { href: "/chats", label: "Сообщения" },
+    ],
+  },
+  {
+    title: "Хочу в команду",
+    links: [
+      { href: "/me/profile", label: "Заполнить профиль" },
+      { href: "/startups?terms=free", label: "Проекты для портфолио" },
+      { href: "/startups?stage=mvp&stage=launched", label: "Проекты с живым продуктом" },
+      { href: "/me/settings", label: "Подборка ролей на почту" },
     ],
   },
 ];
 
 export function SiteFooter() {
   return (
-    <footer className="mt-24 border-t bg-secondary/60">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 text-sm sm:px-6 md:grid-cols-[1.3fr_1fr_1fr]">
-        <div>
-          <div className="flex items-center gap-2 font-heading text-[15px] font-semibold">
-            <LogoMark />
-            envola
+    <footer className="mt-24 px-2 pb-2 sm:px-3 sm:pb-3">
+      <div className="mx-auto w-full max-w-[1360px] rounded-[28px] bg-tone px-4 sm:px-8 lg:px-10">
+        <div className="grid gap-10 py-12 text-[15px] md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+          <div>
+            <Wordmark />
+            <p className="mt-4 max-w-xs text-muted-foreground">
+              Место, где из разговора вырастает стартап: обсуждай идеи, находи сообщников, вступай в команды.
+            </p>
+            <div className="mt-4 text-muted-foreground">
+              <FeedbackButton />
+            </div>
           </div>
-          <p className="mt-3 max-w-xs text-muted-foreground">
-            Новички в IT получают первый реальный опыт, а основатели — людей в команду. Без резюме и откликов в пустоту.
-          </p>
-          <div className="mt-4 text-muted-foreground">
-            <FeedbackButton />
-          </div>
+          {COLUMNS.map((c) => (
+            <nav key={c.title} aria-label={c.title}>
+              <h2 className="text-[15px] font-bold tracking-normal">{c.title}</h2>
+              <ul className="mt-3 space-y-2.5 text-muted-foreground">
+                {c.links.map((l) => (
+                  <li key={l.href}>
+                    <Link href={l.href} className="transition-colors hover:text-foreground">
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
         </div>
-        {COLUMNS.map((c) => (
-          <nav key={c.title} aria-label={c.title}>
-            <h2 className="font-sans text-sm font-semibold tracking-normal">{c.title}</h2>
-            <ul className="mt-3 space-y-2 text-muted-foreground">
-              {c.links.map((l) => (
-                <li key={l.href}>
-                  <Link href={l.href} className="hover:text-foreground">
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        ))}
-      </div>
-      <div className="border-t">
-        <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 px-4 py-4 text-xs text-muted-foreground sm:px-6">
+        <div className="flex flex-wrap justify-between gap-2 border-t py-5 text-sm text-muted-foreground">
           <span>© {new Date().getFullYear()} envola</span>
-          <Link href="/cookies" className="hover:text-foreground">
+          <Link href="/cookies" className="transition-colors hover:text-foreground">
             Cookie и данные
           </Link>
         </div>

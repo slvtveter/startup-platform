@@ -20,17 +20,17 @@ export function StartupCard({ startup, reasons }: { startup: StartupCardData; re
   return (
     <Link
       href={`/startups/${startup.slug}`}
-      className="group flex h-full flex-col rounded-2xl border bg-card p-5 transition-[border-color,box-shadow] duration-300 ease-out hover:border-foreground/30 hover:shadow-[0_12px_32px_-16px_rgb(18_22_51/0.25)]"
+      className="group flex h-full flex-col rounded-[26px] bg-card p-6 shadow-[0_0_0_1.5px_var(--border)] transition-[box-shadow,transform] duration-300 ease-[var(--ease-out)] hover:-translate-y-0.5 hover:shadow-[0_0_0_1.5px_var(--cornflower)]"
     >
       <div className="flex items-start gap-3">
-        <h3 className="text-lg leading-snug font-bold group-hover:text-brand-ink">{startup.title}</h3>
+        <h3 className="text-xl leading-snug font-extrabold tracking-[-0.03em] group-hover:text-brand-ink">{startup.title}</h3>
         <TermsBadge terms={startup.terms} className="mt-0.5 ml-auto" />
       </div>
       <p className="mt-1 line-clamp-2 text-[15px] text-muted-foreground">{startup.pitch}</p>
 
       {startup.open_roles.length > 0 && (
-        <div className="mt-5 border-t pt-4">
-          <div className="text-xs font-semibold text-muted-foreground">Ищут в команду</div>
+        <div className="mt-5 rounded-2xl bg-tone p-4">
+          <div className="text-xs font-bold text-muted-foreground">Ищут в команду</div>
           <ul className="mt-2 space-y-1.5">
             {startup.open_roles.slice(0, 3).map((r) => (
               <li key={r.id} className="flex items-baseline gap-2 text-sm">
@@ -52,7 +52,7 @@ export function StartupCard({ startup, reasons }: { startup: StartupCardData; re
       {reasons && reasons.length > 0 && (
         <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Почему подходит">
           {reasons.map((r) => (
-            <li key={r} className="inline-flex items-center gap-1 rounded-full bg-marker-soft px-2.5 py-0.5 text-xs font-semibold text-marker-ink">
+            <li key={r} className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2.5 py-1 text-xs font-bold text-brand-ink">
               <Check aria-hidden className="size-3" />
               {reasonLabel(r)}
             </li>

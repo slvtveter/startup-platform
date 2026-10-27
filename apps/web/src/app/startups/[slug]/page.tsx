@@ -392,7 +392,7 @@ export default async function StartupPage({ params }: Props) {
 
       {openSeats > 0 && !s.is_owner && !s.is_demo && (
         <div className="sticky-cta fixed inset-x-0 bottom-[var(--cookie-offset,0px)] z-30 border-t bg-background/95 px-4 py-3 backdrop-blur lg:hidden">
-          <div className="mx-auto flex max-w-6xl items-center gap-3">
+          <div className="mx-auto flex max-w-[1360px] items-center gap-3">
             <span className="text-sm">
               <span className="block font-semibold">{TERMS[s.terms]}</span>
               <span className="text-muted-foreground">

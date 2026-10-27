@@ -3,9 +3,9 @@ import type { MetadataRoute } from "next";
 /** Название и иконка, когда сайт добавляют на главный экран телефона. */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Envola: первый опыт в IT и команда для стартапа",
+    name: "Envola: здесь стартапы начинаются с разговора",
     short_name: "Envola",
-    description: "Стажёры и выпускники находят стартапы для первого опыта, а основатели собирают команду.",
+    description: "Обсуждай идеи, находи сообщников и вступай в стартапы. Для студентов и начинающих в IT.",
     lang: "ru",
     start_url: "/",
     display: "standalone",
