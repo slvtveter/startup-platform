@@ -1,6 +1,8 @@
+import urllib.parse
 import uuid
 
 from fastapi import APIRouter, Request, Response
+from fastapi.responses import RedirectResponse
 
 from app.core.config import get_settings
 from app.core.deps import CurrentUser, client_ip
@@ -17,10 +19,14 @@ from app.schemas.auth import (
     RegisterIn,
     ResetIn,
     SessionOut,
+    SocialLoginOut,
+    SocialProvidersOut,
+    TelegramAuthIn,
     TokenIn,
 )
 from app.schemas.common import OkOut
 from app.services import auth as auth_service
+from app.services import social
 from app.services.profiles import completeness
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -174,3 +180,80 @@ async def delete_account(user: CurrentUser, response: Response, db: DbSession) -
     await auth_service.delete_account(db, user)
     response.delete_cookie(get_settings().session_cookie_name, path="/")
     return OkOut()
+
+
+# --- Вход через Telegram и VK ID ---
+
+
+@router.get("/providers", response_model=SocialProvidersOut)
+async def social_providers() -> SocialProvidersOut:
+    enabled = social.providers()
+    return SocialProvidersOut(
+        **enabled, telegram_bot_id=social.telegram_bot_id() if enabled["telegram"] else None
+    )
+
+
+@router.post("/telegram", response_model=SocialLoginOut)
+async def telegram_login(
+    data: TelegramAuthIn, request: Request, response: Response, db: DbSession
+) -> SocialLoginOut:
+    fields = {k: str(v) for k, v in data.model_dump().items() if v not in ("", None)}
+    social.check_telegram(fields)
+    name = " ".join(x for x in (data.first_name, data.last_name) if x) or data.username
+    user, token, created = await social.login_social(
+        db, "telegram", str(data.id), name, _ua(request)
+    )
+    _set_cookie(response, token)
+    return SocialLoginOut(me=me_out(user), created=created)
+
+
+VK_COOKIE = "vk_oauth"
+
+
+@router.get("/vk/start")
+async def vk_start() -> RedirectResponse:
+    s = get_settings()
+    if not s.vk_client_id:
+        return RedirectResponse("/login?error=vk")
+    state, verifier, challenge = social.vk_pkce()
+    query = urllib.parse.urlencode(
+        {
+            "response_type": "code",
+            "client_id": s.vk_client_id,
+            "redirect_uri": s.site_url.rstrip("/") + "/api/auth/vk/callback",
+            "state": state,
+            "code_challenge": challenge,
+            "code_challenge_method": "S256",
+            "scope": "vkid.personal_info",
+        }
+    )
+    resp = RedirectResponse(f"https://id.vk.com/authorize?{query}")
+    # verifier и state живут 10 минут в httponly-cookie: без них ответ VK не принимаем.
+    resp.set_cookie(
+        VK_COOKIE,
+        f"{state}.{verifier}",
+        max_age=600,
+        httponly=True,
+        samesite="lax",
+        secure=s.cookie_secure,
+        path="/api/auth/vk",
+    )
+    return resp
+
+
+@router.get("/vk/callback")
+async def vk_callback(
+    request: Request, db: DbSession, code: str = "", state: str = "", device_id: str = ""
+) -> RedirectResponse:
+    saved_state, _, verifier = request.cookies.get(VK_COOKIE, "").partition(".")
+    if not code or not saved_state or state != saved_state:
+        return RedirectResponse("/login?error=vk")
+    try:
+        uid, name = await social.vk_exchange(code, verifier, device_id, state)
+        user, token, created = await social.login_social(db, "vk", uid, name, _ua(request))
+    except Exception:  # noqa: BLE001 — любая ошибка VK ведёт обратно на вход с сообщением
+        return RedirectResponse("/login?error=vk")
+    resp = RedirectResponse("/welcome" if created else "/")
+    _set_cookie(resp, token)
+    resp.delete_cookie(VK_COOKIE, path="/api/auth/vk")
+    return resp

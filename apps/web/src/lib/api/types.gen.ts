@@ -1587,6 +1587,35 @@ export type SkillOut = {
 };
 
 /**
+ * SocialLoginOut
+ */
+export type SocialLoginOut = {
+    me: MeOut;
+    /**
+     * Created
+     */
+    created: boolean;
+};
+
+/**
+ * SocialProvidersOut
+ */
+export type SocialProvidersOut = {
+    /**
+     * Telegram
+     */
+    telegram: boolean;
+    /**
+     * Vk
+     */
+    vk: boolean;
+    /**
+     * Telegram Bot Id
+     */
+    telegram_bot_id?: string | null;
+};
+
+/**
  * SourceRow
  */
 export type SourceRow = {
@@ -1890,6 +1919,42 @@ export type StatsOut = {
      * Intros 30D
      */
     intros_30d: number;
+};
+
+/**
+ * TelegramAuthIn
+ *
+ * Данные из oauth.telegram.org как есть: подпись проверяется по всем полям.
+ */
+export type TelegramAuthIn = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * First Name
+     */
+    first_name?: string;
+    /**
+     * Last Name
+     */
+    last_name?: string;
+    /**
+     * Username
+     */
+    username?: string;
+    /**
+     * Photo Url
+     */
+    photo_url?: string;
+    /**
+     * Auth Date
+     */
+    auth_date: number;
+    /**
+     * Hash
+     */
+    hash: string;
 };
 
 /**
@@ -2316,6 +2381,97 @@ export type DeleteAccountResponses = {
 };
 
 export type DeleteAccountResponse = DeleteAccountResponses[keyof DeleteAccountResponses];
+
+export type SocialProvidersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/providers';
+};
+
+export type SocialProvidersResponses = {
+    /**
+     * Successful Response
+     */
+    200: SocialProvidersOut;
+};
+
+export type SocialProvidersResponse = SocialProvidersResponses[keyof SocialProvidersResponses];
+
+export type TelegramLoginData = {
+    body: TelegramAuthIn;
+    path?: never;
+    query?: never;
+    url: '/api/auth/telegram';
+};
+
+export type TelegramLoginErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type TelegramLoginError = TelegramLoginErrors[keyof TelegramLoginErrors];
+
+export type TelegramLoginResponses = {
+    /**
+     * Successful Response
+     */
+    200: SocialLoginOut;
+};
+
+export type TelegramLoginResponse = TelegramLoginResponses[keyof TelegramLoginResponses];
+
+export type VkStartData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/vk/start';
+};
+
+export type VkStartResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type VkCallbackData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Code
+         */
+        code?: string;
+        /**
+         * State
+         */
+        state?: string;
+        /**
+         * Device Id
+         */
+        device_id?: string;
+    };
+    url: '/api/auth/vk/callback';
+};
+
+export type VkCallbackErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type VkCallbackError = VkCallbackErrors[keyof VkCallbackErrors];
+
+export type VkCallbackResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type ListRolesData = {
     body?: never;

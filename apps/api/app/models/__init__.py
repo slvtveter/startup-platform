@@ -5,7 +5,7 @@ from app.models.chat import Conversation, Message
 from app.models.ops import AdminAction, Event, Feedback, Job, Report
 from app.models.profile import Profile, ProfileLink
 from app.models.startup import Startup, StartupMember, StartupRole
-from app.models.user import AuthAttempt, EmailToken, Session, User
+from app.models.user import AuthAttempt, EmailToken, Session, SocialAccount, User
 
 __all__ = [
     "AdminAction",
@@ -22,6 +22,7 @@ __all__ = [
     "Report",
     "Role",
     "Session",
+    "SocialAccount",
     "Skill",
     "Startup",
     "StartupMember",
