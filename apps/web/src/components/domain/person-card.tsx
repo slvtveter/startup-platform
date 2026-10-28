@@ -111,6 +111,7 @@ export function PersonCard({
           <span className="mt-auto pt-4 max-sm:pt-2.5">
             <span className="flex items-center gap-2 border-t border-foreground/[0.08] pt-3 text-[13px] text-muted-foreground max-sm:pt-2">
               <span className="min-w-0 truncate">{place}</span>
+              {person.is_demo && <span title="Пример: так выглядит карточка на Envola" className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-muted-foreground shadow-[inset_0_0_0_1px_var(--border)]">Пример</span>}
               <span className="ml-auto inline-flex shrink-0 items-center gap-1 font-bold text-brand-ink">
                 Профиль
                 <ArrowRight aria-hidden className="size-3.5" />
