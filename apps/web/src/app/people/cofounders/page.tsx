@@ -60,7 +60,8 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
             fill
             preload
             placeholder="blur"
-            sizes="(min-width: 1360px) 1360px, 100vw"
+            quality={85}
+            sizes="(max-width: 640px) 220vw, (min-width: 1360px) 1360px, 100vw"
             className="-z-20 object-cover object-[center_35%]"
           />
           <div aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgb(10_18_34/0.85),rgb(10_18_34/0.45)_60%,rgb(10_18_34/0.15))] max-md:bg-[linear-gradient(180deg,rgb(10_18_34/0.2),rgb(10_18_34/0.85)_55%)]" />
