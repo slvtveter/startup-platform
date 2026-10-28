@@ -57,6 +57,7 @@ class MeProfile(BaseModel):
 class SessionOut(BaseModel):
     id: str
     created_at: datetime
+    last_seen_at: datetime | None = None
     user_agent: str
     current: bool
 

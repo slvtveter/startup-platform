@@ -409,6 +409,7 @@ export type ConversationOut = {
      * Unread
      */
     unread: number;
+    context?: ChatApplicationRef | null;
 };
 
 /**
@@ -1553,6 +1554,10 @@ export type SessionOut = {
      * Created At
      */
     created_at: string;
+    /**
+     * Last Seen At
+     */
+    last_seen_at?: string | null;
     /**
      * User Agent
      */

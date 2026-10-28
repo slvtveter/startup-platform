@@ -107,8 +107,14 @@ export function ChatThread({ chat, initial }: { chat: ConversationOut; initial: 
         </Link>
         <Avatar name={peer.display_name} url={peer.avatar_url} className="size-10 rounded-full text-sm" />
         <div className="min-w-0">
-          <h1 className="truncate font-sans text-base font-semibold tracking-normal">{peer.display_name}</h1>
-          {peer.headline && <p className="truncate text-xs text-muted-foreground">{peer.headline}</p>}
+          <h1 className="truncate text-base font-bold tracking-normal">{peer.display_name}</h1>
+          {chat.context ? (
+            <Link href={`/startups/${chat.context.startup_slug}`} className="block truncate text-xs text-brand-ink hover:underline">
+              {chat.context.direction === "invite" ? "Приглашение" : "Отклик"}: {chat.context.role_title} в «{chat.context.startup_title}»
+            </Link>
+          ) : (
+            peer.headline && <p className="truncate text-xs text-muted-foreground">{peer.headline}</p>
+          )}
         </div>
         {peer.slug && (
           <Link href={`/people/${peer.slug}`} className="ml-auto shrink-0 text-sm font-semibold text-brand-ink hover:underline">

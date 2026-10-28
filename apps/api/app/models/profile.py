@@ -56,11 +56,14 @@ class Profile(TimestampMixin, Base):
 
     @property
     def avatar_url_lg(self) -> str | None:
-        """512px для крупных карточек; у аватаров, загруженных до появления размера, — 256."""
+        """Самый крупный из имеющихся размеров: 1024, иначе 512, иначе 256 (старые аватары)."""
         if not self.avatar_key:
             return None
-        big = Path(get_settings().media_dir) / f"{self.avatar_key}-512.webp"
-        return f"/media/{self.avatar_key}-512.webp" if big.exists() else self.avatar_url
+        media = Path(get_settings().media_dir)
+        for size in (1024, 512):
+            if (media / f"{self.avatar_key}-{size}.webp").exists():
+                return f"/media/{self.avatar_key}-{size}.webp"
+        return self.avatar_url
 
     skills: Mapped[list[Skill]] = relationship(secondary=profile_skills, lazy="selectin")
     links: Mapped[list["ProfileLink"]] = relationship(

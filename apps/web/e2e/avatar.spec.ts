@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-// PNG 4×4: сервер сам обрежет и уменьшит до 512, 256 и 64 пикселей.
+// PNG 4×4: сервер сам обрежет и уменьшит до 1024, 512, 256 и 64 пикселей.
 const PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAE0lEQVR4nGO0tf3KAANMcBZeDgBH+gF3AbJGaQAAAABJRU5ErkJggg==",
   "base64",
@@ -15,7 +15,7 @@ test("member uploads an avatar and it shows on the public profile", async ({ pag
 
   await page.goto("/people/mariya-kim");
   const img = page.locator("header img");
-  await expect(img).toHaveAttribute("src", /\/media\/avatars\/.+-512\.webp$/);
+  await expect(img).toHaveAttribute("src", /\/media\/avatars\/.+-1024\.webp$/);
   const src = await img.getAttribute("src");
   const res = await page.request.get(src!);
   expect(res.ok()).toBeTruthy();

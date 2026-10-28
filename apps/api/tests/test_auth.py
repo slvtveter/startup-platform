@@ -213,3 +213,17 @@ async def test_revoke_session_only_own(make_user):
     assert (await maria.get("/api/auth/me")).status_code == 200
     assert (await maria.delete(f"/api/auth/sessions/{maria_session}")).status_code == 200
     assert (await maria.get("/api/auth/me")).status_code == 401
+
+
+async def test_old_sessions_are_pruned_on_login(make_user, client):
+    from app.services.auth import MAX_SESSIONS
+
+    await make_user("maria@mail.ru")
+    for _ in range(MAX_SESSIONS + 5):
+        r = await client.post(
+            "/api/auth/login", json={"email": "maria@mail.ru", "password": "secret-pass-1"}
+        )
+        assert r.status_code == 200
+    sessions = (await client.get("/api/auth/sessions")).json()
+    assert len(sessions) == MAX_SESSIONS
+    assert all(s["last_seen_at"] for s in sessions)

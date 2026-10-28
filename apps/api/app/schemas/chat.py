@@ -38,6 +38,8 @@ class ConversationOut(BaseModel):
     last_message: MessageOut | None
     last_message_at: datetime
     unread: int
+    # О чём разговор: последний отклик или приглашение в этом диалоге (если был).
+    context: ChatApplicationRef | None = None
 
 
 class ConversationRef(BaseModel):

@@ -148,6 +148,7 @@ async def list_sessions(request: Request, user: CurrentUser, db: DbSession) -> l
         SessionOut(
             id=str(s.id),
             created_at=s.created_at,
+            last_seen_at=s.last_seen_at or s.created_at,
             user_agent=s.user_agent,
             current=s.token_hash == current,
         )

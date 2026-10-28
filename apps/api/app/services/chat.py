@@ -53,18 +53,22 @@ def _peer_out(u: User) -> ChatPeer:
     )
 
 
+def _app_ref(m: Message) -> ChatApplicationRef | None:
+    if m.application is None:
+        return None
+    role = m.application.startup_role
+    return ChatApplicationRef(
+        id=str(m.application.id),
+        direction=m.application.direction.value,
+        status=m.application.status.value,
+        role_title=role.title,
+        startup_title=role.startup.title,
+        startup_slug=role.startup.slug,
+    )
+
+
 def message_out(m: Message, viewer: User) -> MessageOut:
-    ref = None
-    if m.application is not None:
-        role = m.application.startup_role
-        ref = ChatApplicationRef(
-            id=str(m.application.id),
-            direction=m.application.direction.value,
-            status=m.application.status.value,
-            role_title=role.title,
-            startup_title=role.startup.title,
-            startup_slug=role.startup.slug,
-        )
+    ref = _app_ref(m)
     return MessageOut(
         id=m.id,
         body=m.body,
@@ -156,12 +160,19 @@ async def summary(db: AsyncSession, conv: Conversation, user: User) -> Conversat
         .order_by(Message.id.desc())
         .limit(1)
     )
+    with_app = await db.scalar(
+        select(Message)
+        .where(Message.conversation_id == conv.id, Message.application_id.is_not(None))
+        .order_by(Message.id.desc())
+        .limit(1)
+    )
     return ConversationOut(
         id=str(conv.id),
         peer=_peer_out(peer_of(conv, user)),
         last_message=message_out(last, user) if last else None,
         last_message_at=conv.last_message_at,
         unread=await _unread(db, conv, user),
+        context=_app_ref(with_app) if with_app else None,
     )
 
 

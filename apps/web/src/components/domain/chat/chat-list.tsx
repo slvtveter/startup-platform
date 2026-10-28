@@ -64,6 +64,7 @@ export function ChatList({ items }: { items: ConversationOut[] }) {
                       <span className={cn("truncate", c.unread ? "font-bold" : "font-semibold")}>{c.peer.display_name}</span>
                       <span className="ml-auto shrink-0 text-xs text-muted-foreground">{timeAgo(c.last_message_at)}</span>
                     </span>
+                    {c.context && <span className="block truncate text-xs font-semibold text-brand-ink">{c.context.startup_title} · {c.context.role_title}</span>}
                     <span className="flex items-center gap-2">
                       <span className={cn("truncate text-sm", c.unread ? "text-foreground" : "text-muted-foreground")}>
                         {last?.mine ? "Вы: " : ""}
