@@ -97,7 +97,7 @@ async function Landing() {
             <div className="flex flex-wrap items-end gap-x-10 gap-y-6 p-2 sm:p-0">
               <div>
                 <p className="text-sm font-bold tracking-wide text-brand-ink uppercase">Сообщники</p>
-                <h2 id="cof-h" className="mt-3 max-w-[16ch] text-[clamp(32px,3.8vw,54px)] leading-[1.02]">
+                <h2 id="cof-h" className="mt-3 max-w-[16ch] text-[32px] sm:text-[36px] lg:text-[48px] leading-[1.02]">
                   Нет идеи? Придумайте её вместе
                 </h2>
                 <p className="mt-4 max-w-[48ch] text-lg text-muted-foreground">
@@ -173,7 +173,7 @@ async function Landing() {
               [stats.open_roles, plural(stats.open_roles, "свободное место в командах", "свободных места в командах", "свободных мест в командах")],
             ].map(([n, label], i) => (
               <div key={i} className="reveal-item rounded-3xl bg-tone p-6" style={delay(i * 60)}>
-                <b className="block text-[clamp(32px,3.4vw,48px)] leading-none font-extrabold tracking-[-0.04em] text-brand-ink">{n}</b>
+                <b className="block text-[32px] lg:text-[48px] leading-none font-extrabold tracking-[-0.04em] text-brand-ink">{n}</b>
                 <span className="mt-2 block text-base text-muted-foreground">{label}</span>
               </div>
             ))}
@@ -190,7 +190,7 @@ async function Landing() {
           <Image src={PHOTOS.teamEvening} alt="" fill placeholder="blur" sizes="(min-width: 1360px) 1360px, 100vw" className="-z-20 object-cover" />
           <div aria-hidden className="absolute inset-0 -z-10 bg-[rgb(14_26_52/0.72)]" />
           <div>
-            <h2 id="final-h" className="max-w-[14ch] text-[clamp(36px,4.8vw,70px)] leading-[1.02]">
+            <h2 id="final-h" className="max-w-[14ch] text-[36px] sm:text-[48px] lg:text-[64px] leading-[1.02]">
               Начни с профиля или идеи
             </h2>
             <p className="mt-4 max-w-[42ch] text-lg text-white/85">
@@ -228,7 +228,7 @@ function Section({
   return (
     <section id={id} aria-labelledby={hid} className={`${wrap} scroll-mt-24 pt-[clamp(72px,8vw,120px)]`}>
       <div className="mb-10 flex flex-wrap items-end gap-x-10 gap-y-4">
-        <h2 id={hid} className="max-w-[17ch] text-[clamp(32px,4vw,58px)] leading-[1.02]">
+        <h2 id={hid} className="max-w-[17ch] text-[32px] sm:text-[48px] lg:text-[56px] leading-[1.02]">
           {title}
         </h2>
         {(lead || more) && (
@@ -269,8 +269,8 @@ function Hero() {
       />
       <div aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgb(10_18_34/0.84),rgb(10_18_34/0.5)_55%,rgb(10_18_34/0.2))] max-lg:bg-[linear-gradient(180deg,rgb(10_18_34/0.35),rgb(10_18_34/0.85)_60%)]" />
       <div>
-        <h1 className="max-w-[14ch] text-[clamp(40px,5vw,76px)] leading-[1.02]">Здесь стартапы начинаются с разговора</h1>
-        <p className="mt-5 max-w-[46ch] text-[clamp(17px,1.4vw,20px)] text-white/90">
+        <h1 className="max-w-[14ch] text-[36px] sm:text-[48px] lg:text-[64px] leading-[1.02]">Здесь стартапы начинаются с разговора</h1>
+        <p className="mt-5 max-w-[46ch] text-lg sm:text-xl text-white/90">
           Envola — место для студентов и начинающих. Обсуди идею, найди сообщников, чтобы придумать свою, или вступи в стартап, который уже ищет людей.
         </p>
         <div className="mt-8 flex flex-wrap gap-2.5">

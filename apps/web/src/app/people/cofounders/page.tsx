@@ -67,8 +67,8 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
           <div aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgb(10_18_34/0.85),rgb(10_18_34/0.45)_60%,rgb(10_18_34/0.15))] max-md:bg-[linear-gradient(180deg,rgb(10_18_34/0.2),rgb(10_18_34/0.85)_55%)]" />
           <div className="max-w-[640px]">
             <p className="text-sm font-bold tracking-wide text-white/80 uppercase">Сообщники</p>
-            <h2 className="mt-3 text-[clamp(36px,5vw,68px)] leading-[1.02]">Нет идеи? Найди тех, с кем её придумать</h2>
-            <p className="mt-5 max-w-[48ch] text-[clamp(16px,1.4vw,19px)] text-white/90">
+            <h2 className="mt-3 text-[36px] sm:text-[48px] lg:text-[64px] leading-[1.02]">Нет идеи? Найди тех, с кем её придумать</h2>
+            <p className="mt-5 max-w-[48ch] text-base sm:text-lg text-white/90">
               Здесь собираются разработчики, дизайнеры и маркетологи, которые хотят своё, но не хотят делать в одиночку. Познакомься, накидайте
               идеи и запустите лучшую вместе.
             </p>
@@ -88,7 +88,7 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
 
         <section id="people" aria-labelledby="people-h" className="scroll-mt-24 pt-4">
           <div className="mb-8 flex flex-wrap items-end gap-x-10 gap-y-3">
-            <h2 id="people-h" className="max-w-[16ch] text-[clamp(30px,3.6vw,48px)] leading-[1.04]">
+            <h2 id="people-h" className="max-w-[16ch] text-[32px] lg:text-[48px] leading-[1.04]">
               Ищут сообщников прямо сейчас
             </h2>
             <p className="max-w-[44ch] text-muted-foreground sm:ml-auto">
@@ -130,7 +130,7 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
         <section aria-labelledby="starters-h" className="pt-20">
           <div className="grid gap-8 rounded-[36px] bg-brand-soft p-6 sm:p-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
             <div>
-              <h2 id="starters-h" className="text-[clamp(28px,3.2vw,42px)] leading-[1.05]">
+              <h2 id="starters-h" className="text-[28px] lg:text-[36px] leading-[1.05]">
                 Не знаешь, с чего начать разговор?
               </h2>
               <p className="mt-4 max-w-[40ch] text-muted-foreground">
@@ -150,7 +150,7 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
         {ideas && ideas.items.length > 0 && (
           <section aria-labelledby="ideas-h" className="pt-20">
             <div className="mb-8 flex flex-wrap items-end gap-x-10 gap-y-3">
-              <h2 id="ideas-h" className="max-w-[18ch] text-[clamp(30px,3.6vw,48px)] leading-[1.04]">
+              <h2 id="ideas-h" className="max-w-[18ch] text-[32px] lg:text-[48px] leading-[1.04]">
                 Или подключись к идее, которая уже есть
               </h2>
               <Link href="/ideas" className="inline-flex items-center gap-1.5 font-bold text-brand-ink hover:underline sm:ml-auto">
