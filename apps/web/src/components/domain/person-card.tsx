@@ -45,7 +45,7 @@ export function PersonPhoto({
       aria-hidden
       className={cn("grid size-full place-items-center bg-[radial-gradient(120%_100%_at_50%_0%,var(--brand-soft),var(--marker))]", className)}
     >
-      <span className="text-[clamp(40px,5vw,64px)] font-extrabold tracking-[-0.04em] text-brand-ink">{initials(person.display_name)}</span>
+      <span className="text-[36px] sm:text-[48px] lg:text-[64px] font-extrabold tracking-[-0.04em] text-brand-ink">{initials(person.display_name)}</span>
     </span>
   );
 }

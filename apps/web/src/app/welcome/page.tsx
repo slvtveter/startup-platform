@@ -11,7 +11,7 @@ export default async function WelcomePage() {
   return (
     <div className="mx-auto w-full max-w-[1100px] px-4 pt-10 pb-16 sm:px-6">
       <p className="text-sm font-bold tracking-wide text-brand-ink uppercase">Добро пожаловать</p>
-      <h1 className="mt-3 text-[clamp(32px,4.5vw,56px)] leading-[1.04]">С чего начнёшь?</h1>
+      <h1 className="mt-3 text-[32px] sm:text-[48px] lg:text-[56px] leading-[1.04]">С чего начнёшь?</h1>
       <p className="mt-3 max-w-[52ch] text-lg text-muted-foreground">
         Выбери, что ближе сейчас. Дальше подстроим профиль и покажем тех, кто тебе подходит. Передумать можно в любой момент.
       </p>

@@ -54,7 +54,7 @@ export function StartupCover({
       className={cn("grid size-full place-items-center", className)}
       style={{ background: `radial-gradient(120% 120% at 15% 10%, ${to}, ${from})`, color: ink }}
     >
-      <span className="text-[clamp(56px,7vw,88px)] leading-none font-extrabold tracking-[-0.05em] opacity-90">
+      <span className="text-[56px] lg:text-[64px] leading-none font-extrabold tracking-[-0.05em] opacity-90">
         {startup.title.trim()[0]?.toUpperCase() ?? "•"}
       </span>
     </span>
