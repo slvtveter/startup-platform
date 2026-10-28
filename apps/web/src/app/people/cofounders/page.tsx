@@ -153,7 +153,7 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
               <h2 id="ideas-h" className="max-w-[18ch] text-[32px] lg:text-[48px] leading-[1.04]">
                 Или подключись к идее, которая уже есть
               </h2>
-              <Link href="/ideas" className="inline-flex items-center gap-1.5 font-bold text-brand-ink hover:underline sm:ml-auto">
+              <Link href="/startups?stage=idea" className="inline-flex items-center gap-1.5 font-bold text-brand-ink hover:underline sm:ml-auto">
                 Все идеи
                 <ArrowRight aria-hidden className="size-4" />
               </Link>

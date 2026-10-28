@@ -50,6 +50,8 @@ class StartupIn(_Links):
     title: str = Field(min_length=2, max_length=80)
     pitch: str = Field(default="", max_length=160)
     description: str = Field(default="", max_length=8000)
+    progress: str = Field(default="", max_length=3000)
+    plans: str = Field(default="", max_length=3000)
     stage: Stage
     terms: Terms
     terms_details: str = Field(default="", max_length=2000)
@@ -61,6 +63,8 @@ class StartupUpdate(_Links):
     title: str | None = Field(default=None, min_length=2, max_length=80)
     pitch: str | None = Field(default=None, max_length=160)
     description: str | None = Field(default=None, max_length=8000)
+    progress: str | None = Field(default=None, max_length=3000)
+    plans: str | None = Field(default=None, max_length=3000)
     stage: Stage | None = None
     terms: Terms | None = None
     terms_details: str | None = Field(default=None, max_length=2000)
@@ -137,6 +141,8 @@ class ResponseStats(BaseModel):
 
 class StartupDetail(StartupCard):
     description: str
+    progress: str = ""
+    plans: str = ""
     terms_details: str
     website: str
     telegram: str

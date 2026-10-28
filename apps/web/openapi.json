@@ -5971,6 +5971,18 @@
             "title": "Description",
             "default": ""
           },
+          "progress": {
+            "type": "string",
+            "maxLength": 3000,
+            "title": "Progress",
+            "default": ""
+          },
+          "plans": {
+            "type": "string",
+            "maxLength": 3000,
+            "title": "Plans",
+            "default": ""
+          },
           "stage": {
             "$ref": "#/components/schemas/Stage"
           },
@@ -7033,6 +7045,16 @@
             "type": "string",
             "title": "Description"
           },
+          "progress": {
+            "type": "string",
+            "title": "Progress",
+            "default": ""
+          },
+          "plans": {
+            "type": "string",
+            "title": "Plans",
+            "default": ""
+          },
           "terms_details": {
             "type": "string",
             "title": "Terms Details"
@@ -7122,6 +7144,18 @@
             "type": "string",
             "maxLength": 8000,
             "title": "Description",
+            "default": ""
+          },
+          "progress": {
+            "type": "string",
+            "maxLength": 3000,
+            "title": "Progress",
+            "default": ""
+          },
+          "plans": {
+            "type": "string",
+            "maxLength": 3000,
+            "title": "Plans",
             "default": ""
           },
           "stage": {
@@ -7271,6 +7305,30 @@
               }
             ],
             "title": "Description"
+          },
+          "progress": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 3000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress"
+          },
+          "plans": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 3000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plans"
           },
           "stage": {
             "anyOf": [

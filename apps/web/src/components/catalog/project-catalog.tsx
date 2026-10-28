@@ -1,86 +1,103 @@
-import { ArrowRight, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import Link from "next/link";
 
 import { CatalogToolbar } from "@/components/domain/filter-bar";
-import { Pager, asList, type SearchParams } from "@/components/domain/filters";
+import { Pager, asList, toggleHref, type SearchParams } from "@/components/domain/filters";
 import { Container, EmptyState, PageHeader } from "@/components/domain/page-header";
 import { StartupCard } from "@/components/domain/startup-card";
 import { buttonVariants } from "@/components/ui/button";
 import { listRoles, listStartups } from "@/lib/api";
 import { STAGE, TERMS, plural } from "@/lib/labels";
 import { serverClient } from "@/lib/server-api";
+import { cn } from "@/lib/utils";
 
 const LIMIT = 12;
+const BASE = "/startups";
 
-// Стартапы — проекты, которые уже делают; идеи живут на своей странице /ideas.
 const STAGES = [
-  { value: "prototype", label: STAGE.prototype },
-  { value: "mvp", label: STAGE.mvp },
-  { value: "launched", label: "Запущены" },
+  { value: "idea", label: "Идеи", hint: "только задумка" },
+  { value: "prototype", label: STAGE.prototype, hint: "макеты" },
+  { value: "mvp", label: STAGE.mvp, hint: "первая версия" },
+  { value: "launched", label: "Запущены", hint: "есть пользователи" },
 ];
-const WORKING = STAGES.map((s) => s.value);
 
-const COPY = {
-  ideas: {
-    title: "Идеи",
-    description: "Сырые, но живые идеи. Открой, задай вопрос автору или подключись к роли, которой не хватает.",
-    search: "Тема, роль или навык",
-    empty: "Убери часть фильтров или опубликуй свою идею: возможно, именно её здесь не хватает.",
-    other: { href: "/startups", text: "Хочешь в проект, который уже работает?", cta: "Смотреть стартапы" },
-  },
-  startups: {
-    title: "Стартапы",
-    description: "Проекты, которые уже делают: от прототипа до запущенного продукта. Каждый ищет людей — открой карточку и откликнись на роль.",
-    search: "Название, роль или навык",
-    empty: "Убери часть фильтров или загляни в идеи: там проекты в самом начале.",
-    other: { href: "/ideas", text: "Хочешь начать с самого начала?", cta: "Смотреть идеи" },
-  },
-};
-
-/** Каталог проектов в двух режимах: «Идеи» (стадия idea) и «Стартапы» (всё, что уже делают). */
-export async function ProjectCatalog({ mode, params }: { mode: "ideas" | "startups"; params: SearchParams }) {
-  const base = mode === "ideas" ? "/ideas" : "/startups";
-  const copy = COPY[mode];
+/**
+ * Каталог проектов: идеи и работающие стартапы в одном месте. Стадия — главный фильтр,
+ * он стоит отдельной строкой с числами: сразу видно, сколько идей и сколько готовых проектов.
+ */
+export async function ProjectCatalog({ params }: { params: SearchParams }) {
   const page = Math.max(1, Number(params.page) || 1);
-  const selected = {
-    role: asList(params.role),
-    terms: asList(params.terms),
-    stage: mode === "ideas" ? ["idea"] : asList(params.stage).filter((v) => WORKING.includes(v)),
-  };
-  if (mode === "startups" && selected.stage.length === 0) selected.stage = WORKING;
+  const stage = asList(params.stage).filter((v) => STAGES.some((s) => s.value === v));
+  const role = asList(params.role);
+  const terms = asList(params.terms);
   const q = typeof params.q === "string" ? params.q : "";
   const sort = params.sort === "roles" ? "roles" : "new";
   const client = await serverClient();
-  const [{ data: roles }, { data }] = await Promise.all([
+  const common = { role, terms, q: q || undefined };
+  const [{ data: roles }, { data }, ...perStage] = await Promise.all([
     listRoles({ client }),
-    listStartups({ client, query: { ...selected, q: q || undefined, sort, limit: LIMIT, offset: (page - 1) * LIMIT } }),
+    listStartups({ client, query: { ...common, stage, sort, limit: LIMIT, offset: (page - 1) * LIMIT } }),
+    // Сколько проектов на каждой стадии при остальных фильтрах — для чисел на переключателе.
+    ...STAGES.map((s) => listStartups({ client, query: { ...common, stage: [s.value], limit: 1 } })),
   ]);
+  const counts = Object.fromEntries(STAGES.map((s, i) => [s.value, perStage[i].data?.total ?? 0]));
+  const all = Object.values(counts).reduce((a, b) => a + b, 0);
   const total = data?.total ?? 0;
-  const countLabel = `${total} ${mode === "ideas" ? plural(total, "идея", "идеи", "идей") : plural(total, "стартап", "стартапа", "стартапов")}`;
+  const onlyIdeas = stage.length === 1 && stage[0] === "idea";
+  const countLabel = onlyIdeas ? `${total} ${plural(total, "идея", "идеи", "идей")}` : `${total} ${plural(total, "проект", "проекта", "проектов")}`;
   const roleOptions = (roles ?? []).map((r) => ({ value: r.slug, label: r.name }));
+  const chip = "inline-flex h-11 shrink-0 items-center gap-2 rounded-full pr-2 pl-4 text-sm font-semibold whitespace-nowrap transition-colors";
+  const badge = "grid h-7 min-w-7 place-items-center rounded-full px-2 text-xs font-bold tabular-nums";
 
   return (
     <Container>
       <PageHeader
-        title={copy.title}
-        description={copy.description}
+        title="Стартапы"
+        description="От сырых идей до запущенных продуктов. Выбери стадию: к идее можно подключиться с самого начала, в работающий проект — прийти на готовую роль."
         actions={
           <Link href="/startups/new" className={buttonVariants()}>
             <Plus aria-hidden />
-            {mode === "ideas" ? "Предложить идею" : "Добавить стартап"}
+            Добавить проект
           </Link>
         }
       />
 
-      <div className="mt-8">
+      <nav aria-label="Стадия проекта" className="-mx-4 mt-8 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">
+        <Link
+          href={toggleHref(BASE, params, "stage", null)}
+          scroll={false}
+          aria-current={stage.length === 0 ? "true" : undefined}
+          className={cn(chip, stage.length === 0 ? "bg-foreground text-background hover:bg-[#1d2a3f]" : "bg-tone hover:bg-tone-2")}
+        >
+          Все стадии
+          <span className={cn(badge, stage.length === 0 ? "bg-white/15" : "bg-white")}>{all}</span>
+        </Link>
+        {STAGES.map((s) => {
+          const on = stage.includes(s.value);
+          return (
+            <Link
+              key={s.value}
+              href={toggleHref(BASE, params, "stage", s.value)}
+              scroll={false}
+              aria-current={on ? "true" : undefined}
+              title={s.hint}
+              className={cn(chip, on ? "bg-foreground text-background hover:bg-[#1d2a3f]" : "bg-tone hover:bg-tone-2")}
+            >
+              {s.label}
+              <span className={cn(badge, on ? "bg-white/15" : "bg-white")}>{counts[s.value]}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      <div className="mt-4">
         <CatalogToolbar
-          basePath={base}
+          basePath={BASE}
           params={params}
-          placeholder={copy.search}
+          placeholder="Название, тема, роль или навык"
           groups={[
             { name: "role", title: "Кого ищут", options: roleOptions },
             { name: "terms", title: "Оплата", options: Object.entries(TERMS).map(([value, label]) => ({ value, label })) },
-            ...(mode === "startups" ? [{ name: "stage", title: "Стадия", options: STAGES }] : []),
           ]}
           sorts={[
             { value: "new", label: "Сначала новые", short: "новые" },
@@ -112,16 +129,14 @@ export async function ProjectCatalog({ mode, params }: { mode: "ideas" | "startu
                 className="card-hover flex h-full min-h-[260px] flex-col justify-center gap-6 rounded-[28px] bg-brand-soft p-8 hover:bg-marker"
               >
                 <span>
-                  <span className="block text-2xl leading-tight font-extrabold tracking-[-0.03em]">
-                    {mode === "ideas" ? "Твоя идея здесь" : "Твой проект здесь"}
-                  </span>
+                  <span className="block text-2xl leading-tight font-extrabold tracking-[-0.03em]">Твой проект здесь</span>
                   <span className="mt-3 block max-w-[34ch] text-muted-foreground">
-                    Опиши её в двух абзацах и отметь, кого не хватает. Её увидят разработчики, дизайнеры и маркетологи.
+                    Даже если это пока только идея: опиши проблему и отметь, кого не хватает. Её увидят разработчики, дизайнеры и маркетологи.
                   </span>
                 </span>
                 <span className={buttonVariants({ className: "self-start" })}>
                   <Plus aria-hidden />
-                  Предложить идею
+                  Добавить проект
                 </span>
               </Link>
             </li>
@@ -131,31 +146,25 @@ export async function ProjectCatalog({ mode, params }: { mode: "ideas" | "startu
         <div className="mt-4">
           <EmptyState
             title={q && !["role", "terms", "stage"].some((k) => asList(params[k]).length) ? "Ничего не нашли" : "Под этот фильтр ничего нет"}
-            text={q ? `По запросу «${q}» ничего нет. Попробуй другое слово или убери часть фильтров.` : copy.empty}
+            text={
+              q
+                ? `По запросу «${q}» ничего нет. Попробуй другое слово или убери часть фильтров.`
+                : "Убери часть фильтров или выбери другую стадию. А может, именно твоего проекта здесь не хватает?"
+            }
             action={
               <span className="flex flex-wrap justify-center gap-2">
-                <Link href={base} className={buttonVariants({ variant: "outline" })}>
+                <Link href={BASE} className={buttonVariants({ variant: "outline" })}>
                   Сбросить фильтры
                 </Link>
                 <Link href="/startups/new" className={buttonVariants()}>
-                  Предложить идею
+                  Добавить проект
                 </Link>
               </span>
             }
           />
         </div>
       )}
-      <Pager basePath={base} params={params} total={total} limit={LIMIT} page={page} />
-      <Link
-        href={copy.other.href}
-        className="mt-10 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[28px] bg-tone px-6 py-5 transition-colors hover:bg-tone-2"
-      >
-        <span className="font-semibold">{copy.other.text}</span>
-        <span className="inline-flex items-center gap-1.5 font-bold text-brand-ink sm:ml-auto">
-          {copy.other.cta}
-          <ArrowRight aria-hidden className="size-4" />
-        </span>
-      </Link>
+      <Pager basePath={BASE} params={params} total={total} limit={LIMIT} page={page} />
     </Container>
   );
 }

@@ -40,7 +40,10 @@ class Startup(TimestampMixin, Base):
     title: Mapped[str] = mapped_column(String(80))
     slug: Mapped[str] = mapped_column(String(100), unique=True)
     pitch: Mapped[str] = mapped_column(String(160), default="")
+    # description — проблема и суть проекта (главный блок); ниже — что уже есть и планы.
     description: Mapped[str] = mapped_column(Text, default="")
+    progress: Mapped[str] = mapped_column(Text, default="", server_default="")
+    plans: Mapped[str] = mapped_column(Text, default="", server_default="")
     search = search_column(("title", "A"), ("pitch", "B"), ("description", "C"))
     stage: Mapped[Stage] = mapped_column(Enum(Stage, native_enum=False, length=16))
     terms: Mapped[Terms] = mapped_column(Enum(Terms, native_enum=False, length=16))

@@ -19,7 +19,7 @@ import {
   type Terms,
 } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
-import { STAGE, TERMS, TERMS_HINT } from "@/lib/labels";
+import { STAGE, TERMS, TERMS_HINT, plural } from "@/lib/labels";
 import { generateNames } from "@/lib/name-generator";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +36,8 @@ type Form = {
   title: string;
   pitch: string;
   description: string;
+  progress: string;
+  plans: string;
   stage: Stage;
   terms: Terms;
   terms_details: string;
@@ -45,11 +47,12 @@ type Form = {
 
 type Step = { key: string; title: string; hint: string; ready: (f: Form, roles: Record<string, number>) => boolean };
 
+// Сначала стадия: от неё зависят подсказки дальше (у идеи «что уже есть» — это опросы и макеты, не пользователи).
 const STEPS: Step[] = [
-  { key: "title", title: "Как называется проект?", hint: "Рабочее название — потом можно поменять. Не придумывается? Жми на кубик.", ready: (f) => f.title.trim().length >= 2 },
+  { key: "stage", title: "На какой стадии проект?", hint: "Честно: новичкам важно понимать, во что они идут. Идея без единой строчки кода — тоже нормально.", ready: () => true },
+  { key: "title", title: "Как называется проект?", hint: "Рабочее название — потом можно поменять. Не придумывается? Нажми «Придумать».", ready: (f) => f.title.trim().length >= 2 },
   { key: "pitch", title: "Идея одной фразой", hint: "Что это и для кого. Её увидят в ленте первой.", ready: (f) => f.pitch.trim().length >= 10 },
-  { key: "description", title: "Расскажи подробнее", hint: "Какую проблему решаете, что уже сделано, что планируете на 2–3 месяца.", ready: (f) => f.description.trim().length >= MIN_DESCRIPTION },
-  { key: "stage", title: "На какой стадии проект?", hint: "Честно: новичкам важно понимать, во что они идут.", ready: () => true },
+  { key: "description", title: "Расскажи подробнее", hint: "Главное — проблема. Остальные два блока короче, их можно дописать потом.", ready: (f) => f.description.trim().length >= MIN_DESCRIPTION },
   { key: "terms", title: "На каких условиях зовёшь людей?", hint: "Условия видны на карточке стартапа и в фильтрах.", ready: () => true },
   { key: "roles", title: "Кого ищешь в команду?", hint: "Можно выбрать несколько. Задачи и часы подставим примером — после публикации поправишь их у каждой роли.", ready: (_f, r) => Object.keys(r).length > 0 },
   { key: "finish", title: "Почти готово", hint: "Ссылки необязательны, но с ними больше доверия.", ready: () => true },
@@ -59,7 +62,28 @@ const STEPS: Step[] = [
  * Пошаговое создание стартапа (KAN-138 п.4): по одному вопросу на экран, шаги сменяют друг
  * друга анимацией. В конце создаём стартап, роли по шаблонам и сразу публикуем, если можно.
  */
-const DRAFT_KEY = "startup-wizard-draft";
+// v2: шаги переставлены (стадия первой) — старый черновик с номером шага не подходит.
+const DRAFT_KEY = "startup-wizard-draft-v2";
+
+/** Подсказки к блокам описания под стадию проекта. */
+const DESCRIBE: Record<string, { progress: string; plans: string }> = {
+  idea: {
+    progress: "Пока только идея? Напиши, что уже проверил: поговорил с 10 знакомыми, нашёл похожие сервисы, набросал макет",
+    plans: "Например: за месяц собрать команду из трёх человек и сделать кликабельный прототип",
+  },
+  prototype: {
+    progress: "Макеты в Figma, кликабельный прототип, первые отзывы",
+    plans: "Например: за два месяца сделать MVP и показать его 50 пользователям",
+  },
+  mvp: {
+    progress: "Что работает в первой версии, сколько людей уже попробовали",
+    plans: "Например: найти первых платящих клиентов и доделать мобильную версию",
+  },
+  launched: {
+    progress: "Сколько пользователей, выручка или другие цифры, которыми гордишься",
+    plans: "Например: выйти в ещё два города и запустить реферальную программу",
+  },
+};
 
 export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emailVerified: boolean }) {
   const router = useRouter();
@@ -69,6 +93,8 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
     title: "",
     pitch: "",
     description: "",
+    progress: "",
+    plans: "",
     stage: "idea",
     terms: "free",
     terms_details: "",
@@ -207,7 +233,7 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
                   <Input
                     aria-label="Название"
                     maxLength={80}
-                    placeholder="Например, «Бодрый енот»"
+                    placeholder="Например, «Тандем» или «Pulse Lab»"
                     className="h-14 text-lg"
                     value={form.title}
                     onChange={(e) => set("title", e.target.value)}
@@ -252,16 +278,36 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
             )}
 
             {current.key === "description" && (
-              <>
-                <Textarea
-                  aria-label="Подробнее о проекте"
-                  rows={7}
-                  placeholder={"Проблема: …\nЧто уже есть: …\nПланы на 2–3 месяца: …"}
-                  value={form.description}
-                  onChange={(e) => set("description", e.target.value)}
-                />
-                <Counter value={form.description.trim().length} min={MIN_DESCRIPTION} />
-              </>
+              <div className="grid gap-5">
+                <div>
+                  <label htmlFor="w-problem" className="text-sm font-bold">
+                    Какую проблему решаете
+                  </label>
+                  <Textarea
+                    id="w-problem"
+                    rows={6}
+                    className="mt-1.5"
+                    placeholder="Кому сейчас плохо и почему: «Студенты тратят по часу, чтобы найти, с кем сделать проект. Чаты вузов завалены, а знакомые заняты…»"
+                    value={form.description}
+                    onChange={(e) => set("description", e.target.value)}
+                  />
+                  <Counter value={form.description.trim().length} min={MIN_DESCRIPTION} />
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="w-progress" className="text-sm font-bold">
+                      Что уже есть <span className="font-semibold text-muted-foreground">· необязательно</span>
+                    </label>
+                    <Textarea id="w-progress" rows={4} className="mt-1.5" placeholder={DESCRIBE[form.stage].progress} value={form.progress} onChange={(e) => set("progress", e.target.value)} />
+                  </div>
+                  <div>
+                    <label htmlFor="w-plans" className="text-sm font-bold">
+                      Планы на 2–3 месяца <span className="font-semibold text-muted-foreground">· необязательно</span>
+                    </label>
+                    <Textarea id="w-plans" rows={4} className="mt-1.5" placeholder={DESCRIBE[form.stage].plans} value={form.plans} onChange={(e) => set("plans", e.target.value)} />
+                  </div>
+                </div>
+              </div>
             )}
 
             {current.key === "stage" && (
@@ -412,7 +458,7 @@ function Counter({ value, min, max }: { value: number; min: number; max?: number
   const left = min - value;
   return (
     <p className={cn("mt-2 text-xs", left > 0 ? "text-muted-foreground" : "text-success-ink")}>
-      {left > 0 ? `Ещё хотя бы ${left} симв.` : "Отлично"}
+      {left > 0 ? `Ещё ${left} ${plural(left, "символ", "символа", "символов")}` : "Отлично, этого хватит"}
       {max ? ` · ${value}/${max}` : ""}
     </p>
   );

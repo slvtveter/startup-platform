@@ -74,7 +74,7 @@ async function Landing() {
           id="ideas"
           title="Идеи, вокруг которых собираются люди"
           lead="Сырые, но живые. Открой идею, задай вопрос автору или откликнись на роль, которой не хватает."
-          more={{ href: "/ideas", label: "Все идеи" }}
+          more={{ href: "/startups?stage=idea", label: "Все идеи" }}
         >
           <Reveal className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {ideas.items.map((s, i) => (

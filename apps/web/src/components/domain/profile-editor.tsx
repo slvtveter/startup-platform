@@ -212,14 +212,13 @@ export function ProfileEditor({
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
       <div ref={top} className="scroll-mt-24 rounded-[28px] bg-card p-6 shadow-[0_0_0_1px_var(--border)] sm:p-8">
-        <Progress value={score} label={`Шаг ${step + 1} из ${STEPS.length} · ${STEPS[step]}`} />
-        {missing.length > 0 && (
-          <p className="mt-2 text-sm text-muted-foreground">
-            Дальше: {missing.slice(0, 2).map((m) => `${m.label.toLowerCase()} +${m.weight}%`).join(", ")}
-          </p>
-        )}
+        {/* На телефоне боковая колонка уходит вниз — полоска нужна здесь; на широком экране она справа. */}
+        <div className="mb-6 lg:hidden">
+          <Progress value={score} label="Профиль заполнен" />
+          {missing.length > 0 && <p className="mt-2 text-sm text-muted-foreground">Дальше: {missing[0].label.toLowerCase()}</p>}
+        </div>
 
-        <ol className="mt-6 flex flex-wrap items-center gap-3 text-sm font-bold">
+        <ol className="flex flex-wrap items-center gap-3 text-sm font-bold">
           {STEPS.map((title, i) => (
             <li key={title} className="flex items-center gap-3">
               <button type="button" onClick={() => go(i)} aria-current={i === step ? "step" : undefined} className="flex items-center gap-2">
@@ -450,34 +449,28 @@ export function ProfileEditor({
       <aside className="grid h-fit gap-4 lg:sticky lg:top-24">
         <div className="rounded-[28px] bg-tone p-6">
           <Progress value={score} label="Профиль заполнен" />
-          <ul className="mt-5 grid gap-2 text-sm">
-            {COMPLETENESS.map((c) => {
-              const done = c.done(f, extra);
-              return (
-                <li key={c.label}>
-                  <button
-                    type="button"
-                    onClick={() => go(c.step)}
-                    className={cn("flex w-full items-center gap-2.5 text-left transition-colors", done ? "text-muted-foreground" : "font-semibold hover:text-brand-ink")}
-                  >
-                    <span
-                      aria-hidden
-                      className={cn(
-                        "grid size-5 shrink-0 place-items-center rounded-full transition-colors duration-200",
-                        done ? "bg-success-ink text-white" : "bg-white text-transparent shadow-[inset_0_0_0_1.5px_var(--input)]",
-                      )}
+          {missing.length > 0 ? (
+            <>
+              <p className="mt-5 text-sm font-semibold">Что добавить дальше</p>
+              <ul className="mt-2 grid gap-1">
+                {missing.slice(0, 3).map((c) => (
+                  <li key={c.label}>
+                    <button
+                      type="button"
+                      onClick={() => go(c.step)}
+                      className="flex w-full items-center gap-2.5 rounded-lg py-1.5 text-left text-sm transition-colors hover:text-brand-ink"
                     >
-                      <Check className="size-3" strokeWidth={3} />
-                    </span>
-                    <span className={cn(done && "line-through decoration-foreground/30")}>{c.label}</span>
-                    <span className="ml-auto text-xs text-muted-foreground tabular-nums">+{c.weight}%</span>
-                    <span className="sr-only">{done ? "— готово" : "— не заполнено"}</span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-          <p className="mt-4 text-xs text-muted-foreground">С фото, портфолио и рассказом о себе основатели отвечают заметно чаще.</p>
+                      <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-brand" />
+                      {c.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p className="mt-5 text-sm font-semibold text-success-ink">Всё заполнено, профиль выглядит сильно</p>
+          )}
+          {missing.length > 0 && <p className="mt-4 text-xs text-muted-foreground">С фото и портфолио основатели отвечают заметно чаще.</p>}
         </div>
         <div className="rounded-[28px] bg-tone p-6">
           <div className="font-bold">{profile.is_published ? "Опубликован" : "Не опубликован"}</div>
