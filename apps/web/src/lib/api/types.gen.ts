@@ -1259,6 +1259,14 @@ export type PlatformStartupIn = {
      * Description
      */
     description?: string;
+    /**
+     * Progress
+     */
+    progress?: string;
+    /**
+     * Plans
+     */
+    plans?: string;
     stage: Stage;
     terms: Terms;
     /**
@@ -1851,6 +1859,14 @@ export type StartupDetail = {
      */
     description: string;
     /**
+     * Progress
+     */
+    progress?: string;
+    /**
+     * Plans
+     */
+    plans?: string;
+    /**
      * Terms Details
      */
     terms_details: string;
@@ -1897,6 +1913,14 @@ export type StartupIn = {
      * Description
      */
     description?: string;
+    /**
+     * Progress
+     */
+    progress?: string;
+    /**
+     * Plans
+     */
+    plans?: string;
     stage: Stage;
     terms: Terms;
     /**
@@ -1977,6 +2001,14 @@ export type StartupUpdate = {
      * Description
      */
     description?: string | null;
+    /**
+     * Progress
+     */
+    progress?: string | null;
+    /**
+     * Plans
+     */
+    plans?: string | null;
     stage?: Stage | null;
     terms?: Terms | null;
     /**

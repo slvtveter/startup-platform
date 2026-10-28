@@ -35,6 +35,8 @@ type Base = {
   title: string;
   pitch: string;
   description: string;
+  progress: string;
+  plans: string;
   stage: Stage;
   terms: Terms;
   terms_details: string;
@@ -48,6 +50,8 @@ export function StartupEditor({ startup, roles, skills }: { startup?: StartupDet
     title: startup?.title ?? "",
     pitch: startup?.pitch ?? "",
     description: startup?.description ?? "",
+    progress: startup?.progress ?? "",
+    plans: startup?.plans ?? "",
     stage: startup?.stage ?? "idea",
     terms: startup?.terms ?? "free",
     terms_details: startup?.terms_details ?? "",
@@ -108,16 +112,26 @@ export function StartupEditor({ startup, roles, skills }: { startup?: StartupDet
           <Input id="pitch" maxLength={160} placeholder="Домашняя еда от соседей с доставкой за 30 минут" className="mt-1.5 h-11" value={form.pitch} onChange={(e) => set("pitch", e.target.value)} />
         </div>
         <div>
-          <Label htmlFor="description">Подробнее</Label>
+          <Label htmlFor="description">Какую проблему решаете</Label>
           <Textarea
             id="description"
             rows={7}
             className="mt-1.5"
-            placeholder="Какую проблему решаете, что уже сделано, какие планы на ближайшие 2–3 месяца"
+            placeholder="Кому сейчас плохо и почему — главный рассказ о проекте"
             value={form.description}
             onChange={(e) => set("description", e.target.value)}
           />
           <p className="mt-1 text-xs text-muted-foreground">{form.description.length} символов, для публикации нужно от 50</p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <Label htmlFor="progress">Что уже есть</Label>
+            <Textarea id="progress" rows={4} className="mt-1.5" placeholder="Макеты, прототип, первые пользователи" value={form.progress} onChange={(e) => set("progress", e.target.value)} />
+          </div>
+          <div>
+            <Label htmlFor="plans">Планы на 2–3 месяца</Label>
+            <Textarea id="plans" rows={4} className="mt-1.5" placeholder="Что хотите успеть с командой" value={form.plans} onChange={(e) => set("plans", e.target.value)} />
+          </div>
         </div>
         <fieldset>
           <legend className="text-sm font-medium">Стадия</legend>

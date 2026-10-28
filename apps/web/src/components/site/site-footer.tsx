@@ -10,15 +10,15 @@ const COLUMNS = [
     title: "Есть идея",
     links: [
       { href: "/startups/new", label: "Опубликовать идею" },
-      { href: "/ideas", label: "Идеи других" },
-      { href: "/ideas?terms=free", label: "Идеи без оплаты, на равных" },
+      { href: "/startups?stage=idea", label: "Идеи других" },
+      { href: "/startups?stage=idea&terms=free", label: "Идеи без оплаты, на равных" },
     ],
   },
   {
     title: "Нет идеи",
     links: [
       { href: "/people/cofounders", label: "Найти сообщников" },
-      { href: "/ideas", label: "Идеи, к которым можно подключиться" },
+      { href: "/startups?stage=idea", label: "Идеи, к которым можно подключиться" },
       { href: "/me/profile", label: "Отметить «Ищу сообщников»" },
     ],
   },

@@ -129,6 +129,8 @@ async def to_detail(db: AsyncSession, s: Startup, viewer: User | None) -> Startu
     return StartupDetail(
         **to_card(s).model_dump(),
         description=s.description,
+        progress=s.progress,
+        plans=s.plans,
         terms_details=s.terms_details,
         website=s.website,
         telegram=s.telegram,
@@ -322,7 +324,7 @@ def publish_blockers(owner: User, s: Startup) -> list[str]:
     if len(s.pitch) < 10:
         blockers.append("Опишите идею одной фразой (от 10 символов)")
     if len(s.description) < 50:
-        blockers.append("Добавьте подробное описание (от 50 символов)")
+        blockers.append("Опишите проблему, которую решаете (от 50 символов)")
     if not any(r.is_open for r in s.roles):
         blockers.append("Откройте хотя бы одну роль")
     return blockers

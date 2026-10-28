@@ -19,7 +19,6 @@ export async function SiteHeader() {
   // «Главная» — для вошедших это дашборд с моими стартапами и откликами (KAN-138 п.2): всегда видно, как вернуться.
   const links = [
     ...(user ? [{ href: "/", label: "Главная" }] : []),
-    { href: "/ideas", label: "Идеи" },
     { href: "/startups", label: "Стартапы" },
     { href: "/people", label: "Люди" },
   ];

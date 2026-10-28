@@ -102,14 +102,14 @@ export default async function StartupPage({ params }: Props) {
               ...(s.website ? { sameAs: [s.website] } : {}),
             },
             breadcrumbs([
-              s.stage === "idea" ? ["Идеи", "/ideas"] : ["Стартапы", "/startups"],
+              ["Стартапы", "/startups"],
               [s.title, `/startups/${s.slug}`],
             ]),
           ],
         }}
       />
       <Link
-        href={s.stage === "idea" ? "/ideas" : "/startups"}
+        href={s.stage === "idea" ? "/startups?stage=idea" : "/startups"}
         className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
       >
         <ChevronLeftIcon className="size-4" /> {s.stage === "idea" ? "Все идеи" : "Все стартапы"}
@@ -249,14 +249,7 @@ export default async function StartupPage({ params }: Props) {
 
       <div className="mt-14 grid gap-10 lg:grid-cols-[1fr_360px]">
         <div className="min-w-0">
-{s.stage === "idea" && (
-          <section className="mb-14">
-            <h2 className="text-[28px] sm:text-[36px]">Идея</h2>
-            <p className="mt-4 max-w-[68ch] text-lg leading-relaxed whitespace-pre-line text-foreground/85">
-              {s.description || "Описание пока не заполнено."}
-            </p>
-          </section>
-)}
+          {s.stage === "idea" && <About s={s} title="Идея" className="mb-14" />}
           <section id="roles" className="scroll-mt-24">
             <h2 className="text-[28px] sm:text-[36px]">Свободные места</h2>
             {openRoles.length === 0 && (
@@ -345,14 +338,7 @@ export default async function StartupPage({ params }: Props) {
             </div>
           </section>
 
-{s.stage !== "idea" && (
-          <section className="mt-14">
-            <h2 className="text-[28px] sm:text-[36px]">О проекте</h2>
-            <p className="mt-4 max-w-[68ch] text-lg leading-relaxed whitespace-pre-line text-foreground/85">
-              {s.description || "Описание пока не заполнено."}
-            </p>
-          </section>
-)}
+          {s.stage !== "idea" && <About s={s} title="О проекте" className="mt-14" />}
 
           <section className="mt-14">
             <h2 className="text-[28px] sm:text-[36px]">Команда</h2>
@@ -506,4 +492,30 @@ function responseText(stats: StartupDetail["response_stats"]) {
       ? `${Math.max(1, Math.ceil(h))} ч`
       : `${Math.round(h / 24)} ${plural(Math.round(h / 24), "день", "дня", "дней")}`;
   return `${share}, обычно за ${when}`;
+}
+
+/** Описание: проблема — главный текст, «что уже есть» и «планы» — две карточки под ним. */
+function About({ s, title, className }: { s: StartupDetail; title: string; className?: string }) {
+  const extra = [
+    { title: "Что уже есть", text: s.progress },
+    { title: "Планы на 2–3 месяца", text: s.plans },
+  ].filter((b) => b.text?.trim());
+  return (
+    <section className={className}>
+      <h2 className="text-[28px] sm:text-[36px]">{title}</h2>
+      <p className="mt-4 max-w-[68ch] text-lg leading-relaxed whitespace-pre-line text-foreground/85">
+        {s.description || "Описание пока не заполнено."}
+      </p>
+      {extra.length > 0 && (
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          {extra.map((b) => (
+            <div key={b.title} className="rounded-[20px] bg-tone p-5">
+              <h3 className="font-sans text-base font-bold tracking-normal">{b.title}</h3>
+              <p className="mt-2 whitespace-pre-line text-foreground/85">{b.text}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
 }
