@@ -281,6 +281,7 @@ function Hero() {
             Найти сообщников
           </Link>
         </div>
+        <p className="mt-4 text-sm font-semibold text-white/75">Бесплатно · без резюме · профиль за пару минут</p>
       </div>
       <figure aria-label="Пример переписки на Envola" className="flex w-full flex-col gap-2.5 justify-self-end lg:w-[min(420px,100%)]">
         {CHAT.map((m, i) => (

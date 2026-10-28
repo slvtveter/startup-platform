@@ -3,12 +3,14 @@ import Link from "next/link";
 
 import { Container, EmptyState } from "@/components/domain/page-header";
 import { SeatRow } from "@/components/domain/seats";
+import { PersonCard } from "@/components/domain/person-card";
 import { StartupCard } from "@/components/domain/startup-card";
 import { buttonVariants } from "@/components/ui/button";
 import {
   getMyProfile,
   listMyApplications,
   listMyStartups,
+  listPeople,
   listRecommendedStartups,
   unreadChats,
   type ApplicationOut,
@@ -39,6 +41,10 @@ export async function Dashboard() {
     listMyStartups({ client }),
     unreadChats({ client }),
   ]);
+  // Сообщники для тебя: ищут, с кем начать, и у них другая роль — дополнят, а не повторят.
+  const { data: cof } = await listPeople({ client, query: { cofound: true, limit: 24 } });
+  const myRole = profile?.primary_role?.slug;
+  const partners = (cof?.items ?? []).filter((p) => p.slug !== profile?.slug && p.primary_role?.slug !== myRole).slice(0, 4);
   const name = profile?.display_name;
   const myStartups = mine ?? [];
   const myApps = apps ?? [];
@@ -181,6 +187,25 @@ export async function Dashboard() {
         ))}
       </ul>
 
+
+      {partners.length > 0 && (
+        <section className="mt-12">
+          <div className="flex flex-wrap items-end gap-2">
+            <div>
+              <h2 className="text-xl sm:text-2xl">Сообщники для тебя</h2>
+              <p className="mt-1 text-muted-foreground">Хотят придумать стартап с нуля, и их навыки дополняют твои. Напиши первым.</p>
+            </div>
+            <Link href="/people/cofounders" className="ml-auto text-sm font-semibold text-brand-ink hover:underline">
+              Все сообщники
+            </Link>
+          </div>
+          <ul className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-4">
+            {partners.map((p) => (
+              <PersonCard key={p.slug} person={p} as="li" />
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="mt-12">
         <div className="flex flex-wrap items-end gap-2">

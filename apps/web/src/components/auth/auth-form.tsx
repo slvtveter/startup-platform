@@ -59,7 +59,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       setError(errorMessage(res.error));
       return;
     }
-    const fallback = mode === "register" ? "/me/profile?welcome=1" : "/";
+    const fallback = mode === "register" ? "/welcome" : "/";
     router.push(safeNext(params.get("next"), fallback));
     router.refresh();
   }
@@ -148,7 +148,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           </>
         )}
       </p>
-      <p className="text-center text-xs text-muted-foreground">Вход через GitHub, VK ID, Яндекс и Telegram появится скоро.</p>
+      <p className="text-center text-xs text-muted-foreground">Бесплатно · без резюме · займёт минуту</p>
     </form>
   );
 }

@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import Image from "next/image";
 
 import { FACES, PHOTOS } from "@/lib/photos";
@@ -24,6 +25,16 @@ export function AuthCard({ title, subtitle, children }: { title: string; subtitl
           </p>
         </div>
         <p className="mt-8 max-w-[18ch] text-[40px] leading-[1.02] font-extrabold tracking-[-0.04em]">Здесь стартапы начинаются с разговора</p>
+        <ul className="mt-5 grid gap-2 text-[15px] font-semibold text-white/90">
+          {["Бесплатно и без резюме", "Профиль — за пару минут", "Сразу видно, кто ищет таких, как ты"].map((t) => (
+            <li key={t} className="flex items-center gap-2.5">
+              <span aria-hidden className="grid size-5 place-items-center rounded-full bg-white/20">
+                <Check className="size-3.5" strokeWidth={3} />
+              </span>
+              {t}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );

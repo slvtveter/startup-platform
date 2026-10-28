@@ -42,7 +42,7 @@ function StatusTimeline({ app }: { app: ApplicationOut }) {
   return (
     <ol className="mt-4 flex flex-col items-start gap-1.5 text-xs sm:flex-row sm:items-center sm:gap-2" aria-label="Статус заявки">
       {steps.map((step, i) => (
-        <li key={step.label} className="flex items-center gap-2">
+        <li key={i} className="flex items-center gap-2">
           {/* На узком экране шаги идут столбиком, и соединительная черта только мешает. */}
           {i > 0 && <span aria-hidden className={`hidden h-px w-6 sm:block ${step.done ? "bg-foreground" : "bg-border"}`} />}
           <span

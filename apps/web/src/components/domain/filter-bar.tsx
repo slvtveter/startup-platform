@@ -60,7 +60,7 @@ export function CatalogToolbar({
   const sort = sorts ? (sorts.find((s) => s.value === params.sort) ?? sorts[0]) : null;
   const sortMenu = sorts && sort && (
     <DropdownMenu>
-      <DropdownMenuTrigger className={cn(pill, "bg-transparent px-3 text-muted-foreground hover:bg-tone hover:text-foreground")} aria-label={`Сортировка: ${sort.label}`}>
+      <DropdownMenuTrigger className={cn(pill, "bg-transparent px-3 text-muted-foreground hover:bg-tone hover:text-foreground")} aria-label={`Сортировка: ${sort.short}`}>
         <ArrowDownUp aria-hidden className="size-4" />
         <span>
           <span className="max-sm:sr-only">Сортировка: </span>

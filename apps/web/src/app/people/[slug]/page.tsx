@@ -1,4 +1,4 @@
-import { ChevronLeftIcon } from "lucide-react";
+import { ArrowUpRight, ChevronLeftIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -185,17 +185,13 @@ export default async function PersonPage({ params }: Props) {
                       href={l.url}
                       target="_blank"
                       rel="noopener noreferrer nofollow"
-                      className="flex h-full flex-col rounded-2xl bg-tone p-4 transition-colors duration-200 hover:bg-tone-2"
+                      className="group flex h-full items-center gap-3 rounded-2xl bg-tone p-4 transition-colors hover:bg-tone-2"
                     >
-                      <span className="text-sm text-muted-foreground">
-                        {LINK_KIND[l.kind]}
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm text-muted-foreground">{LINK_KIND[l.kind]}</span>
+                        <span className="mt-0.5 block truncate font-semibold">{linkLabel(l.url)}</span>
                       </span>
-                      <span className="mt-1 truncate font-semibold">
-                        {domainOf(l.url)}
-                      </span>
-                      <span className="truncate text-sm text-muted-foreground">
-                        {l.url.replace(/^https?:\/\/[^/]+/, "") || "/"}
-                      </span>
+                      <ArrowUpRight aria-hidden className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
                     </a>
                   </li>
                 ))}
@@ -238,7 +234,7 @@ export default async function PersonPage({ params }: Props) {
                 <div className="grid gap-3">
                   <DemoNotice kind="person" />
                   <Link href="/people/cofounders" className={buttonVariants({ className: "w-full" })}>
-                    Найти настоящих людей
+                    Смотреть, кто ищет сообщников
                   </Link>
                 </div>
               ) : !user ? (
@@ -308,6 +304,12 @@ export default async function PersonPage({ params }: Props) {
       )}
     </Container>
   );
+}
+
+/** «github.com/kirill» вместо голого домена и «/»; у ссылки без пути — только домен. */
+function linkLabel(url: string) {
+  const path = url.replace(/^https?:\/\/[^/]+/, "").replace(/\/$/, "");
+  return domainOf(url) + path;
 }
 
 function domainOf(url: string) {

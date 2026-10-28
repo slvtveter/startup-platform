@@ -17,7 +17,7 @@ const COLUMNS = [
     title: "Нет идеи",
     links: [
       { href: "/people/cofounders", label: "Найти сообщников" },
-      { href: "/people/cofounders", label: "Кто хочет придумать стартап" },
+      { href: "/ideas", label: "Идеи, к которым можно подключиться" },
       { href: "/me/profile", label: "Отметить «Ищу сообщников»" },
     ],
   },
@@ -59,7 +59,7 @@ export function SiteFooter() {
               <h2 className="text-[15px] font-bold tracking-normal">{c.title}</h2>
               <ul className="mt-3 space-y-2.5 text-muted-foreground">
                 {c.links.map((l) => (
-                  <li key={l.href}>
+                  <li key={l.href + l.label}>
                     <Link href={l.href} className="transition-colors hover:text-foreground">
                       {l.label}
                     </Link>

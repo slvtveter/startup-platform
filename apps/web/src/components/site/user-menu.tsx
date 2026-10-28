@@ -51,9 +51,9 @@ export function UserMenu({
     <DropdownMenu>
       <DropdownMenuTrigger
         className="relative rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-        aria-label={unread ? `Меню аккаунта, новых событий: ${unread}` : "Меню аккаунта"}
+        aria-label={`Меню аккаунта ${initials(name)}${unread ? `, новых событий: ${unread}` : ""}`}
       >
-        <Avatar aria-hidden className="size-9">
+        <Avatar className="size-9">
           <AvatarFallback className="bg-foreground text-sm font-bold text-background">{initials(name)}</AvatarFallback>
         </Avatar>
         {unread > 0 && (
