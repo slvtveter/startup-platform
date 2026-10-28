@@ -100,7 +100,7 @@ async function Landing() {
                 <h2 id="cof-h" className="mt-3 max-w-[16ch] text-[clamp(32px,3.8vw,54px)] leading-[1.02]">
                   Нет идеи? Придумайте её вместе
                 </h2>
-                <p className="mt-4 max-w-[48ch] text-[17px] text-muted-foreground">
+                <p className="mt-4 max-w-[48ch] text-lg text-muted-foreground">
                   Эти люди хотят своё, но не хотят делать в одиночку. Напиши тому, чьи навыки дополняют твои, созвонитесь и накидайте идей.
                 </p>
               </div>
@@ -174,7 +174,7 @@ async function Landing() {
             ].map(([n, label], i) => (
               <div key={i} className="reveal-item rounded-3xl bg-tone p-6" style={delay(i * 60)}>
                 <b className="block text-[clamp(32px,3.4vw,48px)] leading-none font-extrabold tracking-[-0.04em] text-brand-ink">{n}</b>
-                <span className="mt-2 block text-[15px] text-muted-foreground">{label}</span>
+                <span className="mt-2 block text-base text-muted-foreground">{label}</span>
               </div>
             ))}
           </Reveal>
@@ -186,14 +186,14 @@ async function Landing() {
       </Section>
 
       <section aria-labelledby="final-h" className={`${wrap} pt-[clamp(72px,8vw,120px)]`}>
-        <div className="relative isolate grid gap-8 overflow-hidden rounded-[40px] px-6 py-[clamp(48px,7vw,110px)] text-white sm:px-[clamp(24px,5vw,72px)] lg:grid-cols-[1.2fr_1fr] lg:items-end">
+        <div className="relative isolate grid gap-8 overflow-hidden rounded-[36px] px-6 py-[clamp(48px,7vw,110px)] text-white sm:px-[clamp(24px,5vw,72px)] lg:grid-cols-[1.2fr_1fr] lg:items-end">
           <Image src={PHOTOS.teamEvening} alt="" fill placeholder="blur" sizes="(min-width: 1360px) 1360px, 100vw" className="-z-20 object-cover" />
           <div aria-hidden className="absolute inset-0 -z-10 bg-[rgb(14_26_52/0.72)]" />
           <div>
             <h2 id="final-h" className="max-w-[14ch] text-[clamp(36px,4.8vw,70px)] leading-[1.02]">
               Начни с профиля или идеи
             </h2>
-            <p className="mt-4 max-w-[42ch] text-[17px] text-white/85">
+            <p className="mt-4 max-w-[42ch] text-lg text-white/85">
               Профиль занимает пять минут, идея — пару абзацев. Дальше тебя найдут люди с нужными навыками.
             </p>
           </div>
@@ -233,7 +233,7 @@ function Section({
         </h2>
         {(lead || more) && (
           <div className="flex max-w-[46ch] flex-col gap-3 sm:ml-auto">
-            {lead && <p className="text-[17px] text-muted-foreground">{lead}</p>}
+            {lead && <p className="text-lg text-muted-foreground">{lead}</p>}
             {more && (
               <Link href={more.href} className="inline-flex items-center gap-1.5 font-bold text-brand-ink transition-colors hover:text-brand-hover">
                 {more.label}
@@ -288,7 +288,7 @@ function Hero() {
           <div key={i} className={`chat-msg flex items-end gap-2.5 ${m.me ? "flex-row-reverse" : ""} ${i > 1 ? "max-sm:hidden" : ""}`} style={delay(600 + i * 1100)}>
             <Image src={m.photo} alt="" width={36} height={36} className="size-9 shrink-0 rounded-full object-cover shadow-[0_0_0_2px_rgb(255_255_255/0.8)]" />
             <p
-              className={`rounded-[18px] px-3.5 py-2.5 text-[15px] leading-snug shadow-[0_14px_40px_rgb(0_0_0/0.25)] ${
+              className={`rounded-2xl px-3.5 py-2.5 text-base leading-snug shadow-[0_14px_40px_rgb(0_0_0/0.25)] ${
                 m.me ? "rounded-br-md bg-brand text-white" : "rounded-bl-md bg-white text-foreground"
               }`}
             >
@@ -297,7 +297,7 @@ function Hero() {
             </p>
           </div>
         ))}
-        <figcaption className="chat-msg self-center rounded-full bg-white/18 px-3.5 py-1.5 text-[13px] font-bold backdrop-blur-md" style={delay(600 + 3 * 1100)}>
+        <figcaption className="chat-msg self-center rounded-full bg-white/18 px-3.5 py-1.5 text-sm font-bold backdrop-blur-md" style={delay(600 + 3 * 1100)}>
           Алина, Кирилл и Егор собрали команду
         </figcaption>
       </figure>
@@ -363,23 +363,23 @@ function Ways() {
       {WAYS.map((w, i) => {
         const body = (
           <>
-            <span className="relative block aspect-[4/3] overflow-hidden rounded-[20px]">
+            <span className="relative block aspect-[4/3] overflow-hidden rounded-2xl">
               <Image src={w.photo} alt={w.alt} fill placeholder="blur" sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 100vw" className="object-cover" />
               <span aria-hidden className="absolute inset-x-3 bottom-3 flex items-center gap-2.5 rounded-2xl bg-white px-3 py-2.5 text-sm shadow-[0_12px_30px_rgb(0_0_0/0.15)]">
                 {w.ui.avatar ? (
                   <Image src={w.ui.avatar} alt="" width={32} height={32} className="size-8 rounded-full object-cover" />
                 ) : (
-                  <span className="grid size-8 place-items-center rounded-[10px] bg-brand font-extrabold text-white">{w.ui.letter}</span>
+                  <span className="grid size-8 place-items-center rounded-xl bg-brand font-extrabold text-white">{w.ui.letter}</span>
                 )}
                 <span className="min-w-0 flex-1">
                   <b className="block truncate">{w.ui.title}</b>
-                  <span className="block truncate text-[13px] text-muted-foreground">{w.ui.sub}</span>
+                  <span className="block truncate text-sm text-muted-foreground">{w.ui.sub}</span>
                 </span>
                 <em className="shrink-0 rounded-full bg-brand-soft px-2.5 py-1 text-xs font-bold whitespace-nowrap text-brand-ink not-italic">{w.ui.tag}</em>
               </span>
             </span>
             <span className="flex flex-1 flex-col gap-2 px-4 pt-5 pb-4">
-              <h3 className="text-[26px] leading-tight font-extrabold tracking-[-0.04em]">{w.title}</h3>
+              <h3 className="text-[28px] leading-tight font-extrabold tracking-[-0.04em]">{w.title}</h3>
               <span className="text-muted-foreground">{w.text}</span>
               <span className="mt-auto inline-flex items-center gap-1.5 pt-3 font-bold text-brand-ink">
                 {w.cta}
@@ -438,17 +438,17 @@ function Flow() {
       <ol className="grid grid-cols-2 gap-x-2 gap-y-6 sm:gap-3 lg:grid-cols-4">
         {FLOW.map((f, i) => (
           <li key={f.tag} className="reveal-item flex flex-col gap-3" style={delay(i * 60)}>
-            <span className="relative block aspect-[3/3.4] overflow-hidden rounded-[20px] sm:rounded-3xl">
+            <span className="relative block aspect-[3/3.4] overflow-hidden rounded-2xl sm:rounded-3xl">
               <Image src={f.photo} alt="" fill placeholder="blur" sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />
-              <span className="absolute top-2.5 left-2.5 rounded-full bg-white px-2.5 py-1 text-xs font-extrabold sm:top-3 sm:left-3 sm:px-3 sm:text-[13px]">
+              <span className="absolute top-2.5 left-2.5 rounded-full bg-white px-2.5 py-1 text-xs font-extrabold sm:top-3 sm:left-3 sm:px-3 sm:text-sm">
                 {i + 1}. {f.tag}
               </span>
             </span>
             <span aria-hidden className="relative h-1 overflow-hidden rounded-sm bg-tone-2">
               <span className="reveal-line absolute inset-0 bg-cornflower" style={delay(300 + i * 300)} />
             </span>
-            <h3 className="text-lg font-extrabold tracking-[-0.03em] sm:text-[22px]">{f.title}</h3>
-            <p className="text-[15px] text-muted-foreground">{f.text}</p>
+            <h3 className="text-lg font-extrabold tracking-[-0.03em] sm:text-2xl">{f.title}</h3>
+            <p className="text-base text-muted-foreground">{f.text}</p>
           </li>
         ))}
       </ol>
@@ -475,8 +475,8 @@ function Faq() {
       {[FAQ.slice(0, half), FAQ.slice(half)].map((col, c) => (
         <div key={c} className="grid gap-2">
           {col.map(([q, a]) => (
-            <details key={q} className="faq group rounded-[22px] bg-tone transition-colors open:bg-brand-soft hover:bg-tone-2 open:hover:bg-brand-soft">
-              <summary className="flex list-none items-center gap-4 px-[22px] py-5 text-[17px] font-bold [&::-webkit-details-marker]:hidden">
+            <details key={q} className="faq group rounded-2xl bg-tone transition-colors open:bg-brand-soft hover:bg-tone-2 open:hover:bg-brand-soft">
+              <summary className="flex list-none items-center gap-4 px-[22px] py-5 text-lg font-bold [&::-webkit-details-marker]:hidden">
                 {q}
                 <span aria-hidden className="ml-auto grid size-7 shrink-0 place-items-center rounded-full bg-white">
                   <PlusIcon className="size-4 transition-transform duration-300 group-open:rotate-45" />

@@ -115,7 +115,7 @@ export default async function PersonPage({ params }: Props) {
       <div className="mt-6 grid gap-10 lg:grid-cols-[1fr_320px]">
         <div className="min-w-0">
           <header className="grid gap-6 sm:grid-cols-[220px_minmax(0,1fr)] sm:items-end md:grid-cols-[280px_minmax(0,1fr)]">
-            <div className="relative aspect-square w-full max-w-[280px] overflow-hidden rounded-[32px] bg-tone">
+            <div className="relative aspect-square w-full max-w-[280px] overflow-hidden rounded-[28px] bg-tone">
               <PersonPhoto person={p} eager sizes="280px" />
             </div>
             <div className="min-w-0">
@@ -128,20 +128,20 @@ export default async function PersonPage({ params }: Props) {
                 )}
                 {p.is_demo && <DemoBadge />}
               </div>
-              <h1 className="mt-3 text-[36px] leading-[1.04] sm:text-[52px]">{p.display_name}</h1>
+              <h1 className="mt-3 text-[36px] leading-[1.04] sm:text-[56px]">{p.display_name}</h1>
               <p className="mt-2 text-lg text-muted-foreground">{facts.join(", ")}</p>
             </div>
           </header>
-          {p.headline && <p className="mt-8 max-w-2xl text-[22px] leading-snug font-bold tracking-[-0.02em]">{p.headline}</p>}
+          {p.headline && <p className="mt-8 max-w-2xl text-2xl leading-snug font-bold tracking-[-0.02em]">{p.headline}</p>}
           {p.bio && (
-            <p className="mt-3 max-w-2xl text-[17px] leading-relaxed whitespace-pre-line text-foreground/85">
+            <p className="mt-3 max-w-2xl text-lg leading-relaxed whitespace-pre-line text-foreground/85">
               {p.bio}
             </p>
           )}
 
           {experience.length > 0 && (
           <section className="mt-10">
-            <h2 className="text-[26px] sm:text-[30px]">Опыт на платформе</h2>
+            <h2 className="text-[28px] sm:text-[32px]">Опыт на платформе</h2>
               <ol className="mt-4 grid gap-2">
                 {experience.map((m) => (
                   <li
@@ -167,7 +167,7 @@ export default async function PersonPage({ params }: Props) {
           )}
 
           <section className="mt-10">
-            <h2 className="text-[26px] sm:text-[30px]">Навыки</h2>
+            <h2 className="text-[28px] sm:text-[32px]">Навыки</h2>
             <div className="mt-4 flex flex-wrap gap-2">
               {p.skills.length ? (
                 p.skills.map((s) => <SkillChip key={s.slug} name={s.name} />)
@@ -179,7 +179,7 @@ export default async function PersonPage({ params }: Props) {
 
           {p.links.length > 0 && (
             <section className="mt-10">
-              <h2 className="text-[26px] sm:text-[30px]">Работы</h2>
+              <h2 className="text-[28px] sm:text-[32px]">Работы</h2>
               <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {p.links.map((l) => (
                   <li key={l.url}>
@@ -207,7 +207,7 @@ export default async function PersonPage({ params }: Props) {
         </div>
 
         <aside id="contact" className="h-fit scroll-mt-24 space-y-4 lg:sticky lg:top-24">
-          <div className="rounded-[26px] bg-tone p-6">
+          <div className="rounded-[28px] bg-tone p-6">
             <div className="text-sm text-muted-foreground">Условия участия</div>
             <div className="mt-2 flex flex-wrap gap-2">
               {termsOf(p.looking_for).length ? (

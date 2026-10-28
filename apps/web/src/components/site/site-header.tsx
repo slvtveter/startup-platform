@@ -60,7 +60,7 @@ export async function SiteHeader() {
               >
                 <MessageCircle aria-hidden className="size-5" />
                 {chats?.count ? (
-                  <span className="absolute top-1 right-0.5 min-w-4 rounded-full bg-brand px-1 text-center text-[10px] leading-4 font-semibold text-white">
+                  <span className="absolute top-1 right-0.5 min-w-4 rounded-full bg-brand px-1 text-center text-xs leading-4 font-semibold text-white">
                     {chats.count}
                   </span>
                 ) : null}
@@ -77,7 +77,7 @@ export async function SiteHeader() {
               <Link href="/login" className={buttonVariants({ variant: "ghost", className: "h-10 max-sm:hidden" })}>
                 Войти
               </Link>
-              <Link href="/register" className={buttonVariants({ size: "sm", className: "sm:h-10 sm:px-4 sm:text-[15px]" })}>
+              <Link href="/register" className={buttonVariants({ size: "sm", className: "sm:h-10 sm:px-4 sm:text-base" })}>
                 Регистрация
               </Link>
             </>

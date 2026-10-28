@@ -42,7 +42,7 @@ export default async function MyStartupsPage() {
       ) : (
         <div className="mt-8 grid gap-4">
           {items.map((s) => (
-            <div key={s.id} className="flex flex-col gap-4 rounded-[26px] bg-tone p-4 sm:flex-row sm:items-center sm:p-5">
+            <div key={s.id} className="flex flex-col gap-4 rounded-[28px] bg-tone p-4 sm:flex-row sm:items-center sm:p-5">
               <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden rounded-2xl bg-tone-2 sm:w-40">
                 <StartupCover startup={s} sizes="160px" />
               </div>

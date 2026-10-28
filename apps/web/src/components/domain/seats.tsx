@@ -18,7 +18,7 @@ export function Seat({
   size?: "sm" | "md" | "lg";
   className?: string;
 }) {
-  const dims = { sm: "size-6 rounded-[6px] text-[10px]", md: "size-8 rounded-lg text-xs", lg: "size-11 rounded-xl text-sm" }[size];
+  const dims = { sm: "size-6 rounded-[6px] text-xs", md: "size-8 rounded-lg text-xs", lg: "size-11 rounded-xl text-sm" }[size];
   return (
     <span
       aria-hidden

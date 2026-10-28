@@ -72,7 +72,7 @@ export async function Dashboard() {
       <div className="flex flex-wrap items-end gap-x-6 gap-y-4">
         <div className="min-w-0">
           <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">{name ? `Привет, ${name}` : "Привет!"}</h1>
-          <p className="mt-3 text-[17px] text-muted-foreground max-sm:hidden">Всё важное по твоим стартапам и откликам — здесь.</p>
+          <p className="mt-3 text-lg text-muted-foreground max-sm:hidden">Всё важное по твоим стартапам и откликам — здесь.</p>
         </div>
         <div className="grid w-full grid-cols-2 gap-2 sm:ml-auto sm:flex sm:w-auto">
           {/* Основателю с открытыми местами нужнее люди, остальным — проекты. */}
@@ -96,7 +96,7 @@ export async function Dashboard() {
 
       <section
         aria-labelledby="next-step"
-        className="mt-6 flex flex-col gap-3 rounded-[26px] bg-brand-soft px-5 py-5 sm:flex-row sm:items-center sm:gap-6 sm:px-6"
+        className="mt-6 flex flex-col gap-3 rounded-[28px] bg-brand-soft px-5 py-5 sm:flex-row sm:items-center sm:gap-6 sm:px-6"
       >
         <div className="min-w-0">
           <h2 id="next-step" className="font-sans text-base font-semibold tracking-normal">
@@ -172,11 +172,11 @@ export async function Dashboard() {
             <Link
               href={s.href}
               className={cn(
-                "group flex h-full flex-col rounded-2xl bg-tone p-3 transition-colors duration-200 hover:bg-tone-2 sm:rounded-[22px] sm:p-4",
+                "group flex h-full flex-col rounded-2xl bg-tone p-3 transition-colors duration-200 hover:bg-tone-2 sm:rounded-2xl sm:p-4",
                 s.value > 0 && "bg-brand-soft hover:bg-marker",
               )}
             >
-              <span className="flex items-center gap-2 text-[11px] leading-tight font-semibold sm:text-sm">
+              <span className="flex items-center gap-2 text-xs leading-tight font-semibold sm:text-sm">
                 <s.icon aria-hidden className={cn("size-4 max-sm:hidden", s.value > 0 ? "text-brand-ink" : "text-muted-foreground")} />
                 {s.label}
               </span>
@@ -241,7 +241,7 @@ export async function Dashboard() {
 
 function Panel({ title, href, more, children }: { title: string; href: string; more?: string; children: React.ReactNode }) {
   return (
-    <section className="flex flex-col rounded-[26px] bg-tone p-6">
+    <section className="flex flex-col rounded-[28px] bg-tone p-6">
       <div className="flex items-center gap-2">
         <h2 className="font-sans text-lg font-bold tracking-normal">{title}</h2>
         {more && (

@@ -311,7 +311,7 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
   }
 
   return (
-    <div className="rounded-[26px] bg-tone p-5 sm:p-6">
+    <div className="rounded-[28px] bg-tone p-5 sm:p-6">
       <div className="text-lg font-extrabold tracking-[-0.02em]">Места в команде</div>
       <p className="mt-1 text-sm text-muted-foreground">
         Чем конкретнее задачи, часы и то, что человек получит, тем больше откликов.

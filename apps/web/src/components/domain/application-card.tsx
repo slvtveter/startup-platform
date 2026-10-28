@@ -122,7 +122,7 @@ export function ApplicationCard({ app, perspective }: { app: ApplicationOut; per
 
       <StatusTimeline app={app} />
 
-      <p className="mt-4 rounded-xl bg-secondary p-4 text-[15px] leading-relaxed whitespace-pre-line">{app.message}</p>
+      <p className="mt-4 rounded-xl bg-secondary p-4 text-base leading-relaxed whitespace-pre-line">{app.message}</p>
       {app.decision_note && <p className="mt-3 text-sm text-muted-foreground">Комментарий: {app.decision_note}</p>}
 
       {app.contacts && (

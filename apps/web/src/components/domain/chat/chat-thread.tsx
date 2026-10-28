@@ -50,7 +50,7 @@ function ApplicationMessage({ m }: { m: MessageOut }) {
         </div>
         <span className="ml-auto shrink-0 rounded-full bg-background px-2 py-0.5 text-xs font-semibold">{STATUS[a.status] ?? a.status}</span>
       </div>
-      <p className="px-4 py-3 text-[15px] whitespace-pre-line">{m.body}</p>
+      <p className="px-4 py-3 text-base whitespace-pre-line">{m.body}</p>
       <div className="px-4 pb-2 text-right text-xs text-muted-foreground">{time(m.created_at)}</div>
     </div>
   );
@@ -137,12 +137,12 @@ export function ChatThread({ chat, initial }: { chat: ConversationOut; initial: 
                 <div className={cn("flex", m.mine ? "justify-end" : "justify-start")}>
                   <div
                     className={cn(
-                      "max-w-[75%] rounded-2xl px-3.5 py-2 text-[15px] whitespace-pre-line",
+                      "max-w-[75%] rounded-2xl px-3.5 py-2 text-base whitespace-pre-line",
                       m.mine ? "rounded-br-md bg-brand text-white" : "rounded-bl-md border bg-background",
                     )}
                   >
                     {m.body}
-                    <span className={cn("ml-2 align-bottom text-[11px]", m.mine ? "text-white/90" : "text-muted-foreground")}>
+                    <span className={cn("ml-2 align-bottom text-xs", m.mine ? "text-white/90" : "text-muted-foreground")}>
                       {time(m.created_at)}
                     </span>
                   </div>
@@ -177,7 +177,7 @@ export function ChatThread({ chat, initial }: { chat: ConversationOut; initial: 
           }}
           placeholder="Сообщение"
           maxLength={4000}
-          className="max-h-40 min-h-11 flex-1 resize-none rounded-xl border bg-background px-3.5 py-2.5 text-[15px] outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="max-h-40 min-h-11 flex-1 resize-none rounded-xl border bg-background px-3.5 py-2.5 text-base outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         />
         <Button type="submit" variant="brand" size="icon" className="size-11 shrink-0" disabled={!text.trim() || sending} aria-label="Отправить">
           <SendHorizontal className="size-5" />

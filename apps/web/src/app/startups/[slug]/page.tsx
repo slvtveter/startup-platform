@@ -251,14 +251,14 @@ export default async function StartupPage({ params }: Props) {
         <div className="min-w-0">
 {s.stage === "idea" && (
           <section className="mb-14">
-            <h2 className="text-[28px] sm:text-[34px]">Идея</h2>
-            <p className="mt-4 max-w-[68ch] text-[17px] leading-relaxed whitespace-pre-line text-foreground/85">
+            <h2 className="text-[28px] sm:text-[36px]">Идея</h2>
+            <p className="mt-4 max-w-[68ch] text-lg leading-relaxed whitespace-pre-line text-foreground/85">
               {s.description || "Описание пока не заполнено."}
             </p>
           </section>
 )}
           <section id="roles" className="scroll-mt-24">
-            <h2 className="text-[28px] sm:text-[34px]">Свободные места</h2>
+            <h2 className="text-[28px] sm:text-[36px]">Свободные места</h2>
             {openRoles.length === 0 && (
               <p className="mt-3 text-muted-foreground">
                 Сейчас все места заняты.
@@ -276,8 +276,8 @@ export default async function StartupPage({ params }: Props) {
                     <div className="flex flex-wrap items-start gap-x-4 gap-y-3 p-5 sm:p-7 sm:pb-5">
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-bold text-brand-ink">Ищут в команду</p>
-                        <h3 className="mt-1 text-[24px] leading-tight font-extrabold tracking-[-0.03em] sm:text-[28px]">{r.title}</h3>
-                        <div className="mt-3 flex flex-wrap gap-1.5 text-[13px] font-semibold">
+                        <h3 className="mt-1 text-2xl leading-tight font-extrabold tracking-[-0.03em] sm:text-[28px]">{r.title}</h3>
+                        <div className="mt-3 flex flex-wrap gap-1.5 text-sm font-semibold">
                           <span className="rounded-full bg-brand-soft px-3 py-1 text-brand-ink">
                             {plural(left, `${left} место`, `${left} места`, `${left} мест`)}
                           </span>
@@ -335,7 +335,7 @@ export default async function StartupPage({ params }: Props) {
               {closedRoles.map((r) => (
                 <div
                   key={r.id}
-                  className="flex items-center gap-4 rounded-[22px] bg-tone p-4 text-muted-foreground"
+                  className="flex items-center gap-4 rounded-2xl bg-tone p-4 text-muted-foreground"
                 >
                   <Check aria-hidden className="size-4 shrink-0" />
                   <span className="font-semibold">{r.title}</span>
@@ -347,15 +347,15 @@ export default async function StartupPage({ params }: Props) {
 
 {s.stage !== "idea" && (
           <section className="mt-14">
-            <h2 className="text-[28px] sm:text-[34px]">О проекте</h2>
-            <p className="mt-4 max-w-[68ch] text-[17px] leading-relaxed whitespace-pre-line text-foreground/85">
+            <h2 className="text-[28px] sm:text-[36px]">О проекте</h2>
+            <p className="mt-4 max-w-[68ch] text-lg leading-relaxed whitespace-pre-line text-foreground/85">
               {s.description || "Описание пока не заполнено."}
             </p>
           </section>
 )}
 
           <section className="mt-14">
-            <h2 className="text-[28px] sm:text-[34px]">Команда</h2>
+            <h2 className="text-[28px] sm:text-[36px]">Команда</h2>
             <ul className="mt-4 grid gap-2 sm:grid-cols-2">
               {s.team.map((m) => {
                 const body = (
@@ -414,7 +414,7 @@ export default async function StartupPage({ params }: Props) {
         </div>
 
         <aside className="h-fit space-y-4 lg:sticky lg:top-24">
-          <div className="rounded-[26px] bg-tone p-6">
+          <div className="rounded-[28px] bg-tone p-6">
             <div className="text-sm text-muted-foreground">Условия участия</div>
             <div className="mt-1 text-2xl font-extrabold tracking-[-0.02em]">{TERMS[s.terms]}</div>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -444,7 +444,7 @@ export default async function StartupPage({ params }: Props) {
             )}
           </div>
           {!s.is_owner && !s.is_demo && (
-            <div className="rounded-[26px] bg-white p-6 shadow-[0_0_0_1.5px_var(--border)]">
+            <div className="rounded-[28px] bg-white p-6 shadow-[0_0_0_1.5px_var(--border)]">
               <div className="text-sm font-bold">Что будет после отклика</div>
               <ol className="mt-3 grid gap-3 text-sm">
                 {[

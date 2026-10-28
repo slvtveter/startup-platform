@@ -86,7 +86,7 @@ export function PersonCard({
           white ? "bg-white hover:bg-tone" : "bg-tone hover:bg-tone-2",
         )}
       >
-        <span className="relative block aspect-square shrink-0 self-start overflow-hidden rounded-[20px] bg-tone-2 max-sm:w-[104px] sm:self-stretch">
+        <span className="relative block aspect-square shrink-0 self-start overflow-hidden rounded-2xl bg-tone-2 max-sm:w-[104px] sm:self-stretch">
           <PersonPhoto person={person} eager={eager} />
           {cofound && (
             <span className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-foreground shadow-sm max-sm:hidden">
@@ -119,9 +119,9 @@ export function PersonCard({
             )}
           </span>
           <span className="mt-auto pt-4 max-sm:pt-2.5">
-            <span className="flex items-center gap-2 border-t border-foreground/[0.08] pt-3 text-[13px] text-muted-foreground max-sm:pt-2">
+            <span className="flex items-center gap-2 border-t border-foreground/[0.08] pt-3 text-sm text-muted-foreground max-sm:pt-2">
               <span className="min-w-0 truncate">{place}</span>
-              {person.is_demo && <span title="Пример: так выглядит карточка на Envola" className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-muted-foreground shadow-[inset_0_0_0_1px_var(--border)]">Пример</span>}
+              {person.is_demo && <span title="Пример: так выглядит карточка на Envola" className="shrink-0 rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-muted-foreground shadow-[inset_0_0_0_1px_var(--border)]">Пример</span>}
               <span className="ml-auto inline-flex shrink-0 items-center gap-1 font-bold text-brand-ink">
                 Профиль
                 <ArrowRight aria-hidden className="size-3.5" />
