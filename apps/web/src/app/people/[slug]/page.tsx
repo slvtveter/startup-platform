@@ -1,4 +1,4 @@
-import { ArrowUpRight, ChevronLeftIcon } from "lucide-react";
+import { ArrowUpRight, ChevronLeftIcon, FileText } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -67,6 +67,7 @@ export default async function PersonPage({ params }: Props) {
     p.primary_role?.name ?? "Роль не указана",
     p.experience_level && LEVEL[p.experience_level].toLowerCase(),
     p.city,
+    p.education,
   ].filter(Boolean);
   const experience = p.memberships ?? [];
   // «с октября 2026»: в формате месяца с днём Intl даёт родительный падеж.
@@ -177,10 +178,30 @@ export default async function PersonPage({ params }: Props) {
             </div>
           </section>
 
-          {p.links.length > 0 && (
+          {(p.links.length > 0 || p.has_resume) && (
             <section className="mt-10">
               <h2 className="text-[28px] sm:text-[32px]">Работы</h2>
               <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {p.has_resume && (
+                  <li>
+                    {/* Резюме отдаём только вошедшим: гостю — ссылка на вход с возвратом сюда. */}
+                    <a
+                      href={user ? `/api/people/${p.slug}/resume` : `/login?next=/people/${p.slug}`}
+                      target={user ? "_blank" : undefined}
+                      rel={user ? "noopener" : undefined}
+                      className="group flex h-full items-center gap-3 rounded-2xl bg-tone p-4 transition-colors hover:bg-tone-2"
+                    >
+                      <span aria-hidden className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-brand-ink">
+                        <FileText className="size-5" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm text-muted-foreground">{user ? "PDF" : "Откроется после входа"}</span>
+                        <span className="mt-0.5 block truncate font-semibold">Резюме</span>
+                      </span>
+                      <ArrowUpRight aria-hidden className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
+                    </a>
+                  </li>
+                )}
                 {p.links.map((l) => (
                   <li key={l.url}>
                     <a

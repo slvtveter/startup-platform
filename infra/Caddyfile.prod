@@ -16,6 +16,10 @@
 		-Server
 	}
 	# Загруженные файлы (KAN-34). Имя файла меняется при каждой загрузке, поэтому кеш вечный.
+	# Резюме — личные данные: отдаёт только api вошедшим (/api/people/{slug}/resume).
+	handle /media/resumes/* {
+		respond 404
+	}
 	handle /media/* {
 		root * /srv
 		header Cache-Control "public, max-age=31536000, immutable"

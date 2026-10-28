@@ -41,6 +41,8 @@ class Profile(TimestampMixin, Base):
     )
     looking_for: Mapped[list[str]] = mapped_column(ARRAY(String(16)), default=list)
     city: Mapped[str] = mapped_column(String(80), default="")
+    # Где учится или учился: «ВШЭ, 3 курс» — для студентов это главный «опыт».
+    education: Mapped[str] = mapped_column(String(120), default="", server_default="")
     contact_telegram: Mapped[str] = mapped_column(String(64), default="")
     show_email: Mapped[bool] = mapped_column(Boolean, default=True)
     is_published: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
@@ -64,6 +66,10 @@ class Profile(TimestampMixin, Base):
             if (media / f"{self.avatar_key}-{size}.webp").exists():
                 return f"/media/{self.avatar_key}-{size}.webp"
         return self.avatar_url
+
+    # Резюме PDF: лежит в media/resumes, наружу его отдаёт только api и только вошедшим.
+    resume_key: Mapped[str | None] = mapped_column(String(160))
+    resume_name: Mapped[str] = mapped_column(String(160), default="", server_default="")
 
     skills: Mapped[list[Skill]] = relationship(secondary=profile_skills, lazy="selectin")
     links: Mapped[list["ProfileLink"]] = relationship(

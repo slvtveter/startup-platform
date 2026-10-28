@@ -109,6 +109,27 @@ export async function Dashboard() {
         </Link>
       </section>
 
+      {profile && profile.completeness < 80 && (
+        <Link
+          href="/me/profile"
+          className="card-hover mt-3 flex flex-col gap-3 rounded-[28px] bg-tone px-5 py-5 hover:bg-tone-2 sm:flex-row sm:items-center sm:gap-6 sm:px-6"
+        >
+          <span className="min-w-0 flex-1">
+            <span className="flex items-baseline gap-3">
+              <span className="font-semibold">Профиль заполнен на {profile.completeness}%</span>
+              {profile.missing[0] && <span className="text-sm text-muted-foreground max-sm:hidden">дальше: {profile.missing[0].toLowerCase()}</span>}
+            </span>
+            <span aria-hidden className="mt-2.5 block h-2 overflow-hidden rounded-full bg-white">
+              <span className="block h-full rounded-full bg-brand" style={{ width: `${Math.max(profile.completeness, 3)}%` }} />
+            </span>
+          </span>
+          <span className="inline-flex shrink-0 items-center gap-1.5 text-sm font-bold text-brand-ink">
+            Дополнить профиль
+            <ArrowRightIcon aria-hidden className="size-4" />
+          </span>
+        </Link>
+      )}
+
       <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Panel title="Мои стартапы" href="/me/startups" more={myStartups.length > 0 ? "Управлять" : undefined}>
           {myStartups.length > 0 ? (

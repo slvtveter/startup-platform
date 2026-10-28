@@ -1033,6 +1033,66 @@
         }
       }
     },
+    "/api/profile/me/resume": {
+      "post": {
+        "tags": [
+          "profiles"
+        ],
+        "summary": "Upload My Resume",
+        "operationId": "upload_my_resume",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_my_resume"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyProfileOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "profiles"
+        ],
+        "summary": "Delete My Resume",
+        "operationId": "delete_my_resume",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyProfileOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/profile/me/publish": {
       "post": {
         "tags": [
@@ -1237,6 +1297,42 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/people/{slug}/resume": {
+      "get": {
+        "tags": [
+          "profiles"
+        ],
+        "summary": "Get Resume",
+        "description": "\u0420\u0435\u0437\u044e\u043c\u0435 \u0432\u0438\u0434\u044f\u0442 \u0442\u043e\u043b\u044c\u043a\u043e \u0432\u043e\u0448\u0435\u0434\u0448\u0438\u0435: \u0433\u043e\u0441\u0442\u044f\u043c \u0438 \u043f\u043e\u0438\u0441\u043a\u043e\u0432\u0438\u043a\u0430\u043c \u0444\u0430\u0439\u043b \u043d\u0435 \u043e\u0442\u0434\u0430\u0451\u043c.",
+        "operationId": "get_resume",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
           },
           "422": {
             "description": "Validation Error",
@@ -4095,6 +4191,20 @@
         ],
         "title": "Body_upload_my_avatar"
       },
+      "Body_upload_my_resume": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_my_resume"
+      },
       "Body_upload_startup_cover": {
         "properties": {
           "file": {
@@ -5223,6 +5333,16 @@
             "type": "string",
             "title": "Bio"
           },
+          "education": {
+            "type": "string",
+            "title": "Education",
+            "default": ""
+          },
+          "has_resume": {
+            "type": "boolean",
+            "title": "Has Resume",
+            "default": false
+          },
           "links": {
             "items": {
               "$ref": "#/components/schemas/LinkOut"
@@ -5249,6 +5369,11 @@
           "show_email": {
             "type": "boolean",
             "title": "Show Email"
+          },
+          "resume_name": {
+            "type": "string",
+            "title": "Resume Name",
+            "default": ""
           },
           "completeness": {
             "type": "integer",
@@ -5784,6 +5909,16 @@
             "type": "string",
             "title": "Bio"
           },
+          "education": {
+            "type": "string",
+            "title": "Education",
+            "default": ""
+          },
+          "has_resume": {
+            "type": "boolean",
+            "title": "Has Resume",
+            "default": false
+          },
           "links": {
             "items": {
               "$ref": "#/components/schemas/LinkOut"
@@ -5972,6 +6107,18 @@
               }
             ],
             "title": "City"
+          },
+          "education": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Education"
           },
           "contact_telegram": {
             "anyOf": [

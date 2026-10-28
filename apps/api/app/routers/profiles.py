@@ -1,12 +1,14 @@
+import urllib.parse
 from typing import Annotated
 
 from fastapi import APIRouter, Query, UploadFile
+from fastapi.responses import FileResponse
 
 from app.core.deps import CurrentUser, OptionalUser
 from app.db.session import DbSession
 from app.schemas.common import Page
 from app.schemas.profile import MyProfileOut, PersonCard, PersonDetail, ProfileUpdate, PublishIn
-from app.services import avatars
+from app.services import avatars, resumes
 from app.services import profiles as service
 
 router = APIRouter(tags=["profiles"])
@@ -34,6 +36,19 @@ async def upload_my_avatar(file: UploadFile, user: CurrentUser, db: DbSession) -
 @router.delete("/profile/me/avatar", response_model=MyProfileOut)
 async def delete_my_avatar(user: CurrentUser, db: DbSession) -> MyProfileOut:
     await avatars.remove(db, user.profile)
+    return await service.my_profile(db, user)
+
+
+@router.post("/profile/me/resume", response_model=MyProfileOut)
+async def upload_my_resume(file: UploadFile, user: CurrentUser, db: DbSession) -> MyProfileOut:
+    data = await file.read(resumes.MAX_BYTES + 1)
+    await resumes.upload(db, user.profile, data, file.filename or "")
+    return await service.my_profile(db, user)
+
+
+@router.delete("/profile/me/resume", response_model=MyProfileOut)
+async def delete_my_resume(user: CurrentUser, db: DbSession) -> MyProfileOut:
+    await resumes.remove(db, user.profile)
     return await service.my_profile(db, user)
 
 
@@ -65,3 +80,23 @@ async def list_people(
 @router.get("/people/{slug}", response_model=PersonDetail)
 async def get_person(slug: str, user: OptionalUser, db: DbSession) -> PersonDetail:
     return await service.to_detail(db, await service.get_public(db, slug, user))
+
+
+@router.get("/people/{slug}/resume", response_class=FileResponse)
+async def get_resume(slug: str, user: CurrentUser, db: DbSession) -> FileResponse:
+    """Резюме видят только вошедшие: гостям и поисковикам файл не отдаём."""
+    if user.profile is not None and user.profile.slug == slug:
+        p = user.profile
+    else:
+        p = await service.get_public(db, slug, user)
+    name = p.resume_name or "Резюме.pdf"
+    return FileResponse(
+        resumes.path_of(p),
+        media_type="application/pdf",
+        headers={
+            # inline: PDF открывается во вкладке браузера; имя — для «Сохранить как».
+            "Content-Disposition": f"inline; filename*=UTF-8''{urllib.parse.quote(name)}",
+            "Cache-Control": "private, no-store",
+            "X-Robots-Tag": "noindex",
+        },
+    )

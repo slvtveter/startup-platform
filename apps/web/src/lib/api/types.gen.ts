@@ -192,6 +192,16 @@ export type BodyUploadMyAvatar = {
 };
 
 /**
+ * Body_upload_my_resume
+ */
+export type BodyUploadMyResume = {
+    /**
+     * File
+     */
+    file: Blob | File;
+};
+
+/**
  * Body_upload_startup_cover
  */
 export type BodyUploadStartupCover = {
@@ -885,6 +895,14 @@ export type MyProfileOut = {
      */
     bio: string;
     /**
+     * Education
+     */
+    education?: string;
+    /**
+     * Has Resume
+     */
+    has_resume?: boolean;
+    /**
      * Links
      */
     links: Array<LinkOut>;
@@ -904,6 +922,10 @@ export type MyProfileOut = {
      * Show Email
      */
     show_email: boolean;
+    /**
+     * Resume Name
+     */
+    resume_name?: string;
     /**
      * Completeness
      */
@@ -1202,6 +1224,14 @@ export type PersonDetail = {
      */
     bio: string;
     /**
+     * Education
+     */
+    education?: string;
+    /**
+     * Has Resume
+     */
+    has_resume?: boolean;
+    /**
      * Links
      */
     links: Array<LinkOut>;
@@ -1281,6 +1311,10 @@ export type ProfileUpdate = {
      * City
      */
     city?: string | null;
+    /**
+     * Education
+     */
+    education?: string | null;
     /**
      * Contact Telegram
      */
@@ -2766,6 +2800,47 @@ export type UploadMyAvatarResponses = {
 
 export type UploadMyAvatarResponse = UploadMyAvatarResponses[keyof UploadMyAvatarResponses];
 
+export type DeleteMyResumeData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/profile/me/resume';
+};
+
+export type DeleteMyResumeResponses = {
+    /**
+     * Successful Response
+     */
+    200: MyProfileOut;
+};
+
+export type DeleteMyResumeResponse = DeleteMyResumeResponses[keyof DeleteMyResumeResponses];
+
+export type UploadMyResumeData = {
+    body: BodyUploadMyResume;
+    path?: never;
+    query?: never;
+    url: '/api/profile/me/resume';
+};
+
+export type UploadMyResumeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UploadMyResumeError = UploadMyResumeErrors[keyof UploadMyResumeErrors];
+
+export type UploadMyResumeResponses = {
+    /**
+     * Successful Response
+     */
+    200: MyProfileOut;
+};
+
+export type UploadMyResumeResponse = UploadMyResumeResponses[keyof UploadMyResumeResponses];
+
 export type PublishMyProfileData = {
     body: PublishIn;
     path?: never;
@@ -2878,6 +2953,34 @@ export type GetPersonResponses = {
 };
 
 export type GetPersonResponse = GetPersonResponses[keyof GetPersonResponses];
+
+export type GetResumeData = {
+    body?: never;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/people/{slug}/resume';
+};
+
+export type GetResumeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetResumeError = GetResumeErrors[keyof GetResumeErrors];
+
+export type GetResumeResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type ListStartupsData = {
     body?: never;

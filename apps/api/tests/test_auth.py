@@ -35,7 +35,7 @@ async def test_register_needs_code_from_mail(client):
     code = _code_from_mail()
     assert code in msg["Subject"]
     html = msg.get_body(("html",)).get_content()
-    assert "logo-email.png" in html and "Подтвердите почту" in html
+    assert "envola" in html and "Подтвердите почту" in html
 
     # Без кода войти по паролю нельзя: снова уходит код.
     r = await client.post(
