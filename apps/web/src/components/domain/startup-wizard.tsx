@@ -197,7 +197,7 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
         className="mt-6 overflow-hidden rounded-3xl border bg-card p-6 sm:p-10"
       >
         <div key={current.key} ref={stepRef} className={dir === "forward" ? "wizard-step-forward" : "wizard-step-back"}>
-          <h2 className="text-2xl sm:text-3xl">{current.title}</h2>
+          <h2 className="text-2xl sm:text-[32px]">{current.title}</h2>
           <p className="mt-2 text-muted-foreground">{current.hint}</p>
 
           <div className="mt-6">

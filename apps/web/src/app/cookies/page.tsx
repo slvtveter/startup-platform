@@ -10,7 +10,7 @@ const COOKIES = [
 export default function CookiesPage() {
   return (
     <Container className="max-w-2xl py-16">
-      <h1 className="text-3xl font-bold">Cookie и данные</h1>
+      <h1 className="text-[32px] font-bold">Cookie и данные</h1>
       <p className="mt-4 text-muted-foreground">
         Cookie — небольшая запись, которую сайт сохраняет в браузере. Мы используем только необходимые cookie. Рекламы,
         счётчиков и сторонних трекеров на сайте нет.
