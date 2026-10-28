@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { register, uniqueEmail, verifyEmailViaMailpit } from "./helpers";
+import { register, uniqueEmail } from "./helpers";
 
 const MAILPIT = process.env.MAILPIT_URL ?? "http://localhost:8025";
 
@@ -9,7 +9,6 @@ test("user changes email after confirming the new address", async ({ page }) => 
   const oldEmail = uniqueEmail("old");
   const newEmail = uniqueEmail("new");
   await register(page, oldEmail);
-  await verifyEmailViaMailpit(page, oldEmail);
 
   await page.goto("/me/settings");
   // Форма раскрывается по кнопке: смена почты нужна редко.

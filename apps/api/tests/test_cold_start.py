@@ -4,8 +4,7 @@ from sqlalchemy import select
 
 from app.db.session import SessionLocal
 from app.models import AdminAction
-from app.services import mail
-from tests.test_auth import _token_from_mail
+from tests.test_auth import _code_from_mail
 from tests.test_startups import ROLE, STARTUP, create_published
 
 PLATFORM_STARTUP = STARTUP | {"title": "Чужой проект", "owner_email": "Founder@Mail.ru"}
@@ -74,10 +73,10 @@ async def test_platform_startup_goes_to_owner_after_email_verification(make_user
         "/api/auth/register", json={"email": "founder@mail.ru", "password": "secret-pass-1"}
     )
     assert (await founder.get(f"/api/startups/{s['slug']}")).json()["is_owner"] is False
-    mail_count = len(mail.outbox)
-    assert mail_count >= 1
-    token = _token_from_mail()
-    assert (await founder.post("/api/auth/verify-email", json={"token": token})).status_code == 200
+    r = await founder.post(
+        "/api/auth/code", json={"email": "founder@mail.ru", "code": _code_from_mail()}
+    )
+    assert r.status_code == 200
 
     detail = (await founder.get(f"/api/startups/{s['slug']}")).json()
     assert detail["is_owner"] is True

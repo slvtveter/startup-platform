@@ -350,6 +350,32 @@ export type ClientEventIn = {
 };
 
 /**
+ * CodeIn
+ */
+export type CodeIn = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Code
+     */
+    code: string;
+};
+
+/**
+ * CodeSentOut
+ *
+ * Код ушёл на почту: дальше шаг ввода кода.
+ */
+export type CodeSentOut = {
+    /**
+     * Email
+     */
+    email: string;
+};
+
+/**
  * CohortRow
  */
 export type CohortRow = {
@@ -1378,6 +1404,38 @@ export type ReportReason = 'spam' | 'fake' | 'offensive' | 'scam' | 'other';
 export type ReportStatus = 'new' | 'resolved' | 'dismissed';
 
 /**
+ * ResendCodeIn
+ */
+export type ResendCodeIn = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Purpose
+     */
+    purpose?: 'verify' | 'reset';
+};
+
+/**
+ * ResetCodeIn
+ */
+export type ResetCodeIn = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Password
+     */
+    password: string;
+};
+
+/**
  * ResetIn
  */
 export type ResetIn = {
@@ -1569,6 +1627,19 @@ export type SessionOut = {
 };
 
 /**
+ * SignInOut
+ *
+ * Вход кодом из письма или через Telegram/VK: created — аккаунт только что создан.
+ */
+export type SignInOut = {
+    me: MeOut;
+    /**
+     * Created
+     */
+    created: boolean;
+};
+
+/**
  * SkillOut
  */
 export type SkillOut = {
@@ -1584,17 +1655,6 @@ export type SkillOut = {
      * Category
      */
     category: string;
-};
-
-/**
- * SocialLoginOut
- */
-export type SocialLoginOut = {
-    me: MeOut;
-    /**
-     * Created
-     */
-    created: boolean;
 };
 
 /**
@@ -2074,10 +2134,60 @@ export type RegisterResponses = {
     /**
      * Successful Response
      */
-    201: MeOut;
+    202: CodeSentOut;
 };
 
 export type RegisterResponse = RegisterResponses[keyof RegisterResponses];
+
+export type VerifyCodeData = {
+    body: CodeIn;
+    path?: never;
+    query?: never;
+    url: '/api/auth/code';
+};
+
+export type VerifyCodeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type VerifyCodeError = VerifyCodeErrors[keyof VerifyCodeErrors];
+
+export type VerifyCodeResponses = {
+    /**
+     * Successful Response
+     */
+    200: SignInOut;
+};
+
+export type VerifyCodeResponse = VerifyCodeResponses[keyof VerifyCodeResponses];
+
+export type ResendCodeData = {
+    body: ResendCodeIn;
+    path?: never;
+    query?: never;
+    url: '/api/auth/code/resend';
+};
+
+export type ResendCodeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ResendCodeError = ResendCodeErrors[keyof ResendCodeErrors];
+
+export type ResendCodeResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type ResendCodeResponse = ResendCodeResponses[keyof ResendCodeResponses];
 
 export type LoginData = {
     body: LoginIn;
@@ -2087,6 +2197,10 @@ export type LoginData = {
 };
 
 export type LoginErrors = {
+    /**
+     * email_unverified
+     */
+    403: unknown;
     /**
      * Validation Error
      */
@@ -2201,6 +2315,31 @@ export type ForgotPasswordResponses = {
 };
 
 export type ForgotPasswordResponse = ForgotPasswordResponses[keyof ForgotPasswordResponses];
+
+export type ResetPasswordWithCodeData = {
+    body: ResetCodeIn;
+    path?: never;
+    query?: never;
+    url: '/api/auth/password/reset-code';
+};
+
+export type ResetPasswordWithCodeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ResetPasswordWithCodeError = ResetPasswordWithCodeErrors[keyof ResetPasswordWithCodeErrors];
+
+export type ResetPasswordWithCodeResponses = {
+    /**
+     * Successful Response
+     */
+    200: MeOut;
+};
+
+export type ResetPasswordWithCodeResponse = ResetPasswordWithCodeResponses[keyof ResetPasswordWithCodeResponses];
 
 export type ResetPasswordData = {
     body: ResetIn;
@@ -2418,7 +2557,7 @@ export type TelegramLoginResponses = {
     /**
      * Successful Response
      */
-    200: SocialLoginOut;
+    200: SignInOut;
 };
 
 export type TelegramLoginResponse = TelegramLoginResponses[keyof TelegramLoginResponses];

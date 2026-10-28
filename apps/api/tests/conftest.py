@@ -23,12 +23,14 @@ os.environ.update(
 import asyncpg  # noqa: E402
 import pytest  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
-from sqlalchemy import text, update  # noqa: E402
+from sqlalchemy import select, text, update  # noqa: E402
 
+from app.core.config import get_settings  # noqa: E402
 from app.db.base import Base  # noqa: E402
 from app.db.session import SessionLocal  # noqa: E402
 from app.main import app  # noqa: E402
 from app.models import Role, Skill, User  # noqa: E402
+from app.services import auth as auth_service  # noqa: E402
 from app.services import mail  # noqa: E402
 
 API_DIR = Path(__file__).resolve().parents[1]
@@ -119,16 +121,21 @@ async def make_user(catalog) -> AsyncIterator[MakeUser]:
         c = _new_client()
         clients.append(c)
         r = await c.post("/api/auth/register", json={"email": email, "password": "secret-pass-1"})
-        assert r.status_code == 201, r.text
+        assert r.status_code == 202, r.text
         values: dict = {}
         if verified:
             values["email_verified_at"] = text("now()")
         if admin:
             values["is_admin"] = True
-        if values:
-            async with SessionLocal() as db:
+        async with SessionLocal() as db:
+            if values:
                 await db.execute(update(User).where(User.email == email).values(**values))
-                await db.commit()
+            # Сессия без кода из письма: так можно получить и неподтверждённого пользователя
+            # (у старых аккаунтов такие сессии остались).
+            user = await db.scalar(select(User).where(User.email == email))
+            token = await auth_service.create_session(db, user)
+            await db.commit()
+        c.cookies.set(get_settings().session_cookie_name, token)
         if published:
             r = await c.patch(
                 "/api/profile/me",

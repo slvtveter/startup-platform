@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { register, uniqueEmail, verifyEmailViaMailpit } from "./helpers";
+import { register, uniqueEmail } from "./helpers";
 
 /**
  * KAN-75: админ переносит чужой открытый проект на платформу без SQL,
@@ -39,7 +39,6 @@ test("admin moves a startup to the platform and the founder claims it", async ({
   const founderCtx = await browser.newContext();
   const founder = await founderCtx.newPage();
   await register(founder, founderEmail);
-  await verifyEmailViaMailpit(founder, founderEmail);
   await founder.goto(url);
   await expect(founder.getByText(/Это твой (стартап|проект)/)).toBeVisible();
 

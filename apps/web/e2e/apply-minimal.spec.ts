@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { uniqueEmail, verifyEmailViaMailpit } from "./helpers";
+import { fillRegistration, uniqueEmail } from "./helpers";
 
 /**
  * KAN-83 (гипотезы H4, H6): гость откликается на место, ни разу не открыв /me/profile.
@@ -19,21 +19,12 @@ test("guest applies to a seat without visiting the profile page", async ({ page 
   await page.getByRole("main").getByRole("link", { name: "Регистрация" }).click();
   await page.waitForURL(/\/register\?next=/);
   await expect(page.getByRole("heading", { name: "Создать аккаунт" })).toBeVisible();
-  await page.waitForLoadState("networkidle");
 
+  // Почта подтверждается кодом прямо при регистрации — после него сразу назад к роли.
   const email = uniqueEmail("seeker");
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Пароль").fill("e2e-password-1");
-  await page.getByText("Мне есть 18 лет").click();
-  await page.getByRole("button", { name: "Создать аккаунт" }).click();
+  await fillRegistration(page, email);
   await page.waitForURL(/\/startups\/vkusnoryadom\?apply=/);
-  const returnUrl = page.url();
 
-  // Без подтверждённой почты диалог объясняет, что делать.
-  await expect(page.getByText("Подтверди почту")).toBeVisible();
-  await verifyEmailViaMailpit(page, email);
-
-  await page.goto(returnUrl);
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
   await dialog.getByLabel("Как тебя зовут").fill("Пётр Новиков");

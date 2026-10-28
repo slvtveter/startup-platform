@@ -9,17 +9,22 @@ from app.core.deps import CurrentUser, client_ip
 from app.core.security import hash_token
 from app.db.session import DbSession
 from app.models import User
+from app.models.enums import TokenPurpose
 from app.schemas.auth import (
     ChangeEmailIn,
     ChangePasswordIn,
+    CodeIn,
+    CodeSentOut,
     ForgotIn,
     LoginIn,
     MeOut,
     MeProfile,
     RegisterIn,
+    ResendCodeIn,
+    ResetCodeIn,
     ResetIn,
     SessionOut,
-    SocialLoginOut,
+    SignInOut,
     SocialProvidersOut,
     TelegramAuthIn,
     TokenIn,
@@ -67,16 +72,31 @@ def me_out(user: User) -> MeOut:
     )
 
 
-@router.post("/register", response_model=MeOut, status_code=201)
-async def register(data: RegisterIn, request: Request, response: Response, db: DbSession) -> MeOut:
-    user, token = await auth_service.register(
-        db, data.email, data.password, client_ip(request), data.utm_source, _ua(request)
-    )
+@router.post("/register", response_model=CodeSentOut, status_code=202)
+async def register(data: RegisterIn, request: Request, db: DbSession) -> CodeSentOut:
+    """Аккаунт создан, на почту ушёл код. Вход — после POST /auth/code."""
+    await auth_service.register(db, data.email, data.password, client_ip(request), data.utm_source)
+    return CodeSentOut(email=data.email)
+
+
+@router.post("/code", response_model=SignInOut)
+async def verify_code(
+    data: CodeIn, request: Request, response: Response, db: DbSession
+) -> SignInOut:
+    """Код из письма: почта подтверждена, ставим сессию. created — аккаунт только что создан."""
+    user, token, created = await auth_service.verify_code(db, data.email, data.code, _ua(request))
     _set_cookie(response, token)
-    return me_out(user)
+    return SignInOut(me=me_out(user), created=created)
 
 
-@router.post("/login", response_model=MeOut)
+@router.post("/code/resend", response_model=OkOut)
+async def resend_code(data: ResendCodeIn, request: Request, db: DbSession) -> OkOut:
+    purpose = TokenPurpose.reset_code if data.purpose == "reset" else TokenPurpose.email_code
+    await auth_service.resend_code(db, data.email, purpose, client_ip(request))
+    return OkOut()
+
+
+@router.post("/login", response_model=MeOut, responses={403: {"description": "email_unverified"}})
 async def login(data: LoginIn, request: Request, response: Response, db: DbSession) -> MeOut:
     user, token = await auth_service.login(
         db, data.email, data.password, client_ip(request), _ua(request)
@@ -115,8 +135,20 @@ async def resend_verification(user: CurrentUser, db: DbSession) -> OkOut:
 
 @router.post("/password/forgot", response_model=OkOut)
 async def forgot_password(data: ForgotIn, request: Request, db: DbSession) -> OkOut:
-    await auth_service.forgot_password(db, data.email.lower(), client_ip(request))
+    await auth_service.forgot_password(db, data.email, client_ip(request))
     return OkOut()
+
+
+@router.post("/password/reset-code", response_model=MeOut)
+async def reset_password_with_code(
+    data: ResetCodeIn, request: Request, response: Response, db: DbSession
+) -> MeOut:
+    """Код из письма и новый пароль: пароль сменён, человек сразу вошёл."""
+    user, token = await auth_service.reset_with_code(
+        db, data.email, data.code, data.password, _ua(request)
+    )
+    _set_cookie(response, token)
+    return me_out(user)
 
 
 @router.post("/password/reset", response_model=OkOut)
@@ -193,10 +225,10 @@ async def social_providers() -> SocialProvidersOut:
     )
 
 
-@router.post("/telegram", response_model=SocialLoginOut)
+@router.post("/telegram", response_model=SignInOut)
 async def telegram_login(
     data: TelegramAuthIn, request: Request, response: Response, db: DbSession
-) -> SocialLoginOut:
+) -> SignInOut:
     fields = {k: str(v) for k, v in data.model_dump().items() if v not in ("", None)}
     social.check_telegram(fields)
     name = " ".join(x for x in (data.first_name, data.last_name) if x) or data.username
@@ -204,7 +236,7 @@ async def telegram_login(
         db, "telegram", str(data.id), name, _ua(request)
     )
     _set_cookie(response, token)
-    return SocialLoginOut(me=me_out(user), created=created)
+    return SignInOut(me=me_out(user), created=created)
 
 
 VK_COOKIE = "vk_oauth"

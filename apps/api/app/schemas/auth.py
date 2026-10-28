@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
@@ -24,12 +25,54 @@ class LoginIn(BaseModel):
         return v.strip().lower()
 
 
+class CodeIn(BaseModel):
+    email: EmailStr
+    code: str = Field(pattern=r"^\d{6}$")
+
+    @field_validator("email")
+    @classmethod
+    def normalize(cls, v: str) -> str:
+        return v.strip().lower()
+
+
+class ResendCodeIn(BaseModel):
+    email: EmailStr
+    purpose: Literal["verify", "reset"] = "verify"
+
+    @field_validator("email")
+    @classmethod
+    def normalize(cls, v: str) -> str:
+        return v.strip().lower()
+
+
+class ResetCodeIn(BaseModel):
+    email: EmailStr
+    code: str = Field(pattern=r"^\d{6}$")
+    password: str = Field(min_length=8, max_length=128)
+
+    @field_validator("email")
+    @classmethod
+    def normalize(cls, v: str) -> str:
+        return v.strip().lower()
+
+
+class CodeSentOut(BaseModel):
+    """Код ушёл на почту: дальше шаг ввода кода."""
+
+    email: str
+
+
 class TokenIn(BaseModel):
     token: str = Field(min_length=10, max_length=200)
 
 
 class ForgotIn(BaseModel):
     email: EmailStr
+
+    @field_validator("email")
+    @classmethod
+    def normalize(cls, v: str) -> str:
+        return v.strip().lower()
 
 
 class ResetIn(BaseModel):
@@ -88,6 +131,8 @@ class TelegramAuthIn(BaseModel):
     hash: str
 
 
-class SocialLoginOut(BaseModel):
+class SignInOut(BaseModel):
+    """Вход кодом из письма или через Telegram/VK: created — аккаунт только что создан."""
+
     me: "MeOut"
     created: bool

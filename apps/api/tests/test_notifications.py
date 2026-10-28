@@ -31,7 +31,9 @@ async def test_notification_has_html_and_unsubscribe_works_without_login(make_us
     msg = next(m for m in mail.outbox if m["To"] == "alina@mail.ru")
     text, html = _parts(msg)
     assert "Отписаться от таких писем" in text and "envola" in html
-    assert "<script" not in html and "<img" not in html
+    # Из картинок только логотип с нашего домена: пикселей отслеживания нет.
+    assert "<script" not in html
+    assert re.findall(r'<img src="([^"]+)"', html) == ["http://localhost:8080/brand/logo-email.png"]
     url = re.search(r"(http\S+/unsubscribe\?\S+)", text).group(1)
     assert msg["List-Unsubscribe"] == f"<{url}>"
     # Отслеживание переходов и открытий у почтового сервиса выключено.

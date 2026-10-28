@@ -1,14 +1,30 @@
 import { Check } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 import { FACES, PHOTOS } from "@/lib/photos";
 
 /** Вход и регистрация: форма слева, справа фото с репликой — тот же «разговор», что на главной. */
-export function AuthCard({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
+export function AuthCard({
+  title,
+  subtitle,
+  tab,
+  next,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  /** Переключатель «Вход / Регистрация» над заголовком. */
+  tab?: "login" | "register";
+  /** Куда вернуть после входа: переносится между вкладками. */
+  next?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="mx-auto grid w-full max-w-[1360px] gap-3 px-4 pt-2 pb-12 sm:px-6 lg:min-h-[calc(100svh-84px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:px-10">
       <div className="grid place-items-center rounded-[28px] bg-tone px-4 py-10 sm:rounded-[36px] sm:py-16">
         <div className="w-full max-w-[420px] rounded-[28px] bg-card p-6 shadow-[0_24px_60px_-30px_rgb(15_27_45/0.25)] sm:p-9">
+          {tab && <AuthTabs active={tab} next={next} />}
           <h1 className="text-[32px] leading-[1.05] sm:text-[36px]">{title}</h1>
           {subtitle && <p className="mt-2.5 text-muted-foreground">{subtitle}</p>}
           <div className="mt-7">{children}</div>
@@ -37,6 +53,33 @@ export function AuthCard({ title, subtitle, children }: { title: string; subtitl
         </ul>
       </div>
     </div>
+  );
+}
+
+function AuthTabs({ active, next }: { active: "login" | "register"; next?: string }) {
+  const q = next ? `?next=${encodeURIComponent(next)}` : "";
+  const tabs = [
+    { key: "login", href: `/login${q}`, label: "Вход" },
+    { key: "register", href: `/register${q}`, label: "Регистрация" },
+  ] as const;
+  return (
+    <nav aria-label="Вход или регистрация" className="mb-7 grid grid-cols-2 gap-1 rounded-full bg-tone p-1">
+      {tabs.map((t) => (
+        <Link
+          key={t.key}
+          href={t.href}
+          replace
+          aria-current={t.key === active ? "page" : undefined}
+          className={
+            t.key === active
+              ? "rounded-full bg-white py-2.5 text-center text-sm font-bold shadow-[0_1px_3px_rgb(15_27_45/0.12)]"
+              : "rounded-full py-2.5 text-center text-sm font-semibold text-muted-foreground transition-colors hover:bg-tone-2 hover:text-foreground"
+          }
+        >
+          {t.label}
+        </Link>
+      ))}
+    </nav>
   );
 }
 

@@ -61,6 +61,9 @@ class TokenPurpose(StrEnum):
     verify_email = "verify_email"
     reset_password = "reset_password"
     change_email = "change_email"
+    # 6-значные коды из письма: подтверждение почты при регистрации/входе и сброс пароля.
+    email_code = "email_code"
+    reset_code = "reset_code"
 
 
 class LinkKind(StrEnum):

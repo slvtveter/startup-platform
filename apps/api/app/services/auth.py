@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 import secrets
 import uuid
 from datetime import UTC, datetime, timedelta
@@ -6,7 +8,7 @@ from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
-from app.core.errors import AppError, Conflict, Unauthorized
+from app.core.errors import AppError, Conflict, EmailUnverified, TooManyRequests, Unauthorized
 from app.core.security import check_password, hash_password_async, hash_token, new_token
 from app.models import EmailToken, Profile, Session, User
 from app.models.enums import TokenPurpose
@@ -129,6 +131,140 @@ async def _consume_email_token(
     return user, row
 
 
+# --- Коды из письма ---
+# Вход по почте подтверждаем 6-значным кодом: без него аккаунт на чужой адрес не получить.
+
+CODE_TTL = timedelta(minutes=15)
+# Неверных вводов на один код; дальше только новый код.
+CODE_ATTEMPTS = 5
+_WRONG_CODE = "Неверный код. Проверь письмо или запроси новый."
+
+
+def _code_hash(row_id: uuid.UUID, code: str) -> str:
+    # HMAC с секретом и id строки: по утёкшей таблице миллион вариантов не перебрать.
+    key = get_settings().secret_key.encode()
+    return hmac.new(key, f"{row_id}:{code}".encode(), hashlib.sha256).hexdigest()
+
+
+def _code_mail(purpose: TokenPurpose, code: str) -> tuple[str, str, str]:
+    """Тема, заголовок и текст письма с кодом. Код в теме виден прямо в уведомлении."""
+    if purpose == TokenPurpose.reset_code:
+        return (
+            f"{code} — код для сброса пароля Envola",
+            "Сброс пароля",
+            "Введите этот код на странице сброса пароля:\n\n"
+            f"{code}\n\nКод действует 15 минут. Если вы не запрашивали сброс, "
+            "просто проигнорируйте письмо: пароль останется прежним.",
+        )
+    return (
+        f"{code} — код подтверждения Envola",
+        "Подтвердите почту",
+        "Введите этот код на сайте, чтобы закончить вход:\n\n"
+        f"{code}\n\nКод действует 15 минут. Если это были не вы, просто проигнорируйте письмо.",
+    )
+
+
+async def send_code(db: AsyncSession, user: User, purpose: TokenPurpose) -> None:
+    """Новый код вместо прежнего: старые коды той же цели перестают работать."""
+    key = f"send-code:{user.id}"
+    await ratelimit.ensure_allowed(
+        db, key, message="Слишком много писем подряд. Попробуйте через 15 минут."
+    )
+    ratelimit.hit(db, key)
+    await db.execute(
+        update(EmailToken)
+        .where(
+            EmailToken.user_id == user.id,
+            EmailToken.purpose == purpose,
+            EmailToken.used_at.is_(None),
+        )
+        .values(used_at=_now())
+    )
+    code = f"{secrets.randbelow(10**6):06d}"
+    row_id = uuid.uuid4()
+    db.add(
+        EmailToken(
+            id=row_id,
+            user_id=user.id,
+            purpose=purpose,
+            token_hash=_code_hash(row_id, code),
+            expires_at=_now() + CODE_TTL,
+        )
+    )
+    await ratelimit.reset(db, f"code:{user.id}")
+    await db.commit()
+    subject, title, body = _code_mail(purpose, code)
+    await mail.send_mail(user.email, subject, body, title=title)
+
+
+async def _check_code(db: AsyncSession, email: str, code: str, purpose: TokenPurpose) -> User:
+    user = await db.scalar(select(User).where(User.email == email))
+    if user is None or not user.is_active:
+        raise AppError(_WRONG_CODE)
+    key = f"code:{user.id}"
+    await ratelimit.ensure_allowed(
+        db, key, CODE_ATTEMPTS, "Слишком много неверных попыток. Запроси новый код."
+    )
+    row = await db.scalar(
+        select(EmailToken)
+        .where(
+            EmailToken.user_id == user.id,
+            EmailToken.purpose == purpose,
+            EmailToken.used_at.is_(None),
+        )
+        .order_by(EmailToken.created_at.desc())
+        .limit(1)
+    )
+    if row is None or row.expires_at < _now():
+        raise AppError("Код устарел. Запроси новый.")
+    if not hmac.compare_digest(row.token_hash, _code_hash(row.id, code)):
+        ratelimit.hit(db, key)
+        await db.commit()
+        raise AppError(_WRONG_CODE)
+    row.used_at = _now()
+    await ratelimit.reset(db, key)
+    return user
+
+
+async def _mark_verified(db: AsyncSession, user: User) -> bool:
+    """True, если почта подтверждена впервые."""
+    if user.email_verified_at is not None:
+        return False
+    user.email_verified_at = _now()
+    track(db, "email_verified", user.id, "user", user.id)
+    # Стартап, который админ перенёс на этот email, переходит к владельцу (KAN-75).
+    await startup_service.claim_pending(db, user)
+    return True
+
+
+async def verify_code(
+    db: AsyncSession, email: str, code: str, user_agent: str = ""
+) -> tuple[User, str, bool]:
+    """Код из письма после регистрации или входа: почта подтверждена, человек вошёл.
+
+    Третье значение — аккаунт только что создан (дальше развилка /welcome).
+    """
+    user = await _check_code(db, email, code, TokenPurpose.email_code)
+    first = await _mark_verified(db, user)
+    token = await create_session(db, user, user_agent)
+    await db.commit()
+    return user, token, first and _now() - user.created_at < timedelta(days=1)
+
+
+async def resend_code(db: AsyncSession, email: str, purpose: TokenPurpose, ip: str) -> None:
+    key = f"resend-code:{ip}"
+    await ratelimit.ensure_allowed(db, key, get_settings().auth_rate_limit * 4)
+    ratelimit.hit(db, key)
+    user = await db.scalar(select(User).where(User.email == email))
+    wanted = user is not None and user.is_active
+    if wanted and purpose == TokenPurpose.email_code:
+        wanted = not user.email_verified
+    if not wanted:
+        await db.commit()
+        return  # не раскрываем, есть ли такой пользователь
+    await send_code(db, user, purpose)
+
+
 async def resend_verification(db: AsyncSession, user: User) -> None:
     key = f"resend-verification:{user.id}"
     await ratelimit.ensure_allowed(db, key)
@@ -153,22 +289,29 @@ async def register(
     password: str,
     ip: str,
     utm_source: str | None,
-    user_agent: str = "",
-) -> tuple[User, str]:
+) -> None:
+    """Аккаунт без входа: войти можно только после кода из письма (verify_code)."""
     key = f"register:{ip}"
     await ratelimit.ensure_allowed(db, key)
     ratelimit.hit(db, key)
-    if await db.scalar(select(User.id).where(User.email == email)):
+    user = await db.scalar(select(User).where(User.email == email))
+    if user is not None and (user.email_verified or not user.is_active):
         await db.commit()
-        raise Conflict("Пользователь с таким email уже зарегистрирован")
-    user = User(email=email, password_hash=await hash_password_async(password))
-    user.profile = Profile(slug=f"u-{secrets.token_hex(4)}", looking_for=[], skills=[], links=[])
-    db.add(user)
-    await db.flush()
-    token = await create_session(db, user, user_agent)
-    track(db, "signup", user.id, "user", user.id, method="email", utm_source=utm_source or "direct")
-    await send_verification(db, user)  # делает commit
-    return user, token
+        raise Conflict("Аккаунт с этой почтой уже есть. Войди или восстанови пароль.")
+    if user is None:
+        user = User(email=email, password_hash=await hash_password_async(password))
+        user.profile = Profile(
+            slug=f"u-{secrets.token_hex(4)}", looking_for=[], skills=[], links=[]
+        )
+        db.add(user)
+        await db.flush()
+        utm = utm_source or "direct"
+        track(db, "signup", user.id, "user", user.id, method="email", utm_source=utm)
+    else:
+        # Почта так и не подтверждена: повторная регистрация задаёт пароль заново.
+        # Чужой аккаунт так не забрать — войти всё равно можно только с кодом из письма.
+        user.password_hash = await hash_password_async(password)
+    await send_code(db, user, TokenPurpose.email_code)  # делает commit
 
 
 async def login(
@@ -188,6 +331,12 @@ async def login(
     if not user.is_active:
         raise Unauthorized("Аккаунт заблокирован")
     await ratelimit.reset(db, key)
+    if not user.email_verified:
+        try:
+            await send_code(db, user, TokenPurpose.email_code)
+        except TooManyRequests:
+            await db.commit()  # код уже ушёл недавно: просим ввести его
+        raise EmailUnverified(f"Подтверди почту: мы отправили код на {user.email}")
     token = await create_session(db, user, user_agent)
     await db.commit()
     return user, token
@@ -195,11 +344,7 @@ async def login(
 
 async def verify_email(db: AsyncSession, token: str) -> User:
     user, _ = await _consume_email_token(db, token, TokenPurpose.verify_email)
-    if user.email_verified_at is None:
-        user.email_verified_at = _now()
-        track(db, "email_verified", user.id, "user", user.id)
-        # Стартап, который админ перенёс на этот email, переходит к владельцу (KAN-75).
-        await startup_service.claim_pending(db, user)
+    await _mark_verified(db, user)
     await db.commit()
     return user
 
@@ -212,15 +357,7 @@ async def forgot_password(db: AsyncSession, email: str, ip: str) -> None:
     if user is None or not user.is_active:
         await db.commit()
         return  # не раскрываем, есть ли такой пользователь
-    token = await _issue_email_token(db, user, TokenPurpose.reset_password, timedelta(hours=1))
-    await db.commit()
-    await mail.send_mail(
-        user.email,
-        "Сброс пароля",
-        "Чтобы задать новый пароль, перейдите по ссылке:\n"
-        f"{mail.link('/reset-password?token=' + token)}\n\n"
-        "Ссылка действует 1 час. Если вы не запрашивали сброс, просто проигнорируйте письмо.",
-    )
+    await send_code(db, user, TokenPurpose.reset_code)
 
 
 async def reset_password(db: AsyncSession, token: str, password: str) -> None:
@@ -228,6 +365,20 @@ async def reset_password(db: AsyncSession, token: str, password: str) -> None:
     user.password_hash = await hash_password_async(password)
     await db.execute(delete(Session).where(Session.user_id == user.id))
     await db.commit()
+
+
+async def reset_with_code(
+    db: AsyncSession, email: str, code: str, password: str, user_agent: str = ""
+) -> tuple[User, str]:
+    """Сброс по коду: новый пароль, остальные устройства выходят, человек сразу вошёл."""
+    user = await _check_code(db, email, code, TokenPurpose.reset_code)
+    user.password_hash = await hash_password_async(password)
+    await db.execute(delete(Session).where(Session.user_id == user.id))
+    await _mark_verified(db, user)  # код пришёл на эту почту — владение доказано
+    await ratelimit.reset(db, f"login:{email}")
+    token = await create_session(db, user, user_agent)
+    await db.commit()
+    return user, token
 
 
 async def change_password(
