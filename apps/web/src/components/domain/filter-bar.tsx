@@ -44,7 +44,7 @@ export function CatalogToolbar({
   resultLabel?: string;
 }) {
   const router = useRouter();
-  const go = (href: string) => router.replace(href, { scroll: false });
+  const go = (href: string) => router.push(href, { scroll: false });
   const q = typeof params.q === "string" && params.q ? params.q : null;
 
   const chips = groups.flatMap((g) =>
@@ -143,6 +143,8 @@ export function CatalogToolbar({
                       <DropdownMenuItem
                         key={o.value}
                         closeOnClick={false}
+                        role="menuitemcheckbox"
+                        aria-checked={on}
                         onClick={() => go(toggleHref(basePath, params, g.name, o.value))}
                         className="gap-2.5 rounded-lg py-2"
                       >

@@ -98,7 +98,7 @@ export function StartupEditor({ startup, roles, skills }: { startup?: StartupDet
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
-      <form onSubmit={save} className="grid gap-6 rounded-3xl border bg-card p-6 sm:p-8">
+      <form onSubmit={save} className="grid content-start gap-6 rounded-3xl bg-tone p-6 sm:p-8">
         <div>
           <Label htmlFor="title">Название</Label>
           <Input id="title" required minLength={2} maxLength={80} className="mt-1.5 h-11" value={form.title} onChange={(e) => set("title", e.target.value)} />
@@ -290,6 +290,12 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
     });
     setEditing(r.id);
     setAdding(true);
+    // Форма роли ниже экрана: показываем её и ставим курсор в название.
+    requestAnimationFrame(() => {
+      const el = document.getElementById("role-form");
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+      el?.querySelector<HTMLInputElement>("input")?.focus({ preventScroll: true });
+    });
   }
 
   async function toggle(id: string, is_open: boolean) {
@@ -350,7 +356,7 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
         ))}
       </ul>
       {adding ? (
-        <div className="mt-4 grid gap-3 border-t pt-4">
+        <div id="role-form" className="mt-4 grid scroll-mt-24 gap-3 border-t pt-4">
           {editing && <div className="font-bold">Изменить роль</div>}
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">

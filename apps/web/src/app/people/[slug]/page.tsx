@@ -69,10 +69,12 @@ export default async function PersonPage({ params }: Props) {
     p.city,
   ].filter(Boolean);
   const experience = p.memberships ?? [];
-  const month = new Intl.DateTimeFormat("ru-RU", {
-    month: "long",
-    year: "numeric",
-  });
+  // «с октября 2026»: в формате месяца с днём Intl даёт родительный падеж.
+  const sinceLabel = (iso: string) => {
+    const d = new Date(iso);
+    const m = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long" }).format(d).replace(/^\d+\s/, "");
+    return `${m} ${d.getFullYear()}`;
+  };
 
   const showBar = !p.is_demo && user?.profile?.slug !== p.slug;
 
@@ -156,7 +158,7 @@ export default async function PersonPage({ params }: Props) {
                       {m.role_title}
                     </span>
                     <span className="ml-auto text-sm text-muted-foreground">
-                      с {month.format(new Date(m.since)).replace(" г.", "")}
+                      с {sinceLabel(m.since)}
                     </span>
                   </li>
                 ))}

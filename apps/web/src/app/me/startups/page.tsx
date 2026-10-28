@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { StartupStatusBadge, TermsBadge } from "@/components/domain/badges";
 import { Container, EmptyState, PageHeader } from "@/components/domain/page-header";
+import { StartupCover } from "@/components/domain/startup-card";
 import { buttonVariants } from "@/components/ui/button";
 import { listMyStartups } from "@/lib/api";
 import { plural } from "@/lib/labels";
@@ -41,16 +42,21 @@ export default async function MyStartupsPage() {
       ) : (
         <div className="mt-8 grid gap-4">
           {items.map((s) => (
-            <div key={s.id} className="flex flex-col gap-4 rounded-2xl border bg-card p-5 sm:flex-row sm:items-center">
+            <div key={s.id} className="flex flex-col gap-4 rounded-[26px] bg-tone p-4 sm:flex-row sm:items-center sm:p-5">
+              <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden rounded-2xl bg-tone-2 sm:w-40">
+                <StartupCover startup={s} sizes="160px" />
+              </div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap gap-2">
                   <StartupStatusBadge status={s.status} />
                   <TermsBadge terms={s.terms} />
                   {s.is_hidden && <span className="rounded-full bg-destructive/10 px-2.5 py-0.5 text-xs font-bold text-destructive">Скрыт модератором</span>}
                 </div>
-                <div className="mt-2 text-xl font-bold">{s.title}</div>
+                <Link href={`/startups/${s.slug}`} className="mt-2 block text-xl font-extrabold tracking-[-0.02em] hover:text-brand-ink">
+                  {s.title}
+                </Link>
                 <div className="text-sm text-muted-foreground">
-                  Свободных мест: {s.open_roles.length}, {s.views_30d ?? 0} {plural(s.views_30d ?? 0, "просмотр", "просмотра", "просмотров")} за 30 дней
+                  {plural(s.open_roles.length, `${s.open_roles.length} место свободно`, `${s.open_roles.length} места свободно`, `${s.open_roles.length} мест свободно`)} · {s.views_30d ?? 0} {plural(s.views_30d ?? 0, "просмотр", "просмотра", "просмотров")} за месяц
                   {s.pending_applications > 0 && (
                     <span className="font-bold text-brand-ink">
                       , {s.pending_applications} {plural(s.pending_applications, "новый отклик", "новых отклика", "новых откликов")}

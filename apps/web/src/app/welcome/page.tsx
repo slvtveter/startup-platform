@@ -10,7 +10,7 @@ export default async function WelcomePage() {
   await requireMe("/welcome");
   return (
     <div className="mx-auto w-full max-w-[1100px] px-4 pt-10 pb-16 sm:px-6">
-      <p className="text-sm font-bold tracking-wide text-brand-ink uppercase">Шаг 1 из 2</p>
+      <p className="text-sm font-bold tracking-wide text-brand-ink uppercase">Добро пожаловать</p>
       <h1 className="mt-3 text-[clamp(32px,4.5vw,56px)] leading-[1.04]">С чего начнёшь?</h1>
       <p className="mt-3 max-w-[52ch] text-[17px] text-muted-foreground">
         Выбери, что ближе сейчас. Дальше подстроим профиль и покажем тех, кто тебе подходит. Передумать можно в любой момент.

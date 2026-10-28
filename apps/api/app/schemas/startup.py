@@ -1,12 +1,52 @@
+import re
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.models.enums import Stage, StartupStatus, Terms
 from app.schemas.catalog import RoleOut, SkillOut
 
 
-class StartupIn(BaseModel):
+def _website(v: str | None) -> str | None:
+    """«example.com» → «https://example.com»; не похожее на адрес сайта не принимаем."""
+    if v is None:
+        return v
+    v = v.strip()
+    if not v:
+        return ""
+    if not re.match(r"^https?://", v, re.I):
+        v = "https://" + v
+    if not re.match(r"^https?://[^\s/]+\.[^\s/]{2,}(/\S*)?$", v, re.I):
+        raise ValueError("Укажи адрес сайта, например example.com")
+    return v
+
+
+def _telegram(v: str | None) -> str | None:
+    """@channel, channel или t.me/channel → «@channel»."""
+    if v is None:
+        return v
+    v = v.strip()
+    if not v:
+        return ""
+    v = re.sub(r"^(https?://)?(t\.me|telegram\.me)/", "", v, flags=re.I).lstrip("@")
+    if not re.fullmatch(r"[A-Za-z0-9_]{4,32}", v):
+        raise ValueError("Укажи Telegram в виде @channel или t.me/channel")
+    return "@" + v
+
+
+class _Links(BaseModel):
+    @field_validator("website", check_fields=False)
+    @classmethod
+    def _check_website(cls, v):
+        return _website(v)
+
+    @field_validator("telegram", check_fields=False)
+    @classmethod
+    def _check_telegram(cls, v):
+        return _telegram(v)
+
+
+class StartupIn(_Links):
     title: str = Field(min_length=2, max_length=80)
     pitch: str = Field(default="", max_length=160)
     description: str = Field(default="", max_length=8000)
@@ -17,7 +57,7 @@ class StartupIn(BaseModel):
     telegram: str = Field(default="", max_length=100)
 
 
-class StartupUpdate(BaseModel):
+class StartupUpdate(_Links):
     title: str | None = Field(default=None, min_length=2, max_length=80)
     pitch: str | None = Field(default=None, max_length=160)
     description: str | None = Field(default=None, max_length=8000)

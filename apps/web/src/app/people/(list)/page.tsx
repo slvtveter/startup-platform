@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { CatalogToolbar } from "@/components/domain/filter-bar";
 import { Pager, asList, type SearchParams } from "@/components/domain/filters";
-import { Container, EmptyState, PageHeader } from "@/components/domain/page-header";
+import { Container, EmptyState } from "@/components/domain/page-header";
 import { PeopleTabs } from "@/components/catalog/people-tabs";
 import { PersonCard } from "@/components/domain/person-card";
 import { buttonVariants } from "@/components/ui/button";
@@ -37,13 +37,14 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
 
   return (
     <Container>
-      <PageHeader
-        title="Люди"
-        description="Напиши первым: обсудить идею, позвать в проект или просто познакомиться. Контакты открываются, только когда согласны оба."
-      />
-      <div className="mt-6">
+      {/* Шапка раздела «Люди» такая же, как на вкладке «Сообщники»: переключатель не прыгает. */}
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+        <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">Люди</h1>
         <PeopleTabs active="all" cofounders={cof?.total} />
       </div>
+      <p className="mt-3 max-w-2xl text-[17px] text-muted-foreground">
+        Напиши первым: обсудить идею, позвать в проект или просто познакомиться. Контакты открываются, только когда согласны оба.
+      </p>
 
       <div className="mt-8">
         <CatalogToolbar

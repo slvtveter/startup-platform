@@ -23,7 +23,7 @@ export function PersonPhoto({ person, className, eager }: { person: PersonCardDa
       <img
         src={url}
         srcSet={url.endsWith("-1024.webp") ? `${url.replace("-1024.webp", "-512.webp")} 512w, ${url} 1024w` : undefined}
-        sizes="(min-width: 640px) 340px, 104px"
+        sizes="(min-width: 640px) 290px, 104px"
         alt=""
         loading={eager ? "eager" : "lazy"}
         decoding="async"
@@ -94,7 +94,7 @@ export function PersonCard({
             </span>
           )}
           <h3 className="truncate text-lg leading-6 font-extrabold tracking-[-0.02em]">{person.display_name}</h3>
-          <p className="truncate text-sm leading-5 text-muted-foreground">{role || "\u00A0"}</p>
+          <p className="text-sm leading-5 text-muted-foreground max-sm:line-clamp-2 sm:truncate">{role || "\u00A0"}</p>
           <p className="mt-2.5 line-clamp-2 min-h-10 text-sm leading-5 max-sm:mt-1.5">{person.headline || "\u00A0"}</p>
           <span className="mt-3 flex h-6 min-w-0 items-center gap-1 overflow-hidden max-sm:mt-2" aria-label="Навыки">
             {skills.map((s, i) => (

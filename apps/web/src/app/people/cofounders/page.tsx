@@ -49,7 +49,7 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
   return (
     <>
       <div className="mx-auto w-full max-w-[1360px] px-4 pt-2 sm:px-6 lg:px-10">
-        <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-3 pt-6">
+        <div className="mb-6 flex flex-wrap items-center gap-x-6 gap-y-3 pt-6">
           <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">Люди</h1>
           <PeopleTabs active="cofounders" cofounders={total} />
         </div>
@@ -84,17 +84,8 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
       </div>
 
       <Container className="pt-16">
-        <ol className="grid gap-3 md:grid-cols-3">
-          {STEPS.map(([title, text], i) => (
-            <li key={title} className="rounded-[28px] bg-tone p-6">
-              <span className="grid size-10 place-items-center rounded-full bg-white text-base font-extrabold text-brand-ink">{i + 1}</span>
-              <h3 className="mt-5 text-2xl font-extrabold tracking-[-0.03em]">{title}</h3>
-              <p className="mt-2 text-muted-foreground">{text}</p>
-            </li>
-          ))}
-        </ol>
 
-        <section id="people" aria-labelledby="people-h" className="scroll-mt-24 pt-16">
+        <section id="people" aria-labelledby="people-h" className="scroll-mt-24 pt-4">
           <div className="mb-8 flex flex-wrap items-end gap-x-10 gap-y-3">
             <h2 id="people-h" className="max-w-[16ch] text-[clamp(30px,3.6vw,48px)] leading-[1.04]">
               Ищут сообщников прямо сейчас
@@ -121,6 +112,18 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
               <ArrowRight aria-hidden />
             </Link>
           )}
+        </section>
+
+        <section aria-label="Как это работает" className="pt-16">
+          <ol className="grid gap-3 md:grid-cols-3">
+          {STEPS.map(([title, text], i) => (
+            <li key={title} className="rounded-[28px] bg-tone p-6">
+              <span className="grid size-10 place-items-center rounded-full bg-white text-base font-extrabold text-brand-ink">{i + 1}</span>
+              <h3 className="mt-5 text-2xl font-extrabold tracking-[-0.03em]">{title}</h3>
+              <p className="mt-2 text-muted-foreground">{text}</p>
+            </li>
+          ))}
+          </ol>
         </section>
 
         <section aria-labelledby="starters-h" className="pt-20">

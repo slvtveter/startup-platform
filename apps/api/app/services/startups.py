@@ -2,7 +2,7 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from statistics import median
 
-from sqlalchemy import Select, and_, exists, func, or_, select
+from sqlalchemy import Select, and_, exists, false, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.demo import is_demo
@@ -443,7 +443,9 @@ async def list_public(
         stmt = stmt.where(Startup.stage.in_(stages))
     q = (q or "").strip()
     rank = None
-    if q:
+    if q and not search.has_text(q):
+        stmt = stmt.where(false())
+    elif q:
         # Стартап находится по своему тексту, по открытой роли (название, тип роли) и навыкам роли.
         pattern = search.like(q)
         open_role = exists().where(
