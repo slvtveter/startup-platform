@@ -3,6 +3,7 @@ import { Suspense } from "react";
 
 import { AuthCard } from "@/components/auth/auth-card";
 import { AuthForm } from "@/components/auth/auth-form";
+import { SocialButtons } from "@/components/auth/social-buttons";
 
 export const metadata: Metadata = { title: "Регистрация" };
 
@@ -11,6 +12,9 @@ export default function RegisterPage() {
     <AuthCard title="Создать аккаунт" subtitle="Займёт минуту. Профиль заполним на следующем шаге.">
       <Suspense>
         <AuthForm mode="register" />
+        <div className="mt-4">
+          <SocialButtons />
+        </div>
       </Suspense>
     </AuthCard>
   );

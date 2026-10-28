@@ -60,6 +60,9 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       MAIL_FROM: ${MAIL_FROM}
       MEDIA_DIR: /media
+      # Вход через соцсети: пусто — кнопки скрыты (docs/deploy.md).
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      VK_CLIENT_ID: ${VK_CLIENT_ID:-}
     volumes:
       - media:/media
     # Миграции применяются при старте контейнера (CMD в Dockerfile).

@@ -122,3 +122,12 @@ GlitchTip для ошибок и Uptime Kuma для доступности ст�
 - Примеры (3 стартапа и 7 человек с пометкой «Пример»): `... exec api python -m app.scripts.demo add`.
   Почта у них `@demo.invalid`: войти нельзя, писем нет, откликнуться, пригласить и написать нельзя.
   Когда появятся настоящие стартапы: `... exec api python -m app.scripts.demo remove` — удалит и аватарки.
+
+## Вход через Telegram и VK ID
+
+Код готов, кнопки появятся сами, когда в `/opt/startup-platform/.env.prod` будут ключи (после правки — `export IMAGE_TAG=$(cat .deployed-tag)` и `docker compose -f compose.prod.yml --env-file .env.prod up -d api`):
+
+- **Telegram:** создать бота у @BotFather, токен → `TELEGRAM_BOT_TOKEN=...`; там же `/setdomain` → `envola.ru`.
+- **VK ID:** приложение на id.vk.com/business (тип «Веб»), доверенный redirect URL `https://envola.ru/api/auth/vk/callback`, ID приложения → `VK_CLIENT_ID=...`.
+
+Вошедшие так пользователи получают служебный email `…@users.invalid` (писем на него нет), почту можно указать в настройках.

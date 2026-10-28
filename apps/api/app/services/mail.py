@@ -124,7 +124,8 @@ async def send_mail(
     не будет, иначе в письмо добавится ссылка отписки. Без kind письмо служебное.
     В тестах (mail_backend=memory) письмо сразу попадает в outbox.
     """
-    if is_demo_email(to):
+    # Демо и вошедшие через Telegram/VK без почты: домен .invalid письма не принимает.
+    if is_demo_email(to) or to.lower().endswith(".invalid"):
         return
     unsubscribe = None
     if kind is not None and user is not None:

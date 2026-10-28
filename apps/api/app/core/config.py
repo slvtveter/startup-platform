@@ -12,6 +12,10 @@ class Settings(BaseSettings):
 
     # Публичный адрес сайта: из него строятся ссылки в письмах.
     site_url: str = "http://localhost:8080"
+    # Вход через соцсети: пусто — кнопка не показывается. Токен бота от @BotFather (домен бота
+    # задаётся там же командой /setdomain), client_id приложения VK ID (id.vk.com/business).
+    telegram_bot_token: str = ""
+    vk_client_id: str = ""
     # Разрешённые Origin для изменяющих запросов (защита от CSRF).
     allowed_origins: list[str] = ["http://localhost:8080", "http://localhost:3000"]
 

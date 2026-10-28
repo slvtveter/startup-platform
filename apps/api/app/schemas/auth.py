@@ -68,3 +68,26 @@ class MeOut(BaseModel):
     is_admin: bool
     email_verified: bool
     profile: MeProfile | None
+
+
+class SocialProvidersOut(BaseModel):
+    telegram: bool
+    vk: bool
+    telegram_bot_id: str | None = None
+
+
+class TelegramAuthIn(BaseModel):
+    """Данные из oauth.telegram.org как есть: подпись проверяется по всем полям."""
+
+    id: int
+    first_name: str = ""
+    last_name: str = ""
+    username: str = ""
+    photo_url: str = ""
+    auth_date: int
+    hash: str
+
+
+class SocialLoginOut(BaseModel):
+    me: "MeOut"
+    created: bool
