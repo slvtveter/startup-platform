@@ -21,7 +21,7 @@ export function UnsubscribeConfirm({ u, k, t }: { u: string; k: string; t: strin
   if (state.done)
     return (
       <div>
-        <h1 className="text-2xl sm:text-3xl">Готово, больше не пришлём</h1>
+        <h1 className="text-2xl sm:text-[32px]">Готово, больше не пришлём</h1>
         <p className="mt-3 text-muted-foreground">
           Вы отписались от писем «{state.done}». Включить их обратно можно в настройках аккаунта.
         </p>
@@ -32,7 +32,7 @@ export function UnsubscribeConfirm({ u, k, t }: { u: string; k: string; t: strin
     );
   return (
     <div>
-      <h1 className="text-2xl sm:text-3xl">Отписаться от писем?</h1>
+      <h1 className="text-2xl sm:text-[32px]">Отписаться от писем?</h1>
       <p className="mt-3 text-muted-foreground">
         Письма о входе и сбросе пароля продолжат приходить: без них нельзя восстановить доступ.
       </p>

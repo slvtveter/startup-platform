@@ -180,7 +180,7 @@ export async function Dashboard() {
                 <s.icon aria-hidden className={cn("size-4 max-sm:hidden", s.value > 0 ? "text-brand-ink" : "text-muted-foreground")} />
                 {s.label}
               </span>
-              <span className="mt-1 text-xl font-extrabold tracking-[-0.03em] tabular-nums sm:mt-3 sm:text-3xl">{s.value}</span>
+              <span className="mt-1 text-xl font-extrabold tracking-[-0.03em] tabular-nums sm:mt-3 sm:text-[32px]">{s.value}</span>
               <span className="mt-0.5 hidden text-xs text-muted-foreground sm:block">{s.hint}</span>
             </Link>
           </li>
