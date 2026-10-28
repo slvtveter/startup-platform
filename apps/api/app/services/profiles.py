@@ -1,4 +1,4 @@
-from sqlalchemy import Select, and_, exists, func, or_, select
+from sqlalchemy import Select, and_, exists, false, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.demo import is_demo
@@ -256,7 +256,9 @@ async def list_people(
     q = (q or "").strip()
     # Сначала профили с описанием: пустые карточки в начале каталога отталкивают основателей.
     order = [(Profile.headline == "").asc(), Profile.updated_at.desc()]
-    if q:
+    if q and not search.has_text(q):
+        stmt = stmt.where(false())
+    elif q:
         # Человек находится по имени, тексту о себе, роли, навыкам и городу.
         pattern = search.like(q)
         role_hit = exists().where(Role.id == Profile.primary_role_id, Role.name.ilike(pattern))

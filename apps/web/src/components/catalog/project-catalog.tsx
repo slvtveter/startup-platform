@@ -67,7 +67,7 @@ export async function ProjectCatalog({ mode, params }: { mode: "ideas" | "startu
         actions={
           <Link href="/startups/new" className={buttonVariants()}>
             <Plus aria-hidden />
-            Предложить идею
+            {mode === "ideas" ? "Предложить идею" : "Добавить стартап"}
           </Link>
         }
       />
@@ -102,14 +102,14 @@ export async function ProjectCatalog({ mode, params }: { mode: "ideas" | "startu
       {data && data.items.length > 0 ? (
         <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {data.items.map((s, i) => (
-            <StartupCard key={s.id} startup={s} as="li" eager={i < 3} />
+            <StartupCard key={s.id} startup={s} as="li" eager={i < 6} />
           ))}
           {/* Последняя страница: пустое место в ряду — приглашение опубликовать свою идею, а не дыра в сетке. */}
           {page * LIMIT >= total && (
             <li className={`h-full ${data.items.length % 3 === 0 ? "lg:hidden" : ""} ${data.items.length % 2 === 0 ? "sm:max-lg:hidden" : ""}`}>
               <Link
                 href="/startups/new"
-                className="card-hover flex h-full min-h-[300px] flex-col justify-between gap-6 rounded-[28px] bg-brand-soft p-6 hover:bg-marker"
+                className="card-hover flex h-full min-h-[260px] flex-col justify-center gap-6 rounded-[28px] bg-brand-soft p-8 hover:bg-marker"
               >
                 <span>
                   <span className="block text-2xl leading-tight font-extrabold tracking-[-0.03em]">
@@ -130,7 +130,7 @@ export async function ProjectCatalog({ mode, params }: { mode: "ideas" | "startu
       ) : (
         <div className="mt-4">
           <EmptyState
-            title="Под этот фильтр ничего нет"
+            title={q && !["role", "terms", "stage"].some((k) => asList(params[k]).length) ? "Ничего не нашли" : "Под этот фильтр ничего нет"}
             text={q ? `По запросу «${q}» ничего нет. Попробуй другое слово или убери часть фильтров.` : copy.empty}
             action={
               <span className="flex flex-wrap justify-center gap-2">

@@ -176,7 +176,7 @@ export default async function StartupPage({ params }: Props) {
             {!s.is_demo && <ShareButton title={s.title} text={s.pitch} path={`/startups/${s.slug}`} />}
             {s.is_demo && (
               <Link href="/startups/new" className={buttonVariants({ size: "lg" })}>
-                Сделать такую страницу для своей идеи
+                Опубликовать свою идею
               </Link>
             )}
           </div>
@@ -205,6 +205,15 @@ export default async function StartupPage({ params }: Props) {
               Отклики
             </Link>
           </div>
+          {s.status === "draft" && (
+            <p className="mt-4 rounded-2xl bg-white p-4 text-sm">
+              <b>Это черновик — его пока видишь только ты.</b> Подтверди почту и нажми «Опубликовать» в редакторе, тогда проект
+              появится в каталоге и люди смогут откликаться.{" "}
+              <Link href={`/startups/${s.slug}/edit`} className="font-bold text-brand-ink hover:underline">
+                Перейти к публикации
+              </Link>
+            </p>
+          )}
           <ol className="mt-4 grid gap-2 sm:grid-cols-3">
             <li className="rounded-2xl bg-white p-4">
               <b className="block">{s.cover_url ? "Обложка есть" : "Добавь обложку"}</b>
@@ -434,7 +443,7 @@ export default async function StartupPage({ params }: Props) {
               </a>
             )}
           </div>
-          {!s.is_owner && (
+          {!s.is_owner && !s.is_demo && (
             <div className="rounded-[26px] bg-white p-6 shadow-[0_0_0_1.5px_var(--border)]">
               <div className="text-sm font-bold">Что будет после отклика</div>
               <ol className="mt-3 grid gap-3 text-sm">

@@ -264,7 +264,7 @@ function Hero() {
         preload
         placeholder="blur"
         quality={85}
-        sizes="(min-width: 1360px) 1360px, 100vw"
+        sizes="(max-width: 640px) 220vw, (min-width: 1360px) 1360px, 100vw"
         className="-z-20 object-cover object-[center_30%]"
       />
       <div aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgb(10_18_34/0.84),rgb(10_18_34/0.5)_55%,rgb(10_18_34/0.2))] max-lg:bg-[linear-gradient(180deg,rgb(10_18_34/0.35),rgb(10_18_34/0.85)_60%)]" />

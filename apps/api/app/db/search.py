@@ -39,6 +39,11 @@ def _clean(q: str) -> str:
     return q.replace("\\", "").replace("%", "").replace("_", "")
 
 
+def has_text(q: str) -> bool:
+    """В запросе есть буквы или цифры: «%», «_» или «\\» сами по себе ничего не ищут."""
+    return bool(re.search(r"\w", _clean(q)))
+
+
 def like(q: str) -> str:
     """Шаблон ILIKE «содержит» без спецсимволов пользователя (для навыков и ролей: ML, UX, Go)."""
     return f"%{_clean(q)}%"

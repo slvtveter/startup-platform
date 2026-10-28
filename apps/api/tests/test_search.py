@@ -76,3 +76,23 @@ async def test_search_by_skill_role_prefix_and_city(make_user, client):
     # Стартап находится по началу слова роли и по навыку роли.
     assert (await client.get("/api/startups", params={"q": "дизайн"})).json()["total"] == 1
     assert (await client.get("/api/startups", params={"q": "figma"})).json()["total"] == 1
+
+
+async def test_special_chars_find_nothing_and_links_are_normalized(make_user, client):
+    from tests.test_startups import STARTUP
+
+    founder = await make_user("alina@mail.ru", published=True)
+    for q in ["_", "%", "\\"]:
+        assert (await client.get("/api/people", params={"q": q})).json()["total"] == 0
+        assert (await client.get("/api/startups", params={"q": q})).json()["total"] == 0
+    s = (
+        await founder.post(
+            "/api/startups",
+            json=STARTUP | {"website": "example.com", "telegram": "t.me/my_channel"},
+        )
+    ).json()
+    assert s["website"] == "https://example.com" and s["telegram"] == "@my_channel"
+    r = await founder.post(
+        "/api/startups", json=STARTUP | {"title": "Другой", "telegram": "енот канал"}
+    )
+    assert r.status_code == 422
