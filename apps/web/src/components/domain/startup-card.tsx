@@ -63,7 +63,8 @@ export function StartupCover({
 
 /**
  * Карточка стартапа — одна на весь сайт: каталог, главная, подборка в кабинете.
- * Обложка со стадией, название и условия, суть в двух строках, кого ищут, кто основатель.
+ * Обложка со стадией и условиями, название, суть в двух строках, кого ищут (одна строка), кто основатель.
+ * Блоки фиксированной высоты, футер прижат вниз: карточки в одном ряду совпадают по ритму.
  */
 export function StartupCard({
   startup,
@@ -78,7 +79,8 @@ export function StartupCard({
 }) {
   const open = startup.open_roles.reduce((n, r) => n + (r.slots ?? 1), 0);
   const team = startup.team_size ?? 1;
-  const roles = startup.open_roles.slice(0, 3);
+  // Роли строго в одну строку: две первые (длинные обрезаются), остальное — «+N».
+  const roles = startup.open_roles.slice(0, 2);
   const more = startup.open_roles.length - roles.length;
   return (
     <Tag className="h-full">
@@ -86,47 +88,55 @@ export function StartupCard({
         href={`/startups/${startup.slug}`}
         className="card-hover group flex h-full flex-col rounded-[28px] bg-tone p-2 hover:bg-tone-2"
       >
-        <span className="relative block aspect-[16/9] overflow-hidden rounded-[20px]">
+        <span className="relative block aspect-[16/9] shrink-0 overflow-hidden rounded-[20px]">
           <StartupCover startup={startup} eager={eager} />
           <span className="absolute top-3 left-3 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-foreground shadow-sm">
             {STAGE[startup.stage] ?? startup.stage}
           </span>
+          <TermsBadge terms={startup.terms} className="absolute top-3 right-3" />
         </span>
-        <div className="flex flex-1 flex-col px-4 pt-4 pb-3">
-          <div className="flex items-start gap-3">
-            <h3 className="text-xl leading-tight font-extrabold tracking-[-0.03em]">{startup.title}</h3>
-            <TermsBadge terms={startup.terms} className="mt-0.5 ml-auto" />
-          </div>
-          <span className="mt-1.5 line-clamp-2 text-[15px] leading-snug text-muted-foreground">{startup.pitch}</span>
-          {roles.length > 0 && (
-            <span className="mt-4 flex flex-wrap items-center gap-1.5" aria-label="Кого ищут">
-              <span className="mr-0.5 text-[13px] text-muted-foreground">Ищут:</span>
-              {roles.map((r) => (
-                <span key={r.id} className="rounded-full bg-white px-2.5 py-1 text-[13px] font-semibold">
-                  {r.title}
-                </span>
-              ))}
-              {more > 0 && <span className="self-center px-1 text-[13px] text-muted-foreground">+{more}</span>}
-            </span>
-          )}
+        <div className="flex flex-1 flex-col px-4 pt-4 pb-4">
+          <h3 className="truncate text-xl leading-tight font-extrabold tracking-[-0.03em]" title={startup.title}>
+            {startup.title}
+          </h3>
+          {/* Суть всегда занимает две строки: карточки в ряду держат один ритм, даже если текст короткий. */}
+          <p className="mt-1.5 line-clamp-2 min-h-[42px] text-[15px] leading-[21px] text-muted-foreground">{startup.pitch}</p>
+          <span className="mt-4 flex h-7 min-w-0 items-center gap-1.5 overflow-hidden" aria-label="Кого ищут">
+            {roles.length > 0 ? (
+              <>
+                {roles.map((r, i) => (
+                  <span key={r.id} className={cn("truncate rounded-full bg-white px-2.5 py-1 text-[13px] leading-5 font-semibold", i === 0 ? "max-w-[65%] shrink-0" : "min-w-16")} title={r.title}>
+                    {r.title}
+                  </span>
+                ))}
+                {more > 0 && (
+                  <span className="shrink-0 rounded-full bg-white px-2 py-1 text-[13px] leading-5 font-semibold text-muted-foreground">+{more}</span>
+                )}
+              </>
+            ) : (
+              <span className="text-[13px] text-muted-foreground">Команда собрана</span>
+            )}
+          </span>
           {reasons && reasons.length > 0 && (
-            <span className="mt-3 flex flex-wrap gap-1.5" aria-label="Почему подходит">
-              {reasons.map((r) => (
-                <span key={r} className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2.5 py-1 text-xs font-bold text-brand-ink">
-                  <Check aria-hidden className="size-3" />
-                  {reasonLabel(r)}
+            <span className="mt-2.5 flex h-6 min-w-0 gap-1.5 overflow-hidden" aria-label="Почему подходит">
+              {reasons.slice(0, 2).map((r) => (
+                <span key={r} className="inline-flex min-w-0 items-center gap-1 rounded-full bg-brand-soft px-2.5 text-xs font-bold text-brand-ink">
+                  <Check aria-hidden className="size-3 shrink-0" />
+                  <span className="truncate">{reasonLabel(r)}</span>
                 </span>
               ))}
             </span>
           )}
-          <span className="mt-auto flex items-center gap-2 border-t border-foreground/[0.06] pt-3.5 text-[13px] text-muted-foreground">
-            <span className="min-w-0 truncate">
-              Основатель <span className="font-semibold text-foreground">{startup.owner_name}</span>
-              {team > 1 ? ` и ещё ${team - 1}` : ""}
-            </span>
-            <span className="ml-auto inline-flex shrink-0 items-center gap-1 font-bold text-brand-ink">
-              {open > 0 ? plural(open, `${open} место`, `${open} места`, `${open} мест`) : "Подробнее"}
-              <ArrowRight aria-hidden className="size-3.5" />
+          <span className="mt-auto pt-5">
+            <span className="flex items-center gap-2 border-t border-foreground/[0.08] pt-3.5 text-[13px] text-muted-foreground">
+              <span className="min-w-0 truncate">
+                Основатель <span className="font-semibold text-foreground">{startup.owner_name}</span>
+                {team > 1 ? ` и ещё ${team - 1}` : ""}
+              </span>
+              <span className="ml-auto inline-flex shrink-0 items-center gap-1 font-bold text-brand-ink">
+                {open > 0 ? plural(open, `${open} место`, `${open} места`, `${open} мест`) : "Подробнее"}
+                <ArrowRight aria-hidden className="size-3.5" />
+              </span>
             </span>
           </span>
         </div>

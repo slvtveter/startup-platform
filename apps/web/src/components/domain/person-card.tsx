@@ -63,12 +63,20 @@ export function PersonCard({
     .join(", ");
   const cofound = person.looking_for.includes(COFOUND);
   const terms = termsOf(person.looking_for).map((t) => TERMS[t].toLowerCase());
-  const skills = person.skills.slice(0, 3);
+  // Навыки строго в одну строку: два первых (длинные обрезаются), остальное — «+N».
+  const skills = person.skills.slice(0, 2);
   const more = person.skills.length - skills.length;
+  const place = person.city || (terms.length ? terms.join(", ") : "");
   return (
     <Tag className="h-full">
-      <Link href={`/people/${person.slug}`} className={cn("card-hover group flex h-full rounded-[28px] p-2 max-sm:items-start max-sm:gap-1 sm:flex-col", white ? "bg-white hover:bg-tone" : "bg-tone hover:bg-tone-2")}>
-        <span className="relative block aspect-square shrink-0 overflow-hidden rounded-[20px] bg-tone-2 max-sm:w-[104px]">
+      <Link
+        href={`/people/${person.slug}`}
+        className={cn(
+          "card-hover group flex h-full rounded-[28px] p-2 max-sm:gap-1 sm:flex-col",
+          white ? "bg-white hover:bg-tone" : "bg-tone hover:bg-tone-2",
+        )}
+      >
+        <span className="relative block aspect-square shrink-0 self-start overflow-hidden rounded-[20px] bg-tone-2 max-sm:w-[104px] sm:self-stretch">
           <PersonPhoto person={person} eager={eager} />
           {cofound && (
             <span className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-foreground shadow-sm max-sm:hidden">
@@ -77,26 +85,36 @@ export function PersonCard({
             </span>
           )}
         </span>
-        <div className="flex min-w-0 flex-1 flex-col px-3 pt-4 pb-3 max-sm:pt-2">
-          {cofound && <span className="mb-1 text-xs font-bold text-brand-ink sm:hidden">Ищет сообщников</span>}
-          <h3 className="text-lg leading-tight font-extrabold tracking-[-0.02em]">{person.display_name}</h3>
-          {role && <p className="mt-0.5 text-sm text-muted-foreground">{role}</p>}
-          {person.headline && <p className="mt-2.5 line-clamp-2 text-sm leading-snug">{person.headline}</p>}
-          {skills.length > 0 && (
-            <span className="mt-3 flex flex-wrap gap-1 pb-3" aria-label="Навыки">
-              {skills.map((s) => (
-                <span key={s.slug} className={cn("rounded-full px-2.5 py-1 text-xs font-semibold", chip)}>
-                  {s.name}
-                </span>
-              ))}
-              {more > 0 && <span className={cn("rounded-full px-2 py-1 text-xs font-semibold text-muted-foreground", chip)}>+{more}</span>}
+        {/* Каждый текстовый блок фиксированной высоты: имя и роль — по строке, о себе — две строки, навыки — одна. */}
+        <div className="flex min-w-0 flex-1 flex-col px-3 pt-4 pb-3 max-sm:pt-2 max-sm:pb-2">
+          {cofound && (
+            <span className="mb-1 inline-flex items-center gap-1.5 text-xs font-bold text-brand-ink sm:hidden">
+              <span aria-hidden className="size-1.5 rounded-full bg-cornflower" />
+              Ищет сообщников
             </span>
           )}
-          <span className="mt-auto flex items-center gap-2 border-t border-foreground/[0.06] pt-3 text-[13px] text-muted-foreground">
-            <span className="min-w-0 truncate">{person.city || (terms.length ? terms.join(", ") : "")}</span>
-            <span className="ml-auto inline-flex shrink-0 items-center gap-1 font-bold text-brand-ink">
-              Профиль
-              <ArrowRight aria-hidden className="size-3.5" />
+          <h3 className="truncate text-lg leading-6 font-extrabold tracking-[-0.02em]">{person.display_name}</h3>
+          <p className="truncate text-sm leading-5 text-muted-foreground">{role || "\u00A0"}</p>
+          <p className="mt-2.5 line-clamp-2 min-h-10 text-sm leading-5 max-sm:mt-1.5">{person.headline || "\u00A0"}</p>
+          <span className="mt-3 flex h-6 min-w-0 items-center gap-1 overflow-hidden max-sm:mt-2" aria-label="Навыки">
+            {skills.map((s, i) => (
+              <span key={s.slug} className={cn("truncate rounded-full px-2.5 py-0.5 text-xs leading-5 font-semibold", chip, i === 0 ? "max-w-[65%] shrink-0" : "min-w-12 max-sm:hidden")} title={s.name}>
+                {s.name}
+              </span>
+            ))}
+            {/* На телефоне карточка узкая: один навык и «+N», на широком — два. */}
+            {more > 0 && <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-xs leading-5 font-semibold text-muted-foreground max-sm:hidden", chip)}>+{more}</span>}
+            {skills.length > 1 && (
+              <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-xs leading-5 font-semibold text-muted-foreground sm:hidden", chip)}>+{person.skills.length - 1}</span>
+            )}
+          </span>
+          <span className="mt-auto pt-4 max-sm:pt-2.5">
+            <span className="flex items-center gap-2 border-t border-foreground/[0.08] pt-3 text-[13px] text-muted-foreground max-sm:pt-2">
+              <span className="min-w-0 truncate">{place}</span>
+              <span className="ml-auto inline-flex shrink-0 items-center gap-1 font-bold text-brand-ink">
+                Профиль
+                <ArrowRight aria-hidden className="size-3.5" />
+              </span>
             </span>
           </span>
         </div>
