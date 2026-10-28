@@ -96,7 +96,7 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
   await founder.goto("/me/startups");
   await shot(founder, "my-startups");
   // Счётчик на кнопке аккаунта (KAN-101): новый отклик виден, после просмотра пропадает.
-  await expect(founder.getByRole("button", { name: "Меню аккаунта, новых событий: 1" })).toBeVisible();
+  await expect(founder.getByRole("button", { name: /^Меню аккаунта .*, новых событий: 1$/ })).toBeVisible();
   await founder.getByRole("link", { name: "Отклики" }).first().click();
   await expect(founder.getByText("Мария Тестова")).toBeVisible();
   await expect(founder.getByRole("button", { name: /новых событий/ })).toHaveCount(0);
@@ -106,7 +106,7 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
 
   // --- Кандидат видит контакты основателя ---
   await candidate.goto("/");
-  await expect(candidate.getByRole("button", { name: "Меню аккаунта, новых событий: 1" })).toBeVisible();
+  await expect(candidate.getByRole("button", { name: /^Меню аккаунта .*, новых событий: 1$/ })).toBeVisible();
   await candidate.goto("/me/applications");
   await expect(candidate.getByRole("heading", { name: "Тебя приняли" })).toBeVisible();
   await expect(candidate.getByText("Принят", { exact: true })).toBeVisible();

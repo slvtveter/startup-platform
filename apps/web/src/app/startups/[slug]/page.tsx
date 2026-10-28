@@ -176,7 +176,7 @@ export default async function StartupPage({ params }: Props) {
             {!s.is_demo && <ShareButton title={s.title} text={s.pitch} path={`/startups/${s.slug}`} />}
             {s.is_demo && (
               <Link href="/startups/new" className={buttonVariants({ size: "lg" })}>
-                Опубликовать свою идею
+                Сделать такую страницу для своей идеи
               </Link>
             )}
           </div>
@@ -434,10 +434,25 @@ export default async function StartupPage({ params }: Props) {
               </a>
             )}
           </div>
-          {!s.is_demo && (
-            <p className="px-1 text-sm text-muted-foreground">
-              Телеграм и почта основателя откроются, когда отклик примут. До этого — переписка на Envola.
-            </p>
+          {!s.is_owner && (
+            <div className="rounded-[26px] bg-white p-6 shadow-[0_0_0_1.5px_var(--border)]">
+              <div className="text-sm font-bold">Что будет после отклика</div>
+              <ol className="mt-3 grid gap-3 text-sm">
+                {[
+                  ["Пара фраз о себе", "Отклик уходит основателю вместе с твоим профилем."],
+                  ["Ответ обычно за 2–3 дня", "Основатель может сразу написать тебе в сообщения."],
+                  ["Контакты открываются", "Когда отклик примут, вы видите телеграм и почту друг друга."],
+                ].map(([t, d], i) => (
+                  <li key={t} className="flex gap-3">
+                    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-brand-soft text-xs font-extrabold text-brand-ink">{i + 1}</span>
+                    <span>
+                      <b className="block">{t}</b>
+                      <span className="text-muted-foreground">{d}</span>
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
           )}
         </aside>
       </div>

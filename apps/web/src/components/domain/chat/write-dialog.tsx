@@ -54,13 +54,30 @@ export function WriteDialog({
           <DialogTitle>Сообщение: {name}</DialogTitle>
           <DialogDescription>Расскажи коротко, кто ты и что хочешь предложить. Ответ придёт в «Сообщения».</DialogDescription>
         </DialogHeader>
+        {/* Готовые первые сообщения: первый шаг — самый трудный, пусть он будет в один клик. */}
+        <div className="flex flex-wrap gap-1.5" aria-label="Готовые начала">
+          {[
+            `Привет! Посмотрел(а) твой профиль — хочу предложить вместе придумать проект. Созвонимся на 20 минут?`,
+            `Привет! У меня есть идея, и кажется, твои навыки там очень нужны. Расскажу в двух словах?`,
+            `Привет! Мы делаем похожие вещи — было бы интересно познакомиться и обменяться опытом.`,
+          ].map((t, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setBody(t)}
+              className="rounded-full bg-tone px-3 py-1.5 text-left text-xs font-semibold transition-colors hover:bg-tone-2"
+            >
+              {["Придумать проект вместе", "Есть идея", "Познакомиться"][i]}
+            </button>
+          ))}
+        </div>
         <Textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={5}
           maxLength={4000}
           aria-label="Сообщение"
-          placeholder="Привет! Увидел твой профиль: делаю сервис для… Хочешь обсудить?"
+          placeholder="Напиши пару фраз о себе и о том, что хочешь предложить"
         />
         <DialogFooter>
           <Button disabled={!body.trim() || busy} onClick={submit}>

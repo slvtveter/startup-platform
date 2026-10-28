@@ -89,7 +89,12 @@ export async function ProjectCatalog({ mode, params }: { mode: "ideas" | "startu
           resultLabel={countLabel}
           summary={
             // h2 между h1 страницы и h3 карточек: порядок заголовков для экранных читалок.
-            <h2 className="text-[15px] font-bold tracking-normal">{countLabel}</h2>
+            <span className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+              <h2 className="text-[15px] font-bold tracking-normal">{countLabel}</h2>
+              <Link href="/me/settings" className="text-sm font-semibold text-brand-ink transition-colors hover:text-brand-hover">
+                Присылать новые роли на почту
+              </Link>
+            </span>
           }
         />
       </div>
@@ -99,6 +104,28 @@ export async function ProjectCatalog({ mode, params }: { mode: "ideas" | "startu
           {data.items.map((s, i) => (
             <StartupCard key={s.id} startup={s} as="li" eager={i < 3} />
           ))}
+          {/* Последняя страница: пустое место в ряду — приглашение опубликовать свою идею, а не дыра в сетке. */}
+          {page * LIMIT >= total && (
+            <li className={`h-full ${data.items.length % 3 === 0 ? "lg:hidden" : ""} ${data.items.length % 2 === 0 ? "sm:max-lg:hidden" : ""}`}>
+              <Link
+                href="/startups/new"
+                className="card-hover flex h-full min-h-[300px] flex-col justify-between gap-6 rounded-[28px] bg-brand-soft p-6 hover:bg-marker"
+              >
+                <span>
+                  <span className="block text-2xl leading-tight font-extrabold tracking-[-0.03em]">
+                    {mode === "ideas" ? "Твоя идея здесь" : "Твой проект здесь"}
+                  </span>
+                  <span className="mt-3 block max-w-[34ch] text-muted-foreground">
+                    Опиши её в двух абзацах и отметь, кого не хватает. Её увидят разработчики, дизайнеры и маркетологи.
+                  </span>
+                </span>
+                <span className={buttonVariants({ className: "self-start" })}>
+                  <Plus aria-hidden />
+                  Предложить идею
+                </span>
+              </Link>
+            </li>
+          )}
         </ul>
       ) : (
         <div className="mt-4">

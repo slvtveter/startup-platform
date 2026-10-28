@@ -36,6 +36,9 @@ export async function register(page: Page, email: string) {
   await page.getByLabel("Пароль").fill("e2e-password-1");
   await page.getByText("Мне есть 18 лет").click();
   await page.getByRole("button", { name: "Создать аккаунт" }).click();
+  // После регистрации — развилка «С чего начнёшь?», дальше профиль.
+  await page.waitForURL(/\/welcome/);
+  await page.getByRole("button", { name: /Хочу в команду/ }).click();
   await page.waitForURL(/\/me\/profile/);
 }
 

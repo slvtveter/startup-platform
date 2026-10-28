@@ -185,7 +185,7 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
                     value={form.title}
                     onChange={(e) => set("title", e.target.value)}
                   />
-                  <Button type="button" variant="outline" className="h-14 shrink-0 px-4" onClick={roll} aria-label="Сгенерировать название" title="Сгенерировать название">
+                  <Button type="button" variant="outline" className="h-14 shrink-0 px-4" onClick={roll} aria-label="Придумать название" title="Придумать название">
                     <DicesIcon aria-hidden className="size-5" />
                     <span className="max-sm:hidden">Придумать</span>
                   </Button>
