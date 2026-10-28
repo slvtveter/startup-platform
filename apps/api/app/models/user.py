@@ -44,6 +44,8 @@ class Session(Base):
     token_hash: Mapped[str] = mapped_column(String(64), unique=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    # Последняя активность (обновляем не чаще раза в 10 минут) — в настройках «был в сети».
+    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # Браузер и ОС входа — чтобы в настройках было видно, где открыт аккаунт.
     user_agent: Mapped[str] = mapped_column(String(300), default="", server_default="")
 

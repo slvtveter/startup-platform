@@ -193,21 +193,49 @@ export default async function StartupPage({ params }: Props) {
       </header>
 
       {s.is_owner && (
-        <div className="mt-8 flex flex-wrap items-center gap-2 rounded-[22px] bg-brand-soft p-4">
-          <span className="mr-auto text-sm font-bold">Это твой стартап</span>
-          <Link
-            href={`/startups/${s.slug}/edit`}
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            Редактировать
-          </Link>
-          <Link
-            href={`/me/startups/${s.slug}`}
-            className={buttonVariants({ size: "sm" })}
-          >
-            Отклики
-          </Link>
-        </div>
+        <section aria-labelledby="owner-h" className="mt-8 rounded-[28px] bg-brand-soft p-5 sm:p-6">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 id="owner-h" className="mr-auto text-lg font-extrabold tracking-[-0.02em]">
+              Это твой {s.stage === "idea" ? "проект" : "стартап"}: что дальше
+            </h2>
+            <Link href={`/startups/${s.slug}/edit`} className={buttonVariants({ variant: "light", size: "sm" })}>
+              Редактировать
+            </Link>
+            <Link href={`/me/startups/${s.slug}`} className={buttonVariants({ size: "sm" })}>
+              Отклики
+            </Link>
+          </div>
+          <ol className="mt-4 grid gap-2 sm:grid-cols-3">
+            <li className="rounded-2xl bg-white p-4">
+              <b className="block">{s.cover_url ? "Обложка есть" : "Добавь обложку"}</b>
+              <span className="mt-1 block text-sm text-muted-foreground">
+                {s.cover_url ? "Её видно в каталоге и на главной." : "С фото карточку открывают заметно чаще, чем с буквой."}
+              </span>
+              {!s.cover_url && (
+                <Link href={`/startups/${s.slug}/edit`} className="mt-2 inline-block text-sm font-bold text-brand-ink hover:underline">
+                  Загрузить фото
+                </Link>
+              )}
+            </li>
+            <li className="rounded-2xl bg-white p-4">
+              <b className="block">Напиши людям первым</b>
+              <span className="mt-1 block text-sm text-muted-foreground">Подборка тех, чья роль совпадает с открытыми местами.</span>
+              <Link
+                href={`/people?${[...new Set(openRoles.map((r) => `role=${r.role.slug}`))].join("&")}`}
+                className="mt-2 inline-block text-sm font-bold text-brand-ink hover:underline"
+              >
+                Найти людей
+              </Link>
+            </li>
+            <li className="rounded-2xl bg-white p-4">
+              <b className="block">Поделись ссылкой</b>
+              <span className="mt-1 block text-sm text-muted-foreground">В чатах вуза и у друзей — так приходят первые отклики.</span>
+              <span className="mt-2 inline-block">
+                <ShareButton title={s.title} text={s.pitch} path={`/startups/${s.slug}`} />
+              </span>
+            </li>
+          </ol>
+        </section>
       )}
 
       <div className="mt-14 grid gap-10 lg:grid-cols-[1fr_360px]">

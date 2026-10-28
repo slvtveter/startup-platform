@@ -51,7 +51,7 @@ const STEPS: Step[] = [
   { key: "description", title: "Расскажи подробнее", hint: "Какую проблему решаете, что уже сделано, что планируете на 2–3 месяца.", ready: (f) => f.description.trim().length >= MIN_DESCRIPTION },
   { key: "stage", title: "На какой стадии проект?", hint: "Честно: новичкам важно понимать, во что они идут.", ready: () => true },
   { key: "terms", title: "На каких условиях зовёшь людей?", hint: "Условия видны на карточке стартапа и в фильтрах.", ready: () => true },
-  { key: "roles", title: "Кого ищешь в команду?", hint: "Выбери роли — задачи и часы подставим примером, поправишь потом.", ready: (_f, r) => Object.keys(r).length > 0 },
+  { key: "roles", title: "Кого ищешь в команду?", hint: "Можно выбрать несколько. Задачи и часы подставим примером — после публикации поправишь их у каждой роли.", ready: (_f, r) => Object.keys(r).length > 0 },
   { key: "finish", title: "Почти готово", hint: "Ссылки необязательны, но с ними больше доверия.", ready: () => true },
 ];
 
@@ -197,7 +197,7 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
                         key={n}
                         type="button"
                         onClick={() => set("title", n)}
-                        className={cn("rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors", form.title === n ? "border-foreground bg-foreground text-background" : "hover:border-foreground/40")}
+                        className={cn("rounded-full px-3 py-1.5 text-sm font-semibold transition-colors", form.title === n ? "bg-foreground text-background" : "bg-tone hover:bg-tone-2")}
                       >
                         {n}
                       </button>
@@ -275,7 +275,7 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
                   return (
                     <div
                       key={r.slug}
-                      className={cn("flex items-center gap-2 rounded-xl border p-3 transition-colors", on ? "border-foreground ring-2 ring-foreground" : "hover:border-foreground/40")}
+                      className={cn("flex items-center gap-2 rounded-2xl p-3 transition-colors", on ? "bg-brand-soft ring-2 ring-brand" : "bg-tone hover:bg-tone-2")}
                     >
                       <button
                         type="button"
@@ -290,7 +290,7 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
                         }
                         className="flex min-w-0 flex-1 items-center gap-2 text-left font-semibold"
                       >
-                        <span className={cn("grid size-5 shrink-0 place-items-center rounded-md border", on && "border-foreground bg-foreground text-background")}>
+                        <span className={cn("grid size-5 shrink-0 place-items-center rounded-md border-[1.5px] border-input bg-white", on && "border-brand bg-brand text-white")}>
                           {on && <CheckIcon aria-hidden className="size-3.5" />}
                         </span>
                         <span className="truncate">{r.name}</span>
@@ -318,7 +318,11 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
                   <Input aria-label="Сайт или прототип" placeholder="Сайт или прототип: https://…" className="h-11" value={form.website} onChange={(e) => set("website", e.target.value)} />
                   <Input aria-label="Telegram-канал" placeholder="Telegram-канал: @channel" className="h-11" value={form.telegram} onChange={(e) => set("telegram", e.target.value)} />
                 </div>
-                <dl className="grid gap-3 rounded-2xl bg-secondary p-5 text-sm">
+                <p className="rounded-2xl bg-brand-soft p-4 text-sm">
+                  После публикации откроется страница проекта: там можно добавить обложку, поправить задачи каждой роли и сразу
+                  найти людей под открытые места.
+                </p>
+                <dl className="grid gap-3 rounded-2xl bg-tone p-5 text-sm">
                   <Summary label="Название" value={form.title} onEdit={() => jump(0)} />
                   <Summary label="Идея" value={form.pitch} onEdit={() => jump(1)} />
                   <Summary label="Стадия и условия" value={`${STAGE[form.stage]}, ${TERMS[form.terms].toLowerCase()}`} onEdit={() => jump(3)} />

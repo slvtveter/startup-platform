@@ -71,9 +71,9 @@ async def test_large_avatar_and_cofound_filter(make_user, client, media):
         "/api/profile/me/avatar", files={"file": ("me.jpg", _jpeg(900, 900), "image/jpeg")}
     )
     lg = r.json()["avatar_url_lg"]
-    assert lg.endswith("-512.webp")
+    assert lg.endswith("-1024.webp")
     with Image.open(media / lg.removeprefix("/media/")) as img:
-        assert img.size == (512, 512)
+        assert img.size == (1024, 1024)
 
     # «Ищу сообщников» — отдельное значение в looking_for, по нему фильтруется каталог.
     r = await maria.patch("/api/profile/me", json={"looking_for": ["free", "cofound"]})

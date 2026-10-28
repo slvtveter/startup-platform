@@ -22,6 +22,8 @@ export function PersonPhoto({ person, className, eager }: { person: PersonCardDa
       // eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP 512 px
       <img
         src={url}
+        srcSet={url.endsWith("-1024.webp") ? `${url.replace("-1024.webp", "-512.webp")} 512w, ${url} 1024w` : undefined}
+        sizes="(min-width: 640px) 340px, 104px"
         alt=""
         loading={eager ? "eager" : "lazy"}
         decoding="async"

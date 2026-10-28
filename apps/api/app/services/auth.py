@@ -2,7 +2,7 @@ import secrets
 import uuid
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
@@ -19,9 +19,24 @@ def _now() -> datetime:
     return datetime.now(UTC)
 
 
+# Больше этого числа активных сеансов на человека не держим: старые входы удаляются.
+MAX_SESSIONS = 10
+
+
 async def create_session(db: AsyncSession, user: User, user_agent: str = "") -> str:
     token = new_token()
     days = get_settings().session_ttl_days
+    # Чистим протухшие и лишние сеансы: иначе в настройках копятся десятки «входов».
+    await db.execute(
+        delete(Session).where(Session.user_id == user.id, Session.expires_at <= _now())
+    )
+    keep = (
+        select(Session.id)
+        .where(Session.user_id == user.id)
+        .order_by(func.coalesce(Session.last_seen_at, Session.created_at).desc())
+        .limit(MAX_SESSIONS - 1)
+    )
+    await db.execute(delete(Session).where(Session.user_id == user.id, Session.id.not_in(keep)))
     db.add(
         Session(
             user_id=user.id,
@@ -37,7 +52,7 @@ async def list_sessions(db: AsyncSession, user: User) -> list[Session]:
     rows = await db.scalars(
         select(Session)
         .where(Session.user_id == user.id, Session.expires_at > _now())
-        .order_by(Session.created_at.desc())
+        .order_by(func.coalesce(Session.last_seen_at, Session.created_at).desc())
     )
     return list(rows)
 
@@ -63,6 +78,12 @@ async def user_by_session(db: AsyncSession, token: str) -> User | None:
     )
     if session is None or not session.user.is_active:
         return None
+    seen = session.last_seen_at or session.created_at
+    if seen is None or _now() - seen > timedelta(minutes=10):
+        await db.execute(
+            update(Session).where(Session.id == session.id).values(last_seen_at=_now())
+        )
+        await db.commit()
     return session.user
 
 

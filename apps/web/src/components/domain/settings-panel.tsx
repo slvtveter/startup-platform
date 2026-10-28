@@ -336,7 +336,7 @@ export function SessionsSettings({ sessions }: { sessions: SessionOut[] }) {
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-semibold">{d.name}</div>
                   <div className="text-xs text-muted-foreground">
-                    {s.current ? <span className="font-semibold text-success-ink">Это устройство</span> : `Вход ${timeAgo(s.created_at)}`}
+                    {s.current ? <span className="font-semibold text-success-ink">Это устройство</span> : `Был в сети ${timeAgo(s.last_seen_at ?? s.created_at)}`}
                   </div>
                 </div>
                 {!s.current && (

@@ -4192,6 +4192,16 @@
           "unread": {
             "type": "integer",
             "title": "Unread"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChatApplicationRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -6186,6 +6196,18 @@
             "type": "string",
             "format": "date-time",
             "title": "Created At"
+          },
+          "last_seen_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Seen At"
           },
           "user_agent": {
             "type": "string",
