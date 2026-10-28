@@ -63,7 +63,9 @@ async def test_response_stats_after_three_applications(make_user, client):
     founder = await make_user("alina@mail.ru", published=True)
     s = await create_published(founder)
     role_id = s["roles"][0]["id"]
-    await founder.patch(f"/api/startup-roles/{role_id}", json={"slots": 5})
+    r = await founder.patch(f"/api/startup-roles/{role_id}", json={"slots": 4})
+    assert r.status_code == 422  # не больше трёх мест на роль
+    await founder.patch(f"/api/startup-roles/{role_id}", json={"slots": 3})
     apps = []
     for name in ("maria", "oleg", "ivan"):
         c = await make_user(f"{name}@mail.ru", published=True)

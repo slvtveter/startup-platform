@@ -28,7 +28,7 @@ import {
   type Terms,
 } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
-import { STAGE, TERMS, TERMS_HINT, plural } from "@/lib/labels";
+import { MAX_SLOTS, STAGE, TERMS, TERMS_HINT, plural } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 
 type Base = {
@@ -299,7 +299,7 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
       description: r.description,
       outcome: r.outcome ?? "",
       hours_per_week: r.hours_per_week ?? null,
-      slots: r.slots ?? 1,
+      slots: Math.min(r.slots ?? 1, MAX_SLOTS),
       skills: r.skills.map((x) => x.slug),
     });
     setEditing(r.id);
@@ -410,7 +410,7 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
           <div className="flex flex-wrap gap-4">
             <label className="flex items-center gap-2 text-sm">
               Мест:
-              <Input type="number" min={1} max={20} className="w-20" value={draft.slots} onChange={(e) => setDraft({ ...draft, slots: Number(e.target.value) || 1 })} />
+              <Input type="number" min={1} max={MAX_SLOTS} className="w-20" value={draft.slots} onChange={(e) => setDraft({ ...draft, slots: Math.min(MAX_SLOTS, Math.max(1, Number(e.target.value) || 1)) })} />
             </label>
             <label className="flex items-center gap-2 text-sm">
               Часов в неделю:

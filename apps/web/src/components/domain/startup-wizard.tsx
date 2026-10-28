@@ -19,7 +19,7 @@ import {
   type Terms,
 } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
-import { STAGE, TERMS, TERMS_HINT, plural } from "@/lib/labels";
+import { MAX_SLOTS, STAGE, TERMS, TERMS_HINT, plural } from "@/lib/labels";
 import { generateNames } from "@/lib/name-generator";
 import { cn } from "@/lib/utils";
 
@@ -54,7 +54,7 @@ const STEPS: Step[] = [
   { key: "pitch", title: "Идея одной фразой", hint: "Что это и для кого. Её увидят в ленте первой.", ready: (f) => f.pitch.trim().length >= 10 },
   { key: "description", title: "Расскажи подробнее", hint: "Главное — проблема. Остальные два блока короче, их можно дописать потом.", ready: (f) => f.description.trim().length >= MIN_DESCRIPTION },
   { key: "terms", title: "На каких условиях зовёшь людей?", hint: "Условия видны на карточке стартапа и в фильтрах.", ready: () => true },
-  { key: "roles", title: "Кого ищешь в команду?", hint: "Можно выбрать несколько. Задачи и часы подставим примером — после публикации поправишь их у каждой роли.", ready: (_f, r) => Object.keys(r).length > 0 },
+  { key: "roles", title: "Кого ищешь в команду?", hint: "Можно выбрать несколько, до трёх человек на роль. Задачи и часы подставим примером — после публикации поправишь их у каждой роли.", ready: (_f, r) => Object.keys(r).length > 0 },
   { key: "finish", title: "Почти готово", hint: "Ссылки необязательны, но с ними больше доверия.", ready: () => true },
 ];
 
@@ -374,7 +374,7 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
                             <MinusIcon aria-hidden className="size-3.5" />
                           </button>
                           <span className="w-4 text-center tabular-nums">{slots}</span>
-                          <button type="button" className="grid size-7 place-items-center rounded-md hover:bg-secondary disabled:opacity-40" disabled={slots >= 20} onClick={() => setPicked((p) => ({ ...p, [r.slug]: slots + 1 }))} aria-label="Больше мест">
+                          <button type="button" className="grid size-7 place-items-center rounded-md hover:bg-secondary disabled:opacity-40" disabled={slots >= MAX_SLOTS} onClick={() => setPicked((p) => ({ ...p, [r.slug]: slots + 1 }))} aria-label="Больше мест">
                             <PlusIcon aria-hidden className="size-3.5" />
                           </button>
                         </span>

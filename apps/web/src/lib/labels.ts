@@ -96,3 +96,6 @@ export function initials(name: string) {
       .join("") || "?"
   );
 }
+
+/** Как в API (schemas/startup.py, MAX_SLOTS): не больше трёх человек на одну роль. */
+export const MAX_SLOTS = 3;
