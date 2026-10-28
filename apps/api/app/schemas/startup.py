@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field, field_validator
 from app.models.enums import Stage, StartupStatus, Terms
 from app.schemas.catalog import RoleOut, SkillOut
 
+MAX_SLOTS = 3
+
 
 def _website(v: str | None) -> str | None:
     """«example.com» → «https://example.com»; не похожее на адрес сайта не принимаем."""
@@ -76,7 +78,8 @@ class RoleIn(BaseModel):
     role: str = Field(description="slug роли из справочника")
     title: str = Field(min_length=2, max_length=100)
     description: str = Field(default="", max_length=2000)
-    slots: int = Field(default=1, ge=1, le=20)
+    # Не больше трёх мест на роль: на старте больше не нужно, а «10 дизайнеров» отпугивают.
+    slots: int = Field(default=1, ge=1, le=MAX_SLOTS)
     hours_per_week: int | None = Field(default=None, ge=1, le=40)
     outcome: str = Field(default="", max_length=500)
     skills: list[str] = Field(default_factory=list, max_length=12)
@@ -85,7 +88,7 @@ class RoleIn(BaseModel):
 class RoleUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=2, max_length=100)
     description: str | None = Field(default=None, max_length=2000)
-    slots: int | None = Field(default=None, ge=1, le=20)
+    slots: int | None = Field(default=None, ge=1, le=MAX_SLOTS)
     hours_per_week: int | None = Field(default=None, ge=1, le=40)
     outcome: str | None = Field(default=None, max_length=500)
     skills: list[str] | None = Field(default=None, max_length=12)

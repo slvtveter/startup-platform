@@ -6511,7 +6511,7 @@
           },
           "slots": {
             "type": "integer",
-            "maximum": 20.0,
+            "maximum": 3.0,
             "minimum": 1.0,
             "title": "Slots",
             "default": 1
@@ -6636,7 +6636,7 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 20.0,
+                "maximum": 3.0,
                 "minimum": 1.0
               },
               {
