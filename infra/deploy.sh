@@ -67,6 +67,8 @@ if healthy; then
   # Справочник ролей и навыков: без него в профиле нечего выбрать. Идемпотентно.
   $C exec -T api python -m app.scripts.catalog || echo "catalog step failed (old image?)" >&2
   warm_images || echo "image warm-up failed" >&2
+  # Caddyfile приходит с релизом: без reload новые правила (закрытые /media/resumes) не действуют.
+  $C exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile || echo "caddy reload failed" >&2
   echo "$TAG" > .deployed-tag
   prune_old_images
   echo "deployed $TAG"

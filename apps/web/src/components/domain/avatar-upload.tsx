@@ -10,8 +10,21 @@ import { deleteMyAvatar, uploadMyAvatar } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 
 /** Аватар в редакторе профиля (KAN-34). Без фото показываем место с инициалами. */
-export function AvatarUpload({ name, initialUrl }: { name: string; initialUrl: string | null }) {
-  const [url, setUrl] = useState(initialUrl);
+export function AvatarUpload({
+  name,
+  initialUrl,
+  onChange,
+}: {
+  name: string;
+  initialUrl: string | null;
+  /** Фото появилось или удалено: редактор пересчитывает заполненность. */
+  onChange?: (url: string | null) => void;
+}) {
+  const [url, setUrlState] = useState(initialUrl);
+  const setUrl = (v: string | null) => {
+    setUrlState(v);
+    onChange?.(v);
+  };
   const [busy, setBusy] = useState(false);
   const input = useRef<HTMLInputElement>(null);
 

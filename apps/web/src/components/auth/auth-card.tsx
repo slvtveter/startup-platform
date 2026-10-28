@@ -4,31 +4,17 @@ import Link from "next/link";
 
 import { FACES, PHOTOS } from "@/lib/photos";
 
-/** Вход и регистрация: форма слева, справа фото с репликой — тот же «разговор», что на главной. */
-export function AuthCard({
-  title,
-  subtitle,
-  tab,
-  next,
-  children,
-}: {
-  title: string;
-  subtitle?: string;
-  /** Переключатель «Вход / Регистрация» над заголовком. */
-  tab?: "login" | "register";
-  /** Куда вернуть после входа: переносится между вкладками. */
-  next?: string;
-  children: React.ReactNode;
-}) {
+/**
+ * Рамка раздела входа (app/(auth)/layout.tsx): слева место под карточку, справа фото с репликой —
+ * тот же «разговор», что на главной. Живёт в layout, поэтому при переходе «Вход ⇄ Регистрация»
+ * фото не перерисовывается и ничего не прыгает: меняется только карточка.
+ */
+export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto grid w-full max-w-[1360px] gap-3 px-4 pt-2 pb-12 sm:px-6 lg:min-h-[calc(100svh-84px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:px-10">
-      <div className="grid place-items-center rounded-[28px] bg-tone px-4 py-10 sm:rounded-[36px] sm:py-16">
-        <div className="w-full max-w-[420px] rounded-[28px] bg-card p-6 shadow-[0_24px_60px_-30px_rgb(15_27_45/0.25)] sm:p-9">
-          {tab && <AuthTabs active={tab} next={next} />}
-          <h1 className="text-[32px] leading-[1.05] sm:text-[36px]">{title}</h1>
-          {subtitle && <p className="mt-2.5 text-muted-foreground">{subtitle}</p>}
-          <div className="mt-7">{children}</div>
-        </div>
+      {/* Карточка прижата к верху, а не по центру: разная высота входа и регистрации не двигает вкладки. */}
+      <div className="flex items-start justify-center rounded-[28px] bg-tone px-4 py-10 sm:rounded-[36px] sm:py-16 lg:pt-[max(64px,10vh)]">
+        <div className="w-full max-w-[420px]">{children}</div>
       </div>
       <div className="relative isolate hidden overflow-hidden rounded-[36px] p-10 text-white lg:flex lg:flex-col lg:justify-end">
         <Image src={PHOTOS.videoCall} alt="" fill preload placeholder="blur" sizes="50vw" className="-z-20 object-cover" />
@@ -52,6 +38,32 @@ export function AuthCard({
           ))}
         </ul>
       </div>
+    </div>
+  );
+}
+
+/** Карточка формы внутри AuthShell. */
+export function AuthCard({
+  title,
+  subtitle,
+  tab,
+  next,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  /** Переключатель «Вход / Регистрация» над заголовком. */
+  tab?: "login" | "register";
+  /** Куда вернуть после входа: переносится между вкладками. */
+  next?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="w-full rounded-[28px] bg-card p-6 shadow-[0_24px_60px_-30px_rgb(15_27_45/0.25)] sm:p-9">
+      {tab && <AuthTabs active={tab} next={next} />}
+      <h1 className="text-[32px] leading-[1.05] sm:text-[36px]">{title}</h1>
+      {subtitle && <p className="mt-2.5 text-muted-foreground">{subtitle}</p>}
+      <div className="mt-7">{children}</div>
     </div>
   );
 }

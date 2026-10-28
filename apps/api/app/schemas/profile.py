@@ -26,6 +26,7 @@ class ProfileUpdate(BaseModel):
     availability: Availability | None = None
     looking_for: list[LookingFor] | None = None
     city: str | None = Field(default=None, max_length=80)
+    education: str | None = Field(default=None, max_length=120)
     contact_telegram: str | None = Field(default=None, max_length=64)
     show_email: bool | None = None
     skills: list[str] | None = Field(default=None, max_length=20, description="slug навыков")
@@ -60,6 +61,9 @@ class MembershipOut(BaseModel):
 
 class PersonDetail(PersonCard):
     bio: str
+    education: str = ""
+    # Само резюме скачивается через /people/{slug}/resume и только после входа.
+    has_resume: bool = False
     links: list[LinkOut]
     memberships: list[MembershipOut] = []
 
@@ -68,6 +72,7 @@ class MyProfileOut(PersonDetail):
     is_published: bool
     contact_telegram: str
     show_email: bool
+    resume_name: str = ""
     completeness: int
     missing: list[str]
     can_publish: bool

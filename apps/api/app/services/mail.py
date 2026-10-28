@@ -5,6 +5,7 @@ import logging
 import re
 import smtplib
 from email.message import EmailMessage
+from email.utils import formatdate, make_msgid, parseaddr
 from pathlib import Path
 from string import Template
 
@@ -30,8 +31,8 @@ def _send_smtp(msg: EmailMessage) -> None:
 
 
 _URL = re.compile(r"https?://[^\s<]+")
-# Шаблон в стиле сайта: инлайн-стили и таблицы (почтовые клиенты не понимают остальное),
-# из картинок только логотип с нашего домена, пикселей отслеживания нет.
+# Шаблон в стиле сайта: инлайн-стили и таблицы (почтовые клиенты не понимают остальное).
+# Ни одной картинки, даже логотип — текстом: с картинками письмо уходит в «Промоакции» и спам.
 _TEMPLATE = Template((Path(__file__).parent.parent / "templates" / "email.html").read_text())
 
 
@@ -109,13 +110,9 @@ def _html(subject: str, body: str, unsubscribe: str | None, title: str | None = 
         if unsubscribe
         else "Это служебное письмо, от него нельзя отписаться."
     )
-    # Текст в превью списка писем: первая строка тела (для кода — сам код).
-    preheader = next((b for b in body.strip().split("\n\n") if _CODE.fullmatch(b.strip())), "")
-    preheader = f"Код: {preheader}" if preheader else body.strip().split("\n")[0]
     return _TEMPLATE.substitute(
         subject=html.escape(subject),
         title=html.escape(title or subject),
-        preheader=html.escape(preheader[:140]),
         site=html.escape(site, quote=True),
         paragraphs="\n".join(paragraphs),
         footer=footer,
@@ -129,6 +126,10 @@ def _message(
     msg["From"] = get_settings().mail_from
     msg["To"] = to
     msg["Subject"] = subject
+    # Без Date и Message-ID почтовые фильтры считают письмо подозрительным (уходит в спам).
+    msg["Date"] = formatdate(usegmt=True)
+    domain = parseaddr(get_settings().mail_from)[1].rpartition("@")[2] or None
+    msg["Message-ID"] = make_msgid(domain=domain)
     text = body + (f"\n\nОтписаться от таких писем: {unsubscribe}" if unsubscribe else "")
     msg.set_content(text)
     msg.add_alternative(_html(subject, body, unsubscribe, title), subtype="html")

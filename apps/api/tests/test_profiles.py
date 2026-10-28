@@ -12,7 +12,7 @@ async def test_profile_update_and_completeness(make_user):
     body = r.json()
     assert body["slug"] == "mariya-kim"
     assert body["primary_role"]["slug"] == "designer"
-    assert body["completeness"] == 50
+    assert body["completeness"] == 45  # имя 10 + роль 15 + навыки 20
     assert "Telegram для связи" in body["missing"]
 
 
@@ -57,3 +57,37 @@ async def test_people_catalog_filters_and_privacy(make_user, client):
     assert r.status_code == 200
     unpublished = await client.get("/api/people", params={"q": "hidden"})
     assert unpublished.json()["total"] == 0
+
+
+PDF = b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n"
+
+
+async def test_resume_upload_is_private(make_user, client):
+    maria = await make_user("maria@mail.ru", published=True, name="Мария Ким")
+    slug = (await maria.get("/api/profile/me")).json()["slug"]
+
+    r = await maria.post(
+        "/api/profile/me/resume", files={"file": ("cv.png", b"\x89PNG....", "image/png")}
+    )
+    assert r.status_code == 400
+    r = await maria.post(
+        "/api/profile/me/resume",
+        files={"file": ("../Мария Ким CV.pdf", PDF, "application/pdf")},
+    )
+    assert r.status_code == 200, r.text
+    me = r.json()
+    assert me["resume_name"] == "Мария Ким CV.pdf"
+    assert "Портфолио или резюме" not in me["missing"]
+
+    person = (await client.get(f"/api/people/{slug}")).json()
+    assert person["has_resume"] is True and "resume_name" not in person
+    # Гостю файл не отдаём, вошедшему — да.
+    assert (await client.get(f"/api/people/{slug}/resume")).status_code == 401
+    oleg = await make_user("oleg@mail.ru")
+    r = await oleg.get(f"/api/people/{slug}/resume")
+    assert r.status_code == 200
+    assert r.content == PDF and r.headers["content-type"] == "application/pdf"
+    assert "no-store" in r.headers["cache-control"]
+
+    assert (await maria.delete("/api/profile/me/resume")).json()["resume_name"] == ""
+    assert (await oleg.get(f"/api/people/{slug}/resume")).status_code == 404

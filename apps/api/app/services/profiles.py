@@ -30,14 +30,16 @@ from app.services.events import track
 from app.services.slug import unique_slug
 
 # Вес каждого поля в «заполненности» профиля (сумма 100).
+# Фронт считает так же на лету (profile-editor.tsx, COMPLETENESS), чтобы полоска росла при вводе.
 _WEIGHTS = {
-    "display_name": (15, "Имя или псевдоним"),
+    "display_name": (10, "Имя или псевдоним"),
     "primary_role": (15, "Основная роль"),
+    "avatar": (10, "Фото"),
     "headline": (10, "Короткое описание"),
     "bio": (10, "Рассказ о себе"),
     "skills": (20, "Хотя бы 3 навыка"),
-    "links": (15, "Ссылка на портфолио"),
-    "contact_telegram": (10, "Telegram для связи"),
+    "links": (15, "Портфолио или резюме"),
+    "contact_telegram": (5, "Telegram для связи"),
     "looking_for": (5, "Условия участия"),
 }
 COMPLETED_THRESHOLD = 80
@@ -47,10 +49,11 @@ def _filled(p: Profile) -> dict[str, bool]:
     return {
         "display_name": bool(p.display_name),
         "primary_role": p.primary_role_id is not None,
+        "avatar": p.avatar_key is not None,
         "headline": bool(p.headline),
         "bio": len(p.bio) >= 30,
         "skills": len(p.skills) >= 3,
-        "links": len(p.links) >= 1,
+        "links": len(p.links) >= 1 or p.resume_key is not None,
         "contact_telegram": bool(p.contact_telegram),
         "looking_for": bool(p.looking_for),
     }
@@ -122,6 +125,8 @@ async def to_detail(db: AsyncSession, p: Profile) -> PersonDetail:
     return PersonDetail(
         **to_card(p).model_dump(),
         bio=p.bio,
+        education=p.education,
+        has_resume=p.resume_key is not None,
         links=[LinkOut.model_validate(link) for link in p.links],
         memberships=await _memberships(db, p.user_id),
     )
@@ -153,6 +158,7 @@ async def my_profile(db: AsyncSession, user: User) -> MyProfileOut:
         is_published=p.is_published,
         contact_telegram=p.contact_telegram,
         show_email=p.show_email,
+        resume_name=p.resume_name,
         completeness=score,
         missing=missing,
         can_publish=not publish_blockers(user, p),

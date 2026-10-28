@@ -15,21 +15,21 @@ const CHOICES = [
     icon: Lightbulb,
     title: "Есть идея",
     text: "Опишу её в двух абзацах и отмечу, кого не хватает.",
-    next: "/startups/new",
+    next: "/me/profile?welcome=idea",
   },
   {
     key: "cofound",
     icon: Users,
     title: "Нет идеи, ищу сообщников",
     text: "Хочу найти людей и вместе придумать стартап с нуля.",
-    next: "/me/profile?welcome=1",
+    next: "/me/profile?welcome=cofound",
   },
   {
     key: "join",
     icon: Rocket,
     title: "Хочу в команду",
     text: "Найду стартап, который уже работает и ищет людей.",
-    next: "/me/profile?welcome=1",
+    next: "/me/profile?welcome=join",
   },
 ] as const;
 

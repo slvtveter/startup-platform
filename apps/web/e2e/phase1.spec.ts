@@ -59,7 +59,7 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
   await register(candidate, candidateEmail);
   await shot(candidate, "onboarding-step1");
 
-  await candidate.goto("/me/profile?welcome=1");
+  await candidate.goto("/me/profile?welcome=join");
   await candidate.getByLabel("Имя или псевдоним").fill("Мария Тестова");
   await candidate.getByRole("button", { name: "Дизайнер", exact: true }).click();
   await candidate.getByRole("button", { name: "После курсов" }).click();
@@ -68,14 +68,16 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
 
   await candidate.getByPlaceholder("Начни вводить").fill("Figma");
   await candidate.getByRole("button", { name: "+ Figma" }).click();
-  await candidate.getByPlaceholder("behance.net/your-name").fill("behance.net/maria-test");
+  await candidate.getByLabel("Ссылка", { exact: true }).fill("behance.net/maria-test");
   await shot(candidate, "onboarding-step2");
   await candidate.getByRole("button", { name: "Дальше" }).click();
 
   await candidate.getByRole("button", { name: /^Без оплаты/ }).click();
   await candidate.getByRole("button", { name: /^Оплата обсуждается/ }).click();
   await candidate.getByLabel("Telegram").fill(`@${tg}`);
-  await candidate.getByRole("button", { name: "Сохранить и опубликовать" }).click();
+  // Полоска заполненности растёт на лету, без сохранения.
+  await expect(candidate.getByRole("progressbar").first()).not.toHaveAttribute("aria-valuenow", "0");
+  await candidate.getByRole("button", { name: "Опубликовать и продолжить" }).click();
   await candidate.waitForURL(/\/startups$/);
 
   // --- Отклик ---

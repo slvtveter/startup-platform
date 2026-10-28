@@ -1,11 +1,13 @@
 "use client";
 
+import { Check, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { AvatarUpload } from "@/components/domain/avatar-upload";
+import { ResumeUpload } from "@/components/domain/resume-upload";
 import { SkillPicker } from "@/components/domain/skill-picker";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +28,48 @@ import { errorMessage } from "@/lib/errors";
 import { AVAILABILITY, LEVEL, LINK_KIND, TERMS, TERMS_HINT } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 
-const STEPS = ["Кто ты", "Навыки и работы", "Что ищешь"];
+const STEPS = ["Кто ты", "Опыт и работы", "Что ищешь"];
+
+/** Цель из развилки после регистрации (/welcome): куда вести, когда профиль готов. */
+export type Goal = "idea" | "cofound" | "join";
+const AFTER: Record<Goal, { href: string; cta: string }> = {
+  idea: { href: "/startups/new", cta: "Сохранить и описать идею" },
+  cofound: { href: "/people/cofounders", cta: "Сохранить и к сообщникам" },
+  join: { href: "/startups", cta: "Сохранить и смотреть стартапы" },
+};
+
+type Form = {
+  display_name: string;
+  headline: string;
+  bio: string;
+  primary_role: string | null;
+  experience_level: ExperienceLevel | null;
+  availability: Availability | null;
+  city: string;
+  education: string;
+  skills: string[];
+  links: { kind: LinkKind; url: string }[];
+  looking_for: LookingFor[];
+  contact_telegram: string;
+  show_email: boolean;
+};
+type Extra = { avatar: boolean; resume: boolean };
+
+/**
+ * Заполненность на лету, те же веса, что в API (services/profiles.py, _WEIGHTS):
+ * полоска растёт, пока человек печатает, а не после сохранения. step — где поле в мастере.
+ */
+const COMPLETENESS: { weight: number; label: string; step: number; done: (f: Form, x: Extra) => boolean }[] = [
+  { weight: 10, label: "Имя", step: 0, done: (f) => f.display_name.trim().length >= 2 },
+  { weight: 15, label: "Основная роль", step: 0, done: (f) => !!f.primary_role },
+  { weight: 10, label: "Фото", step: 0, done: (_, x) => x.avatar },
+  { weight: 10, label: "Коротко о себе", step: 0, done: (f) => !!f.headline.trim() },
+  { weight: 20, label: "3 навыка", step: 1, done: (f) => f.skills.length >= 3 },
+  { weight: 10, label: "Рассказ о себе", step: 1, done: (f) => f.bio.trim().length >= 30 },
+  { weight: 15, label: "Портфолио или резюме", step: 1, done: (f, x) => x.resume || f.links.some((l) => l.url.trim()) },
+  { weight: 5, label: "Условия участия", step: 2, done: (f) => f.looking_for.length > 0 },
+  { weight: 5, label: "Telegram", step: 2, done: (f) => !!f.contact_telegram.trim() },
+];
 
 function Choice({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
@@ -41,23 +84,52 @@ function Choice({ active, onClick, children }: { active: boolean; onClick: () =>
   );
 }
 
+function Progress({ value, label }: { value: number; label: string }) {
+  return (
+    <div>
+      <div className="flex items-baseline gap-3">
+        <span className="text-sm font-semibold text-muted-foreground">{label}</span>
+        <span className="ml-auto text-2xl font-extrabold tabular-nums tracking-[-0.02em]">{value}%</span>
+      </div>
+      <div
+        role="progressbar"
+        aria-label="Профиль заполнен"
+        aria-valuenow={value}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        className="mt-2 h-2.5 overflow-hidden rounded-full bg-tone"
+      >
+        <div
+          className={cn("h-full rounded-full transition-[width,background-color] duration-500", value >= 80 ? "bg-success-ink" : "bg-brand")}
+          style={{ width: `${Math.max(value, 3)}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export function ProfileEditor({
   profile,
   roles,
   skills,
   emailVerified,
   welcome,
+  goal,
 }: {
   profile: MyProfileOut;
   roles: RoleOut[];
   skills: SkillOut[];
   emailVerified: boolean;
   welcome: boolean;
+  goal?: Goal;
 }) {
   const router = useRouter();
+  const top = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState(0);
   const [busy, setBusy] = useState(false);
-  const [f, setF] = useState({
+  const [avatar, setAvatar] = useState(!!profile.avatar_url);
+  const [resume, setResume] = useState(profile.resume_name ?? "");
+  const [f, setF] = useState<Form>({
     display_name: profile.display_name === "Без имени" ? "" : profile.display_name,
     headline: profile.headline,
     bio: profile.bio,
@@ -65,13 +137,25 @@ export function ProfileEditor({
     experience_level: profile.experience_level ?? null,
     availability: profile.availability ?? null,
     city: profile.city,
+    education: profile.education ?? "",
     skills: profile.skills.map((s) => s.slug),
     links: profile.links.length ? profile.links.map((l) => ({ kind: l.kind, url: l.url })) : [{ kind: "portfolio" as LinkKind, url: "" }],
     looking_for: profile.looking_for as LookingFor[],
     contact_telegram: profile.contact_telegram,
     show_email: profile.show_email,
   });
-  const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((s) => ({ ...s, [k]: v }));
+  const set = <K extends keyof Form>(k: K, v: Form[K]) => setF((s) => ({ ...s, [k]: v }));
+
+  const extra = { avatar, resume: !!resume };
+  const score = COMPLETENESS.reduce((n, c) => n + (c.done(f, extra) ? c.weight : 0), 0);
+  const missing = COMPLETENESS.filter((c) => !c.done(f, extra));
+  const after = goal ? AFTER[goal] : welcome ? AFTER.join : null;
+
+  function go(next: number) {
+    setStep(next);
+    // На телефоне шаг длинный: новый начинаем сверху, с полоски заполненности.
+    top.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   async function save(next?: number) {
     setBusy(true);
@@ -82,19 +166,40 @@ export function ProfileEditor({
     };
     const { error } = await updateMyProfile({ body });
     setBusy(false);
-    if (error) return toast.error(errorMessage(error));
-    if (next !== undefined) setStep(next);
+    if (error) {
+      toast.error(errorMessage(error));
+      return false;
+    }
+    if (next !== undefined) go(next);
     else toast.success("Сохранено");
     router.refresh();
+    return true;
+  }
+
+  /** То же, что проверяет API перед публикацией: сразу ведём к шагу с пропущенным полем. */
+  function blocker(): { text: string; step: number } | null {
+    if (f.display_name.trim().length < 2) return { text: "Укажи имя", step: 0 };
+    if (!f.primary_role) return { text: "Выбери основную роль", step: 0 };
+    if (f.skills.length === 0) return { text: "Добавь хотя бы один навык", step: 1 };
+    if (f.looking_for.length === 0) return { text: "Выбери условия участия", step: 2 };
+    return null;
   }
 
   async function publish(published: boolean) {
-    await save();
+    if (published) {
+      const b = blocker();
+      if (b) {
+        toast.error(b.text);
+        if (b.step !== step) go(b.step);
+        return;
+      }
+    }
+    if (!(await save())) return;
     const { error } = await publishMyProfile({ body: { published } });
     if (error) return toast.error(errorMessage(error));
     toast.success(published ? "Профиль опубликован" : "Профиль скрыт из каталога");
-    router.refresh();
-    if (published && welcome) router.push("/startups");
+    if (published && after) router.push(after.href);
+    else router.refresh();
   }
 
   // Порог каталога «Люди» (как в API): роль, описание в одну строку и хотя бы один навык.
@@ -106,18 +211,25 @@ export function ProfileEditor({
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
-      <div className="rounded-3xl border bg-card p-6 sm:p-8">
-        <ol className="flex flex-wrap items-center gap-3 text-sm font-bold">
+      <div ref={top} className="scroll-mt-24 rounded-[28px] bg-card p-6 shadow-[0_0_0_1px_var(--border)] sm:p-8">
+        <Progress value={score} label={`Шаг ${step + 1} из ${STEPS.length} · ${STEPS[step]}`} />
+        {missing.length > 0 && (
+          <p className="mt-2 text-sm text-muted-foreground">
+            Дальше: {missing.slice(0, 2).map((m) => `${m.label.toLowerCase()} +${m.weight}%`).join(", ")}
+          </p>
+        )}
+
+        <ol className="mt-6 flex flex-wrap items-center gap-3 text-sm font-bold">
           {STEPS.map((title, i) => (
             <li key={title} className="flex items-center gap-3">
-              <button type="button" onClick={() => setStep(i)} className="flex items-center gap-2">
+              <button type="button" onClick={() => go(i)} aria-current={i === step ? "step" : undefined} className="flex items-center gap-2">
                 <span
                   className={cn(
-                    "grid size-8 place-items-center rounded-full",
-                    i === step ? "bg-brand text-primary-foreground" : i < step ? "bg-foreground text-background" : "border-2 text-muted-foreground",
+                    "grid size-8 place-items-center rounded-full transition-colors duration-200",
+                    i === step ? "bg-brand text-primary-foreground" : i < step ? "bg-foreground text-background" : "bg-tone text-muted-foreground",
                   )}
                 >
-                  {i < step ? "✓" : i + 1}
+                  {i < step ? <Check aria-hidden className="size-4" strokeWidth={3} /> : i + 1}
                 </span>
                 <span className={i === step ? "" : "text-muted-foreground"}>{title}</span>
               </button>
@@ -127,11 +239,11 @@ export function ProfileEditor({
         </ol>
 
         {step === 0 && (
-          <div className="mt-8 grid gap-6">
-            <AvatarUpload name={f.display_name || profile.display_name} initialUrl={profile.avatar_url ?? null} />
+          <div key="s0" className="wizard-step-forward mt-8 grid gap-6">
+            <AvatarUpload name={f.display_name || profile.display_name} initialUrl={profile.avatar_url ?? null} onChange={(u) => setAvatar(!!u)} />
             <div>
               <Label htmlFor="name">Имя или псевдоним</Label>
-              <Input id="name" className="mt-1.5 h-11" value={f.display_name} onChange={(e) => set("display_name", e.target.value)} placeholder="Мария Ким" />
+              <Input id="name" autoComplete="name" className="mt-1.5 h-11" value={f.display_name} onChange={(e) => set("display_name", e.target.value)} placeholder="Мария Ким" />
             </div>
             <div>
               <Label>Основная роль</Label>
@@ -156,12 +268,13 @@ export function ProfileEditor({
             <div>
               <Label htmlFor="headline">Коротко о себе</Label>
               <Input id="headline" maxLength={140} className="mt-1.5 h-11" value={f.headline} onChange={(e) => set("headline", e.target.value)} placeholder="UI/UX дизайнер после курсов, ищу первый реальный проект" />
-            </div>
-            <div>
-              <Label htmlFor="bio">Подробнее</Label>
-              <Textarea id="bio" rows={5} className="mt-1.5" value={f.bio} onChange={(e) => set("bio", e.target.value)} placeholder="Что уже делал, чему хочешь научиться, сколько времени готов уделять" />
+              <p className="mt-1 text-xs text-muted-foreground">Одна строка: её видно на карточке в каталоге.</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="education">Учёба</Label>
+                <Input id="education" maxLength={120} className="mt-1.5 h-11" value={f.education} onChange={(e) => set("education", e.target.value)} placeholder="ИТМО, 3 курс" />
+              </div>
               <div>
                 <Label htmlFor="city">Город</Label>
                 <Input id="city" className="mt-1.5 h-11" value={f.city} onChange={(e) => set("city", e.target.value)} placeholder="Казань или «онлайн»" />
@@ -171,12 +284,22 @@ export function ProfileEditor({
         )}
 
         {step === 1 && (
-          <div className="mt-8 grid gap-6">
+          <div key="s1" className="wizard-step-forward mt-8 grid gap-6">
             <div>
               <h2 className="text-2xl">Что ты умеешь?</h2>
               <p className="mt-1 text-muted-foreground">По навыкам основатели найдут тебя в каталоге, а мы подберём подходящие стартапы.</p>
               <div className="mt-4">
                 <SkillPicker all={skills} value={f.skills} onChange={(v) => set("skills", v)} />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="bio">Расскажи подробнее</Label>
+              <Textarea id="bio" rows={5} className="mt-1.5" value={f.bio} onChange={(e) => set("bio", e.target.value)} placeholder="Что уже делал, чему хочешь научиться, сколько времени готов уделять" />
+            </div>
+            <div>
+              <Label>Резюме</Label>
+              <div className="mt-2">
+                <ResumeUpload slug={profile.slug} name={resume} onChange={setResume} />
               </div>
             </div>
             <div>
@@ -196,11 +319,11 @@ export function ProfileEditor({
                         </option>
                       ))}
                     </select>
-                    <Input className="h-11" value={l.url} onChange={(e) => set("links", f.links.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)))} placeholder="behance.net/your-name" />
+                    <Input aria-label="Ссылка" className="h-11" value={l.url} onChange={(e) => set("links", f.links.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)))} placeholder="github.com/your-name" />
                   </div>
                 ))}
                 {f.links.length < 8 && (
-                  <button type="button" onClick={() => set("links", [...f.links, { kind: "other", url: "" }])} className="w-fit text-sm font-bold hover:underline">
+                  <button type="button" onClick={() => set("links", [...f.links, { kind: "other", url: "" }])} className="w-fit text-sm font-bold text-brand-ink transition-colors hover:text-brand-hover">
                     + Ещё ссылка
                   </button>
                 )}
@@ -210,7 +333,7 @@ export function ProfileEditor({
         )}
 
         {step === 2 && (
-          <div className="mt-8 grid gap-6">
+          <div key="s2" className="wizard-step-forward mt-8 grid gap-6">
             <button
               type="button"
               role="switch"
@@ -274,7 +397,7 @@ export function ProfileEditor({
                 ))}
               </div>
             </div>
-            <div className="rounded-2xl bg-secondary p-5">
+            <div className="rounded-2xl bg-tone p-5">
               <div className="font-bold">Контакты</div>
               <p className="mt-1 text-sm text-muted-foreground">Не видны в каталоге. Откроются только тем, с кем вы взаимно договоритесь.</p>
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -291,24 +414,33 @@ export function ProfileEditor({
           </div>
         )}
 
-        <div className="mt-8 flex flex-wrap gap-2 border-t pt-6">
-          {step > 0 && (
+        <div className="mt-8 flex flex-wrap items-center gap-2 border-t pt-6">
+          {step > 0 ? (
             <Button variant="outline" size="lg" onClick={() => save(step - 1)} disabled={busy}>
               Назад
             </Button>
+          ) : (
+            after && (
+              <Link href={after.href} className="px-2 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground">
+                Заполню позже
+              </Link>
+            )
           )}
           <div className="ml-auto flex gap-2">
             {step < STEPS.length - 1 ? (
               <Button size="lg" onClick={() => save(step + 1)} disabled={busy}>
+                {busy && <Loader2 aria-hidden className="animate-spin" />}
                 Дальше
               </Button>
             ) : profile.is_published ? (
-              <Button size="lg" onClick={() => save()} disabled={busy}>
-                Сохранить
+              <Button size="lg" onClick={() => (after ? publish(true) : save())} disabled={busy}>
+                {busy && <Loader2 aria-hidden className="animate-spin" />}
+                {after ? after.cta : "Сохранить"}
               </Button>
             ) : (
               <Button variant="brand" size="lg" onClick={() => publish(true)} disabled={busy}>
-                Сохранить и опубликовать
+                {busy && <Loader2 aria-hidden className="animate-spin" />}
+                {after ? "Опубликовать и продолжить" : "Сохранить и опубликовать"}
               </Button>
             )}
           </div>
@@ -316,24 +448,38 @@ export function ProfileEditor({
       </div>
 
       <aside className="grid h-fit gap-4 lg:sticky lg:top-24">
-        <div className="rounded-2xl border bg-card p-5">
-          <div className="flex items-baseline">
-            <span className="font-bold">Профиль заполнен</span>
-            <span className="ml-auto text-2xl font-bold">{profile.completeness}%</span>
-          </div>
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-secondary">
-            <div className="h-full rounded-full bg-brand transition-[width] duration-500" style={{ width: `${profile.completeness}%` }} />
-          </div>
-          {profile.missing.length > 0 && (
-            <ul className="mt-4 grid gap-1 text-sm text-muted-foreground">
-              {profile.missing.map((m) => (
-                <li key={m}>+ {m}</li>
-              ))}
-            </ul>
-          )}
-          <p className="mt-4 text-xs text-muted-foreground">С портфолио и рассказом о себе основатели отвечают заметно чаще.</p>
+        <div className="rounded-[28px] bg-tone p-6">
+          <Progress value={score} label="Профиль заполнен" />
+          <ul className="mt-5 grid gap-2 text-sm">
+            {COMPLETENESS.map((c) => {
+              const done = c.done(f, extra);
+              return (
+                <li key={c.label}>
+                  <button
+                    type="button"
+                    onClick={() => go(c.step)}
+                    className={cn("flex w-full items-center gap-2.5 text-left transition-colors", done ? "text-muted-foreground" : "font-semibold hover:text-brand-ink")}
+                  >
+                    <span
+                      aria-hidden
+                      className={cn(
+                        "grid size-5 shrink-0 place-items-center rounded-full transition-colors duration-200",
+                        done ? "bg-success-ink text-white" : "bg-white text-transparent shadow-[inset_0_0_0_1.5px_var(--input)]",
+                      )}
+                    >
+                      <Check className="size-3" strokeWidth={3} />
+                    </span>
+                    <span className={cn(done && "line-through decoration-foreground/30")}>{c.label}</span>
+                    <span className="ml-auto text-xs text-muted-foreground tabular-nums">+{c.weight}%</span>
+                    <span className="sr-only">{done ? "— готово" : "— не заполнено"}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          <p className="mt-4 text-xs text-muted-foreground">С фото, портфолио и рассказом о себе основатели отвечают заметно чаще.</p>
         </div>
-        <div className="rounded-2xl border bg-card p-5">
+        <div className="rounded-[28px] bg-tone p-6">
           <div className="font-bold">{profile.is_published ? "Опубликован" : "Не опубликован"}</div>
           <p className="mt-1 text-sm text-muted-foreground">
             {profile.is_published ? "Профиль открыт по ссылке, можно откликаться." : "Пока профиль скрыт, нельзя откликаться и тебя не найдут в каталоге."}
@@ -355,7 +501,7 @@ export function ProfileEditor({
                 </Button>
               </>
             ) : (
-              <Button variant="brand" size="sm" onClick={() => publish(true)} disabled={!profile.can_publish && !emailVerified}>
+              <Button variant="brand" size="sm" onClick={() => publish(true)} disabled={busy}>
                 Опубликовать
               </Button>
             )}
