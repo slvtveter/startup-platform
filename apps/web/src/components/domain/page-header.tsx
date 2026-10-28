@@ -11,7 +11,7 @@ export function PageHeader({
     <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
       <div>
         <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">{title}</h1>
-        {description && <p className="mt-3 max-w-2xl text-[17px] text-muted-foreground">{description}</p>}
+        {description && <p className="mt-3 max-w-2xl text-lg text-muted-foreground">{description}</p>}
       </div>
       {actions && <div className="flex gap-2 sm:ml-auto">{actions}</div>}
     </div>

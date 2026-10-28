@@ -34,8 +34,8 @@ export function CoverUpload({ startup }: { startup: StartupDetail }) {
   }
 
   return (
-    <section className="grid gap-5 rounded-[26px] bg-tone p-5 sm:grid-cols-[260px_minmax(0,1fr)] sm:items-center sm:p-6">
-      <div className="relative aspect-[16/9] overflow-hidden rounded-[18px] bg-tone-2">
+    <section className="grid gap-5 rounded-[28px] bg-tone p-5 sm:grid-cols-[260px_minmax(0,1fr)] sm:items-center sm:p-6">
+      <div className="relative aspect-[16/9] overflow-hidden rounded-2xl bg-tone-2">
         <StartupCover startup={s} sizes="260px" />
       </div>
       <div>

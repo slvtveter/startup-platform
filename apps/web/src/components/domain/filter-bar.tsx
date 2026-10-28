@@ -98,7 +98,7 @@ export function CatalogToolbar({
               defaultValue={q ?? ""}
               placeholder={placeholder}
               aria-label={placeholder}
-              className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
+              className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
             />
           </label>
           <button type="submit" className="sr-only">
@@ -131,7 +131,7 @@ export function CatalogToolbar({
                 <DropdownMenuTrigger className={cn(pill, selected.length > 0 ? pillOn : pillOff)}>
                   {g.title}
                   {selected.length > 0 && (
-                    <span className="grid size-5 place-items-center rounded-full bg-brand text-[11px] font-bold text-white">{selected.length}</span>
+                    <span className="grid size-5 place-items-center rounded-full bg-brand text-xs font-bold text-white">{selected.length}</span>
                   )}
                   <ChevronDown aria-hidden className="size-4 opacity-70" />
                 </DropdownMenuTrigger>
@@ -167,7 +167,7 @@ export function CatalogToolbar({
             <SheetTrigger className={cn(pill, activeCount > 0 ? pillOn : pillOff)}>
               <SlidersHorizontal aria-hidden className="size-4" />
               Фильтры
-              {activeCount > 0 && <span className="grid size-5 place-items-center rounded-full bg-brand text-[11px] font-bold text-white">{activeCount}</span>}
+              {activeCount > 0 && <span className="grid size-5 place-items-center rounded-full bg-brand text-xs font-bold text-white">{activeCount}</span>}
             </SheetTrigger>
             <SheetContent side="bottom" className="max-h-[85svh] gap-0 rounded-t-[28px] border-0 p-0">
               <div className="px-5 pt-5 pb-2">
@@ -229,13 +229,13 @@ export function CatalogToolbar({
                 href={toggleHref(basePath, params, c.name, c.name === "q" ? null : c.value)}
                 scroll={false}
                 aria-label={`Убрать фильтр: ${c.label}`}
-                className="inline-flex h-8 items-center gap-1 rounded-full bg-tone pr-2 pl-3 text-[13px] font-semibold transition-colors hover:bg-tone-2"
+                className="inline-flex h-8 items-center gap-1 rounded-full bg-tone pr-2 pl-3 text-sm font-semibold transition-colors hover:bg-tone-2"
               >
                 {c.label}
                 <X aria-hidden className="size-3.5 text-muted-foreground" />
               </Link>
             ))}
-            <Link href={basePath} scroll={false} className="text-[13px] font-semibold text-brand-ink transition-colors hover:text-brand-hover">
+            <Link href={basePath} scroll={false} className="text-sm font-semibold text-brand-ink transition-colors hover:text-brand-hover">
               Сбросить всё
             </Link>
           </>
@@ -250,7 +250,7 @@ function Box({ on }: { on: boolean }) {
     <span
       aria-hidden
       className={cn(
-        "grid size-[18px] shrink-0 place-items-center rounded-[5px] border-[1.5px] transition-colors",
+        "grid size-[18px] shrink-0 place-items-center rounded-[6px] border-[1.5px] transition-colors",
         on ? "border-brand bg-brand text-white" : "border-input bg-white",
       )}
     >

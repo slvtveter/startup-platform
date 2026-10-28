@@ -42,7 +42,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
         <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">Люди</h1>
         <PeopleTabs active="all" cofounders={cof?.total} />
       </div>
-      <p className="mt-3 max-w-2xl text-[17px] text-muted-foreground">
+      <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
         Напиши первым: обсудить идею, позвать в проект или просто познакомиться. Контакты открываются, только когда согласны оба.
       </p>
 
@@ -60,7 +60,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
           resultLabel={countLabel}
           summary={
             // h2 между h1 страницы и h3 карточек: порядок заголовков для экранных читалок.
-            <h2 className="text-[15px] font-bold tracking-normal">{countLabel}</h2>
+            <h2 className="text-base font-bold tracking-normal">{countLabel}</h2>
           }
         />
       </div>

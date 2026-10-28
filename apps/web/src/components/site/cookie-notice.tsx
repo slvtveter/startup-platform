@@ -63,7 +63,7 @@ export function CookieNotice() {
       ref={ref}
       role="region"
       aria-label="Cookie"
-      className="cookie-in fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-md items-center gap-3 rounded-[20px] bg-card p-3 pl-4 text-sm shadow-[0_0_0_1px_var(--border),0_20px_50px_-12px_rgb(15_27_45/0.25)]"
+      className="cookie-in fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-card p-3 pl-4 text-sm shadow-[0_0_0_1px_var(--border),0_20px_50px_-12px_rgb(15_27_45/0.25)]"
     >
       <p className="flex-1 text-muted-foreground">
         Мы используем только необходимые cookie, чтобы вы могли войти в аккаунт.{" "}

@@ -88,7 +88,7 @@ export function StartupCard({
         href={`/startups/${startup.slug}`}
         className="card-hover group flex h-full flex-col rounded-[28px] bg-tone p-2 hover:bg-tone-2"
       >
-        <span className="relative block aspect-[16/9] shrink-0 overflow-hidden rounded-[20px]">
+        <span className="relative block aspect-[16/9] shrink-0 overflow-hidden rounded-2xl">
           <StartupCover startup={startup} eager={eager} />
           <span className="absolute top-3 left-3 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-foreground shadow-sm">
             {STAGE[startup.stage] ?? startup.stage}
@@ -100,21 +100,21 @@ export function StartupCard({
             {startup.title}
           </h3>
           {/* Суть всегда занимает две строки: карточки в ряду держат один ритм, даже если текст короткий. */}
-          <p className="mt-1.5 line-clamp-2 min-h-[42px] text-[15px] leading-[21px] text-muted-foreground">{startup.pitch}</p>
+          <p className="mt-1.5 line-clamp-2 min-h-[42px] text-base leading-[21px] text-muted-foreground">{startup.pitch}</p>
           <span className="mt-4 flex h-7 min-w-0 items-center gap-1.5 overflow-hidden" aria-label="Кого ищут">
             {roles.length > 0 ? (
               <>
                 {roles.map((r, i) => (
-                  <span key={r.id} className={cn("truncate rounded-full bg-white px-2.5 py-1 text-[13px] leading-5 font-semibold", i === 0 ? "max-w-[65%] shrink-0" : "min-w-16")} title={r.title}>
+                  <span key={r.id} className={cn("truncate rounded-full bg-white px-2.5 py-1 text-sm leading-5 font-semibold", i === 0 ? "max-w-[65%] shrink-0" : "min-w-16")} title={r.title}>
                     {r.title}
                   </span>
                 ))}
                 {more > 0 && (
-                  <span className="shrink-0 rounded-full bg-white px-2 py-1 text-[13px] leading-5 font-semibold text-muted-foreground">+{more}</span>
+                  <span className="shrink-0 rounded-full bg-white px-2 py-1 text-sm leading-5 font-semibold text-muted-foreground">+{more}</span>
                 )}
               </>
             ) : (
-              <span className="text-[13px] text-muted-foreground">Команда собрана</span>
+              <span className="text-sm text-muted-foreground">Команда собрана</span>
             )}
           </span>
           {reasons && reasons.length > 0 && (
@@ -128,12 +128,12 @@ export function StartupCard({
             </span>
           )}
           <span className="mt-auto pt-5">
-            <span className="flex items-center gap-2 border-t border-foreground/[0.08] pt-3.5 text-[13px] text-muted-foreground">
+            <span className="flex items-center gap-2 border-t border-foreground/[0.08] pt-3.5 text-sm text-muted-foreground">
               <span className="min-w-0 truncate">
                 Основатель <span className="font-semibold text-foreground">{startup.owner_name}</span>
                 {team > 1 ? ` и ещё ${team - 1}` : ""}
               </span>
-              {startup.is_demo && <span title="Пример: так выглядит карточка на Envola" className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-muted-foreground shadow-[inset_0_0_0_1px_var(--border)]">Пример</span>}
+              {startup.is_demo && <span title="Пример: так выглядит карточка на Envola" className="shrink-0 rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-muted-foreground shadow-[inset_0_0_0_1px_var(--border)]">Пример</span>}
               <span className="ml-auto inline-flex shrink-0 items-center gap-1 font-bold text-brand-ink">
                 {open > 0 ? plural(open, `${open} место`, `${open} места`, `${open} мест`) : "Подробнее"}
                 <ArrowRight aria-hidden className="size-3.5" />

@@ -90,7 +90,7 @@ export async function ProjectCatalog({ mode, params }: { mode: "ideas" | "startu
           summary={
             // h2 между h1 страницы и h3 карточек: порядок заголовков для экранных читалок.
             <span className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-              <h2 className="text-[15px] font-bold tracking-normal">{countLabel}</h2>
+              <h2 className="text-base font-bold tracking-normal">{countLabel}</h2>
               <Link href="/me/settings" className="text-sm font-semibold text-brand-ink transition-colors hover:text-brand-hover">
                 Присылать новые роли на почту
               </Link>
@@ -148,7 +148,7 @@ export async function ProjectCatalog({ mode, params }: { mode: "ideas" | "startu
       <Pager basePath={base} params={params} total={total} limit={LIMIT} page={page} />
       <Link
         href={copy.other.href}
-        className="mt-10 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[26px] bg-tone px-6 py-5 transition-colors hover:bg-tone-2"
+        className="mt-10 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[28px] bg-tone px-6 py-5 transition-colors hover:bg-tone-2"
       >
         <span className="font-semibold">{copy.other.text}</span>
         <span className="inline-flex items-center gap-1.5 font-bold text-brand-ink sm:ml-auto">

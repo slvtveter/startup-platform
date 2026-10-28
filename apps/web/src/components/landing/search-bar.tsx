@@ -22,7 +22,7 @@ export function SearchBar() {
       action={tab.action}
       className="grid gap-2 rounded-[28px] bg-tone p-2.5 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center"
     >
-      <div role="radiogroup" aria-label="Где искать" className="flex rounded-[18px] bg-white p-1">
+      <div role="radiogroup" aria-label="Где искать" className="flex rounded-2xl bg-white p-1">
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -31,7 +31,7 @@ export function SearchBar() {
             aria-checked={t.key === tab.key}
             onClick={() => setTab(t)}
             className={cn(
-              "h-[46px] flex-1 rounded-[14px] px-[18px] text-[15px] font-bold text-muted-foreground transition-colors",
+              "h-[46px] flex-1 rounded-xl px-[18px] text-base font-bold text-muted-foreground transition-colors",
               t.key === tab.key ? "bg-foreground text-background" : "hover:bg-tone hover:text-foreground",
             )}
           >
@@ -40,7 +40,7 @@ export function SearchBar() {
         ))}
       </div>
       {tab.key === "ideas" && <input type="hidden" name="stage" value="idea" />}
-      <label className="flex h-[54px] items-center gap-3 rounded-[18px] bg-white px-[18px] focus-within:shadow-[inset_0_0_0_2px_var(--cornflower)]">
+      <label className="flex h-[54px] items-center gap-3 rounded-2xl bg-white px-[18px] focus-within:shadow-[inset_0_0_0_2px_var(--cornflower)]">
         <SearchIcon aria-hidden className="size-5 shrink-0 text-muted-foreground" />
         <input
           name="q"
@@ -50,7 +50,7 @@ export function SearchBar() {
           className="min-w-0 flex-1 bg-transparent text-base font-medium outline-none placeholder:text-muted-foreground"
         />
       </label>
-      <button type="submit" className={buttonVariants({ variant: "ink", className: "h-[54px] rounded-[18px] px-6 text-base" })}>
+      <button type="submit" className={buttonVariants({ variant: "ink", className: "h-[54px] rounded-2xl px-6 text-base" })}>
         Найти
       </button>
     </form>
