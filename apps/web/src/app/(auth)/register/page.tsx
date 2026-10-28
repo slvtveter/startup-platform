@@ -7,15 +7,16 @@ import { SocialButtons } from "@/components/auth/social-buttons";
 
 export const metadata: Metadata = { title: "Регистрация" };
 
-export default function RegisterPage() {
+export default async function RegisterPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  const { next } = await searchParams;
   return (
-    <AuthCard title="Создать аккаунт" subtitle="Займёт минуту. Профиль заполним на следующем шаге.">
+    <AuthCard tab="register" next={next} title="Создать аккаунт" subtitle="Бесплатно и без резюме. Почту подтвердим кодом, профиль заполним на следующем шаге.">
       <Suspense>
         <AuthForm mode="register" />
-        <div className="mt-4">
-          <SocialButtons />
-        </div>
       </Suspense>
+      <div className="mt-4">
+        <SocialButtons />
+      </div>
     </AuthCard>
   );
 }

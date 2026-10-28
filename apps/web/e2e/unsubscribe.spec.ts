@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { uniqueEmail, verifyEmailViaMailpit } from "./helpers";
+import { uniqueEmail, registerViaApi } from "./helpers";
 
 const MAILPIT = process.env.MAILPIT_URL ?? "http://localhost:8025";
 
@@ -9,8 +9,7 @@ test("founder unsubscribes from application emails via the link in the email", a
   // Новичок откликается на место во «ВкусноРядом» — письмо уходит основателю через очередь.
   const email = uniqueEmail("unsub");
   const api = page.request;
-  expect((await api.post("/api/auth/register", { data: { email, password: "e2e-password-1" } })).ok()).toBeTruthy();
-  await verifyEmailViaMailpit(page, email);
+  await registerViaApi(page, email);
   await api.patch("/api/profile/me", {
     data: { display_name: "Тест Отписки", primary_role: "designer", links: [{ kind: "portfolio", url: "https://example.com/e2e" }] },
   });

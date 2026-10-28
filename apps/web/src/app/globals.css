@@ -362,3 +362,22 @@
 .wizard-step-back {
   animation: step-in-back 320ms var(--ease-out) backwards;
 }
+
+/* Вход и регистрация: мигающий курсор в ячейке кода, галочка успеха. */
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+.code-caret {
+  animation: caret-blink 1s steps(1) infinite;
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+.auth-pop {
+  animation: pop-in 400ms var(--ease-out) backwards;
+}

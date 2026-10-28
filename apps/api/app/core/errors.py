@@ -34,6 +34,13 @@ class Forbidden(AppError):
     code = "forbidden"
 
 
+class EmailUnverified(AppError):
+    """Пароль верный, но почта не подтверждена: на неё ушёл код, фронт показывает шаг ввода кода."""
+
+    status_code = 403
+    code = "email_unverified"
+
+
 class Conflict(AppError):
     status_code = 409
     code = "conflict"

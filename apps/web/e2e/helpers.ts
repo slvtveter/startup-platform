@@ -7,9 +7,9 @@ export function uniqueEmail(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e4)}@e2e.example.com`;
 }
 
-/** Достаём токен подтверждения из последнего письма в Mailpit. */
-export async function verifyEmailViaMailpit(page: Page, email: string) {
-  let token = "";
+/** Код подтверждения из последнего письма в Mailpit. */
+export async function codeFromMailpit(email: string) {
+  let code = "";
   await expect
     .poll(
       async () => {
@@ -17,25 +17,38 @@ export async function verifyEmailViaMailpit(page: Page, email: string) {
         const { messages = [] } = (await res.json()) as { messages?: { ID: string }[] };
         if (!messages.length) return "";
         const msg = (await (await fetch(`${MAILPIT}/api/v1/message/${messages[0].ID}`)).json()) as { Text: string };
-        token = /token=([\w-]+)/.exec(msg.Text)?.[1] ?? "";
-        return token;
+        code = /^(\d{6})$/m.exec(msg.Text)?.[1] ?? "";
+        return code;
       },
       { timeout: 20_000 },
     )
     .not.toBe("");
-  await page.goto(`/verify-email?token=${token}`);
-  await expect(page.getByRole("heading", { name: "Email подтверждён" })).toBeVisible();
+  return code;
 }
 
-export async function register(page: Page, email: string) {
-  await page.goto("/register");
+/** Регистрация через API: код из письма подтверждает почту и ставит сессию в контекст страницы. */
+export async function registerViaApi(page: Page, email: string) {
+  expect((await page.request.post("/api/auth/register", { data: { email, password: "e2e-password-1" } })).ok()).toBeTruthy();
+  const res = await page.request.post("/api/auth/code", { data: { email, code: await codeFromMailpit(email) } });
+  expect(res.ok()).toBeTruthy();
+}
+
+/** На открытой форме регистрации: почта, пароль, код из письма. */
+export async function fillRegistration(page: Page, email: string) {
   // Ждём гидрацию: иначе React сбросит значения, введённые до неё.
   await page.waitForLoadState("networkidle");
   await page.getByLabel("Email").fill(email);
   await expect(page.getByLabel("Email")).toHaveValue(email);
-  await page.getByLabel("Пароль").fill("e2e-password-1");
+  await page.getByLabel("Пароль", { exact: true }).fill("e2e-password-1");
   await page.getByText("Мне есть 18 лет").click();
-  await page.getByRole("button", { name: "Создать аккаунт" }).click();
+  await page.getByRole("button", { name: "Получить код на почту" }).click();
+  // Код отправляется сам после шестой цифры.
+  await page.getByLabel("Код из письма").fill(await codeFromMailpit(email));
+}
+
+export async function register(page: Page, email: string) {
+  await page.goto("/register");
+  await fillRegistration(page, email);
   // После регистрации — развилка «С чего начнёшь?», дальше профиль.
   await page.waitForURL(/\/welcome/);
   await page.getByRole("button", { name: /Хочу в команду/ }).click();

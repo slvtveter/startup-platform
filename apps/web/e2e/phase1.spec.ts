@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { register, shot, uniqueEmail, verifyEmailViaMailpit } from "./helpers";
+import { register, shot, uniqueEmail } from "./helpers";
 
 /**
  * Definition of done фазы 1 (KAN-68): основатель публикует стартап, новичок регистрируется,
@@ -15,7 +15,6 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
   const founder = await founderCtx.newPage();
   const founderEmail = uniqueEmail("founder");
   await register(founder, founderEmail);
-  await verifyEmailViaMailpit(founder, founderEmail);
 
   // Мастер создания (KAN-138 п.4): по одному вопросу на экран.
   await founder.goto("/startups/new");
@@ -59,7 +58,6 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
   const tg = `e2e_${stamp}`;
   await register(candidate, candidateEmail);
   await shot(candidate, "onboarding-step1");
-  await verifyEmailViaMailpit(candidate, candidateEmail);
 
   await candidate.goto("/me/profile?welcome=1");
   await candidate.getByLabel("Имя или псевдоним").fill("Мария Тестова");

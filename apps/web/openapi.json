@@ -32,6 +32,7 @@
           "auth"
         ],
         "summary": "Register",
+        "description": "\u0410\u043a\u043a\u0430\u0443\u043d\u0442 \u0441\u043e\u0437\u0434\u0430\u043d, \u043d\u0430 \u043f\u043e\u0447\u0442\u0443 \u0443\u0448\u0451\u043b \u043a\u043e\u0434. \u0412\u0445\u043e\u0434 \u2014 \u043f\u043e\u0441\u043b\u0435 POST /auth/code.",
         "operationId": "register",
         "requestBody": {
           "content": {
@@ -44,12 +45,95 @@
           "required": true
         },
         "responses": {
-          "201": {
+          "202": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MeOut"
+                  "$ref": "#/components/schemas/CodeSentOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/code": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Verify Code",
+        "description": "\u041a\u043e\u0434 \u0438\u0437 \u043f\u0438\u0441\u044c\u043c\u0430: \u043f\u043e\u0447\u0442\u0430 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0430, \u0441\u0442\u0430\u0432\u0438\u043c \u0441\u0435\u0441\u0441\u0438\u044e. created \u2014 \u0430\u043a\u043a\u0430\u0443\u043d\u0442 \u0442\u043e\u043b\u044c\u043a\u043e \u0447\u0442\u043e \u0441\u043e\u0437\u0434\u0430\u043d.",
+        "operationId": "verify_code",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CodeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignInOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/code/resend": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Resend Code",
+        "operationId": "resend_code",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendCodeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkOut"
                 }
               }
             }
@@ -94,6 +178,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "email_unverified"
           },
           "422": {
             "description": "Validation Error",
@@ -236,6 +323,48 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OkOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/password/reset-code": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Reset Password With Code",
+        "description": "\u041a\u043e\u0434 \u0438\u0437 \u043f\u0438\u0441\u044c\u043c\u0430 \u0438 \u043d\u043e\u0432\u044b\u0439 \u043f\u0430\u0440\u043e\u043b\u044c: \u043f\u0430\u0440\u043e\u043b\u044c \u0441\u043c\u0435\u043d\u0451\u043d, \u0447\u0435\u043b\u043e\u0432\u0435\u043a \u0441\u0440\u0430\u0437\u0443 \u0432\u043e\u0448\u0451\u043b.",
+        "operationId": "reset_password_with_code",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetCodeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeOut"
                 }
               }
             }
@@ -572,7 +701,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SocialLoginOut"
+                  "$ref": "#/components/schemas/SignInOut"
                 }
               }
             }
@@ -4226,6 +4355,40 @@
         "title": "ClientEventIn",
         "description": "\u0421\u043e\u0431\u044b\u0442\u0438\u044f, \u043a\u043e\u0442\u043e\u0440\u044b\u0435 \u0432\u0438\u0434\u0438\u0442 \u0442\u043e\u043b\u044c\u043a\u043e \u0431\u0440\u0430\u0443\u0437\u0435\u0440 (docs/events.md). \u0411\u0435\u043b\u044b\u0439 \u0441\u043f\u0438\u0441\u043e\u043a \u0438\u043c\u0451\u043d."
       },
+      "CodeIn": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^\\d{6}$",
+            "title": "Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "code"
+        ],
+        "title": "CodeIn"
+      },
+      "CodeSentOut": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "CodeSentOut",
+        "description": "\u041a\u043e\u0434 \u0443\u0448\u0451\u043b \u043d\u0430 \u043f\u043e\u0447\u0442\u0443: \u0434\u0430\u043b\u044c\u0448\u0435 \u0448\u0430\u0433 \u0432\u0432\u043e\u0434\u0430 \u043a\u043e\u0434\u0430."
+      },
       "CohortRow": {
         "properties": {
           "week": {
@@ -6032,6 +6195,56 @@
         ],
         "title": "ReportStatus"
       },
+      "ResendCodeIn": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "verify",
+              "reset"
+            ],
+            "title": "Purpose",
+            "default": "verify"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "ResendCodeIn"
+      },
+      "ResetCodeIn": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^\\d{6}$",
+            "title": "Code"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "code",
+          "password"
+        ],
+        "title": "ResetCodeIn"
+      },
       "ResetIn": {
         "properties": {
           "token": {
@@ -6369,6 +6582,24 @@
         ],
         "title": "SessionOut"
       },
+      "SignInOut": {
+        "properties": {
+          "me": {
+            "$ref": "#/components/schemas/MeOut"
+          },
+          "created": {
+            "type": "boolean",
+            "title": "Created"
+          }
+        },
+        "type": "object",
+        "required": [
+          "me",
+          "created"
+        ],
+        "title": "SignInOut",
+        "description": "\u0412\u0445\u043e\u0434 \u043a\u043e\u0434\u043e\u043c \u0438\u0437 \u043f\u0438\u0441\u044c\u043c\u0430 \u0438\u043b\u0438 \u0447\u0435\u0440\u0435\u0437 Telegram/VK: created \u2014 \u0430\u043a\u043a\u0430\u0443\u043d\u0442 \u0442\u043e\u043b\u044c\u043a\u043e \u0447\u0442\u043e \u0441\u043e\u0437\u0434\u0430\u043d."
+      },
       "SkillOut": {
         "properties": {
           "slug": {
@@ -6391,23 +6622,6 @@
           "category"
         ],
         "title": "SkillOut"
-      },
-      "SocialLoginOut": {
-        "properties": {
-          "me": {
-            "$ref": "#/components/schemas/MeOut"
-          },
-          "created": {
-            "type": "boolean",
-            "title": "Created"
-          }
-        },
-        "type": "object",
-        "required": [
-          "me",
-          "created"
-        ],
-        "title": "SocialLoginOut"
       },
       "SocialProvidersOut": {
         "properties": {

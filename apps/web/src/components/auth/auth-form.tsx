@@ -1,30 +1,82 @@
 "use client";
 
+import { Check, Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 import { FieldError } from "@/components/auth/auth-card";
+import { CodeStep } from "@/components/auth/code-step";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { login, register } from "@/lib/api";
+import { login, register, verifyCode } from "@/lib/api";
 import { errorMessage, fieldErrors } from "@/lib/errors";
 
-function safeNext(next: string | null, fallback: string) {
+export function safeNext(next: string | null, fallback: string) {
   // Только относительные пути: защищаемся от открытого редиректа.
   return next && next.startsWith("/") && !next.startsWith("//") ? next : fallback;
 }
 
+/** Переход после входа: пока грузится следующая страница, показываем «Входим…», а не замершую кнопку. */
+export function useSignedIn() {
+  const router = useRouter();
+  const [done, setDone] = useState(false);
+  const [, startTransition] = useTransition();
+  function go(href: string) {
+    setDone(true);
+    startTransition(() => {
+      router.replace(href);
+      router.refresh();
+    });
+  }
+  return { done, go };
+}
+
+/** Экран между формой и следующей страницей: галочка и «Входим в аккаунт». */
+export function SignedIn({ title = "Готово" }: { title?: string }) {
+  return (
+    <div role="status" className="grid justify-items-center gap-4 py-6 text-center">
+      <span className="auth-pop grid size-16 place-items-center rounded-full bg-brand text-white">
+        <Check className="size-8" strokeWidth={3} aria-hidden />
+      </span>
+      <div>
+        <p className="text-xl font-extrabold tracking-[-0.02em]">{title}</p>
+        <p className="mt-1 inline-flex items-center gap-2 text-muted-foreground">
+          <Loader2 aria-hidden className="size-4 animate-spin" />
+          Входим в аккаунт…
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function apiCode(error: unknown) {
+  return (error as { error?: { code?: string } } | undefined)?.error?.code;
+}
+
+/**
+ * Вход и регистрация по почте. Регистрация — в два шага: почта и пароль, потом код из письма,
+ * без кода аккаунт не открыть. Вход с неподтверждённой почтой тоже уводит на шаг с кодом.
+ */
 export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const router = useRouter();
   const params = useSearchParams();
+  const next = params.get("next");
+  const [step, setStep] = useState<"form" | "code">("form");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [show, setShow] = useState(false);
   const [adult, setAdult] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [fields, setFields] = useState<Record<string, string>>({});
+  const { done, go } = useSignedIn();
+
+  // Страница после входа подгружается заранее, пока человек вводит пароль.
+  useEffect(() => {
+    router.prefetch(safeNext(next, mode === "register" ? "/welcome" : "/"));
+  }, [router, next, mode]);
 
   /** Свои понятные сообщения вместо всплывающих подсказок браузера (они на языке браузера и пропадают). */
   function validate(): Record<string, string> {
@@ -48,31 +100,53 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     setBusy(true);
     setError("");
     setFields({});
-    const body = { email, password };
-    const res =
-      mode === "login"
-        ? await login({ body })
-        : await register({ body: { ...body, utm_source: params.get("utm_source") || params.get("ref") || null } });
+    const body = { email: email.trim(), password };
+    if (mode === "login") {
+      const res = await login({ body });
+      if (!res.error) return go(safeNext(next, "/"));
+      setBusy(false);
+      if (apiCode(res.error) === "email_unverified") return setStep("code");
+      setFields(fieldErrors(res.error));
+      setError(errorMessage(res.error));
+      return;
+    }
+    const res = await register({ body: { ...body, utm_source: params.get("utm_source") || params.get("ref") || null } });
     setBusy(false);
     if (res.error) {
       setFields(fieldErrors(res.error));
       setError(errorMessage(res.error));
       return;
     }
-    const fallback = mode === "register" ? "/welcome" : "/";
-    router.push(safeNext(params.get("next"), fallback));
-    router.refresh();
+    setStep("code");
   }
 
+  async function confirm(code: string) {
+    const { data, error: err } = await verifyCode({ body: { email: email.trim(), code } });
+    if (err || !data) return errorMessage(err);
+    go(safeNext(next, data.created ? "/welcome" : "/"));
+    return null;
+  }
+
+  if (done) return <SignedIn title={mode === "register" ? "Почта подтверждена" : "Готово"} />;
+  if (step === "code") {
+    return (
+      <CodeStep email={email.trim()} purpose="verify" onBack={() => setStep("form")} onSubmit={confirm} submitLabel={mode === "register" ? "Создать аккаунт" : "Войти"} />
+    );
+  }
+
+  const nextQuery = next ? `?next=${encodeURIComponent(next)}` : "";
   return (
-    <form onSubmit={submit} noValidate className="grid gap-4">
+    <form onSubmit={submit} noValidate className="grid gap-4" aria-busy={busy}>
       <div>
         <Label htmlFor="email">Email</Label>
         <Input
           id="email"
           type="email"
           autoComplete="email"
+          inputMode="email"
+          autoFocus
           required
+          disabled={busy}
           aria-invalid={!!fields.email}
           aria-describedby={fields.email ? "email-error" : undefined}
           className="mt-1.5 h-11"
@@ -85,23 +159,35 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         <div className="flex items-baseline">
           <Label htmlFor="password">Пароль</Label>
           {mode === "login" && (
-            <Link href="/forgot-password" className="ml-auto text-sm text-muted-foreground hover:text-foreground">
+            <Link href={`/forgot-password${email ? `?email=${encodeURIComponent(email.trim())}` : ""}`} className="ml-auto text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground">
               Забыли пароль?
             </Link>
           )}
         </div>
-        <Input
-          id="password"
-          type="password"
-          autoComplete={mode === "login" ? "current-password" : "new-password"}
-          required
-          minLength={mode === "register" ? 8 : 1}
-          aria-invalid={!!fields.password}
-          aria-describedby={fields.password ? "password-error" : mode === "register" ? "password-hint" : undefined}
-          className="mt-1.5 h-11"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className="relative mt-1.5">
+          <Input
+            id="password"
+            type={show ? "text" : "password"}
+            autoComplete={mode === "login" ? "current-password" : "new-password"}
+            required
+            disabled={busy}
+            minLength={mode === "register" ? 8 : 1}
+            aria-invalid={!!fields.password}
+            aria-describedby={fields.password ? "password-error" : mode === "register" ? "password-hint" : undefined}
+            className="h-11 pr-11"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button
+            type="button"
+            onClick={() => setShow((v) => !v)}
+            aria-label={show ? "Скрыть пароль" : "Показать пароль"}
+            aria-pressed={show}
+            className="absolute inset-y-0 right-0 grid w-11 place-items-center rounded-r-lg text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {show ? <EyeOff aria-hidden className="size-[18px]" /> : <Eye aria-hidden className="size-[18px]" />}
+          </button>
+        </div>
         {mode === "register" && !fields.password && (
           <p id="password-hint" className="mt-1 text-xs text-muted-foreground">
             Минимум 8 символов
@@ -127,28 +213,32 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           <FieldError id="adult-error" message={fields.adult} />
         </div>
       )}
-      {error && <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
-      <Button type="submit" variant="brand" size="lg" disabled={busy}>
-        {mode === "login" ? "Войти" : "Создать аккаунт"}
-      </Button>
-      <p className="text-center text-sm text-muted-foreground">
-        {mode === "login" ? (
+      {error && (
+        <p role="alert" className="rounded-xl bg-destructive/10 px-3 py-2.5 text-sm text-destructive">
+          {error}
+          {mode === "register" && error.includes("уже есть") && (
+            <>
+              {" "}
+              <Link href={`/login${nextQuery}`} className="font-bold underline underline-offset-2">
+                Войти
+              </Link>
+            </>
+          )}
+        </p>
+      )}
+      <Button type="submit" variant="brand" size="lg" disabled={busy} aria-busy={busy}>
+        {busy ? (
           <>
-            Нет аккаунта?{" "}
-            <Link href={`/register${params.get("next") ? `?next=${encodeURIComponent(params.get("next")!)}` : ""}`} className="font-bold text-foreground">
-              Регистрация
-            </Link>
+            <Loader2 aria-hidden className="size-5 animate-spin" />
+            {mode === "login" ? "Проверяем…" : "Отправляем код…"}
           </>
+        ) : mode === "login" ? (
+          "Войти"
         ) : (
-          <>
-            Уже есть аккаунт?{" "}
-            <Link href={`/login${params.get("next") ? `?next=${encodeURIComponent(params.get("next")!)}` : ""}`} className="font-bold text-foreground">
-              Войти
-            </Link>
-          </>
+          "Получить код на почту"
         )}
-      </p>
-      <p className="text-center text-xs text-muted-foreground">Бесплатно · без резюме · займёт минуту</p>
+      </Button>
+      {mode === "register" && <p className="text-center text-xs text-muted-foreground">Пришлём 6 цифр, чтобы убедиться, что почта твоя</p>}
     </form>
   );
 }
