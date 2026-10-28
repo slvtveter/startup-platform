@@ -116,7 +116,7 @@ export default async function PersonPage({ params }: Props) {
         <div className="min-w-0">
           <header className="grid gap-6 sm:grid-cols-[220px_minmax(0,1fr)] sm:items-end md:grid-cols-[280px_minmax(0,1fr)]">
             <div className="relative aspect-square w-full max-w-[280px] overflow-hidden rounded-[32px] bg-tone">
-              <PersonPhoto person={p} eager />
+              <PersonPhoto person={p} eager sizes="280px" />
             </div>
             <div className="min-w-0">
               <div className="flex flex-wrap gap-2">

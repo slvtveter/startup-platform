@@ -15,7 +15,17 @@ export function PersonAvatar({ name, size = "md" }: { name: string; size?: "md" 
 }
 
 /** Крупное фото человека или инициалы на мягком фоне, если фото нет. */
-export function PersonPhoto({ person, className, eager }: { person: PersonCardData; className?: string; eager?: boolean }) {
+export function PersonPhoto({
+  person,
+  className,
+  eager,
+  sizes = "(min-width: 640px) 290px, 104px",
+}: {
+  person: PersonCardData;
+  className?: string;
+  eager?: boolean;
+  sizes?: string;
+}) {
   const url = person.avatar_url_lg ?? person.avatar_url;
   if (url)
     return (
@@ -23,7 +33,7 @@ export function PersonPhoto({ person, className, eager }: { person: PersonCardDa
       <img
         src={url}
         srcSet={url.endsWith("-1024.webp") ? `${url.replace("-1024.webp", "-512.webp")} 512w, ${url} 1024w` : undefined}
-        sizes="(min-width: 640px) 290px, 104px"
+        sizes={sizes}
         alt=""
         loading={eager ? "eager" : "lazy"}
         decoding="async"

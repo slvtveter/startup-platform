@@ -49,7 +49,7 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
   return (
     <>
       <div className="mx-auto w-full max-w-[1360px] px-4 pt-2 sm:px-6 lg:px-10">
-        <div className="mb-6 flex flex-wrap items-center gap-x-6 gap-y-3 pt-6">
+        <div className="mb-6 flex flex-wrap items-center gap-x-6 gap-y-3 pt-8">
           <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">Люди</h1>
           <PeopleTabs active="cofounders" cofounders={total} />
         </div>
