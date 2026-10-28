@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
     qualities: [75, 85],
   },
   // В docker-окружении /api забирает Caddy; rewrite нужен, когда web запущен сам по себе.
+  // «Сообщники» теперь вкладка раздела «Люди».
+  async redirects() {
+    return [{ source: "/cofounders", destination: "/people/cofounders", permanent: true }];
+  },
   async rewrites() {
     return [{ source: "/api/:path*", destination: `${API_URL}/api/:path*` }];
   },

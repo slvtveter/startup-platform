@@ -1,4 +1,4 @@
-import { Check, ChevronLeftIcon, UserPlus } from "lucide-react";
+import { Check, ChevronLeftIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -102,14 +102,14 @@ export default async function StartupPage({ params }: Props) {
               ...(s.website ? { sameAs: [s.website] } : {}),
             },
             breadcrumbs([
-              ["Стартапы", "/startups"],
+              s.stage === "idea" ? ["Идеи", "/ideas"] : ["Стартапы", "/startups"],
               [s.title, `/startups/${s.slug}`],
             ]),
           ],
         }}
       />
       <Link
-        href={s.stage === "idea" ? "/startups?stage=idea" : "/startups"}
+        href={s.stage === "idea" ? "/ideas" : "/startups"}
         className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
       >
         <ChevronLeftIcon className="size-4" /> {s.stage === "idea" ? "Все идеи" : "Все стартапы"}
@@ -141,14 +141,15 @@ export default async function StartupPage({ params }: Props) {
                   className={`size-10 rounded-full text-xs shadow-[0_0_0_3px_#fff] ${i ? "-ml-2.5" : ""}`}
                 />
               ))}
-              {Array.from({ length: Math.min(openSeats, 4) }, (_, i) => (
-                <span key={i} aria-hidden className="-ml-2.5 size-10 rounded-full border-2 border-dashed border-cornflower bg-brand-soft shadow-[0_0_0_3px_#fff]" />
-              ))}
             </span>
             <span className="text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">{founder?.display_name ?? s.owner_name}</span> и команда
-              {openSeats > 0 &&
-                ` · ${plural(openSeats, `свободно ${openSeats} место`, `свободно ${openSeats} места`, `свободно ${openSeats} мест`)}`}
+              <span className="font-semibold text-foreground">{founder?.display_name ?? s.owner_name}</span>
+              {s.team.length > 1 ? ` и ещё ${s.team.length - 1}` : ""}
+              {openSeats > 0 && (
+                <span className="ml-2 rounded-full bg-brand-soft px-2.5 py-1 text-xs font-bold text-brand-ink">
+                  {plural(openSeats, `ищут ${openSeats} человека`, `ищут ${openSeats} человека`, `ищут ${openSeats} человек`)}
+                </span>
+              )}
             </span>
           </div>
           <div className="mt-7 flex flex-wrap gap-2.5">
@@ -226,81 +227,69 @@ export default async function StartupPage({ params }: Props) {
                 Сейчас все места заняты.
               </p>
             )}
-            <div className="mt-5 space-y-4">
+            <div className="mt-6 space-y-4">
               {openRoles.map((r) => {
                 const matched = r.skills.filter((sk) =>
                   mySkills.has(sk.slug),
                 ).length;
                 const left = Math.max(0, (r.slots ?? 1) - (r.filled ?? 0));
                 return (
-                  <article key={r.id} className="rounded-[26px] bg-tone p-5 sm:p-7">
-                    <div className="flex items-start gap-4">
-                      <span aria-hidden className="grid size-11 shrink-0 place-items-center rounded-full bg-brand-soft text-brand-ink"><UserPlus className="size-5" /></span>
+                  <article key={r.id} className="overflow-hidden rounded-[28px] bg-white shadow-[0_0_0_1.5px_var(--border)]">
+                    {/* Шапка роли: кого ищут и сколько это времени — главное, что нужно понять за секунду. */}
+                    <div className="flex flex-wrap items-start gap-x-4 gap-y-3 p-5 sm:p-7 sm:pb-5">
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-xl font-extrabold tracking-[-0.02em]">{r.title}</h3>
-                        <p className="mt-0.5 text-sm text-muted-foreground">
-                          {[
-                            r.role.name !== r.title ? r.role.name : null,
-                            plural(
-                              left,
-                              `${left} место`,
-                              `${left} места`,
-                              `${left} мест`,
-                            ),
-                            r.hours_per_week
-                              ? `${r.hours_per_week} ч в неделю`
-                              : null,
-                          ]
-                            .filter(Boolean)
-                            .join(", ")}
-                        </p>
-                      </div>
-                    </div>
-                    {r.description && (
-                      <div className="mt-5">
-                        <div className="text-sm font-semibold">Что делать</div>
-                        <p className="mt-1 whitespace-pre-line text-foreground/85">
-                          {r.description}
-                        </p>
-                      </div>
-                    )}
-                    {r.outcome && (
-                      <div className="mt-4 rounded-2xl bg-white p-4">
-                        <div className="text-sm font-bold text-brand-ink">
-                          Что получишь
-                        </div>
-                        <p className="mt-1 whitespace-pre-line">{r.outcome}</p>
-                      </div>
-                    )}
-                    {r.skills.length > 0 && (
-                      <div className="mt-4 flex flex-wrap items-center gap-1.5">
-                        {r.skills.map((sk) => (
-                          <SkillChip
-                            key={sk.slug}
-                            name={sk.name}
-                            highlight={mySkills.has(sk.slug)}
-                            onTone
-                          />
-                        ))}
-                        {profile && matched > 0 && (
-                          <span className="ml-1 text-xs font-semibold text-success-ink">
-                            {matched} из {r.skills.length} совпадают с твоими
-                            навыками
+                        <p className="text-sm font-bold text-brand-ink">Ищут в команду</p>
+                        <h3 className="mt-1 text-[24px] leading-tight font-extrabold tracking-[-0.03em] sm:text-[28px]">{r.title}</h3>
+                        <div className="mt-3 flex flex-wrap gap-1.5 text-[13px] font-semibold">
+                          <span className="rounded-full bg-brand-soft px-3 py-1 text-brand-ink">
+                            {plural(left, `${left} место`, `${left} места`, `${left} мест`)}
                           </span>
+                          {r.hours_per_week ? <span className="rounded-full bg-tone px-3 py-1">{r.hours_per_week} ч в неделю</span> : null}
+                          {r.role.name !== r.title && <span className="rounded-full bg-tone px-3 py-1">{r.role.name}</span>}
+                          <span className="rounded-full bg-tone px-3 py-1">{TERMS[s.terms]}</span>
+                        </div>
+                      </div>
+                      {!s.is_owner && !s.is_demo && (
+                        <div className="w-full sm:w-auto">
+                          <ApplyDialog
+                            roleId={r.id}
+                            roleTitle={r.title}
+                            startupTitle={s.title}
+                            primary
+                            state={state(r.id)}
+                            needs={needs}
+                            roles={roleOptions}
+                          />
+                        </div>
+                      )}
+                    </div>
+                    {(r.description || r.outcome) && (
+                      <div className="grid gap-px border-t bg-border sm:grid-cols-2">
+                        {r.description && (
+                          <div className="bg-white p-5 sm:px-7">
+                            <div className="text-xs font-bold tracking-wide text-muted-foreground uppercase">Что делать</div>
+                            <p className="mt-2 whitespace-pre-line">{r.description}</p>
+                          </div>
+                        )}
+                        {r.outcome && (
+                          <div className="bg-brand-soft/60 p-5 sm:px-7">
+                            <div className="text-xs font-bold tracking-wide text-brand-ink uppercase">Что получишь</div>
+                            <p className="mt-2 whitespace-pre-line">{r.outcome}</p>
+                          </div>
                         )}
                       </div>
                     )}
-                    {!s.is_owner && !s.is_demo && (
-                      <div className="mt-5">
-                        <ApplyDialog
-                          roleId={r.id}
-                          roleTitle={r.title}
-                          startupTitle={s.title}
-                          primary
-                          state={state(r.id)}
-                          needs={needs}
-                          roles={roleOptions}
-                        />
+                    {r.skills.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1.5 border-t px-5 py-4 sm:px-7">
+                        <span className="mr-1 text-sm text-muted-foreground">Навыки:</span>
+                        {r.skills.map((sk) => (
+                          <SkillChip key={sk.slug} name={sk.name} highlight={mySkills.has(sk.slug)} />
+                        ))}
+                        {profile && matched > 0 && (
+                          <span className="ml-auto text-xs font-bold text-success-ink">
+                            {matched} из {r.skills.length} совпадают с твоими
+                          </span>
+                        )}
                       </div>
                     )}
                   </article>
@@ -311,7 +300,7 @@ export default async function StartupPage({ params }: Props) {
                   key={r.id}
                   className="flex items-center gap-4 rounded-[22px] bg-tone p-4 text-muted-foreground"
                 >
-                  <span aria-hidden className="grid size-9 shrink-0 place-items-center rounded-full bg-white text-muted-foreground"><Check className="size-4" /></span>
+                  <Check aria-hidden className="size-4 shrink-0" />
                   <span className="font-semibold">{r.title}</span>
                   <span className="ml-auto text-sm">Место занято</span>
                 </div>

@@ -237,7 +237,7 @@ export default async function PersonPage({ params }: Props) {
               {p.is_demo ? (
                 <div className="grid gap-3">
                   <DemoNotice kind="person" />
-                  <Link href="/cofounders" className={buttonVariants({ className: "w-full" })}>
+                  <Link href="/people/cofounders" className={buttonVariants({ className: "w-full" })}>
                     Найти настоящих людей
                   </Link>
                 </div>
