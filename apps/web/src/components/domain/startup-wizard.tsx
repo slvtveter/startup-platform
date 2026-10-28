@@ -59,6 +59,8 @@ const STEPS: Step[] = [
  * Пошаговое создание стартапа (KAN-138 п.4): по одному вопросу на экран, шаги сменяют друг
  * друга анимацией. В конце создаём стартап, роли по шаблонам и сразу публикуем, если можно.
  */
+const DRAFT_KEY = "startup-wizard-draft";
+
 export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emailVerified: boolean }) {
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -83,6 +85,28 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
   const current = STEPS[step];
   const ready = current.ready(form, picked);
   const last = step === STEPS.length - 1;
+
+  // Черновик мастера переживает перезагрузку и случайный уход со страницы (только в этой вкладке).
+  const restored = useRef(false);
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(DRAFT_KEY) ?? "null");
+      if (saved?.form) {
+        // sessionStorage есть только в браузере: восстанавливаем после гидрации, иначе разойдётся с SSR.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setForm((f) => ({ ...f, ...saved.form }));
+        setPicked(saved.picked ?? {});
+        setStep(Math.min(saved.step ?? 0, STEPS.length - 1));
+      }
+    } catch {}
+    restored.current = true;
+  }, []);
+  useEffect(() => {
+    if (!restored.current) return;
+    try {
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ form, picked, step }));
+    } catch {}
+  }, [form, picked, step]);
 
   useEffect(() => {
     void listRoleTemplates().then(({ data }) => setTemplates(Object.fromEntries((data ?? []).map((t) => [t.role, t]))));
@@ -135,6 +159,9 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
       });
       if (error) toast.error(`${name}: ${errorMessage(error)}`);
     }
+    try {
+      sessionStorage.removeItem(DRAFT_KEY);
+    } catch {}
     if (publish) {
       const { error } = await publishStartup({ path: { startup_id: s.id } });
       if (!error) {

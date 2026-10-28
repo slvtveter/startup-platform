@@ -133,6 +133,7 @@ export function StartupCard({
                 Основатель <span className="font-semibold text-foreground">{startup.owner_name}</span>
                 {team > 1 ? ` и ещё ${team - 1}` : ""}
               </span>
+              {startup.is_demo && <span title="Пример: так выглядит карточка на Envola" className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-muted-foreground shadow-[inset_0_0_0_1px_var(--border)]">Пример</span>}
               <span className="ml-auto inline-flex shrink-0 items-center gap-1 font-bold text-brand-ink">
                 {open > 0 ? plural(open, `${open} место`, `${open} места`, `${open} мест`) : "Подробнее"}
                 <ArrowRight aria-hidden className="size-3.5" />
