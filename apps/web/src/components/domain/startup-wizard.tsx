@@ -19,7 +19,7 @@ import {
   type Terms,
 } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
-import { MAX_SLOTS, STAGE, TERMS, TERMS_HINT, plural } from "@/lib/labels";
+import { MAX_SLOTS, STAGE, TERMS, plural } from "@/lib/labels";
 import { generateNames } from "@/lib/name-generator";
 import { cn } from "@/lib/utils";
 
@@ -52,8 +52,8 @@ const STEPS: Step[] = [
   { key: "stage", title: "На какой стадии проект?", hint: "Честно: новичкам важно понимать, во что они идут. Идея без единой строчки кода — тоже нормально.", ready: () => true },
   { key: "title", title: "Как называется проект?", hint: "Рабочее название — потом можно поменять. Не придумывается? Нажми «Придумать».", ready: (f) => f.title.trim().length >= 2 },
   { key: "pitch", title: "Идея одной фразой", hint: "Что это и для кого. Её увидят в ленте первой.", ready: (f) => f.pitch.trim().length >= 10 },
-  { key: "description", title: "Расскажи подробнее", hint: "Главное — проблема. Остальные два блока короче, их можно дописать потом.", ready: (f) => f.description.trim().length >= MIN_DESCRIPTION },
-  { key: "terms", title: "На каких условиях зовёшь людей?", hint: "Условия видны на карточке стартапа и в фильтрах.", ready: () => true },
+  { key: "description", title: "Расскажи подробнее", hint: "Главное — проблема. Остальное можно дописать потом.", ready: (f) => f.description.trim().length >= MIN_DESCRIPTION },
+  { key: "terms", title: "На каких условиях зовёшь людей?", hint: "Видно на карточке и в фильтрах.", ready: () => true },
   { key: "roles", title: "Кого ищешь в команду?", hint: "Можно выбрать несколько, до трёх человек на роль. Задачи и часы подставим примером — после публикации поправишь их у каждой роли.", ready: (_f, r) => Object.keys(r).length > 0 },
   { key: "finish", title: "Почти готово", hint: "Ссылки необязательны, но с ними больше доверия.", ready: () => true },
 ];
@@ -67,22 +67,17 @@ const DRAFT_KEY = "startup-wizard-draft-v2";
 
 /** Подсказки к блокам описания под стадию проекта. */
 const DESCRIBE: Record<string, { progress: string; plans: string }> = {
-  idea: {
-    progress: "Пока только идея? Напиши, что уже проверил: поговорил с 10 знакомыми, нашёл похожие сервисы, набросал макет",
-    plans: "Например: за месяц собрать команду из трёх человек и сделать кликабельный прототип",
-  },
-  prototype: {
-    progress: "Макеты в Figma, кликабельный прототип, первые отзывы",
-    plans: "Например: за два месяца сделать MVP и показать его 50 пользователям",
-  },
-  mvp: {
-    progress: "Что работает в первой версии, сколько людей уже попробовали",
-    plans: "Например: найти первых платящих клиентов и доделать мобильную версию",
-  },
-  launched: {
-    progress: "Сколько пользователей, выручка или другие цифры, которыми гордишься",
-    plans: "Например: выйти в ещё два города и запустить реферальную программу",
-  },
+  idea: { progress: "Например: 10 интервью, набросок макета", plans: "Например: собрать команду и сделать прототип" },
+  prototype: { progress: "Например: кликабельный прототип в Figma", plans: "Например: MVP и первые 50 пользователей" },
+  mvp: { progress: "Например: рабочая версия, 30 тестовых пользователей", plans: "Например: первые платящие клиенты" },
+  launched: { progress: "Например: 2 000 пользователей, 150 000 ₽ в месяц", plans: "Например: выйти в ещё два города" },
+};
+
+/** Короткие подсказки к условиям: по одной строке под названием. */
+const TERMS_SHORT: Record<string, string> = {
+  free: "Опыт и кейс в портфолио",
+  paid: "В месяц или за проект",
+  negotiable: "Договоритесь на созвоне",
 };
 
 export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emailVerified: boolean }) {
@@ -121,7 +116,8 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
         // sessionStorage есть только в браузере: восстанавливаем после гидрации, иначе разойдётся с SSR.
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setForm((f) => ({ ...f, ...saved.form }));
-        setPicked(saved.picked ?? {});
+        // Черновик мог остаться со времён, когда мест на роль было до 20.
+        setPicked(Object.fromEntries(Object.entries((saved.picked ?? {}) as Record<string, number>).map(([k, v]) => [k, Math.min(v, MAX_SLOTS)])));
         setStep(Math.min(saved.step ?? 0, STEPS.length - 1));
       }
     } catch {}
@@ -280,32 +276,24 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
             {current.key === "description" && (
               <div className="grid gap-5">
                 <div>
-                  <label htmlFor="w-problem" className="text-sm font-bold">
-                    Какую проблему решаете
-                  </label>
+                  <Field id="w-problem" label="Проблема" />
                   <Textarea
                     id="w-problem"
-                    rows={6}
+                    rows={5}
                     className="mt-1.5"
-                    placeholder="Кому сейчас плохо и почему: «Студенты тратят по часу, чтобы найти, с кем сделать проект. Чаты вузов завалены, а знакомые заняты…»"
+                    placeholder="Кому сейчас неудобно и почему"
                     value={form.description}
                     onChange={(e) => set("description", e.target.value)}
                   />
                   <Counter value={form.description.trim().length} min={MIN_DESCRIPTION} />
                 </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label htmlFor="w-progress" className="text-sm font-bold">
-                      Что уже есть <span className="font-semibold text-muted-foreground">· необязательно</span>
-                    </label>
-                    <Textarea id="w-progress" rows={4} className="mt-1.5" placeholder={DESCRIBE[form.stage].progress} value={form.progress} onChange={(e) => set("progress", e.target.value)} />
-                  </div>
-                  <div>
-                    <label htmlFor="w-plans" className="text-sm font-bold">
-                      Планы на 2–3 месяца <span className="font-semibold text-muted-foreground">· необязательно</span>
-                    </label>
-                    <Textarea id="w-plans" rows={4} className="mt-1.5" placeholder={DESCRIBE[form.stage].plans} value={form.plans} onChange={(e) => set("plans", e.target.value)} />
-                  </div>
+                <div>
+                  <Field id="w-progress" label="Что уже есть" optional />
+                  <Textarea id="w-progress" rows={2} className="mt-1.5" placeholder={DESCRIBE[form.stage].progress} value={form.progress} onChange={(e) => set("progress", e.target.value)} />
+                </div>
+                <div>
+                  <Field id="w-plans" label="Планы на 2–3 месяца" optional />
+                  <Textarea id="w-plans" rows={2} className="mt-1.5" placeholder={DESCRIBE[form.stage].plans} value={form.plans} onChange={(e) => set("plans", e.target.value)} />
                 </div>
               </div>
             )}
@@ -321,18 +309,20 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
             {current.key === "terms" && (
               <>
                 <Choice
-                  options={Object.keys(TERMS).map((v) => ({ value: v, label: TERMS[v], hint: TERMS_HINT[v] }))}
+                  columns={1}
+                  options={Object.keys(TERMS).map((v) => ({ value: v, label: TERMS[v], hint: TERMS_SHORT[v] }))}
                   value={form.terms}
                   onChange={(v) => set("terms", v as Terms)}
                 />
+                <Field id="w-terms" label="Детали" optional className="mt-5" />
                 <Textarea
+                  id="w-terms"
                   rows={2}
-                  className="mt-4"
-                  aria-label="Детали условий"
+                  className="mt-1.5"
                   placeholder={
                     form.terms === "paid"
                       ? "Сколько и как платите: «20 000 ₽ в месяц» или «60 000 ₽ за весь проект»"
-                      : "Детали, если есть: часы в неделю, созвоны, что получит человек"
+                      : "Например: 5–10 часов в неделю, созвон раз в неделю"
                   }
                   value={form.terms_details}
                   onChange={(e) => set("terms_details", e.target.value)}
@@ -454,6 +444,18 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
   }
 }
 
+/** Подпись поля; необязательные помечены коротко и справа, чтобы не спорить с названием. */
+function Field({ id, label, optional, className }: { id: string; label: string; optional?: boolean; className?: string }) {
+  return (
+    <div className={cn("flex items-baseline gap-2", className)}>
+      <label htmlFor={id} className="text-sm font-bold">
+        {label}
+      </label>
+      {optional && <span className="ml-auto text-xs text-muted-foreground">по желанию</span>}
+    </div>
+  );
+}
+
 function Counter({ value, min, max }: { value: number; min: number; max?: number }) {
   const left = min - value;
   return (
@@ -464,21 +466,40 @@ function Counter({ value, min, max }: { value: number; min: number; max?: number
   );
 }
 
-function Choice({ options, value, onChange }: { options: { value: string; label: string; hint: string }[]; value: string; onChange: (v: string) => void }) {
+/** Выбор одного варианта: те же плитки, что у ролей (фон, синяя рамка у выбранной), одной высоты в ряду. */
+function Choice({
+  options,
+  value,
+  onChange,
+  columns = 2,
+}: {
+  options: { value: string; label: string; hint: string }[];
+  value: string;
+  onChange: (v: string) => void;
+  columns?: 1 | 2;
+}) {
   return (
-    <div className="grid gap-2 sm:grid-cols-2">
-      {options.map((o) => (
-        <button
-          key={o.value}
-          type="button"
-          aria-pressed={value === o.value}
-          onClick={() => onChange(o.value)}
-          className={cn("rounded-xl border p-4 text-left transition-colors", value === o.value ? "border-foreground ring-2 ring-foreground" : "hover:border-foreground/40")}
-        >
-          <div className="font-bold">{o.label}</div>
-          <div className="mt-0.5 text-sm text-muted-foreground">{o.hint}</div>
-        </button>
-      ))}
+    <div className={cn("grid gap-2", columns === 2 && "sm:grid-cols-2")}>
+      {options.map((o) => {
+        const on = value === o.value;
+        return (
+          <button
+            key={o.value}
+            type="button"
+            aria-pressed={on}
+            onClick={() => onChange(o.value)}
+            className={cn("flex h-full items-start gap-3 rounded-2xl p-4 text-left transition-colors", on ? "bg-brand-soft ring-2 ring-brand" : "bg-tone hover:bg-tone-2")}
+          >
+            <span aria-hidden className={cn("mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border-[1.5px] bg-white", on ? "border-brand" : "border-input")}>
+              {on && <span className="size-2.5 rounded-full bg-brand" />}
+            </span>
+            <span>
+              <span className="block font-bold">{o.label}</span>
+              <span className="mt-0.5 block text-sm text-muted-foreground">{o.hint}</span>
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }

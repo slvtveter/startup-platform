@@ -25,7 +25,7 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
   await founder.getByLabel("Идея одной фразой").fill("Сервис, который проверяет весь путь фазы 1");
   await next.click();
   await founder
-    .getByLabel("Какую проблему решаете")
+    .getByLabel("Проблема", { exact: true })
     .fill("Мы автоматически проверяем, что новичок может найти стартап, откликнуться и познакомиться с основателем.");
   await founder.getByLabel(/Что уже есть/).fill("Автотесты на каждый релиз");
   await next.click();
