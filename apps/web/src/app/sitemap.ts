@@ -18,9 +18,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]);
   return [
     { url: `${site}/`, changeFrequency: "daily", priority: 1 },
+    { url: `${site}/ideas`, changeFrequency: "hourly", priority: 0.9 },
     { url: `${site}/startups`, changeFrequency: "hourly", priority: 0.9 },
     { url: `${site}/people`, changeFrequency: "daily", priority: 0.7 },
-    { url: `${site}/cofounders`, changeFrequency: "daily", priority: 0.8 },
+    { url: `${site}/people/cofounders`, changeFrequency: "daily", priority: 0.8 },
     // Примеры в карту сайта не попадают: у них noindex.
     ...(startups?.items ?? [])
       .filter((s) => !s.is_demo)

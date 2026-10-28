@@ -42,7 +42,7 @@ def get(url, accept="text/html"):
     return urllib.request.urlopen(req, timeout=30).read()
 
 urls = set()
-for page in ["/", "/startups", "/people", "/cofounders", "/login", "/register"]:
+for page in ["/", "/ideas", "/startups", "/people", "/people/cofounders", "/login", "/register"]:
     try:
         body = html.unescape(get(page).decode())
     except Exception:

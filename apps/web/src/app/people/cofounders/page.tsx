@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { DemoNote } from "@/components/domain/badges";
+import { PeopleTabs } from "@/components/catalog/people-tabs";
 import { Container } from "@/components/domain/page-header";
 import { PersonCard } from "@/components/domain/person-card";
 import { StartupCard } from "@/components/domain/startup-card";
@@ -49,6 +50,10 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
   return (
     <>
       <div className="mx-auto w-full max-w-[1360px] px-4 pt-2 sm:px-6 lg:px-10">
+        <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-3 pt-6">
+          <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">Люди</h1>
+          <PeopleTabs active="cofounders" cofounders={total} />
+        </div>
         <section className="relative isolate grid min-h-[480px] items-end overflow-hidden rounded-[28px] px-5 py-8 text-white sm:rounded-[36px] sm:p-12">
           <Image
             src={PHOTOS.whiteboardDuo}
@@ -62,7 +67,7 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
           <div aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgb(10_18_34/0.85),rgb(10_18_34/0.45)_60%,rgb(10_18_34/0.15))] max-md:bg-[linear-gradient(180deg,rgb(10_18_34/0.2),rgb(10_18_34/0.85)_55%)]" />
           <div className="max-w-[640px]">
             <p className="text-sm font-bold tracking-wide text-white/80 uppercase">Сообщники</p>
-            <h1 className="mt-3 text-[clamp(36px,5vw,68px)] leading-[1.02]">Нет идеи? Найди тех, с кем её придумать</h1>
+            <h2 className="mt-3 text-[clamp(36px,5vw,68px)] leading-[1.02]">Нет идеи? Найди тех, с кем её придумать</h2>
             <p className="mt-5 max-w-[48ch] text-[clamp(16px,1.4vw,19px)] text-white/90">
               Здесь собираются разработчики, дизайнеры и маркетологи, которые хотят своё, но не хотят делать в одиночку. Познакомься, накидайте
               идеи и запустите лучшую вместе.
@@ -84,7 +89,7 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
           {STEPS.map(([title, text], i) => (
             <li key={title} className="rounded-[28px] bg-tone p-6">
               <span className="grid size-10 place-items-center rounded-full bg-white text-base font-extrabold text-brand-ink">{i + 1}</span>
-              <h2 className="mt-5 text-2xl tracking-[-0.03em]">{title}</h2>
+              <h3 className="mt-5 text-2xl font-extrabold tracking-[-0.03em]">{title}</h3>
               <p className="mt-2 text-muted-foreground">{text}</p>
             </li>
           ))}
@@ -102,7 +107,7 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
             </p>
           </div>
           <div className="mb-5">
-            <QuickChips basePath="/cofounders" params={params} name="role" allLabel="Все роли" options={(roles ?? []).map((r) => ({ value: r.slug, label: r.name }))} />
+            <QuickChips basePath="/people/cofounders" params={params} name="role" allLabel="Все роли" options={(roles ?? []).map((r) => ({ value: r.slug, label: r.name }))} />
           </div>
           {people?.items.some((p) => p.is_demo) && (
             <div className="mb-5">
@@ -150,7 +155,7 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
               <h2 id="ideas-h" className="max-w-[18ch] text-[clamp(30px,3.6vw,48px)] leading-[1.04]">
                 Или подключись к идее, которая уже есть
               </h2>
-              <Link href="/startups?stage=idea" className="inline-flex items-center gap-1.5 font-bold text-brand-ink hover:underline sm:ml-auto">
+              <Link href="/ideas" className="inline-flex items-center gap-1.5 font-bold text-brand-ink hover:underline sm:ml-auto">
                 Все идеи
                 <ArrowRight aria-hidden className="size-4" />
               </Link>

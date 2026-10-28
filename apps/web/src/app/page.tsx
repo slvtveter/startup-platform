@@ -74,7 +74,7 @@ async function Landing() {
           id="ideas"
           title="Идеи, вокруг которых собираются люди"
           lead="Сырые, но живые. Открой идею, задай вопрос автору или откликнись на роль, которой не хватает."
-          more={{ href: "/startups?stage=idea", label: "Все идеи" }}
+          more={{ href: "/ideas", label: "Все идеи" }}
         >
           <Reveal className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {ideas.items.map((s, i) => (
@@ -105,7 +105,7 @@ async function Landing() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2.5 sm:ml-auto">
-                <Link href="/cofounders" className={buttonVariants({ size: "lg" })}>
+                <Link href="/people/cofounders" className={buttonVariants({ size: "lg" })}>
                   Все сообщники
                   <ArrowRight aria-hidden />
                 </Link>
@@ -151,7 +151,7 @@ async function Landing() {
           id="startups"
           title="Стартапы, которые ищут людей"
           lead="Для тех, кто хочет присоединиться к проекту, который уже работает."
-          more={{ href: "/startups?stage=prototype&stage=mvp&stage=launched", label: "Все стартапы" }}
+          more={{ href: "/startups", label: "Все стартапы" }}
         >
           <Reveal className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {startups.items.map((s, i) => (
@@ -277,7 +277,7 @@ function Hero() {
           <Link href="/register" className={buttonVariants({ size: "lg" })}>
             Создать профиль
           </Link>
-          <Link href="/cofounders" className={buttonVariants({ variant: "onphoto", size: "lg" })}>
+          <Link href="/people/cofounders" className={buttonVariants({ variant: "onphoto", size: "lg" })}>
             Найти сообщников
           </Link>
         </div>
@@ -330,7 +330,7 @@ const WAYS: Way[] = [
     title: "Нет идеи",
     text: "Найди сообщников с другими навыками, созвонитесь и придумайте стартап вместе. Идея не нужна.",
     cta: "Найти сообщников",
-    href: "/cofounders",
+    href: "/people/cofounders",
     photo: PHOTOS.whiteboardDuo,
     alt: "Двое накидывают идеи у доски",
     ui: { avatar: FACES.vera, title: "Вера", sub: "ML-инженер", tag: "Ищет сообщников" },

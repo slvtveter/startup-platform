@@ -82,7 +82,7 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
 
   // --- Отклик ---
   await candidate.goto(startupUrl);
-  await expect(candidate.getByText("1 из 1 совпадают с твоими навыками")).toBeVisible();
+  await expect(candidate.getByText("1 из 1 совпадают с твоими")).toBeVisible();
   await candidate.getByRole("button", { name: "Откликнуться" }).click();
   await candidate
     .getByLabel("Сообщение основателю")

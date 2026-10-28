@@ -1,9 +1,14 @@
 name: CI
 
+# Экономия минут Actions: тесты (api, web, e2e) идут только на PR — merge возможен лишь при зелёных проверках,
+# повторять их на main незачем. На main — только сборка образов, смоук prod-стека и выкатка.
+# Merge, где поменялись только документы и макеты, не пересобирает и не выкатывает прод.
+# (На PR фильтр путей не ставим: обязательные проверки иначе зависнут в ожидании.)
 on:
   pull_request:
   push:
     branches: [main]
+    paths-ignore: ["docs/**", "design/**", "**/*.md"]
 
 # На PR старый прогон отменяем. На main нет: иначе новый push оборвал бы выкатку на полпути.
 concurrency:
@@ -15,6 +20,7 @@ env:
 
 jobs:
   api:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -53,6 +59,7 @@ jobs:
           git diff --exit-code ../web/openapi.json || (echo "::error::Run 'make gen-client' and commit the result" && exit 1)
 
   web:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -71,14 +78,11 @@ jobs:
       - run: npm run typecheck
       - run: npm run build
 
-  e2e-shard:
-    # Сквозные сценарии в настоящем браузере против поднятого docker compose.
-    # Тесты делим на две параллельные джобы, у каждой свой стенд: так вдвое быстрее и без общих данных.
+  e2e:
+    # Сквозные сценарии в настоящем браузере против поднятого docker compose. Одна джоба, а не шарды:
+    # подъём стенда стоит столько же, сколько сами тесты, и в двух шардах минуты считались дважды.
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -105,13 +109,13 @@ jobs:
           until [ -f /tmp/npm-ci.exit ]; do sleep 1; done
           cat /tmp/npm-ci.log | tail -5
           exit "$(cat /tmp/npm-ci.exit)"
-      - run: npx playwright test --shard=${{ matrix.shard }}/2
+      - run: npx playwright test
         working-directory: apps/web
       - name: Screenshots of key pages (KAN-86)
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: screens-${{ matrix.shard }}
+          name: screens
           path: apps/web/test-results/screens
           retention-days: 14
           if-no-files-found: ignore
@@ -121,19 +125,12 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
-          name: playwright-traces-${{ matrix.shard }}
+          name: playwright-traces
           path: apps/web/test-results
           retention-days: 7
 
-  # Обязательная проверка в защите main называется «e2e»: собираем итог шардов в одну джобу.
-  e2e:
-    if: always()
-    needs: e2e-shard
-    runs-on: ubuntu-latest
-    steps:
-      - run: test "${{ needs.e2e-shard.result }}" = "success"
-
   images:
+    if: github.event_name == 'push'
     # Собираем prod-образы и поднимаем их через compose.prod.yml с HTTPS: так проверяем, что деплой соберётся.
     runs-on: ubuntu-latest
     permissions:
@@ -214,7 +211,7 @@ jobs:
   # изменения. Старые прогоны проверки проходят, но деплой пропускают.
   latest:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [api, web, e2e, images]
+    needs: [images]
     runs-on: ubuntu-latest
     outputs:
       is_latest: ${{ steps.check.outputs.is_latest }}

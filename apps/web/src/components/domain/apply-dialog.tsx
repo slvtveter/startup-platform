@@ -47,18 +47,20 @@ export function ApplyDialog({ roleId, roleTitle, startupTitle, state, needs, rol
   const [role, setRole] = useState("");
   const [link, setLink] = useState("");
   const [busy, setBusy] = useState(false);
-  const variant = primary ? "brand" : "outline";
+  const variant = primary ? "default" : "outline";
+  const size = primary ? "lg" : "default";
+  const wide = primary ? "w-full sm:w-auto" : "";
 
   if (state === "applied")
     return (
-      <Link href="/me/applications" className={buttonVariants({ variant: "secondary" })}>
+      <Link href="/me/applications" className={buttonVariants({ variant: "secondary", size, className: wide })}>
         Отклик отправлен
       </Link>
     );
   if (state === "guest") {
     const next = `${pathname}?apply=${roleId}`;
     return (
-      <Link href={`/login?next=${encodeURIComponent(next)}`} className={buttonVariants({ variant })}>
+      <Link href={`/login?next=${encodeURIComponent(next)}`} className={buttonVariants({ variant, size, className: wide })}>
         Войти и откликнуться
       </Link>
     );
@@ -104,7 +106,7 @@ export function ApplyDialog({ roleId, roleTitle, startupTitle, state, needs, rol
         setOpen(next);
       }}
     >
-      <DialogTrigger render={<Button variant={variant} />}>Откликнуться</DialogTrigger>
+      <DialogTrigger render={<Button variant={variant} size={size} className={wide} />}>Откликнуться</DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
@@ -124,7 +126,7 @@ export function ApplyDialog({ roleId, roleTitle, startupTitle, state, needs, rol
         ) : (
           <>
             {state === "incomplete" && needs && (
-              <div className="grid gap-3 rounded-xl bg-secondary p-4">
+              <div className="grid gap-3 rounded-2xl bg-tone p-4">
                 <p className="text-sm text-muted-foreground">
                   Пара полей для основателя. Остальной профиль можно заполнить потом.
                 </p>
@@ -141,7 +143,7 @@ export function ApplyDialog({ roleId, roleTitle, startupTitle, state, needs, rol
                       id="apply-role"
                       value={role}
                       onChange={(e) => setRole(e.target.value)}
-                      className="h-10 rounded-lg border bg-card px-3 text-sm"
+                      className="h-11 rounded-xl bg-white px-3 text-sm"
                     >
                       <option value="">Выбери роль</option>
                       {roles.map((r) => (

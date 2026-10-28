@@ -1,26 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
-/**
- * Пункт шапки. «Идеи» и «Стартапы» — один каталог с разным фильтром стадии, поэтому для /startups
- * смотрим и на ?stage: только идеи — горит «Идеи», иначе — «Стартапы».
- */
-function ActiveLink({ href, children }: { href: string; children: React.ReactNode }) {
+/** Пункт шапки: горит на своём разделе и его страницах (/people/cofounders — это «Люди»). */
+export function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   const pathname = usePathname();
-  const params = useSearchParams();
-  const [path, query] = href.split("?");
-  const onPath = path === "/" ? pathname === "/" : pathname === path || pathname.startsWith(path + "/");
-  const ideasOnly = params.getAll("stage").join() === "idea";
-  const active = path === "/startups" && pathname === "/startups" ? (query === "stage=idea") === ideasOnly : onPath;
-  return <Item href={href} active={active}>{children}</Item>;
-}
-
-function Item({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
+  const active = href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");
   return (
     <Link
       href={href}
@@ -32,14 +20,5 @@ function Item({ href, active, children }: { href: string; active: boolean; child
     >
       {children}
     </Link>
-  );
-}
-
-// useSearchParams на статических страницах требует Suspense: до гидрации пункт рисуется без подсветки.
-export function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Suspense fallback={<Item href={href} active={false}>{children}</Item>}>
-      <ActiveLink href={href}>{children}</ActiveLink>
-    </Suspense>
   );
 }

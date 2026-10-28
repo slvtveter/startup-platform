@@ -5,6 +5,7 @@ import { DemoNote } from "@/components/domain/badges";
 import { FilterBar } from "@/components/domain/filter-bar";
 import { Pager, QuickChips, SearchBox, asList, type SearchParams } from "@/components/domain/filters";
 import { Container, EmptyState, PageHeader } from "@/components/domain/page-header";
+import { PeopleTabs } from "@/components/catalog/people-tabs";
 import { PersonCard } from "@/components/domain/person-card";
 import { buttonVariants } from "@/components/ui/button";
 import { listPeople, listRoles } from "@/lib/api";
@@ -26,9 +27,10 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
   const cofound = params.cofound === "1";
   const q = typeof params.q === "string" ? params.q : "";
   const client = await serverClient();
-  const [{ data: roles }, { data }] = await Promise.all([
+  const [{ data: roles }, { data }, { data: cof }] = await Promise.all([
     listRoles({ client }),
     listPeople({ client, query: { ...selected, cofound, q: q || undefined, limit: LIMIT, offset: (page - 1) * LIMIT } }),
+    listPeople({ client, query: { cofound: true, limit: 1 } }),
   ]);
   const total = data?.total ?? 0;
   const roleGroup = { name: "role", title: "Роль", options: (roles ?? []).map((r) => ({ value: r.slug, label: r.name })) };
@@ -38,12 +40,10 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
       <PageHeader
         title="Люди"
         description="Напиши первым: обсудить идею, позвать в проект или просто познакомиться. Контакты открываются, только когда согласны оба."
-        actions={
-          <Link href="/cofounders" className={buttonVariants({ variant: "outline" })}>
-            Кто ищет сообщников
-          </Link>
-        }
       />
+      <div className="mt-6">
+        <PeopleTabs active="all" cofounders={cof?.total} />
+      </div>
 
       <div className="mt-8 grid gap-4">
         <SearchBox params={params} placeholder="Имя, роль, навык или город" />
@@ -87,7 +87,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
                 <Link href="/people" className={buttonVariants({ variant: "outline" })}>
                   Сбросить фильтры
                 </Link>
-                <Link href="/cofounders" className={buttonVariants()}>
+                <Link href="/people/cofounders" className={buttonVariants()}>
                   Кто ищет сообщников
                 </Link>
               </span>
