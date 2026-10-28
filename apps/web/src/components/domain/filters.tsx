@@ -1,7 +1,6 @@
-import { SearchIcon } from "lucide-react";
 import Link from "next/link";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 
 export type Option = { value: string; label: string };
 export type SearchParams = Record<string, string | string[] | undefined>;
@@ -23,32 +22,8 @@ export function toggleHref(basePath: string, params: SearchParams, name: string,
   return s ? `${basePath}?${s}` : basePath;
 }
 
-/** Поиск по тексту: GET-форма, которая сохраняет остальные фильтры скрытыми полями. */
-export function SearchBox({ params, placeholder }: { params: SearchParams; placeholder: string }) {
-  return (
-    <form role="search" className="flex gap-2">
-      {Object.entries(params).flatMap(([k, v]) =>
-        k === "q" || k === "page" ? [] : asList(v).map((x) => <input key={`${k}=${x}`} type="hidden" name={k} value={x} />),
-      )}
-      <label className="flex h-12 min-w-0 flex-1 items-center gap-3 rounded-2xl bg-tone px-4 transition-colors duration-200 focus-within:bg-white focus-within:shadow-[inset_0_0_0_2px_var(--cornflower)] hover:bg-tone-2">
-        <SearchIcon aria-hidden className="size-5 shrink-0 text-muted-foreground" />
-        <input
-          name="q"
-          defaultValue={typeof params.q === "string" ? params.q : ""}
-          placeholder={placeholder}
-          aria-label={placeholder}
-          className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground"
-        />
-      </label>
-      <Button type="submit" variant="ink" className="h-12 rounded-2xl px-6">
-        Найти
-      </Button>
-    </form>
-  );
-}
-
 /**
- * Быстрый фильтр на виду: ряд переключателей одной группы («Все», «Идеи», «MVP»…).
+ * Быстрый фильтр на виду: один ряд переключателей одной группы (не переносится, прокручивается вбок) («Все», «Идеи», «MVP»…).
  * «Все» снимает группу; остальные можно выбрать несколько. Ссылки — работает без JS.
  */
 export function QuickChips({
@@ -70,7 +45,7 @@ export function QuickChips({
   const off = "bg-tone text-foreground hover:bg-tone-2";
   const onHover = "hover:bg-[#1d2a3f]";
   return (
-    <nav aria-label="Быстрый фильтр" className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [mask-image:linear-gradient(90deg,#000_85%,transparent)] [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0 sm:[mask-image:none]">
+    <nav aria-label="Быстрый фильтр" className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [mask-image:linear-gradient(90deg,#000_88%,transparent)] [scrollbar-width:none] sm:mx-0 sm:px-0">
       <Link href={toggleHref(basePath, params, name, null)} scroll={false} aria-current={selected.length === 0 ? "true" : undefined} className={`${chip} ${selected.length === 0 ? `${on} ${onHover}` : off}`}>
         {allLabel}
       </Link>

@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
-import { DemoNote } from "@/components/domain/badges";
 import { PeopleTabs } from "@/components/catalog/people-tabs";
 import { Container } from "@/components/domain/page-header";
 import { PersonCard } from "@/components/domain/person-card";
@@ -109,11 +108,6 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
           <div className="mb-5">
             <QuickChips basePath="/people/cofounders" params={params} name="role" allLabel="Все роли" options={(roles ?? []).map((r) => ({ value: r.slug, label: r.name }))} />
           </div>
-          {people?.items.some((p) => p.is_demo) && (
-            <div className="mb-5">
-              <DemoNote kind="people" />
-            </div>
-          )}
           {people && people.items.length > 0 && (
             <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 md:grid-cols-3 xl:grid-cols-4">
               {people.items.map((p) => (

@@ -66,7 +66,7 @@ export async function Dashboard() {
       <div className="flex flex-wrap items-end gap-x-6 gap-y-4">
         <div className="min-w-0">
           <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">{name ? `Привет, ${name}` : "Привет!"}</h1>
-          <p className="mt-1 text-muted-foreground max-sm:hidden">Всё важное по твоим стартапам и откликам — здесь.</p>
+          <p className="mt-3 text-[17px] text-muted-foreground max-sm:hidden">Всё важное по твоим стартапам и откликам — здесь.</p>
         </div>
         <div className="grid w-full grid-cols-2 gap-2 sm:ml-auto sm:flex sm:w-auto">
           {/* Основателю с открытыми местами нужнее люди, остальным — проекты. */}

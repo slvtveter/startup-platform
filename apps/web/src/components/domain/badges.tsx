@@ -50,18 +50,6 @@ export function DemoBadge({ className }: { className?: string }) {
   );
 }
 
-/** Одна заметка над выдачей вместо плашки «Пример» на каждой карточке. */
-export function DemoNote({ kind }: { kind: "startups" | "people" }) {
-  return (
-    <p className="rounded-2xl bg-tone px-4 py-3 text-sm text-muted-foreground">
-      <span className="font-semibold text-foreground">Платформа только открылась.</span>{" "}
-      {kind === "startups"
-        ? "Часть проектов — примеры, чтобы было видно, как всё устроено: откликнуться на них нельзя. Опубликуй свою идею — она появится здесь первой."
-        : "Часть профилей — примеры, чтобы было видно, как всё устроено: написать им нельзя. Заполни свой профиль — тебя увидят первым."}
-    </p>
-  );
-}
-
 export function DemoNotice({ kind }: { kind: "startup" | "person" }) {
   return (
     <p className="rounded-2xl bg-white p-4 text-sm text-muted-foreground">
