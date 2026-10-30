@@ -18,8 +18,11 @@ const ROLES = [
   ["analyst", "Аналитик данных"],
 ] as const;
 
+// Продакт-менеджера стартапы ищут реже всего (на 31.10.2026 — ни одного проекта): в колонке проектов его нет.
+const STARTUP_ROLES = ROLES.filter(([slug]) => slug !== "product");
+
 const COLUMNS = [
-  { title: "Стартапы ищут", links: ROLES.map(([slug, name]) => ({ href: `/startups?role=${slug}`, label: name })) },
+  { title: "Стартапы ищут", links: STARTUP_ROLES.map(([slug, name]) => ({ href: `/startups?role=${slug}`, label: name })) },
   { title: "Люди", links: ROLES.map(([slug, name]) => ({ href: `/people?role=${slug}`, label: rolePlural(name) })) },
   {
     title: "Envola",
