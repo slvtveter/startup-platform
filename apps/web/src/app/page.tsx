@@ -1,4 +1,5 @@
 import { ArrowRight, MessageCircle, PlusIcon, Search, UserRound } from "lucide-react";
+import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,11 +13,13 @@ import { PathLink } from "@/components/site/path-link";
 import { Reveal } from "@/components/site/reveal";
 import { TrackView } from "@/components/site/track-view";
 import { buttonVariants } from "@/components/ui/button";
-import { listPeople, listStartups, type PersonCard as Person, type StartupCard as Startup } from "@/lib/api";
+import { listPeople, listStartups, startupFacets, type PersonCard as Person, type StartupCard as Startup } from "@/lib/api";
 import { initials, plural } from "@/lib/labels";
 import { FACES, PHOTOS } from "@/lib/photos";
-import { getMe, serverClient } from "@/lib/server-api";
+import { getMe, getRoles, serverClient } from "@/lib/server-api";
 import { cn } from "@/lib/utils";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default async function Home() {
   const user = await getMe();
@@ -33,23 +36,21 @@ const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
  */
 async function Landing() {
   const client = await serverClient();
-  const [{ data: catalog }, { data: ideas }, { data: startups }, { data: cofounders }, { data: people }] = await Promise.all([
-    listStartups({ client, query: { limit: 100 } }),
+  const [allRoles, { data: facets }, { data: ideas }, { data: startups }, { data: cofounders }, { data: people }] = await Promise.all([
+    getRoles(),
+    startupFacets({ client }),
     listStartups({ client, query: { stage: ["idea"], limit: 5 } }),
     listStartups({ client, query: { stage: ["prototype", "mvp", "launched"], limit: 6 } }),
     listPeople({ client, query: { cofound: true, limit: 24 } }),
     listPeople({ client, query: { limit: 24 } }),
   ]);
 
-  // Открытые места по ролям во всём каталоге: чипсы «кого ищут» с числами, как «Популярное» на hh.
-  const seats = new Map<string, { slug: string; name: string; n: number }>();
-  for (const s of catalog?.items ?? [])
-    for (const r of s.open_roles) {
-      const cur = seats.get(r.role.slug) ?? { slug: r.role.slug, name: r.role.name, n: 0 };
-      cur.n += r.slots ?? 1;
-      seats.set(r.role.slug, cur);
-    }
-  const roles = [...seats.values()].sort((a, b) => b.n - a.n);
+  // Сколько проектов ищет каждую роль — чипсы «кого ищут» с числами, как «Популярное» на hh.
+  // Ссылки ведут на посадочные «Стартапы ищут дизайнера» (src/lib/seo.ts).
+  const roles = allRoles
+    .map((r) => ({ slug: r.slug, name: r.name, n: facets?.role[r.slug] ?? 0 }))
+    .filter((r) => r.n > 0)
+    .sort((a, b) => b.n - a.n);
 
   const withPhoto = (people?.items ?? []).filter((p) => p.avatar_url);
   const cofWithPhoto = (cofounders?.items ?? []).filter((p) => p.avatar_url);
@@ -129,7 +130,7 @@ async function Landing() {
       {roles.length > 0 && <RoleStrip roles={roles} />}
 
       {feed.length > 0 && (
-        <Section id="feed" eyebrow="Свежее" title="Идеи и проекты, которым нужны люди" lead="Открой карточку: что за проект, на какой он стадии и кого не хватает.">
+        <Section id="feed" eyebrow="Свежее" title="Идеи и проекты, которым нужны люди">
           <HomeFeed tabs={feed} />
         </Section>
       )}
@@ -167,7 +168,7 @@ function Hero({ idea, faces }: { idea?: Startup; faces: Person[] }) {
           Найди, с кем делать <span className="text-brand">стартап</span>
         </h1>
         <p className="mt-6 max-w-[46ch] text-lg text-muted-foreground sm:text-xl">
-          Идеи, которым нужны люди, стартапы с открытыми ролями и те, кто хочет придумать проект вместе. Без резюме и без опыта.
+          Можно без опыта и без своей идеи.
         </p>
         <div className="mt-9 flex flex-wrap gap-2.5">
           <PathLink path="seeker" href="/register" className={buttonVariants({ size: "lg" })}>
@@ -314,7 +315,7 @@ function Paths({ idea, startups, people, faces }: { idea?: Startup; startups: St
           <span>
             <span className="text-sm font-bold text-white/70">Есть идея</span>
             <h3 className="mt-3 max-w-[14ch] text-[32px] leading-[1.02] font-extrabold tracking-[-0.04em] sm:text-[40px]">Собери под неё команду</h3>
-            <span className="mt-4 block max-w-[36ch] text-lg text-white/80">Опиши проблему в двух абзацах и отметь, кого не хватает. Черновик займёт минут пять.</span>
+            <span className="mt-4 block max-w-[36ch] text-lg text-white/80">Даже если пока нет ни кода, ни макетов.</span>
           </span>
           <span aria-hidden className="rounded-2xl bg-white p-4 text-foreground shadow-[0_24px_50px_-20px_rgb(0_0_0/0.5)] transition-transform duration-500 group-hover:-translate-y-1">
             <b className="block truncate text-sm font-extrabold">{idea?.title ?? "Бот расписания"}</b>
@@ -385,7 +386,6 @@ function Paths({ idea, startups, people, faces }: { idea?: Startup; startups: St
           <span>
             <span className="text-sm font-bold text-white/60">Нужны люди</span>
             <h3 className="mt-3 max-w-[16ch] text-[32px] leading-[1.02] font-extrabold tracking-[-0.04em] text-white sm:text-[40px]">Найди разработчика или дизайнера</h3>
-            <span className="mt-4 block max-w-[36ch] text-lg text-white/70">Фильтр по роли, навыкам и опыту. Напиши первым тому, кто подходит.</span>
           </span>
           <span aria-hidden className="grid gap-1.5">
             {people.map((p) => (
@@ -461,9 +461,9 @@ function Cofounders({ people, faces, total }: { people: Person[]; faces: Person[
 /* ───────────── Три шага ───────────── */
 
 const STEPS = [
-  { icon: UserRound, title: "Расскажи о себе", text: "Роль, пара навыков и что ищешь. Две минуты, резюме не нужно." },
-  { icon: Search, title: "Найди своих", text: "Идея, стартап или человек: фильтр по роли, оплате и стадии проекта." },
-  { icon: MessageCircle, title: "Напиши и созвонись", text: "Обсудите задачи и время и решите, делаете ли проект вместе." },
+  { icon: UserRound, title: "Расскажи о себе", text: "Роль, пара навыков и что ищешь. Резюме не нужно." },
+  { icon: Search, title: "Найди своих", text: "Идея, стартап или человек под твою роль." },
+  { icon: MessageCircle, title: "Напиши и созвонись", text: "Обсудите задачи и решите, делаете ли проект вместе." },
 ];
 
 function Steps() {
@@ -532,7 +532,7 @@ function OwnIdeaCard({ className, wide }: { className?: string; wide?: boolean }
       <span className="flex flex-col justify-between gap-6 p-5">
         <span>
           <span className="block max-w-[16ch] text-[28px] leading-[1.05] font-extrabold tracking-[-0.04em]">Твоя идея может быть здесь</span>
-          <span className="mt-3 block max-w-[30ch] text-muted-foreground">Даже если пока нет ни кода, ни макетов. Опиши проблему и отметь, кого не хватает.</span>
+          <span className="mt-3 block max-w-[30ch] text-muted-foreground">Даже если пока нет ни кода, ни макетов.</span>
         </span>
         <span className={buttonVariants({ className: "self-start" })}>
           <PlusIcon aria-hidden />
@@ -554,7 +554,7 @@ const FAQ = [
   ["А если мою идею украдут?", "Опиши её в общих чертах, а подробности расскажи тем, с кем решишь работать."],
   ["Это бесплатно?", "Да. Профиль, сообщения, идеи и отклики бесплатны."],
   ["Мне будут платить?", "Зависит от проекта. В каждой роли написано: без оплаты, с оплатой или договоритесь."],
-  ["Можно просто пообщаться, без стартапа?", "Да. Многие приходят обсудить идею или найти единомышленников, а проект появляется позже."],
+  ["Можно просто пообщаться, без стартапа?", "Да. Обсуждай идеи и знакомься, проект может появиться позже."],
 ];
 
 function Faq() {

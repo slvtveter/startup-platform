@@ -61,10 +61,29 @@ export function StartupCover({
   );
 }
 
+/** Квадрат-логотип для карточки: обложка, уменьшенная до значка, или первая буква. */
+function StartupMark({ startup, eager }: { startup: StartupCardData; eager?: boolean }) {
+  if (startup.cover_url)
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- обложки уже пережаты api в WebP
+      <img src={startup.cover_url} alt="" loading={eager ? "eager" : "lazy"} decoding="async" className="size-14 shrink-0 rounded-2xl bg-tone-2 object-cover" />
+    );
+  const [from, to, ink] = FALLBACK[[...startup.slug].reduce((n, c) => n + c.charCodeAt(0), 0) % FALLBACK.length];
+  return (
+    <span
+      aria-hidden
+      className="grid size-14 shrink-0 place-items-center rounded-2xl text-2xl font-extrabold tracking-[-0.04em]"
+      style={{ background: `radial-gradient(120% 120% at 15% 10%, ${to}, ${from})`, color: ink }}
+    >
+      {startup.title.trim()[0]?.toUpperCase() ?? "•"}
+    </span>
+  );
+}
+
 /**
  * Карточка стартапа — одна на весь сайт: каталог, главная, подборка в кабинете.
- * Обложка со стадией и условиями, название, суть в двух строках, кого ищут (одна строка), кто основатель.
- * Блоки фиксированной высоты, футер прижат вниз: карточки в одном ряду совпадают по ритму.
+ * Устроена как вакансия на Хабр Карьере или Wellfound: значок, название, стадия и оплата одной строкой,
+ * суть, кого ищут (роли целиком, без обрезки), основатель. Большой обложки нет: она не говорит, кого ищут.
  */
 export function StartupCard({
   startup,
@@ -79,82 +98,80 @@ export function StartupCard({
 }) {
   const open = startup.open_roles.reduce((n, r) => n + (r.slots ?? 1), 0);
   const team = startup.team_size ?? 1;
-  // Роли строго в одну строку: две первые (длинные обрезаются), остальное — «+N».
-  const roles = startup.open_roles.slice(0, 2);
+  const roles = startup.open_roles.slice(0, 3);
   const more = startup.open_roles.length - roles.length;
   return (
     <Tag className="h-full">
-      <Link
-        href={`/startups/${startup.slug}`}
-        className="card-hover group flex h-full flex-col rounded-[28px] bg-tone p-2 hover:bg-tone-2"
-      >
-        <span className="relative block aspect-[2/1] shrink-0 overflow-hidden rounded-2xl">
-          <StartupCover startup={startup} eager={eager} />
-          <span className="absolute top-3 left-3 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-foreground shadow-sm">
-            {STAGE[startup.stage] ?? startup.stage}
-          </span>
-          <TermsBadge terms={startup.terms} className="absolute top-3 right-3" />
-        </span>
-        <div className="flex flex-1 flex-col px-4 pt-4 pb-4">
-          <span className="flex items-center gap-2">
-            <h3 className="truncate text-xl leading-tight font-extrabold tracking-[-0.03em]" title={startup.title}>
-              {startup.title}
-            </h3>
-            {startup.is_demo && (
-              <span title="Пример: так выглядит карточка на Envola" className="shrink-0 rounded-md bg-white px-2 py-0.5 text-xs leading-5 font-semibold text-muted-foreground">
-                Пример
-              </span>
-            )}
-          </span>
-          {/* Суть всегда занимает две строки: карточки в ряду держат один ритм, даже если текст короткий. */}
-          <p className="mt-1.5 line-clamp-2 min-h-[42px] text-base leading-[21px] text-muted-foreground">{startup.pitch}</p>
-          <span className="mt-4 flex h-7 min-w-0 items-center gap-1.5 overflow-hidden" aria-label="Кого ищут">
-            {roles.length > 0 ? (
-              <>
-                {roles.map((r, i) => (
-                  <span key={r.id} className={cn("truncate rounded-full bg-white px-2.5 py-1 text-sm leading-5 font-semibold", i === 0 ? "max-w-[65%] shrink-0" : "min-w-16")} title={r.title}>
-                    {r.title}
-                  </span>
-                ))}
-                {more > 0 && (
-                  <span className="shrink-0 rounded-full bg-white px-2 py-1 text-sm leading-5 font-semibold text-muted-foreground">+{more}</span>
-                )}
-              </>
-            ) : (
-              <span className="text-sm text-muted-foreground">Команда собрана</span>
-            )}
-          </span>
-          {reasons && reasons.length > 0 && (
-            <span className="mt-2.5 flex h-6 min-w-0 gap-1.5 overflow-hidden" aria-label="Почему подходит">
-              {reasons.slice(0, 2).map((r) => (
-                <span key={r} className="inline-flex min-w-0 items-center gap-1 rounded-full bg-brand-soft px-2.5 text-xs font-bold text-brand-ink">
-                  <Check aria-hidden className="size-3 shrink-0" />
-                  <span className="truncate">{reasonLabel(r)}</span>
-                </span>
-              ))}
-            </span>
-          )}
-          <span className="mt-auto pt-5">
-            <span className="flex items-center gap-2 border-t border-foreground/[0.08] pt-3.5 text-sm text-muted-foreground">
-              {startup.owner_avatar_url ? (
-                // eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP
-                <img src={startup.owner_avatar_url} alt="" loading="lazy" decoding="async" className="size-7 shrink-0 rounded-full bg-tone-2 object-cover" />
-              ) : (
-                <span aria-hidden className="grid size-7 shrink-0 place-items-center rounded-full bg-brand-soft text-[11px] font-extrabold text-brand-ink">
-                  {initials(startup.owner_name)}
+      <Link href={`/startups/${startup.slug}`} className="card-hover group flex h-full flex-col rounded-3xl bg-tone p-5 hover:bg-tone-2 sm:p-6">
+        <span className="flex items-center gap-4">
+          <StartupMark startup={startup} eager={eager} />
+          <span className="min-w-0 flex-1">
+            <span className="flex items-baseline gap-2">
+              <h3 className="truncate text-xl leading-7 font-extrabold tracking-[-0.03em] text-brand-ink transition-colors group-hover:text-brand-hover" title={startup.title}>
+                {startup.title}
+              </h3>
+              {startup.is_demo && (
+                <span title="Пример: так выглядит карточка на Envola" className="shrink-0 text-xs font-semibold text-muted-foreground">
+                  Пример
                 </span>
               )}
-              <span className="min-w-0 truncate">
-                <span className="font-semibold text-foreground">{startup.owner_name}</span>
-                {team > 1 ? ` и ещё ${team - 1}` : ""}
-              </span>
-              <span className="ml-auto inline-flex shrink-0 items-center gap-1 font-bold text-brand-ink">
-                {open > 0 ? plural(open, `${open} место`, `${open} места`, `${open} мест`) : "Подробнее"}
-                <ArrowRight aria-hidden className="size-3.5" />
-              </span>
+            </span>
+            <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+              <span className="font-semibold">{STAGE[startup.stage] ?? startup.stage}</span>
+              <span aria-hidden className="text-muted-foreground">·</span>
+              <TermsBadge terms={startup.terms} className="px-2 py-0.5" />
             </span>
           </span>
-        </div>
+        </span>
+
+        <p className="mt-4 line-clamp-2 text-base leading-6 text-foreground/80">{startup.pitch}</p>
+
+        {roles.length > 0 ? (
+          <span className="mt-4 flex flex-wrap gap-1.5" aria-label="Кого ищут">
+            {roles.map((r) => (
+              <span key={r.id} className="rounded-full bg-white px-3 py-1 text-sm leading-5 font-semibold">
+                {r.title}
+              </span>
+            ))}
+            {more > 0 && <span className="rounded-full bg-white px-3 py-1 text-sm leading-5 font-semibold text-muted-foreground">ещё {more}</span>}
+          </span>
+        ) : (
+          <span className="mt-4 text-sm text-muted-foreground">Команда собрана</span>
+        )}
+
+        {reasons && reasons.length > 0 && (
+          <span className="mt-2.5 flex flex-wrap gap-1.5" aria-label="Почему подходит">
+            {reasons.slice(0, 2).map((r) => (
+              <span key={r} className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-bold text-brand-ink">
+                <Check aria-hidden className="size-3 shrink-0" />
+                {reasonLabel(r)}
+              </span>
+            ))}
+          </span>
+        )}
+
+        <span className="mt-auto pt-5">
+          <span className="flex items-center gap-2 border-t border-foreground/[0.08] pt-4 text-sm text-muted-foreground">
+            {startup.owner_avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP
+              <img src={startup.owner_avatar_url} alt="" loading="lazy" decoding="async" className="size-7 shrink-0 rounded-full bg-tone-2 object-cover" />
+            ) : (
+              <span aria-hidden className="grid size-7 shrink-0 place-items-center rounded-full bg-brand-soft text-[11px] font-extrabold text-brand-ink">
+                {initials(startup.owner_name)}
+              </span>
+            )}
+            <span className="min-w-0 truncate">
+              <span className="font-semibold text-foreground">{startup.owner_name}</span>
+              {team > 1 ? ` и ещё ${team - 1}` : ""}
+            </span>
+            {open > 0 && (
+              <span className="ml-auto inline-flex shrink-0 items-center gap-1 font-bold text-brand-ink">
+                {plural(open, `${open} свободное место`, `${open} свободных места`, `${open} свободных мест`)}
+                <ArrowRight aria-hidden className="size-3.5" />
+              </span>
+            )}
+          </span>
+        </span>
       </Link>
     </Tag>
   );

@@ -163,6 +163,14 @@ class MyStartupOut(StartupCard):
     views_30d: int = 0
 
 
+class StartupFacets(BaseModel):
+    """Сколько стартапов под каждым значением фильтра: {"idea": 4, "mvp": 3}. Нулевых ключей нет."""
+
+    stage: dict[str, int]
+    role: dict[str, int]
+    terms: dict[str, int]
+
+
 class OpenSeatStartup(BaseModel):
     slug: str
     title: str

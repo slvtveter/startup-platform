@@ -6,9 +6,10 @@ import { Pager, asList, toggleHref, type SearchParams } from "@/components/domai
 import { Container, EmptyState, PageHeader } from "@/components/domain/page-header";
 import { StartupCard } from "@/components/domain/startup-card";
 import { buttonVariants } from "@/components/ui/button";
-import { listRoles, listStartups } from "@/lib/api";
+import { listStartups, startupFacets } from "@/lib/api";
 import { STAGE, TERMS, plural } from "@/lib/labels";
-import { serverClient } from "@/lib/server-api";
+import { startupsSeo } from "@/lib/seo";
+import { getRoles, serverClient } from "@/lib/server-api";
 import { cn } from "@/lib/utils";
 
 const LIMIT = 12;
@@ -34,31 +35,34 @@ export async function ProjectCatalog({ params }: { params: SearchParams }) {
   const sort = params.sort === "roles" ? "roles" : "new";
   const client = await serverClient();
   const common = { role, terms, q: q || undefined };
-  const [{ data: roles }, { data }, ...perStage] = await Promise.all([
-    listRoles({ client }),
+  // Числа у всех фильтров — одним запросом facets, а не отдельным запросом на каждую стадию.
+  const [roles, { data }, { data: facets }] = await Promise.all([
+    getRoles(),
     listStartups({ client, query: { ...common, stage, sort, limit: LIMIT, offset: (page - 1) * LIMIT } }),
-    // Сколько проектов на каждой стадии при остальных фильтрах — для чисел на переключателе.
-    ...STAGES.map((s) => listStartups({ client, query: { ...common, stage: [s.value], limit: 1 } })),
+    startupFacets({ client, query: { ...common, stage } }),
   ]);
-  const counts = Object.fromEntries(STAGES.map((s, i) => [s.value, perStage[i].data?.total ?? 0]));
+  const counts = Object.fromEntries(STAGES.map((s) => [s.value, facets?.stage[s.value] ?? 0]));
   const all = Object.values(counts).reduce((a, b) => a + b, 0);
   const total = data?.total ?? 0;
   const onlyIdeas = stage.length === 1 && stage[0] === "idea";
   const countLabel = onlyIdeas ? `${total} ${plural(total, "идея", "идеи", "идей")}` : `${total} ${plural(total, "проект", "проекта", "проектов")}`;
-  const roleOptions = (roles ?? []).map((r) => ({ value: r.slug, label: r.name }));
+  const seo = startupsSeo(params, roles);
+  // Роли, под которыми есть проекты, — наверх: пустые не должны занимать первые строки списка.
+  const roleOptions = roles
+    .map((r) => ({ value: r.slug, label: r.name, count: facets?.role[r.slug] ?? 0 }))
+    .sort((a, b) => Number(b.count > 0) - Number(a.count > 0));
   const chip = "inline-flex h-11 shrink-0 items-center gap-2 rounded-full pr-2 pl-4 text-sm font-semibold whitespace-nowrap transition-colors";
   const badge = "grid h-7 min-w-7 place-items-center rounded-full px-2 text-xs font-bold tabular-nums";
   const groups: FilterGroup[] = [
     { name: "stage", title: "Стадия", allLabel: "Все стадии", sheet: false, options: STAGES.map((s) => ({ value: s.value, label: s.label, count: counts[s.value] })) },
     { name: "role", title: "Кого ищут", options: roleOptions },
-    { name: "terms", title: "Оплата", options: Object.entries(TERMS).map(([value, label]) => ({ value, label })) },
+    { name: "terms", title: "Оплата", options: Object.entries(TERMS).map(([value, label]) => ({ value, label, count: facets?.terms[value] ?? 0 })) },
   ];
 
   return (
     <Container>
       <PageHeader
-        title="Стартапы"
-        description="Идеи, прототипы и работающие продукты. К идее можно подключиться с самого начала, в работающий проект прийти на готовую роль."
+        title={seo.h1}
         actions={
           <Link href="/startups/new" className={buttonVariants()}>
             <Plus aria-hidden />
@@ -120,22 +124,20 @@ export async function ProjectCatalog({ params }: { params: SearchParams }) {
           />
 
           {data && data.items.length > 0 ? (
-            <ul className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <ul className="mt-4 grid gap-3 md:grid-cols-2">
               {data.items.map((s, i) => (
                 <StartupCard key={s.id} startup={s} as="li" eager={i < 6} />
               ))}
               {/* Последняя страница: пустое место в ряду — приглашение опубликовать свою идею, а не дыра в сетке. */}
               {page * LIMIT >= total && (
-                <li className={`h-full ${data.items.length % 3 === 0 ? "xl:hidden" : ""} ${data.items.length % 2 === 0 ? "sm:max-xl:hidden" : ""}`}>
+                <li className={`h-full ${data.items.length % 2 === 0 ? "md:hidden" : ""}`}>
                   <Link
                     href="/startups/new"
-                    className="card-hover flex h-full min-h-[260px] flex-col justify-center gap-6 rounded-[28px] bg-brand-soft p-8 hover:bg-marker"
+                    className="card-hover flex h-full min-h-[240px] flex-col justify-center gap-6 rounded-3xl bg-brand-soft p-6 hover:bg-marker sm:p-8"
                   >
                     <span>
                       <span className="block text-2xl leading-tight font-extrabold tracking-[-0.03em]">Твой проект здесь</span>
-                      <span className="mt-3 block max-w-[34ch] text-muted-foreground">
-                        Даже если это пока только идея: опиши проблему и отметь, кого не хватает. Её увидят разработчики, дизайнеры и маркетологи.
-                      </span>
+                      <span className="mt-3 block max-w-[34ch] text-muted-foreground">Даже если это пока только идея. Отметь, кого не хватает в команде.</span>
                     </span>
                     <span className={buttonVariants({ className: "self-start" })}>
                       <Plus aria-hidden />

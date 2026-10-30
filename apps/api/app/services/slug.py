@@ -22,6 +22,10 @@ def slugify(text: str) -> str:
     return slug[:60] or "item"
 
 
+# Заняты маршрутами: /startups/new на сайте, /api/startups/facets в API.
+RESERVED = {"new", "facets"}
+
+
 async def unique_slug(db: AsyncSession, model, text: str, exclude_id=None) -> str:
     base = slugify(text)
     candidate = base
@@ -29,6 +33,6 @@ async def unique_slug(db: AsyncSession, model, text: str, exclude_id=None) -> st
         stmt = select(model.id).where(model.slug == candidate)
         if exclude_id is not None:
             stmt = stmt.where(model.id != exclude_id)
-        if (await db.scalar(stmt)) is None:
+        if candidate not in RESERVED and (await db.scalar(stmt)) is None:
             return candidate
         candidate = f"{base}-{secrets.token_hex(2)}"

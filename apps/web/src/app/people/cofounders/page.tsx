@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   title: "Сообщники: найди людей, с кем придумать стартап",
   description:
     "Нет идеи, но хочется своё? Здесь собираются разработчики, дизайнеры и маркетологи, которые хотят вместе придумать и запустить стартап.",
+  alternates: { canonical: "/people/cofounders" },
 };
 
 const STEPS = [

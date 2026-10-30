@@ -2,13 +2,16 @@ import type { Metadata } from "next";
 
 import { ProjectCatalog } from "@/components/catalog/project-catalog";
 import type { SearchParams } from "@/components/domain/filters";
+import { startupsSeo } from "@/lib/seo";
+import { getRoles } from "@/lib/server-api";
 
-export const metadata: Metadata = {
-  title: "Стартапы и идеи ищут людей в команду",
-  description:
-    "Идеи и стартапы от прототипа до запущенного продукта, которые ищут дизайнеров, разработчиков, маркетологов и аналитиков.",
-};
+type Props = { searchParams: Promise<SearchParams> };
 
-export default async function StartupsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const seo = startupsSeo(await searchParams, await getRoles());
+  return { title: seo.title, description: seo.description, alternates: { canonical: seo.canonical } };
+}
+
+export default async function StartupsPage({ searchParams }: Props) {
   return <ProjectCatalog params={await searchParams} />;
 }

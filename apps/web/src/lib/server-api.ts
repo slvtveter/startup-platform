@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 
-import { me } from "@/lib/api";
+import { listRoles, me } from "@/lib/api";
 import { createClient, createConfig } from "@/lib/api/client";
 
 // Server Components ходят в FastAPI напрямую (внутри docker-сети),
@@ -38,3 +38,9 @@ export async function requireMe(next: string) {
   if (!user) redirect(`/login?next=${encodeURIComponent(next)}`);
   return user;
 }
+
+/** Справочник ролей: публичный, один запрос на рендер, даже если он нужен и метаданным, и странице. */
+export const getRoles = cache(async () => {
+  const { data } = await listRoles({ client: publicClient() });
+  return data ?? [];
+});

@@ -77,3 +77,40 @@ async def test_recommendations(make_user):
     recs = (await maria.get("/api/me/recommended-startups")).json()
     assert recs[0]["startup"]["slug"] == "vkusnoryadom"
     assert recs[0]["score"] > 0
+
+
+async def test_facets_count_each_filter_without_itself(make_user, client):
+    founder = await make_user("alina@mail.ru", published=True)
+    await create_published(founder)
+    other = await make_user("oleg@mail.ru", published=True)
+    s = (
+        await other.post(
+            "/api/startups", json={**STARTUP, "title": "Идея", "stage": "idea", "terms": "free"}
+        )
+    ).json()
+    await other.post(
+        f"/api/startups/{s['id']}/roles", json={**ROLE, "role": "backend", "title": "Бэкенд"}
+    )
+    await other.post(f"/api/startups/{s['id']}/publish")
+
+    f = (await client.get("/api/startups/facets")).json()
+    assert f == {
+        "stage": {"prototype": 1, "idea": 1},
+        "terms": {"negotiable": 1, "free": 1},
+        "role": {"designer": 1, "backend": 1},
+    }
+    # Выбранная стадия сужает роли и оплату, но числа у других стадий остаются.
+    f = (await client.get("/api/startups/facets", params={"stage": "idea"})).json()
+    assert f["stage"] == {"prototype": 1, "idea": 1}
+    assert f["role"] == {"backend": 1} and f["terms"] == {"free": 1}
+    f = (
+        await client.get("/api/startups/facets", params={"q": "соседям", "role": "designer"})
+    ).json()
+    assert f["stage"] == {"prototype": 1}
+
+
+async def test_reserved_slugs(make_user):
+    founder = await make_user("alina@mail.ru")
+    for title in ("New", "Facets"):
+        s = (await founder.post("/api/startups", json={**STARTUP, "title": title})).json()
+        assert s["slug"] not in ("new", "facets") and s["slug"].startswith(title.lower())

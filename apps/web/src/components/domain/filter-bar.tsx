@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowDownUp, Check, ChevronDown, SearchIcon, SlidersHorizontal, X } from "lucide-react";
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { useRouter } from "next/navigation";
 
 import { asList, toggleHref, type Option, type SearchParams } from "@/components/domain/filters";
@@ -138,18 +138,21 @@ export function CatalogToolbar({
                       <div className="flex flex-wrap gap-1.5">
                         {g.options.map((o) => {
                           const on = selected.includes(o.value);
+                          const empty = o.count === 0 && !on;
                           return (
                             <button
                               key={o.value}
                               type="button"
                               aria-pressed={on}
+                              disabled={empty}
                               onClick={() => go(toggleHref(basePath, params, g.name, o.value))}
                               className={cn(
-                                "inline-flex min-h-10 items-center rounded-full px-4 py-2 text-left text-sm font-semibold transition-colors",
+                                "inline-flex min-h-10 items-center gap-1.5 rounded-full px-4 py-2 text-left text-sm font-semibold transition-colors disabled:bg-transparent disabled:text-muted-foreground disabled:shadow-[inset_0_0_0_1px_var(--border)]",
                                 on ? "bg-foreground text-background" : "bg-tone hover:bg-tone-2",
                               )}
                             >
                               {o.label}
+                              {o.count !== undefined && <span className={cn("tabular-nums", on ? "text-background/70" : "text-muted-foreground")}>{o.count}</span>}
                             </button>
                           );
                         })}
@@ -201,13 +204,20 @@ export function CatalogToolbar({
   );
 }
 
+/** Пока каталог грузится после клика, отмеченный вариант мягко пульсирует: клик точно засчитан. */
+function usePending() {
+  return useLinkStatus().pending ? "animate-pulse" : "";
+}
+
 function Box({ on }: { on: boolean }) {
+  const pending = usePending();
   return (
     <span
       aria-hidden
       className={cn(
         "grid size-[18px] shrink-0 place-items-center rounded-[6px] border-[1.5px] transition-colors",
         on ? "border-brand bg-brand text-white" : "border-input bg-white",
+        pending,
       )}
     >
       {on && <Check className="size-3" strokeWidth={3} />}
@@ -243,7 +253,7 @@ export function FilterSidebar({ basePath, params, groups }: { basePath: string; 
             const o = g.options[0];
             const on = selected.includes(o.value);
             return (
-              <Link key={g.name} href={toggleHref(basePath, params, g.name, on ? null : o.value)} scroll={false} replace role="checkbox" aria-checked={on} className={cn(row, "items-start py-2")}>
+              <Link key={g.name} href={toggleHref(basePath, params, g.name, on ? null : o.value)} scroll={false} replace prefetch={false} role="checkbox" aria-checked={on} className={cn(row, "items-start py-2")}>
                 <Box on={on} />
                 <span>
                   <span className="block font-semibold">{g.title}</span>
@@ -288,17 +298,30 @@ export function FilterSidebar({ basePath, params, groups }: { basePath: string; 
 }
 
 function Option({ href, on, label, count, radio, className }: { href: string; on: boolean; label: string; count?: number; radio?: boolean; className: string }) {
+  // Вариант, под которым ничего нет, не кликается (как на hh): иначе легко попасть в пустую выдачу.
+  if (count === 0 && !on && !radio)
+    return (
+      <span aria-disabled="true" className={cn(className, "cursor-default text-muted-foreground hover:bg-transparent")}>
+        <span aria-hidden className="size-[18px] shrink-0 rounded-[6px] border-[1.5px] border-border bg-tone" />
+        <span className="min-w-0 flex-1">{label}</span>
+        <span className="tabular-nums">0</span>
+      </span>
+    );
+  // prefetch выключен: два десятка фильтров не должны рендерить каталог заранее на каждый показ страницы.
   return (
-    <Link href={href} scroll={false} replace role={radio ? "radio" : "checkbox"} aria-checked={on} className={className}>
-      {radio ? (
-        <span aria-hidden className={cn("grid size-[18px] shrink-0 place-items-center rounded-full border-[1.5px] transition-colors", on ? "border-brand" : "border-input bg-white")}>
-          {on && <span className="size-2 rounded-full bg-brand" />}
-        </span>
-      ) : (
-        <Box on={on} />
-      )}
+    <Link href={href} scroll={false} replace prefetch={false} role={radio ? "radio" : "checkbox"} aria-checked={on} className={className}>
+      {radio ? <Radio on={on} /> : <Box on={on} />}
       <span className={cn("min-w-0 flex-1", on && "font-semibold")}>{label}</span>
       {count !== undefined && <span className="text-muted-foreground tabular-nums">{count}</span>}
     </Link>
+  );
+}
+
+function Radio({ on }: { on: boolean }) {
+  const pending = usePending();
+  return (
+    <span aria-hidden className={cn("grid size-[18px] shrink-0 place-items-center rounded-full border-[1.5px] transition-colors", on ? "border-brand" : "border-input bg-white", pending)}>
+      {on && <span className="size-2 rounded-full bg-brand" />}
+    </span>
   );
 }

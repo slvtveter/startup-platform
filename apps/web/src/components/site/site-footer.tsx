@@ -3,40 +3,31 @@ import Link from "next/link";
 
 import { FeedbackButton } from "@/components/site/feedback-button";
 import { Wordmark } from "@/components/site/logo";
+import { rolePlural } from "@/lib/seo";
 
-// Подвал не повторяет шапку: короткие подсказки по трём сценариям — есть идея, нужны люди, хочу в команду.
+// Подвал как у hh и Peerlist: ссылки на посадочные страницы ролей. Человеку — быстрый вход
+// в нужный срез каталога, поисковику — перелинковка страниц «Стартапы ищут дизайнера», «Дизайнеры».
+// Роли — самые частые из справочника; переименование в админке ссылки не ломает (slug не меняется).
+const ROLES = [
+  ["frontend", "Frontend-разработчик"],
+  ["backend", "Backend-разработчик"],
+  ["mobile", "Mobile-разработчик"],
+  ["designer", "Дизайнер"],
+  ["product", "Продакт-менеджер"],
+  ["marketer", "Маркетолог"],
+  ["analyst", "Аналитик данных"],
+] as const;
+
 const COLUMNS = [
+  { title: "Стартапы ищут", links: ROLES.map(([slug, name]) => ({ href: `/startups?role=${slug}`, label: name })) },
+  { title: "Люди", links: ROLES.map(([slug, name]) => ({ href: `/people?role=${slug}`, label: rolePlural(name) })) },
   {
-    title: "Есть идея",
+    title: "Envola",
     links: [
-      { href: "/startups/new", label: "Опубликовать идею" },
-      { href: "/startups?stage=idea", label: "Идеи других" },
-      { href: "/startups?stage=idea&terms=free", label: "Идеи без оплаты, на равных" },
-    ],
-  },
-  {
-    title: "Нет идеи",
-    links: [
-      { href: "/people/cofounders", label: "Найти сообщников" },
-      { href: "/startups?stage=idea", label: "Идеи, к которым можно подключиться" },
-      { href: "/me/profile", label: "Отметить «Ищу сообщников»" },
-    ],
-  },
-  {
-    title: "Нужны люди",
-    links: [
-      { href: "/people", label: "Все люди" },
-      { href: "/people?level=internship", label: "После стажировки" },
-      { href: "/chats", label: "Сообщения" },
-    ],
-  },
-  {
-    title: "Хочу в команду",
-    links: [
-      { href: "/me/profile", label: "Заполнить профиль" },
-      { href: "/startups?terms=free", label: "Проекты для портфолио" },
-      { href: "/startups?stage=mvp&stage=launched", label: "Проекты с живым продуктом" },
-      { href: "/me/settings", label: "Подборка ролей на почту" },
+      { href: "/startups?stage=idea", label: "Идеи стартапов" },
+      { href: "/people/cofounders", label: "Сообщники" },
+      { href: "/startups/new", label: "Добавить проект" },
+      { href: "/cookies", label: "Cookie и данные" },
     ],
   },
 ];
@@ -45,12 +36,10 @@ export function SiteFooter() {
   return (
     <footer className="mx-auto mt-24 w-full max-w-[1360px] px-4 pb-4 sm:px-6 lg:px-10">
       <div className="rounded-[28px] bg-tone px-5 sm:px-8 lg:px-10">
-        <div className="grid gap-6 py-10 text-base sm:grid-cols-2 sm:gap-10 sm:py-12 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1fr]">
+        <div className="grid gap-6 py-10 text-base sm:grid-cols-2 sm:gap-10 sm:py-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
             <Wordmark />
-            <p className="mt-4 max-w-xs text-muted-foreground">
-              Место, где из разговора вырастает стартап: обсуждай идеи, находи сообщников, вступай в команды.
-            </p>
+            <p className="mt-4 max-w-xs text-muted-foreground">Стартапы и команды для студентов и начинающих в IT.</p>
             <div className="mt-4 text-muted-foreground">
               <FeedbackButton />
             </div>
@@ -92,9 +81,6 @@ export function SiteFooter() {
         </div>
         <div className="flex flex-wrap justify-between gap-2 border-t py-5 text-sm text-muted-foreground">
           <span>© {new Date().getFullYear()} envola</span>
-          <Link href="/cookies" className="transition-colors hover:text-foreground">
-            Cookie и данные
-          </Link>
         </div>
       </div>
     </footer>

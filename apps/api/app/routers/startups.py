@@ -16,6 +16,7 @@ from app.schemas.startup import (
     RoleUpdate,
     StartupCard,
     StartupDetail,
+    StartupFacets,
     StartupIn,
     StartupUpdate,
 )
@@ -40,6 +41,18 @@ async def list_startups(
 ) -> Page[StartupCard]:
     rows, total = await service.list_public(db, role, skill, terms, stage, q, sort, limit, offset)
     return Page(items=[service.to_card(s) for s in rows], total=total, limit=limit, offset=offset)
+
+
+@router.get("/startups/facets", response_model=StartupFacets)
+async def startup_facets(
+    db: DbSession,
+    role: Annotated[list[str], Query()] = [],  # noqa: B006
+    skill: Annotated[list[str], Query()] = [],  # noqa: B006
+    terms: Annotated[list[str], Query()] = [],  # noqa: B006
+    stage: Annotated[list[str], Query()] = [],  # noqa: B006
+    q: str | None = None,
+) -> StartupFacets:
+    return await service.facets(db, role, skill, terms, stage, q)
 
 
 @router.get("/seats", response_model=list[OpenSeat])

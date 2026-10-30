@@ -103,6 +103,9 @@ services:
     environment:
       API_INTERNAL_URL: http://api:8000
       SITE_URL: https://${SITE_DOMAIN}
+      # Коды подтверждения прав в Яндекс Вебмастере и Google Search Console (мета-тег на главной).
+      YANDEX_VERIFICATION: ${YANDEX_VERIFICATION:-}
+      GOOGLE_SITE_VERIFICATION: ${GOOGLE_SITE_VERIFICATION:-}
     depends_on:
       api:
         condition: service_healthy

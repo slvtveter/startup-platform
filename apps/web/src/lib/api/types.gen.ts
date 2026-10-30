@@ -1910,6 +1910,32 @@ export type StartupDetail = {
 };
 
 /**
+ * StartupFacets
+ *
+ * Сколько стартапов под каждым значением фильтра: {"idea": 4, "mvp": 3}. Нулевых ключей нет.
+ */
+export type StartupFacets = {
+    /**
+     * Stage
+     */
+    stage: {
+        [key: string]: number;
+    };
+    /**
+     * Role
+     */
+    role: {
+        [key: string]: number;
+    };
+    /**
+     * Terms
+     */
+    terms: {
+        [key: string]: number;
+    };
+};
+
+/**
  * StartupIn
  */
 export type StartupIn = {
@@ -3108,6 +3134,52 @@ export type CreateStartupResponses = {
 };
 
 export type CreateStartupResponse = CreateStartupResponses[keyof CreateStartupResponses];
+
+export type StartupFacetsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Role
+         */
+        role?: Array<string>;
+        /**
+         * Skill
+         */
+        skill?: Array<string>;
+        /**
+         * Terms
+         */
+        terms?: Array<string>;
+        /**
+         * Stage
+         */
+        stage?: Array<string>;
+        /**
+         * Q
+         */
+        q?: string | null;
+    };
+    url: '/api/startups/facets';
+};
+
+export type StartupFacetsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type StartupFacetsError = StartupFacetsErrors[keyof StartupFacetsErrors];
+
+export type StartupFacetsResponses = {
+    /**
+     * Successful Response
+     */
+    200: StartupFacets;
+};
+
+export type StartupFacetsResponse = StartupFacetsResponses[keyof StartupFacetsResponses];
 
 export type ListOpenSeatsData = {
     body?: never;
