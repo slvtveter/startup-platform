@@ -311,7 +311,7 @@ function Paths({ idea, startups, people, faces }: { idea?: Startup; startups: St
     <Reveal className="grid gap-3 lg:grid-cols-5">
       {/* Есть идея: главная дорога, крупная и в цвете бренда. */}
       <PathLink path="founder" href="/register?next=/startups/new" className={cn(card, "bg-brand text-white hover:bg-brand-hover lg:col-span-3")} style={delay(0)}>
-        <span className="grid gap-8 sm:grid-cols-[minmax(0,1fr)_minmax(0,260px)] sm:items-end">
+        <span className="grid gap-8 sm:grid-cols-[minmax(0,1fr)_minmax(0,280px)] sm:items-start">
           <span>
             <span className="text-sm font-bold text-white/70">Есть идея</span>
             <h3 className="mt-3 max-w-[14ch] text-[32px] leading-[1.02] font-extrabold tracking-[-0.04em] sm:text-[40px]">Собери под неё команду</h3>
@@ -328,6 +328,17 @@ function Paths({ idea, startups, people, faces }: { idea?: Startup; startups: St
                 </span>
               ))}
             </span>
+            {people.length > 0 && (
+              <span className="mt-3 flex items-center gap-2.5 border-t border-foreground/[0.08] pt-3 text-xs font-semibold text-muted-foreground">
+                <span className="flex shrink-0 -space-x-2">
+                  {people.slice(0, 3).map((p) => (
+                    // eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP
+                    <img key={p.slug} src={p.avatar_url!} alt="" className="size-7 rounded-full object-cover ring-2 ring-white" />
+                  ))}
+                </span>
+                Откликнулись на роли
+              </span>
+            )}
           </span>
         </span>
         <span className={cn(cta, "text-white")}>
