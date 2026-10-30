@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { applyToRole, resendVerification, trackClientEvent, updateMyProfile, type ProfileUpdate } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
+import { goal } from "@/lib/metrika";
 
 export type ApplyState = "guest" | "unverified" | "incomplete" | "can_apply" | "applied";
 
@@ -86,6 +87,7 @@ export function ApplyDialog({ roleId, roleTitle, startupTitle, state, needs, rol
     const { error } = await applyToRole({ path: { role_id: roleId }, body: { message } });
     setBusy(false);
     if (error) return toast.error(errorMessage(error));
+    goal("application_sent");
     toast.success("Отклик отправлен. Мы пришлём письмо, когда основатель ответит.");
     setOpen(false);
     router.push("/me/applications");
@@ -102,7 +104,10 @@ export function ApplyDialog({ roleId, roleTitle, startupTitle, state, needs, rol
     <Dialog
       open={open}
       onOpenChange={(next) => {
-        if (next) void trackClientEvent({ body: { name: "apply_started" } }).catch(() => {});
+        if (next) {
+          void trackClientEvent({ body: { name: "apply_started" } }).catch(() => {});
+          goal("apply_started");
+        }
         setOpen(next);
       }}
     >

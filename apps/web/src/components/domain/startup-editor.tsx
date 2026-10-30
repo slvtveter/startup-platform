@@ -30,6 +30,7 @@ import {
 import { errorMessage } from "@/lib/errors";
 import { MAX_SLOTS, STAGE, TERMS, TERMS_HINT, plural } from "@/lib/labels";
 import { cn } from "@/lib/utils";
+import { goal } from "@/lib/metrika";
 
 type Base = {
   title: string;
@@ -69,6 +70,7 @@ export function StartupEditor({ startup, roles, skills }: { startup?: StartupDet
     setBusy(false);
     if (res.error) return toast.error(errorMessage(res.error));
     if (!startup) {
+      goal("startup_created");
       toast.success("Черновик создан. Теперь добавь роли, которые ищешь.");
       router.push(`/startups/${res.data!.slug}/edit`);
       return;
@@ -86,6 +88,7 @@ export function StartupEditor({ startup, roles, skills }: { startup?: StartupDet
       return;
     }
     setBlockers([]);
+    goal("startup_published");
     toast.success("Стартап опубликован и виден в ленте");
     router.push(`/startups/${startup.slug}`);
     router.refresh();

@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from "@/components/ui/textarea";
 import { startChat } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
+import { goal } from "@/lib/metrika";
 
 /**
  * «Написать» с профиля или «Обсудить идею» со страницы стартапа: первое сообщение любому человеку,
@@ -40,6 +41,7 @@ export function WriteDialog({
     const { data, error } = await startChat({ body: { slug, body } });
     setBusy(false);
     if (error) return toast.error(errorMessage(error));
+    goal("chat_started");
     router.push(`/chats/${data!.id}`);
   }
 

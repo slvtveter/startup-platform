@@ -30,7 +30,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   const top = Math.max(1, ...(m?.funnel.map((f) => f.count) ?? [1]));
 
   return (
-    <Container>
+    <Container className="ym-hide-content">
       <PageHeader
         title="Админка"
         actions={

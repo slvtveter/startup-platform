@@ -3,6 +3,7 @@ import { Manrope } from "next/font/google";
 
 import { CookieNotice } from "@/components/site/cookie-notice";
 import { HydratedFlag } from "@/components/site/hydrated-flag";
+import { Metrika } from "@/components/site/metrika";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { Toaster } from "@/components/ui/sonner";
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteFooter />
         <CookieNotice />
         <HydratedFlag />
+        <Metrika />
         <Toaster position="bottom-right" />
       </body>
     </html>

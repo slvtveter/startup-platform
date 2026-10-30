@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { invitePerson } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
+import { goal } from "@/lib/metrika";
 
 export type InviteOption = { roleId: string; label: string };
 
@@ -20,6 +21,7 @@ export function InviteDialog({ slug, name, options }: { slug: string; name: stri
   async function submit() {
     const { error } = await invitePerson({ path: { slug }, body: { startup_role_id: roleId, message } });
     if (error) return toast.error(errorMessage(error));
+    goal("invite_sent");
     toast.success(`Приглашение отправлено. ${name} получит письмо.`);
     setOpen(false);
   }
