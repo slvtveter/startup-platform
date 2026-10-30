@@ -16,10 +16,16 @@ const manrope = Manrope({ variable: "--font-sans", subsets: ["latin", "cyrillic"
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.SITE_URL ?? "http://localhost:8080"),
-  title: { default: "Envola: здесь стартапы начинаются с разговора", template: "%s · Envola" },
+  // В заголовке — то, что ищут: «команда для стартапа», «стартап для студентов», «сооснователь».
+  title: { default: "Envola: команда для стартапа и проекты для студентов в IT", template: "%s · Envola" },
   description:
-    "Место для студентов и начинающих в IT: обсуждай идеи, находи сообщников и сооснователей, собирай команду или вступай в стартап, который уже ищет людей.",
+    "Стартапы и идеи, которым нужны разработчики, дизайнеры и маркетологи. Найди проект для первого опыта, команду под свою идею или сооснователя. Можно без опыта.",
   openGraph: { type: "website", locale: "ru_RU", siteName: "Envola" },
+  // Коды из Яндекс Вебмастера и Search Console задаются на сервере (infra/.env.prod), пусто — тега нет.
+  verification: {
+    yandex: process.env.YANDEX_VERIFICATION || undefined,
+    google: process.env.GOOGLE_SITE_VERIFICATION || undefined,
+  },
 };
 
 // Цвет панели браузера на телефоне — как фон шапки.

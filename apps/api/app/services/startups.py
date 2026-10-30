@@ -34,6 +34,7 @@ from app.schemas.startup import (
     RoleUpdate,
     StartupCard,
     StartupDetail,
+    StartupFacets,
     StartupIn,
     StartupRoleOut,
     StartupUpdate,
@@ -415,17 +416,10 @@ def _public_query() -> Select:
     )
 
 
-async def list_public(
-    db: AsyncSession,
-    roles: list[str],
-    skills: list[str],
-    terms: list[str],
-    stages: list[str],
-    q: str | None,
-    sort: str,
-    limit: int,
-    offset: int,
-) -> tuple[list[Startup], int]:
+def _filtered(
+    roles: list[str], skills: list[str], terms: list[str], stages: list[str], q: str | None
+) -> tuple[Select, object | None]:
+    """Публичные стартапы под фильтры каталога и ранг поиска (None, если запроса нет)."""
     stmt = _public_query()
     if roles:
         stmt = stmt.where(
@@ -474,6 +468,21 @@ async def list_public(
             ]
             rank = func.ts_rank(Startup.search, tsq)
         stmt = stmt.where(or_(*hits))
+    return stmt, rank
+
+
+async def list_public(
+    db: AsyncSession,
+    roles: list[str],
+    skills: list[str],
+    terms: list[str],
+    stages: list[str],
+    q: str | None,
+    sort: str,
+    limit: int,
+    offset: int,
+) -> tuple[list[Startup], int]:
+    stmt, rank = _filtered(roles, skills, terms, stages, q)
     total = await db.scalar(select(func.count()).select_from(stmt.subquery()))
     if rank is not None:
         # Совпадение в названии (вес A) выше, чем в описании; только по роли — в конце.
@@ -489,6 +498,39 @@ async def list_public(
         stmt = stmt.order_by(Startup.published_at.desc())
     rows = await db.scalars(stmt.limit(limit).offset(offset))
     return list(rows.unique()), total or 0
+
+
+async def facets(
+    db: AsyncSession,
+    roles: list[str],
+    skills: list[str],
+    terms: list[str],
+    stages: list[str],
+    q: str | None,
+) -> StartupFacets:
+    """Числа у фильтров каталога одним заходом. Каждое измерение считается без своего фильтра:
+    отмеченная стадия не обнуляет числа у соседних стадий."""
+
+    async def count_by(column, stmt: Select) -> dict[str, int]:
+        ids = stmt.with_only_columns(Startup.id).subquery()
+        rows = await db.execute(
+            select(column, func.count(func.distinct(Startup.id)))
+            .select_from(Startup)
+            .where(Startup.id.in_(select(ids.c.id)))
+            .group_by(column)
+        )
+        return {str(getattr(k, "value", k)): n for k, n in rows.all()}
+
+    by_stage = await count_by(Startup.stage, _filtered(roles, skills, terms, [], q)[0])
+    by_terms = await count_by(Startup.terms, _filtered(roles, skills, [], stages, q)[0])
+    role_ids = _filtered([], skills, terms, stages, q)[0].with_only_columns(Startup.id).subquery()
+    rows = await db.execute(
+        select(Role.slug, func.count(func.distinct(StartupRole.startup_id)))
+        .join(StartupRole, StartupRole.role_id == Role.id)
+        .where(StartupRole.is_open.is_(True), StartupRole.startup_id.in_(select(role_ids.c.id)))
+        .group_by(Role.slug)
+    )
+    return StartupFacets(stage=by_stage, terms=by_terms, role=dict(rows.all()))
 
 
 async def my_startups(db: AsyncSession, user: User) -> list[MyStartupOut]:

@@ -89,7 +89,7 @@
   --accent-foreground: #0f1b2d;
   --destructive: #c8102e;
   --border: #e3e8f0;
-  --input: #d5dce7;
+  --input: #848fa3; /* рамки чекбоксов и радио: 3.3:1 к белому (WCAG 1.4.11) */
   --ring: #5b8cf0;
   --radius: 0.875rem;
   --brand: #3b6fe4;

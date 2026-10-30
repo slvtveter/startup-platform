@@ -6,34 +6,37 @@ import { Pager, asList, toggleHref, type SearchParams } from "@/components/domai
 import { Container, EmptyState } from "@/components/domain/page-header";
 import { PersonCard } from "@/components/domain/person-card";
 import { buttonVariants } from "@/components/ui/button";
-import { listPeople, listRoles } from "@/lib/api";
+import { listPeople } from "@/lib/api";
 import { LEVEL, TERMS, plural } from "@/lib/labels";
-import { serverClient } from "@/lib/server-api";
+import { peopleSeo } from "@/lib/seo";
+import { getRoles, serverClient } from "@/lib/server-api";
 
-export const metadata: Metadata = {
-  title: "Люди: дизайнеры, разработчики, маркетологи",
-  description:
-    "Студенты и начинающие в IT: кто ищет команду, кто хочет придумать стартап с нуля. Фильтр по роли, опыту и условиям.",
-};
+type Props = { searchParams: Promise<SearchParams> };
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const seo = peopleSeo(await searchParams, await getRoles());
+  return { title: seo.title, description: seo.description, alternates: { canonical: seo.canonical } };
+}
 
 const LIMIT = 24;
 
-export default async function PeoplePage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+export default async function PeoplePage({ searchParams }: Props) {
   const params = await searchParams;
   const page = Math.max(1, Number(params.page) || 1);
   const selected = { role: asList(params.role), level: asList(params.level), looking_for: asList(params.looking_for) };
   const cofound = params.cofound === "1";
   const q = typeof params.q === "string" ? params.q : "";
   const client = await serverClient();
-  const [{ data: roles }, { data }, { data: cof }] = await Promise.all([
-    listRoles({ client }),
+  const [roles, { data }, { data: cof }] = await Promise.all([
+    getRoles(),
     listPeople({ client, query: { ...selected, cofound, q: q || undefined, limit: LIMIT, offset: (page - 1) * LIMIT } }),
     listPeople({ client, query: { cofound: true, limit: 1 } }),
   ]);
   const total = data?.total ?? 0;
+  const seo = peopleSeo(params, roles);
   const countLabel = `${total} ${plural(total, "человек", "человека", "человек")}`;
   const groups: FilterGroup[] = [
-    { name: "role", title: "Роль", options: (roles ?? []).map((r) => ({ value: r.slug, label: r.name })) },
+    { name: "role", title: "Роль", options: roles.map((r) => ({ value: r.slug, label: r.name })) },
     { name: "cofound", title: "Ищет сообщников", toggle: true, options: [{ value: "1", label: "Хочет придумать стартап с нуля" }] },
     { name: "looking_for", title: "Оплата", options: Object.entries(TERMS).map(([value, label]) => ({ value, label })) },
     { name: "level", title: "Опыт", options: Object.entries(LEVEL).map(([value, label]) => ({ value, label })) },
@@ -43,10 +46,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
     <Container>
       <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-6">
         <div>
-          <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">Люди</h1>
-          <p className="mt-3 max-w-[44ch] text-lg text-muted-foreground">
-            Разработчики, дизайнеры, аналитики и маркетологи. Напиши, чтобы обсудить идею, позвать в проект или познакомиться.
-          </p>
+          <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">{seo.h1}</h1>
         </div>
         {/* «Сообщники» — не отдельный каталог, а фильтр этого: плашка включает его и ведёт на объяснение. */}
         {(cof?.total ?? 0) > 0 && (
