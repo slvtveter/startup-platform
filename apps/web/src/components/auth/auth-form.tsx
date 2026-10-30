@@ -238,7 +238,6 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           "Получить код на почту"
         )}
       </Button>
-      {mode === "register" && <p className="text-center text-xs text-muted-foreground">Пришлём 6 цифр, чтобы убедиться, что почта твоя</p>}
     </form>
   );
 }

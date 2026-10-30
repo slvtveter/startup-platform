@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { CatalogToolbar, FilterSidebar, type FilterGroup } from "@/components/domain/filter-bar";
-import { Pager, asList, type SearchParams } from "@/components/domain/filters";
+import { Pager, asList, toggleHref, type SearchParams } from "@/components/domain/filters";
 import { Container, EmptyState } from "@/components/domain/page-header";
-import { PeopleTabs } from "@/components/catalog/people-tabs";
 import { PersonCard } from "@/components/domain/person-card";
 import { buttonVariants } from "@/components/ui/button";
 import { listPeople, listRoles } from "@/lib/api";
@@ -42,14 +41,32 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
 
   return (
     <Container>
-      {/* Шапка раздела «Люди» такая же, как на вкладке «Сообщники»: переключатель не прыгает. */}
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-        <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">Люди</h1>
-        <PeopleTabs active="all" cofounders={cof?.total} />
+      <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-6">
+        <div>
+          <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">Люди</h1>
+          <p className="mt-3 max-w-[44ch] text-lg text-muted-foreground">
+            Разработчики, дизайнеры, аналитики и маркетологи. Напиши, чтобы обсудить идею, позвать в проект или познакомиться.
+          </p>
+        </div>
+        {/* «Сообщники» — не отдельный каталог, а фильтр этого: плашка включает его и ведёт на объяснение. */}
+        {(cof?.total ?? 0) > 0 && (
+          <div className="w-full rounded-3xl bg-brand-soft p-5 sm:w-auto sm:min-w-[360px] sm:p-6">
+            <p className="flex items-center gap-2 text-lg font-bold">
+              <span aria-hidden className="size-2 rounded-full bg-brand" />
+              {cofound ? "Показаны только сообщники" : `${cof?.total} ${plural(cof?.total ?? 0, "ищет", "ищут", "ищут")} сообщников`}
+            </p>
+            <p className="mt-1 text-muted-foreground">Хотят придумать стартап с нуля вместе с другими.</p>
+            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+              <Link href={toggleHref("/people", params, "cofound", cofound ? null : "1")} scroll={false} className={buttonVariants({ size: "sm" })}>
+                {cofound ? "Показать всех" : "Показать их"}
+              </Link>
+              <Link href="/people/cofounders" className="text-sm font-semibold text-brand-ink hover:text-brand-hover">
+                Кто такие сообщники
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
-      <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
-        Разработчики, дизайнеры, аналитики и маркетологи. Напиши, чтобы обсудить идею, позвать в проект или познакомиться.
-      </p>
 
       <div className="mt-8 lg:mt-10 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-12">
         <FilterSidebar basePath="/people" params={params} groups={groups} />
@@ -67,7 +84,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
           />
 
           {data && data.items.length > 0 ? (
-            <ul className="mt-4 grid grid-cols-1 gap-2 sm:gap-3 md:grid-cols-2">
+            <ul className="mt-4 grid gap-3">
               {data.items.map((p, i) => (
                 <PersonCard key={p.slug} person={p} as="li" eager={i < 4} />
               ))}

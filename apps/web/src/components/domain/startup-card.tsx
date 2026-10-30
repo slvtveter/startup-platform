@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { TermsBadge } from "@/components/domain/badges";
 import type { StartupCard as StartupCardData } from "@/lib/api";
-import { STAGE, plural } from "@/lib/labels";
+import { STAGE, initials, plural } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 
 /** Причины подбора («Совпадает навыков: 2») — короткими метками внутри карточки. */
@@ -136,6 +136,14 @@ export function StartupCard({
           )}
           <span className="mt-auto pt-5">
             <span className="flex items-center gap-2 border-t border-foreground/[0.08] pt-3.5 text-sm text-muted-foreground">
+              {startup.owner_avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP
+                <img src={startup.owner_avatar_url} alt="" loading="lazy" decoding="async" className="size-7 shrink-0 rounded-full bg-tone-2 object-cover" />
+              ) : (
+                <span aria-hidden className="grid size-7 shrink-0 place-items-center rounded-full bg-brand-soft text-[11px] font-extrabold text-brand-ink">
+                  {initials(startup.owner_name)}
+                </span>
+              )}
               <span className="min-w-0 truncate">
                 <span className="font-semibold text-foreground">{startup.owner_name}</span>
                 {team > 1 ? ` и ещё ${team - 1}` : ""}

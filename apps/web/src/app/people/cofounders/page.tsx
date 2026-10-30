@@ -3,14 +3,11 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
-import { PeopleTabs } from "@/components/catalog/people-tabs";
 import { Container } from "@/components/domain/page-header";
 import { PersonCard } from "@/components/domain/person-card";
 import { StartupCard } from "@/components/domain/startup-card";
-import { CopyStarter } from "@/components/landing/copy-starter";
 import { buttonVariants } from "@/components/ui/button";
-import { asList, QuickChips, type SearchParams } from "@/components/domain/filters";
-import { listPeople, listRoles, listStartups } from "@/lib/api";
+import { listPeople, listStartups } from "@/lib/api";
 import { plural } from "@/lib/labels";
 import { PHOTOS } from "@/lib/photos";
 import { getMe, serverClient } from "@/lib/server-api";
@@ -27,32 +24,19 @@ const STEPS = [
   ["Накидайте идеи", "Созвонитесь на полчаса, обсудите, что неудобно в учёбе, работе или быту. Лучшую мысль опубликуйте как идею, чтобы к ней присоединились другие."],
 ];
 
-const STARTERS = [
-  "Привет! Вижу, ты тоже ищешь, с кем сделать стартап. Мне интересно всё вокруг учёбы и студентов. Созвонимся на 20 минут и накидаем идей?",
-  "Привет! Я дизайнер, ищу разработчика, чтобы вместе придумать небольшой продукт и довести до первых пользователей. Как тебе идея?",
-  "Привет! Есть пара сырых идей, но хочется обсудить их с кем-то, кто думает иначе. Расскажу в двух словах — интересно?",
-];
-
-export default async function CofoundersPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
-  const params = await searchParams;
-  const role = asList(params.role);
+export default async function CofoundersPage() {
   const user = await getMe();
   const client = await serverClient();
-  const [{ data: people }, { data: ideas }, { data: roles }] = await Promise.all([
-    listPeople({ client, query: { cofound: true, role, limit: 24 } }),
+  const [{ data: people }, { data: ideas }] = await Promise.all([
+    listPeople({ client, query: { cofound: true, limit: 2 } }),
     listStartups({ client, query: { stage: ["idea"], limit: 3 } }),
-    listRoles({ client }),
   ]);
   const total = people?.total ?? 0;
   const join = user ? "/me/profile" : "/register?next=/me/profile";
 
   return (
     <>
-      <div className="mx-auto w-full max-w-[1360px] px-4 pt-2 sm:px-6 lg:px-10">
-        <div className="mb-6 flex flex-wrap items-center gap-x-6 gap-y-3 pt-8">
-          <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">Люди</h1>
-          <PeopleTabs active="cofounders" cofounders={total} />
-        </div>
+      <div className="mx-auto w-full max-w-[1360px] px-4 pt-6 sm:px-6 sm:pt-8 lg:px-10">
         <section className="relative isolate grid min-h-[480px] items-end overflow-hidden rounded-[28px] px-5 py-8 text-white sm:rounded-[36px] sm:p-12">
           <Image
             src={PHOTOS.whiteboardDuo}
@@ -67,10 +51,10 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
           <div aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgb(10_18_34/0.85),rgb(10_18_34/0.45)_60%,rgb(10_18_34/0.15))] max-md:bg-[linear-gradient(180deg,rgb(10_18_34/0.2),rgb(10_18_34/0.85)_55%)]" />
           <div className="max-w-[640px]">
             <p className="text-sm font-bold tracking-wide text-white/80 uppercase">Сообщники</p>
-            <h2 className="mt-3 text-[36px] sm:text-[48px] lg:text-[64px] leading-[1.02]">Нет идеи? Найди тех, с кем её придумать</h2>
+            <h1 className="mt-3 text-[36px] sm:text-[48px] lg:text-[64px] leading-[1.02]">Нет идеи? Найди тех, с кем её придумать</h1>
             <p className="mt-5 max-w-[48ch] text-base sm:text-lg text-white/90">
-              Здесь собираются разработчики, дизайнеры и маркетологи, которые хотят своё, но не хотят делать в одиночку. Познакомься, накидайте
-              идеи и запустите лучшую вместе.
+              Сообщники — разработчики, дизайнеры и маркетологи, которые хотят запустить свой проект, но не в одиночку. Познакомьтесь,
+              обсудите идеи и возьмитесь за лучшую вместе.
             </p>
             <div className="mt-8 flex flex-wrap gap-2.5">
               <Link href={join} className={buttonVariants({ size: "lg" })}>
@@ -85,37 +69,7 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
       </div>
 
       <Container className="pt-16">
-
-        <section id="people" aria-labelledby="people-h" className="scroll-mt-24 pt-4">
-          <div className="mb-8 flex flex-wrap items-end gap-x-10 gap-y-3">
-            <h2 id="people-h" className="max-w-[16ch] text-[32px] lg:text-[48px] leading-[1.04]">
-              Ищут сообщников прямо сейчас
-            </h2>
-            <p className="max-w-[44ch] text-muted-foreground sm:ml-auto">
-              {total > 0
-                ? `${total} ${plural(total, "человек хочет", "человека хотят", "человек хотят")} придумать стартап с нуля. Напиши тому, чьи навыки дополняют твои.`
-                : "Пока здесь никого нет. Включи в профиле «Ищу сообщников», и тебя увидят первым."}
-            </p>
-          </div>
-          <div className="mb-5">
-            <QuickChips basePath="/people/cofounders" params={params} name="role" allLabel="Все роли" options={(roles ?? []).map((r) => ({ value: r.slug, label: r.name }))} />
-          </div>
-          {people && people.items.length > 0 && (
-            <ul className="grid grid-cols-1 gap-2 sm:gap-3 md:grid-cols-2 xl:grid-cols-3">
-              {people.items.map((p) => (
-                <PersonCard key={p.slug} person={p} as="li" />
-              ))}
-            </ul>
-          )}
-          {total > (people?.items.length ?? 0) && (
-            <Link href="/people?cofound=1" className={buttonVariants({ variant: "outline", className: "mt-6" })}>
-              Все, кто ищет сообщников
-              <ArrowRight aria-hidden />
-            </Link>
-          )}
-        </section>
-
-        <section aria-label="Как это работает" className="pt-16">
+        <section aria-label="Как это работает" className="pt-4">
           <ol className="grid gap-3 md:grid-cols-3">
           {STEPS.map(([title, text], i) => (
             <li key={title} className="rounded-[28px] bg-tone p-6">
@@ -127,24 +81,32 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
           </ol>
         </section>
 
-        <section aria-labelledby="starters-h" className="pt-20">
-          <div className="grid gap-8 rounded-[36px] bg-brand-soft p-6 sm:p-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+        <section id="people" aria-labelledby="people-h" className="scroll-mt-24 pt-20">
+          <div className="mb-8 flex flex-wrap items-end gap-x-10 gap-y-3">
             <div>
-              <h2 id="starters-h" className="text-[28px] lg:text-[36px] leading-[1.05]">
-                Не знаешь, с чего начать разговор?
+              <h2 id="people-h" className="max-w-[16ch] text-[32px] lg:text-[48px] leading-[1.04]">
+                Ищут сообщников прямо сейчас
               </h2>
-              <p className="mt-4 max-w-[40ch] text-muted-foreground">
-                Возьми готовое первое сообщение и поправь под себя. На короткое сообщение отвечают охотнее, чем на длинное письмо.
+              <p className="mt-4 max-w-[52ch] text-lg text-muted-foreground">
+                {total > 0
+                  ? `${total} ${plural(total, "человек хочет", "человека хотят", "человек хотят")} придумать стартап с нуля. Напиши тому, чьи навыки дополняют твои.`
+                  : "Пока здесь никого нет. Включи в профиле «Ищу сообщников», и тебя увидят первым."}
               </p>
             </div>
-            <ul className="grid gap-2.5">
-              {STARTERS.map((t) => (
-                <li key={t}>
-                  <CopyStarter text={t} />
-                </li>
+            {total > 0 && (
+              <Link href="/people?cofound=1" className="inline-flex items-center gap-1.5 font-bold text-brand-ink hover:underline sm:ml-auto">
+                Посмотреть всех
+                <ArrowRight aria-hidden className="size-4" />
+              </Link>
+            )}
+          </div>
+          {people && people.items.length > 0 && (
+            <ul className="grid gap-3">
+              {people.items.map((p) => (
+                <PersonCard key={p.slug} person={p} as="li" />
               ))}
             </ul>
-          </div>
+          )}
         </section>
 
         {ideas && ideas.items.length > 0 && (

@@ -1,20 +1,22 @@
 import { Check } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 
+import { AuthFrame } from "@/components/auth/auth-frame";
 import { FACES, PHOTOS } from "@/lib/photos";
 
 /**
- * Рамка раздела входа (app/(auth)/layout.tsx): слева место под карточку, справа фото с репликой —
+ * Рамка раздела входа (app/(auth)/layout.tsx): слева карточка (AuthFrame), справа фото с репликой —
  * тот же «разговор», что на главной. Живёт в layout, поэтому при переходе «Вход ⇄ Регистрация»
- * фото не перерисовывается и ничего не прыгает: меняется только карточка.
+ * ничего не перерисовывается: карточка плавно меняет высоту, меняется только форма внутри.
  */
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto grid w-full max-w-[1360px] gap-3 px-4 pt-2 pb-12 sm:px-6 lg:min-h-[calc(100svh-84px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:px-10">
       {/* Карточка прижата к верху, а не по центру: разная высота входа и регистрации не двигает вкладки. */}
       <div className="flex items-start justify-center rounded-[28px] bg-tone px-4 py-10 sm:rounded-[36px] sm:py-16 lg:pt-[max(64px,10vh)]">
-        <div className="w-full max-w-[420px]">{children}</div>
+        <div className="w-full max-w-[420px]">
+          <AuthFrame>{children}</AuthFrame>
+        </div>
       </div>
       <div className="relative isolate hidden overflow-hidden rounded-[36px] p-10 text-white lg:flex lg:flex-col lg:justify-end">
         <Image src={PHOTOS.videoCall} alt="" fill preload placeholder="blur" sizes="50vw" className="-z-20 object-cover" />
@@ -28,7 +30,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
         </div>
         <p className="mt-8 max-w-[18ch] text-[36px] leading-[1.02] font-extrabold tracking-[-0.04em]">Здесь стартапы начинаются с разговора</p>
         <ul className="mt-5 grid gap-2 text-base font-semibold text-white/90">
-          {["Бесплатно и без резюме", "Профиль — за пару минут", "Сразу видно, кто ищет таких, как ты"].map((t) => (
+          {["Бесплатно и без резюме", "Профиль за пару минут"].map((t) => (
             <li key={t} className="flex items-center gap-2.5">
               <span aria-hidden className="grid size-5 place-items-center rounded-full bg-white/20">
                 <Check className="size-3.5" strokeWidth={3} />
@@ -42,56 +44,14 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Карточка формы внутри AuthShell. */
-export function AuthCard({
-  title,
-  subtitle,
-  tab,
-  next,
-  children,
-}: {
-  title: string;
-  subtitle?: string;
-  /** Переключатель «Вход / Регистрация» над заголовком. */
-  tab?: "login" | "register";
-  /** Куда вернуть после входа: переносится между вкладками. */
-  next?: string;
-  children: React.ReactNode;
-}) {
+/** Содержимое карточки входа: заголовок, подзаголовок и форма. Сама карточка с вкладками — AuthFrame в layout. */
+export function AuthCard({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <div className="w-full rounded-[28px] bg-card p-6 shadow-[0_24px_60px_-30px_rgb(15_27_45/0.25)] sm:p-9">
-      {tab && <AuthTabs active={tab} next={next} />}
+    <>
       <h1 className="text-[32px] leading-[1.05] sm:text-[36px]">{title}</h1>
       {subtitle && <p className="mt-2.5 text-muted-foreground">{subtitle}</p>}
       <div className="mt-7">{children}</div>
-    </div>
-  );
-}
-
-function AuthTabs({ active, next }: { active: "login" | "register"; next?: string }) {
-  const q = next ? `?next=${encodeURIComponent(next)}` : "";
-  const tabs = [
-    { key: "login", href: `/login${q}`, label: "Вход" },
-    { key: "register", href: `/register${q}`, label: "Регистрация" },
-  ] as const;
-  return (
-    <nav aria-label="Вход или регистрация" className="mb-7 grid grid-cols-2 gap-1 rounded-full bg-tone p-1">
-      {tabs.map((t) => (
-        <Link
-          key={t.key}
-          href={t.href}
-          replace
-          aria-current={t.key === active ? "page" : undefined}
-          className={
-            t.key === active
-              ? "rounded-full bg-white py-2.5 text-center text-sm font-bold shadow-[0_1px_3px_rgb(15_27_45/0.12)]"
-              : "rounded-full py-2.5 text-center text-sm font-semibold text-muted-foreground transition-colors hover:bg-tone-2 hover:text-foreground"
-          }
-        >
-          {t.label}
-        </Link>
-      ))}
-    </nav>
+    </>
   );
 }
 

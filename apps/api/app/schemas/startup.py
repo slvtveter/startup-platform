@@ -128,6 +128,7 @@ class StartupCard(BaseModel):
     status: StartupStatus
     published_at: datetime | None
     owner_name: str
+    owner_avatar_url: str | None = None
     open_roles: list[RoleBrief]
     team_size: int = 1
     is_demo: bool = False

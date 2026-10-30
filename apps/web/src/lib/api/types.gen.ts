@@ -976,6 +976,10 @@ export type MyStartupOut = {
      */
     owner_name: string;
     /**
+     * Owner Avatar Url
+     */
+    owner_avatar_url?: string | null;
+    /**
      * Open Roles
      */
     open_roles: Array<RoleBrief>;
@@ -1782,6 +1786,10 @@ export type StartupCard = {
      */
     owner_name: string;
     /**
+     * Owner Avatar Url
+     */
+    owner_avatar_url?: string | null;
+    /**
      * Open Roles
      */
     open_roles: Array<RoleBrief>;
@@ -1834,6 +1842,10 @@ export type StartupDetail = {
      * Owner Name
      */
     owner_name: string;
+    /**
+     * Owner Avatar Url
+     */
+    owner_avatar_url?: string | null;
     /**
      * Open Roles
      */

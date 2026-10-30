@@ -31,13 +31,13 @@ async function Landing() {
   const [{ data: stats }, { data: ideas }, { data: cofounders }, { data: people }, { data: startups }] = await Promise.all([
     publicStats({ client }),
     listStartups({ client, query: { stage: ["idea"], limit: 3 } }),
-    listPeople({ client, query: { looking_for: ["cofound"], limit: 4 } }),
+    listPeople({ client, query: { looking_for: ["cofound"], limit: 2 } }),
     listPeople({ client, query: { limit: 8 } }),
     listStartups({ client, query: { stage: ["prototype", "mvp", "launched"], limit: 3 } }),
   ]);
   // В «Людях» не повторяем тех, кто уже показан в «Сообщниках».
   const shown = new Set(cofounders?.items.map((p) => p.slug));
-  const others = (people?.items ?? []).filter((p) => !shown.has(p.slug)).slice(0, 4);
+  const others = (people?.items ?? []).filter((p) => !shown.has(p.slug)).slice(0, 3);
 
   return (
     <>
@@ -105,8 +105,8 @@ async function Landing() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2.5 sm:ml-auto">
-                <Link href="/people/cofounders" className={buttonVariants({ size: "lg" })}>
-                  Все сообщники
+                <Link href="/people?cofound=1" className={buttonVariants({ size: "lg" })}>
+                  Посмотреть всех
                   <ArrowRight aria-hidden />
                 </Link>
                 <Link href="/register?next=/me/profile" className={buttonVariants({ variant: "light", size: "lg" })}>
@@ -114,7 +114,7 @@ async function Landing() {
                 </Link>
               </div>
             </div>
-            <Reveal className="mt-8 grid grid-cols-1 gap-2 sm:gap-3 md:grid-cols-2">
+            <Reveal className="mt-8 grid gap-3">
               {cofounders.items.map((p, i) => (
                 <div key={p.slug} className="reveal-item" style={delay(i * 50)}>
                   <PersonCard person={p} surface="white" />
@@ -132,7 +132,7 @@ async function Landing() {
           lead="Разработчики, дизайнеры, маркетологи и аналитики в начале пути."
           more={{ href: "/people", label: "Все люди" }}
         >
-          <Reveal className="grid grid-cols-1 gap-2 sm:gap-3 md:grid-cols-2">
+          <Reveal className="grid gap-3">
             {others.map((p, i) => (
               <div key={p.slug} className="reveal-item" style={delay(i * 50)}>
                 <PersonCard person={p} />
