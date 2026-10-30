@@ -126,7 +126,7 @@ export function ApplicationCard({ app, perspective }: { app: ApplicationOut; per
       {app.decision_note && <p className="mt-3 text-sm text-muted-foreground">Комментарий: {app.decision_note}</p>}
 
       {app.contacts && (
-        <div className="mt-4 grid gap-4 rounded-xl bg-success-soft p-4 text-sm sm:grid-cols-3">
+        <div className="ym-hide-content mt-4 grid gap-4 rounded-xl bg-success-soft p-4 text-sm sm:grid-cols-3">
           <div>
             <div className="text-success-ink">{perspective === "candidate" ? "Основатель" : "Участник"}</div>
             <div className="font-bold">{app.contacts.display_name}</div>

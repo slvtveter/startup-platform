@@ -24,7 +24,7 @@ export default async function SettingsPage() {
     listSessions({ client }),
   ]);
   return (
-    <Container className="max-w-5xl">
+    <Container className="ym-hide-content max-w-5xl">
       <PageHeader title="Настройки" description="Видимость профиля, письма, вход в аккаунт и устройства." />
       <div className="mt-8 grid gap-8 lg:grid-cols-[200px_1fr]">
         {/* На десктопе — оглавление сбоку, на телефоне — ряд ссылок над разделами. */}

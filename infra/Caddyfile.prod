@@ -8,10 +8,12 @@
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
-		X-Frame-Options "DENY"
-		# Только свои ресурсы (AGENTS.md, правило 7): внешние скрипты, шрифты и трекеры браузер не загрузит.
+		# Только свои ресурсы (AGENTS.md, правило 7) плюс Яндекс Метрика (KAN-132): она грузится
+		# лишь после согласия на cookie. Адреса — из справки Метрики про CSP.
 		# 'unsafe-inline' для скриптов нужен инлайн-данным гидрации Next; eval запрещён.
-		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' wss://{$SITE_DOMAIN}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+		# frame-ancestors пускает в iframe только плеер Вебвизора, поэтому X-Frame-Options DENY убран:
+		# он запретил бы и его, а остальным сайтам вставлять нас по-прежнему нельзя.
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://mc.yandex.ru https://mc.yandex.com https://yastatic.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://mc.yandex.ru https://mc.yandex.com; font-src 'self'; connect-src 'self' wss://{$SITE_DOMAIN} https://mc.yandex.ru https://mc.yandex.com wss://mc.yandex.ru wss://mc.yandex.com; frame-src blob: https://mc.yandex.ru https://mc.yandex.com; child-src blob: https://mc.yandex.ru https://mc.yandex.com; frame-ancestors https://metrika.yandex.ru https://metrika.yandex.by https://metrika.yandex.kz https://metrica.yandex.com https://metrica.yandex.com.tr https://webvisor.com https://*.webvisor.com; base-uri 'self'; form-action 'self'; object-src 'none'"
 		Permissions-Policy "camera=(), microphone=(), geolocation=()"
 		-Server
 	}

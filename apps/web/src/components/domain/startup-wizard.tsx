@@ -22,6 +22,7 @@ import { errorMessage } from "@/lib/errors";
 import { MAX_SLOTS, STAGE, TERMS, plural } from "@/lib/labels";
 import { generateNames } from "@/lib/name-generator";
 import { cn } from "@/lib/utils";
+import { goal } from "@/lib/metrika";
 
 const STAGE_HINT: Record<string, string> = {
   idea: "Есть только идея и желание",
@@ -164,6 +165,7 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
       return toast.error(errorMessage(created.error));
     }
     const s = created.data!;
+    goal("startup_created");
     for (const [role, slots] of Object.entries(picked)) {
       const t = templates[role];
       const name = roles.find((r) => r.slug === role)?.name ?? role;
@@ -187,6 +189,7 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
     if (publish) {
       const { error } = await publishStartup({ path: { startup_id: s.id } });
       if (!error) {
+        goal("startup_published");
         toast.success("Стартап опубликован, на роли уже можно откликаться");
         router.push(`/startups/${s.slug}`);
         router.refresh();

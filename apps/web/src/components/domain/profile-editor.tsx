@@ -27,6 +27,7 @@ import {
 import { errorMessage } from "@/lib/errors";
 import { AVAILABILITY, LEVEL, LINK_KIND, TERMS, TERMS_HINT } from "@/lib/labels";
 import { cn } from "@/lib/utils";
+import { goal as reachGoal } from "@/lib/metrika";
 
 const STEPS = ["Кто ты", "Опыт и работы", "Что ищешь"];
 
@@ -197,6 +198,7 @@ export function ProfileEditor({
     if (!(await save())) return;
     const { error } = await publishMyProfile({ body: { published } });
     if (error) return toast.error(errorMessage(error));
+    if (published) reachGoal("profile_published");
     toast.success(published ? "Профиль опубликован" : "Профиль скрыт из каталога");
     if (published && after) router.push(after.href);
     else router.refresh();

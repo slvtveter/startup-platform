@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { login, register, verifyCode } from "@/lib/api";
 import { errorMessage, fieldErrors } from "@/lib/errors";
+import { goal } from "@/lib/metrika";
 
 export function safeNext(next: string | null, fallback: string) {
   // Только относительные пути: защищаемся от открытого редиректа.
@@ -123,6 +124,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   async function confirm(code: string) {
     const { data, error: err } = await verifyCode({ body: { email: email.trim(), code } });
     if (err || !data) return errorMessage(err);
+    if (data.created) goal("signup", { method: "email" });
     go(safeNext(next, data.created ? "/welcome" : "/"));
     return null;
   }

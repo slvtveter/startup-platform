@@ -14,8 +14,8 @@ export default defineConfig({
   reporter: process.env.CI ? [["github"], ["list"]] : "list",
   use: {
     baseURL,
-    // Плашка о cookie (KAN-130) уже закрыта, чтобы не перекрывать кнопки и снапшоты. Её проверяет cookie-notice.spec.
-    storageState: { cookies: [], origins: [{ origin: new URL(baseURL).origin, localStorage: [{ name: "cookie-notice", value: "1" }] }] },
+    // Плашка о cookie (KAN-130, KAN-132) уже закрыта, чтобы не перекрывать кнопки и снапшоты. Её проверяет cookie-notice.spec.
+    storageState: { cookies: [], origins: [{ origin: new URL(baseURL).origin, localStorage: [{ name: "cookie-consent", value: "necessary" }] }] },
     // Системный Chrome: не нужно скачивать браузеры Playwright.
     channel: "chrome",
     locale: "ru-RU",

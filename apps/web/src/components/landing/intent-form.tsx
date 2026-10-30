@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import type { Option } from "@/components/domain/filters";
 import { trackClientEvent } from "@/lib/api";
+import { goal } from "@/lib/metrika";
 
 /** Что человек хочет сделать → куда его отправить. Роль подставляется в фильтр, где он есть. */
 const INTENTS = [
@@ -30,7 +31,9 @@ export function IntentForm({ roles }: { roles: Option[] }) {
       onSubmit={(e) => {
         e.preventDefault();
         // Развилка гипотезы H2: «собрать команду» — путь основателя, остальное — путь участника.
-        void trackClientEvent({ body: { name: "landing_path_selected", path: intent === "team" ? "founder" : "seeker" } }).catch(() => {});
+        const path = intent === "team" ? "founder" : "seeker";
+        void trackClientEvent({ body: { name: "landing_path_selected", path } }).catch(() => {});
+        goal("landing_path_selected", { path });
         router.push(href);
       }}
       className="grid max-w-[680px] gap-1 rounded-[24px] bg-white p-2 text-foreground shadow-[0_24px_60px_-20px_rgb(0_0_0/0.45)] sm:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_auto]"

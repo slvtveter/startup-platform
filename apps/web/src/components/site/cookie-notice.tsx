@@ -4,33 +4,16 @@ import Link from "next/link";
 import { useEffect, useRef, useSyncExternalStore } from "react";
 
 import { Button } from "@/components/ui/button";
-
-const KEY = "cookie-notice";
+import { getConsent, setConsent, subscribeConsent } from "@/lib/metrika";
 
 /**
- * KAN-130: у нас одна необходимая cookie (сессия), поэтому согласие не нужно, только сообщение.
- * Флаг в localStorage; если хранилище недоступно, плашка просто покажется снова.
+ * KAN-130, KAN-132: сессионная cookie необходима, а cookie Яндекс Метрики — нет,
+ * поэтому спрашиваем согласие. Пока посетитель не нажал «Принять», счётчик не загружается.
+ * Выбор хранится в localStorage; поменять его можно на странице /cookies.
  */
-const listeners = new Set<() => void>();
-let dismissed = false;
-
-function subscribe(cb: () => void) {
-  listeners.add(cb);
-  return () => listeners.delete(cb);
-}
-
-function isDismissed() {
-  if (dismissed) return true;
-  try {
-    return localStorage.getItem(KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
 export function CookieNotice() {
   // На сервере плашку не рисуем: о localStorage знает только браузер.
-  const open = !useSyncExternalStore(subscribe, isDismissed, () => true);
+  const open = useSyncExternalStore(subscribeConsent, getConsent, () => "necessary" as const) === null;
   const ref = useRef<HTMLElement>(null);
 
   // Пока плашка на экране, закреплённые снизу панели (кнопка «Выбрать место» на телефоне)
@@ -49,31 +32,29 @@ export function CookieNotice() {
     };
   }, [open]);
 
-  function dismiss() {
-    dismissed = true;
-    try {
-      localStorage.setItem(KEY, "1");
-    } catch {}
-    listeners.forEach((cb) => cb());
-  }
-
   if (!open) return null;
   return (
     <section
       ref={ref}
       role="region"
       aria-label="Cookie"
-      className="cookie-in fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-card p-3 pl-4 text-sm shadow-[0_0_0_1px_var(--border),0_20px_50px_-12px_rgb(15_27_45/0.25)]"
+      className="cookie-in fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-md flex-wrap items-center gap-3 rounded-2xl bg-card p-3 pl-4 text-sm shadow-[0_0_0_1px_var(--border),0_20px_50px_-12px_rgb(15_27_45/0.25)]"
     >
-      <p className="flex-1 text-muted-foreground">
-        Мы используем только необходимые cookie, чтобы вы могли войти в аккаунт.{" "}
+      <p className="min-w-56 flex-1 text-muted-foreground">
+        Cookie нужны для входа в аккаунт, а с вашего согласия ещё и для Яндекс Метрики: она помогает понять, что на
+        сайте неудобно.{" "}
         <Link href="/cookies" className="font-semibold text-foreground underline">
           Подробнее
         </Link>
       </p>
-      <Button size="sm" variant="ink" onClick={dismiss}>
-        Понятно
-      </Button>
+      <div className="flex gap-2">
+        <Button size="sm" variant="ghost" onClick={() => setConsent("necessary")}>
+          Только нужные
+        </Button>
+        <Button size="sm" variant="ink" onClick={() => setConsent("all")}>
+          Принять
+        </Button>
+      </div>
     </section>
   );
 }

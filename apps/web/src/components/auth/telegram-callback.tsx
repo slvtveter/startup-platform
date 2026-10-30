@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import { telegramLogin, type TelegramAuthIn } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
+import { goal } from "@/lib/metrika";
 
 /** oauth.telegram.org возвращает данные во фрагменте #tgAuthResult=<base64 JSON>; API проверяет подпись. */
 export function TelegramCallback() {
@@ -25,6 +26,7 @@ export function TelegramCallback() {
     }
     void telegramLogin({ body: data }).then(({ data: res, error: err }) => {
       if (err || !res) return setError(errorMessage(err));
+      if (res.created) goal("signup", { method: "telegram" });
       router.replace(res.created ? "/welcome" : "/");
       router.refresh();
     });
