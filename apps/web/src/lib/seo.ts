@@ -30,6 +30,7 @@ function lower(s: string) {
   return /^[А-ЯЁ][а-яё]/.test(s) ? s[0].toLowerCase() + s.slice(1) : s;
 }
 
+export const roleLower = lower;
 export const roleAcc = (name: string) => lower(inflect(name, "acc"));
 export const rolePlural = (name: string) => inflect(name, "plural");
 
