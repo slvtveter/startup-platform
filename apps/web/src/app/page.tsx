@@ -169,7 +169,7 @@ function Hero({ startup, faces }: { startup?: Startup; faces: Person[] }) {
           Получи первый опыт в настоящем <span className="text-brand">стартапе</span>
         </h1>
         <p className="mt-6 max-w-[44ch] text-lg text-muted-foreground sm:text-xl">
-          Стартапы ищут разработчиков, дизайнеров и маркетологов на первые роли. Без резюме и стажа.
+          Можно без опыта и без резюме.
         </p>
         <div className="mt-8 grid gap-2.5 sm:mt-9 sm:flex sm:flex-wrap">
           <PathLink path="seeker" href="/startups" className={buttonVariants({ size: "lg" })}>
@@ -328,7 +328,7 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
           <span>
             <span className="text-sm font-bold text-white/70">Хочу в команду</span>
             <h3 className="mt-3 max-w-[14ch] text-[32px] leading-[1.02] font-extrabold tracking-[-0.04em] sm:text-[40px]">Залети в стартап и набери опыт</h3>
-            <span className="mt-4 block max-w-[34ch] text-lg text-white/80">Настоящие задачи, кейс в портфолио и команда, с которой можно идти дальше.</span>
+            <span className="mt-4 block max-w-[34ch] text-lg text-white/80">Настоящие задачи и кейс в портфолио.</span>
           </span>
           <span aria-hidden className="grid gap-1.5 rounded-2xl bg-white p-2 text-foreground max-sm:hidden shadow-[0_24px_50px_-20px_rgb(0_0_0/0.5)] transition-transform duration-500 group-hover:-translate-y-1">
             {startups.map((s) => (
@@ -399,7 +399,6 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
           <span>
             <span className="text-sm font-bold text-white/60">Нужны люди</span>
             <h3 className="mt-3 max-w-[16ch] text-[32px] leading-[1.02] font-extrabold tracking-[-0.04em] text-white sm:text-[40px]">Найди разработчика или дизайнера</h3>
-            <span className="mt-4 block max-w-[34ch] text-lg text-white/70">Фильтр по роли, навыкам и опыту.</span>
           </span>
           <span aria-hidden className="grid gap-1.5 max-sm:hidden">
             {people.map((p) => (
@@ -439,7 +438,7 @@ function Cofounders({ people, total }: { people: Person[]; total: number }) {
               Нет идеи? Придумайте её вместе
             </h2>
             <p className="mt-4 max-w-[46ch] text-lg text-muted-foreground">
-              {total} {plural(total, "человек ищет", "человека ищут", "человек ищут")}, с кем придумать проект с нуля. Напиши тому, чьи навыки дополняют твои.
+              {total} {plural(total, "человек ищет", "человека ищут", "человек ищут")}, с кем придумать проект с нуля.
             </p>
           </div>
           <div className="flex flex-wrap gap-2.5">
@@ -488,9 +487,9 @@ function Cofounders({ people, total }: { people: Person[]; total: number }) {
 /* ───────────── Три шага ───────────── */
 
 const STEPS = [
-  { icon: UserRound, title: "Создай профиль", text: "Роль, навыки и сколько часов в неделю готов уделять. Резюме не нужно." },
-  { icon: Search, title: "Выбери стартап", text: "Фильтр по роли, стадии проекта и оплате." },
-  { icon: MessageCircle, title: "Откликнись и созвонись", text: "Пара фраз о себе, а дальше обсуждаешь задачи с основателем." },
+  { icon: UserRound, title: "Создай профиль", text: "Роль, навыки и свободные часы в неделю." },
+  { icon: Search, title: "Выбери стартап", text: "Под твою роль, с оплатой или без." },
+  { icon: MessageCircle, title: "Откликнись и созвонись", text: "Обсуди задачи с основателем." },
 ];
 
 function Steps() {
@@ -579,7 +578,7 @@ function OwnIdeaCard({ className, wide }: { className?: string; wide?: boolean }
 }
 
 const FAQ = [
-  ["Нужен ли опыт, чтобы попасть в стартап?", "Нет. Многие роли открыты для студентов и тех, кто после курсов. Важнее, что ты умеешь и сколько времени готов уделять."],
+  ["Нужен ли опыт, чтобы попасть в стартап?", "Нет. Важнее, что ты умеешь и сколько времени готов уделять."],
   ["Что я получу, кроме опыта?", "Задачи из настоящего продукта, кейс в портфолио и людей, с которыми можно делать следующие проекты."],
   ["Мне будут платить?", "Зависит от проекта. В каждой роли написано: без оплаты, с оплатой или договоритесь."],
   ["Это бесплатно?", "Да. Профиль, отклики и сообщения бесплатны."],
@@ -621,7 +620,7 @@ function FinalCta() {
           <h2 id="final-h" className="max-w-[14ch] text-[40px] leading-[1.02] sm:text-[56px] lg:text-[64px]">
             Найди свой первый стартап
           </h2>
-          <p className="mt-4 max-w-[40ch] text-lg text-white/85">Роли для студентов и начинающих: от прототипов до продуктов с пользователями.</p>
+          <p className="mt-4 max-w-[40ch] text-lg text-white/85">От прототипов до продуктов с пользователями.</p>
         </div>
         <div className="flex flex-wrap gap-2.5 lg:justify-end">
           <PathLink path="seeker" href="/startups" className={buttonVariants({ variant: "light", size: "lg" })}>
