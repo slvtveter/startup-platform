@@ -42,9 +42,12 @@ flowchart LR
 | Роуты и схемы | `apps/api/app/routers`, `apps/api/app/schemas` |
 | События воронки | `app.services.events.track()`, каталог в `docs/events.md` |
 | Метрики и гипотезы | `/admin`: воронка, H1–H8 (`services/hypotheses.py`), когорты D7/D30 (`services/retention.py`), CSV |
+| Каталоги и фильтры | `services/startups.py::list_public` и `facets` (числа у фильтров одним запросом, `GET /api/startups/facets`), `services/profiles.py::list_people`; на фронте `components/catalog`, `components/domain/filter-bar.tsx` |
 | Поиск | `app/db/search.py`: вычисляемые `tsvector` (russian) у стартапов, ролей и профилей, GIN-индексы, `websearch_to_tsquery` + `ts_rank`; запрос короче 3 символов — префикс названия |
 | Подбор v0 | `services/startups.py::recommended`, показы пишутся в `recommendation_shown` |
-| Дизайн-система | `docs/ux/design-system.md`, токены в `apps/web/src/app/globals.css`, компоненты мест `components/domain/seats.tsx` |
+| Дизайн-система | `docs/ux/design-system.md`, токены в `apps/web/src/app/globals.css`, карточки `components/domain/startup-card.tsx` и `person-card.tsx` |
+| Аналитика | Яндекс Метрика только с согласием на cookie (`components/site/metrika.tsx`, `lib/metrika.ts`), цели и настройка — `docs/analytics.md` |
+| Разборы конкурентов | `docs/research/` (главная, карточки, фильтры, SEO — с замерами) |
 | UX-исследование | `docs/ux/research.md` (JTBD, CJM, гипотезы), доска Miro «Startup Platform: макеты MVP» |
 | Тесты API | `apps/api/tests` (отдельная БД `app_test`) |
 | E2E, скриншоты, axe | `apps/web/e2e` (`visual.spec.ts` — страницы на 1440 и 375 px) |
@@ -62,7 +65,7 @@ make test           # тесты API
 cd apps/web && npx playwright test   # E2E (для локального прогона поднимите AUTH_RATE_LIMIT в infra/.env)
 ```
 
-Дальше: ветка → изменения → `make lint` → PR. CI должен быть зелёным, миграции смотрит хранитель схемы.
+Дальше: ветка → изменения → `make lint` → PR. CI должен быть зелёным; merge в `main` выкатывает прод (правила — `AGENTS.md`).
 
 ### ML-специалисту (подбор, KAN-90)
 - Сырые данные — таблица `events`: `recommendation_shown`, `startup_viewed`, `application_sent`, `application_answered`. Схема props — в `docs/events.md`.
@@ -71,6 +74,7 @@ cd apps/web && npx playwright test   # E2E (для локального прог
 
 ### SEO-разработчику
 - Метаданные страниц — `generateMetadata` в `apps/web/src/app/**/page.tsx`. Sitemap и robots — `src/app/sitemap.ts`, `robots.ts`.
+- Посадочные каталогов (`?role=<slug>`, `?stage=idea`) и правила canonical — `src/lib/seo.ts`. Гайды — `src/lib/guides.ts`, `/guides`, для нейросетей — `/llms.txt`.
 - OG-картинки — `opengraph-image.tsx` у стартапа и профиля, общий рендер в `src/lib/og.tsx`.
 - Замеры Lighthouse и как их повторить — `docs/seo.md`. Адреса стартапов и профилей неизменяемы по дизайну.
 

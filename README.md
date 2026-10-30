@@ -57,4 +57,8 @@ cd apps/web && npx playwright test # E2E (нужны make dev и make seed)
 - [docs/architecture.md](docs/architecture.md) — как устроена система
 - [docs/deploy.md](docs/deploy.md) — деплой
 - [docs/security.md](docs/security.md) — безопасность
+- [docs/seo.md](docs/seo.md) — SEO: посадочные, canonical, sitemap, Вебмастер
+- [docs/events.md](docs/events.md) и [docs/analytics.md](docs/analytics.md) — события воронки и Яндекс Метрика
+- [docs/ux/design-system.md](docs/ux/design-system.md) — дизайн-система
+- [docs/research/](docs/research/) — разборы конкурентов
 - [AGENTS.md](AGENTS.md) — правила работы с репозиторием
