@@ -9,6 +9,7 @@ import { StartupCard } from "@/components/domain/startup-card";
 import { buttonVariants } from "@/components/ui/button";
 import { listPeople, listStartups } from "@/lib/api";
 import { plural } from "@/lib/labels";
+import { pinned } from "@/lib/pinned";
 import { PHOTOS } from "@/lib/photos";
 import { getMe, serverClient } from "@/lib/server-api";
 
@@ -29,10 +30,12 @@ export default async function CofoundersPage() {
   const user = await getMe();
   const client = await serverClient();
   const [{ data: people }, { data: ideas }] = await Promise.all([
-    listPeople({ client, query: { cofound: true, limit: 2 } }),
-    listStartups({ client, query: { stage: ["idea"], limit: 3 } }),
+    listPeople({ client, query: { cofound: true, limit: 100 } }),
+    listStartups({ client, query: { stage: ["idea"], limit: 100 } }),
   ]);
   const total = people?.total ?? 0;
+  const shown = pinned(people?.items ?? []).slice(0, 2);
+  const shownIdeas = pinned(ideas?.items ?? []).slice(0, 3);
   const join = user ? "/me/profile" : "/register?next=/me/profile";
 
   return (
@@ -101,16 +104,16 @@ export default async function CofoundersPage() {
               </Link>
             )}
           </div>
-          {people && people.items.length > 0 && (
+          {shown.length > 0 && (
             <ul className="grid gap-3">
-              {people.items.map((p) => (
+              {shown.map((p) => (
                 <PersonCard key={p.slug} person={p} as="li" />
               ))}
             </ul>
           )}
         </section>
 
-        {ideas && ideas.items.length > 0 && (
+        {shownIdeas.length > 0 && (
           <section aria-labelledby="ideas-h" className="pt-20">
             <div className="mb-8 flex flex-wrap items-end gap-x-10 gap-y-3">
               <h2 id="ideas-h" className="max-w-[18ch] text-[32px] lg:text-[48px] leading-[1.04]">
@@ -122,7 +125,7 @@ export default async function CofoundersPage() {
               </Link>
             </div>
             <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {ideas.items.map((s) => (
+              {shownIdeas.map((s) => (
                 <StartupCard key={s.id} startup={s} as="li" />
               ))}
             </ul>
