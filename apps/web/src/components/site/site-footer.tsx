@@ -26,6 +26,7 @@ const COLUMNS = [
     links: [
       { href: "/startups?stage=idea", label: "Идеи стартапов" },
       { href: "/people/cofounders", label: "Сообщники" },
+      { href: "/guides", label: "Гайды" },
       { href: "/startups/new", label: "Добавить проект" },
       { href: "/cookies", label: "Cookie и данные" },
     ],

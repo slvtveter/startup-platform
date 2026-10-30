@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { listPeople, listRoles, listStartups, startupFacets } from "@/lib/api";
 import { createClient, createConfig } from "@/lib/api/client";
+import { GUIDES } from "@/lib/guides";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${site}/startups?stage=idea`, changeFrequency: "daily", priority: 0.8 },
     { url: `${site}/people`, changeFrequency: "daily", priority: 0.7 },
     { url: `${site}/people/cofounders`, changeFrequency: "daily", priority: 0.8 },
+    { url: `${site}/guides`, changeFrequency: "monthly", priority: 0.6 },
+    ...GUIDES.map((g) => ({ url: `${site}/guides/${g.slug}`, lastModified: g.published, changeFrequency: "monthly" as const, priority: 0.7 })),
     ...Object.keys(facets?.role ?? {}).map((slug) => ({ url: `${site}/startups?role=${slug}`, changeFrequency: "daily" as const, priority: 0.7 })),
     ...peopleByRole.filter(([, n]) => n > 0).map(([slug]) => ({ url: `${site}/people?role=${slug}`, changeFrequency: "daily" as const, priority: 0.6 })),
     // Примеры в карту сайта не попадают: у них noindex.
