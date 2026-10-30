@@ -435,7 +435,7 @@ function Cofounders({ people, faces, total }: { people: Person[]; faces: Person[
             Нет идеи? Придумайте её вместе
           </h2>
           <p className="mt-5 max-w-[42ch] text-lg text-muted-foreground">
-            {total} {plural(total, "человек хочет", "человека хотят", "человек хотят")} запустить свой проект, но не в одиночку. Напиши тому, чьи навыки дополняют твои.
+            {total} {plural(total, "человек ищет", "человека ищут", "человек ищут")}, с кем придумать проект.
           </p>
           {faces.length > 0 && (
             <ul aria-hidden className="mt-8 grid max-w-[360px] grid-cols-6 gap-2">
@@ -600,9 +600,9 @@ function FinalCta() {
         <div aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgb(14_26_52/0.85),rgb(14_26_52/0.55))]" />
         <div>
           <h2 id="final-h" className="max-w-[14ch] text-[40px] leading-[1.02] sm:text-[56px] lg:text-[64px]">
-            Твоя команда уже где-то здесь
+            Начни с профиля
           </h2>
-          <p className="mt-4 max-w-[40ch] text-lg text-white/85">Начни с профиля: роль, пара навыков и что ищешь.</p>
+          <p className="mt-4 max-w-[40ch] text-lg text-white/85">Роль, пара навыков и что ищешь.</p>
         </div>
         <div className="flex flex-wrap gap-2.5 lg:justify-end">
           <PathLink path="seeker" href="/register" className={buttonVariants({ variant: "light", size: "lg" })}>
