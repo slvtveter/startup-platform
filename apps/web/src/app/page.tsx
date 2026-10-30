@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Dashboard } from "@/components/domain/dashboard";
-import { PersonCard } from "@/components/domain/person-card";
 import { StartupCard } from "@/components/domain/startup-card";
 import { HomeFeed, type FeedTab } from "@/components/landing/home-feed";
 import { JsonLd, siteUrl } from "@/components/site/json-ld";
@@ -14,7 +13,7 @@ import { Reveal } from "@/components/site/reveal";
 import { TrackView } from "@/components/site/track-view";
 import { buttonVariants } from "@/components/ui/button";
 import { listPeople, listStartups, startupFacets, type PersonCard as Person, type StartupCard as Startup } from "@/lib/api";
-import { initials, plural } from "@/lib/labels";
+import { COFOUND, STAGE, initials, plural } from "@/lib/labels";
 import { FACES, PHOTOS } from "@/lib/photos";
 import { getMe, getRoles, serverClient } from "@/lib/server-api";
 import { cn } from "@/lib/utils";
@@ -30,81 +29,68 @@ const wrap = "mx-auto w-full max-w-[1360px] px-4 sm:px-6 lg:px-10";
 const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
 /**
- * Лендинг для гостя. Порядок по разбору конкурентов (docs/research/competitors-home.md):
- * первый экран с живыми фрагментами интерфейса → кого ищут прямо сейчас → свежие проекты →
- * четыре дороги → сообщники → три шага → вопросы → призыв.
+ * Лендинг для гостя. Главное — попасть в стартап и быстро набрать опыт; идеи и сообщники — дополнение.
+ * Порядок по разбору конкурентов (docs/research/competitors-home.md): первый экран с живыми фрагментами
+ * интерфейса → кого ищут → стартапы → четыре дороги → сообщники → три шага → вопросы → призыв.
  */
 async function Landing() {
   const client = await serverClient();
-  const [allRoles, { data: facets }, { data: ideas }, { data: startups }, { data: cofounders }, { data: people }] = await Promise.all([
+  const [allRoles, { data: facets }, { data: catalog }, { data: people }] = await Promise.all([
     getRoles(),
     startupFacets({ client }),
-    listStartups({ client, query: { stage: ["idea"], limit: 5 } }),
-    listStartups({ client, query: { stage: ["prototype", "mvp", "launched"], limit: 6 } }),
-    listPeople({ client, query: { cofound: true, limit: 24 } }),
-    listPeople({ client, query: { limit: 24 } }),
+    listStartups({ client, query: { limit: 100 } }),
+    listPeople({ client, query: { limit: 100 } }),
   ]);
 
   // Сколько проектов ищет каждую роль — чипсы «кого ищут» с числами, как «Популярное» на hh.
-  // Ссылки ведут на посадочные «Стартапы ищут дизайнера» (src/lib/seo.ts).
   const roles = allRoles
     .map((r) => ({ slug: r.slug, name: r.name, n: facets?.role[r.slug] ?? 0 }))
     .filter((r) => r.n > 0)
     .sort((a, b) => b.n - a.n);
 
-  const withPhoto = (people?.items ?? []).filter((p) => p.avatar_url);
-  const cofWithPhoto = (cofounders?.items ?? []).filter((p) => p.avatar_url);
-  const idea = ideas?.items[0];
+  // На главной закреплены примеры (is_demo): новые профили и проекты не сдвигают карточки витрины.
+  const projects = pinned(catalog?.items ?? []);
+  const startups = projects.filter((s) => s.stage !== "idea");
+  const ideas = projects.filter((s) => s.stage === "idea");
+  const folks = pinned(people?.items ?? []).filter((p) => p.avatar_url);
+  const cofounders = folks.filter((p) => p.looking_for.includes(COFOUND));
+  const featured = startups.find((s) => s.open_roles.length > 0 && s.owner_avatar_url) ?? startups[0];
 
   const grid = "grid gap-3 sm:grid-cols-2 lg:grid-cols-3";
   const feed: FeedTab[] = [];
-  if (ideas?.items.length)
+  if (startups.length)
+    feed.push({
+      value: "startups",
+      label: "Стартапы",
+      more: { href: "/startups?stage=prototype&stage=mvp&stage=launched", label: "Все стартапы" },
+      content: (
+        <div className={grid}>
+          {startups.slice(0, 6).map((s) => (
+            <StartupCard key={s.id} startup={s} />
+          ))}
+        </div>
+      ),
+    });
+  if (ideas.length) {
+    const shown = ideas.slice(0, 5);
     feed.push({
       value: "ideas",
       label: "Идеи",
-      count: ideas.total,
       more: { href: "/startups?stage=idea", label: "Все идеи" },
       content: (
         <div className={grid}>
-          {ideas.items.map((s) => (
+          {shown.map((s) => (
             <StartupCard key={s.id} startup={s} />
           ))}
           {/* Приглашение добивает последний ряд до конца: на широком экране тянется на свободные колонки. */}
           <OwnIdeaCard
-            wide={ideas.items.length % 3 !== 2}
-            className={cn(ideas.items.length % 2 === 0 && "sm:col-span-2", { 0: "lg:col-span-3", 1: "lg:col-span-2", 2: "lg:col-span-1" }[ideas.items.length % 3])}
+            wide={shown.length % 3 !== 2}
+            className={cn(shown.length % 2 === 0 && "sm:col-span-2", { 0: "lg:col-span-3", 1: "lg:col-span-2", 2: "lg:col-span-1" }[shown.length % 3])}
           />
         </div>
       ),
     });
-  if (startups?.items.length)
-    feed.push({
-      value: "startups",
-      label: "Стартапы",
-      count: startups.total,
-      more: { href: "/startups?stage=prototype&stage=mvp&stage=launched", label: "Все стартапы" },
-      content: (
-        <div className={grid}>
-          {startups.items.map((s) => (
-            <StartupCard key={s.id} startup={s} />
-          ))}
-        </div>
-      ),
-    });
-  if (cofounders?.items.length)
-    feed.push({
-      value: "people",
-      label: "Сообщники",
-      count: cofounders.total,
-      more: { href: "/people?cofound=1", label: "Все, кто ищет сообщников" },
-      content: (
-        <div className="grid gap-3">
-          {cofounders.items.slice(0, 3).map((p) => (
-            <PersonCard key={p.slug} person={p} />
-          ))}
-        </div>
-      ),
-    });
+  }
 
   return (
     <>
@@ -119,29 +105,29 @@ async function Landing() {
               name: "Envola",
               url: siteUrl("/"),
               logo: siteUrl("/brand/logo.svg"),
-              description: "Место, где студенты и начинающие в IT обсуждают идеи, находят сообщников и вступают в стартапы.",
+              description: "Стартапы, которые ищут студентов и начинающих в IT: первый опыт в настоящей команде.",
             },
           ],
         }}
       />
 
-      <Hero idea={idea} faces={withPhoto.slice(0, 5)} />
+      <Hero startup={featured} faces={folks.slice(0, 5)} />
 
       {roles.length > 0 && <RoleStrip roles={roles} />}
 
       {feed.length > 0 && (
-        <Section id="feed" eyebrow="Свежее" title="Идеи и проекты, которым нужны люди">
+        <Section id="feed" eyebrow="Сейчас в каталоге" title="Стартапы, которые ищут людей">
           <HomeFeed tabs={feed} />
         </Section>
       )}
 
       <Section eyebrow="С чего начать" title="Четыре дороги в команду">
-        <Paths idea={idea} startups={(startups?.items ?? []).slice(0, 3)} people={withPhoto.slice(5, 8)} faces={cofWithPhoto.slice(0, 6)} />
+        <Paths startups={startups.slice(0, 3)} idea={ideas[0]} people={folks.slice(5, 8)} faces={cofounders.slice(0, 6)} />
       </Section>
 
-      {cofounders && cofounders.items.length > 0 && <Cofounders people={cofounders.items.slice(0, 2)} faces={cofWithPhoto.slice(0, 12)} total={cofounders.total} />}
+      {cofounders.length > 0 && <Cofounders people={cofounders.slice(0, 4)} total={cofounders.length} />}
 
-      <Section eyebrow="Как это устроено" title="От знакомства до команды — три шага">
+      <Section eyebrow="Три шага" title="Как попасть в команду стартапа">
         <Steps />
       </Section>
 
@@ -154,30 +140,38 @@ async function Landing() {
   );
 }
 
+/** Только примеры, если они есть; иначе (локально без сида) — всё как есть. */
+function pinned<T extends { is_demo?: boolean }>(items: T[]) {
+  return items.some((x) => x.is_demo) ? items.filter((x) => x.is_demo) : items;
+}
+
 /* ───────────── Первый экран ───────────── */
 
-function Hero({ idea, faces }: { idea?: Startup; faces: Person[] }) {
+function Hero({ startup, faces }: { startup?: Startup; faces: Person[] }) {
+  const role = startup?.open_roles[0]?.role.name;
+  const second = startup?.open_roles[1]?.role.name ?? role;
+  const founder = startup?.owner_name.split(" ")[0];
   return (
     <section className={`${wrap} grid items-center gap-10 pt-8 pb-4 sm:pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.02fr)] lg:gap-14 lg:pt-14`}>
-      <div className="max-w-[620px]">
+      <div className="max-w-[640px]">
         <p className="inline-flex items-center gap-2 rounded-full bg-brand-soft px-3.5 py-1.5 text-sm font-bold text-brand-ink">
           <span aria-hidden className="size-1.5 rounded-full bg-brand" />
           Для студентов и начинающих в IT
         </p>
-        <h1 className="mt-6 text-[44px] leading-[0.98] tracking-[-0.045em] text-balance sm:text-[64px] lg:text-[76px]">
-          Найди, с кем делать <span className="text-brand">стартап</span>
+        <h1 className="mt-6 text-[44px] leading-[0.98] tracking-[-0.045em] text-balance sm:text-[60px] lg:text-[64px]">
+          Получи первый опыт в настоящем <span className="text-brand">стартапе</span>
         </h1>
-        <p className="mt-6 max-w-[46ch] text-lg text-muted-foreground sm:text-xl">
-          Можно без опыта и без своей идеи.
+        <p className="mt-6 max-w-[44ch] text-lg text-muted-foreground sm:text-xl">
+          Стартапы ищут разработчиков, дизайнеров и маркетологов на первые роли. Без резюме и стажа.
         </p>
         <div className="mt-9 flex flex-wrap gap-2.5">
-          <PathLink path="seeker" href="/register" className={buttonVariants({ size: "lg" })}>
-            Создать профиль
+          <PathLink path="seeker" href="/startups" className={buttonVariants({ size: "lg" })}>
+            Смотреть стартапы
             <ArrowRight aria-hidden />
           </PathLink>
-          <Link href="/startups" className={buttonVariants({ variant: "secondary", size: "lg" })}>
-            Смотреть проекты
-          </Link>
+          <PathLink path="seeker" href="/register" className={buttonVariants({ variant: "secondary", size: "lg" })}>
+            Создать профиль
+          </PathLink>
         </div>
         {faces.length >= 3 && (
           <div className="mt-9 flex items-center gap-3.5">
@@ -195,7 +189,7 @@ function Hero({ idea, faces }: { idea?: Startup; faces: Person[] }) {
         )}
       </div>
 
-      {/* Фото и живые фрагменты интерфейса поверх (как у Wellfound): реплика, карточка идеи, отклик. */}
+      {/* Фото и живые фрагменты интерфейса поверх (как у Wellfound): основатель пишет, кандидат откликается, карточка стартапа. */}
       <div className="relative">
         <div className="relative aspect-[4/3.4] overflow-hidden rounded-[32px] sm:aspect-[4/3] lg:aspect-[5/5.2]">
           <Image
@@ -210,45 +204,56 @@ function Hero({ idea, faces }: { idea?: Startup; faces: Person[] }) {
           />
         </div>
 
-        <div className="chat-msg absolute top-5 left-4 flex max-w-[300px] items-end gap-2 sm:top-8 sm:left-6 lg:-left-10" style={delay(500)}>
-          <Image src={FACES.alina} alt="" width={36} height={36} className="size-9 shrink-0 rounded-full object-cover ring-2 ring-white" />
-          <p className="rounded-2xl rounded-bl-md bg-white px-3.5 py-2.5 text-[15px] leading-snug shadow-[0_18px_40px_-12px_rgb(15_27_45/0.35)]">
-            <small className="mb-0.5 block text-xs font-bold text-muted-foreground">Алина, дизайнер</small>
-            Привет! Нужен фронт для приложения про соседей по квартире. Глянешь макеты?
-          </p>
-        </div>
+        {startup && role && (
+          <div className="chat-msg absolute top-5 left-4 flex max-w-[320px] items-end gap-2 sm:top-8 sm:left-6 lg:-left-10" style={delay(500)}>
+            {startup.owner_avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP
+              <img src={startup.owner_avatar_url} alt="" className="size-9 shrink-0 rounded-full object-cover ring-2 ring-white" />
+            ) : (
+              <Image src={FACES.alina} alt="" width={36} height={36} className="size-9 shrink-0 rounded-full object-cover ring-2 ring-white" />
+            )}
+            <p className="rounded-2xl rounded-bl-md bg-white px-3.5 py-2.5 text-[15px] leading-snug shadow-[0_18px_40px_-12px_rgb(15_27_45/0.35)]">
+              <small className="mb-0.5 block text-xs font-bold text-muted-foreground">
+                {founder}, основатель {startup.title}
+              </small>
+              Привет! Посмотрели твой профиль: нам как раз нужен {role}. Созвонимся на этой неделе?
+            </p>
+          </div>
+        )}
 
-        <div className="chat-msg absolute top-[42%] right-4 flex items-center gap-2.5 rounded-full bg-white py-1.5 pr-4 pl-1.5 text-sm shadow-[0_18px_40px_-12px_rgb(15_27_45/0.35)] max-sm:hidden lg:-right-6" style={delay(1300)}>
-          <Image src={FACES.kirill} alt="" width={32} height={32} className="size-8 rounded-full object-cover" />
-          <span>
-            <b className="font-bold">Кирилл</b> <span className="text-muted-foreground">откликнулся на Frontend</span>
-          </span>
-          <span aria-hidden className="size-2 rounded-full bg-[#22a06b]" />
-        </div>
+        {second && (
+          <div className="chat-msg absolute top-[44%] right-4 flex items-center gap-2.5 rounded-full bg-white py-1.5 pr-4 pl-1.5 text-sm shadow-[0_18px_40px_-12px_rgb(15_27_45/0.35)] max-sm:hidden lg:-right-6" style={delay(1300)}>
+            <Image src={FACES.kirill} alt="" width={32} height={32} className="size-8 rounded-full object-cover" />
+            <span>
+              <b className="font-bold">Кирилл</b> <span className="text-muted-foreground">откликнулся: {second}</span>
+            </span>
+            <span aria-hidden className="size-2 rounded-full bg-[#22a06b]" />
+          </div>
+        )}
 
-        {idea && (
+        {startup && (
           <Link
-            href={`/startups/${idea.slug}`}
+            href={`/startups/${startup.slug}`}
             className="chat-msg absolute right-4 bottom-4 left-4 flex items-center gap-3.5 rounded-3xl bg-white p-3 shadow-[0_24px_50px_-16px_rgb(15_27_45/0.45)] transition-transform duration-300 hover:-translate-y-0.5 sm:right-auto sm:bottom-6 sm:left-6 sm:w-[380px] lg:-left-10"
             style={delay(900)}
           >
             <span className="relative size-16 shrink-0 overflow-hidden rounded-2xl bg-brand-soft">
-              {idea.cover_url ? (
+              {startup.cover_url ? (
                 // eslint-disable-next-line @next/next/no-img-element -- обложки уже пережаты api в WebP
-                <img src={idea.cover_url} alt="" className="size-full object-cover" />
+                <img src={startup.cover_url} alt="" className="size-full object-cover" />
               ) : (
-                <span className="grid size-full place-items-center text-xl font-extrabold text-brand-ink">{initials(idea.title)}</span>
+                <span className="grid size-full place-items-center text-xl font-extrabold text-brand-ink">{initials(startup.title)}</span>
               )}
             </span>
             <span className="min-w-0 flex-1">
               <span className="flex items-center gap-2">
-                <b className="truncate text-base font-extrabold tracking-[-0.02em]">{idea.title}</b>
-                <span className="shrink-0 rounded-full bg-tone px-2 py-0.5 text-[11px] font-bold">Идея</span>
+                <b className="truncate text-base font-extrabold tracking-[-0.02em]">{startup.title}</b>
+                <span className="shrink-0 rounded-full bg-tone px-2 py-0.5 text-[11px] font-bold">{STAGE[startup.stage]}</span>
               </span>
-              <span className="mt-0.5 block truncate text-sm text-muted-foreground">{idea.pitch}</span>
-              {idea.open_roles.length > 0 && (
+              <span className="mt-0.5 block truncate text-sm text-muted-foreground">{startup.pitch}</span>
+              {startup.open_roles.length > 0 && (
                 <span className="mt-1.5 flex gap-1 overflow-hidden">
-                  {idea.open_roles.slice(0, 2).map((r) => (
+                  {startup.open_roles.slice(0, 2).map((r) => (
                     <span key={r.id} className="truncate rounded-full bg-brand-soft px-2 py-0.5 text-xs font-bold text-brand-ink">
                       Ищут: {r.role.name}
                     </span>
@@ -286,7 +291,7 @@ function RoleStrip({ roles }: { roles: { slug: string; name: string; n: number }
           ))}
           <li>
             <Link href="/startups" className="inline-flex h-10 items-center gap-1.5 px-3 text-sm font-bold text-brand-ink hover:text-brand-hover">
-              Все проекты
+              Все стартапы
               <ArrowRight aria-hidden className="size-4" />
             </Link>
           </li>
@@ -298,78 +303,68 @@ function RoleStrip({ roles }: { roles: { slug: string; name: string; n: number }
 
 /* ───────────── Четыре дороги ───────────── */
 
-function Paths({ idea, startups, people, faces }: { idea?: Startup; startups: Startup[]; people: Person[]; faces: Person[] }) {
+function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: Startup; people: Person[]; faces: Person[] }) {
   const card = "reveal-item card-hover group flex flex-col overflow-hidden rounded-[32px] p-7 sm:p-9";
   const cta = "mt-auto inline-flex items-center gap-1.5 pt-8 font-bold";
+  const arrow = <ArrowRight aria-hidden className="size-4 transition-transform duration-300 group-hover:translate-x-1" />;
   const slots = idea?.open_roles.length
-    ? idea.open_roles.slice(0, 3).map((r) => ({ name: r.role.name, n: r.slots ?? 1 }))
+    ? idea.open_roles.slice(0, 2).map((r) => ({ name: r.role.name, n: r.slots ?? 1 }))
     : [
         { name: "Дизайнер", n: 1 },
         { name: "Frontend-разработчик", n: 2 },
       ];
   return (
     <Reveal className="grid gap-3 lg:grid-cols-5">
-      {/* Есть идея: главная дорога, крупная и в цвете бренда. */}
-      <PathLink path="founder" href="/register?next=/startups/new" className={cn(card, "bg-brand text-white hover:bg-brand-hover lg:col-span-3")} style={delay(0)}>
-        <span className="grid gap-8 sm:grid-cols-[minmax(0,1fr)_minmax(0,280px)] sm:items-start">
+      {/* Хочу в команду: главная дорога, крупная и в цвете бренда. */}
+      <PathLink path="seeker" href="/startups" className={cn(card, "bg-brand text-white hover:bg-brand-hover lg:col-span-3")} style={delay(0)}>
+        <span className="grid gap-8 sm:grid-cols-[minmax(0,1fr)_minmax(0,300px)] sm:items-start">
           <span>
-            <span className="text-sm font-bold text-white/70">Есть идея</span>
-            <h3 className="mt-3 max-w-[14ch] text-[32px] leading-[1.02] font-extrabold tracking-[-0.04em] sm:text-[40px]">Собери под неё команду</h3>
-            <span className="mt-4 block max-w-[36ch] text-lg text-white/80">Даже если пока нет ни кода, ни макетов.</span>
+            <span className="text-sm font-bold text-white/70">Хочу в команду</span>
+            <h3 className="mt-3 max-w-[14ch] text-[32px] leading-[1.02] font-extrabold tracking-[-0.04em] sm:text-[40px]">Залети в стартап и набери опыт</h3>
+            <span className="mt-4 block max-w-[34ch] text-lg text-white/80">Настоящие задачи, кейс в портфолио и команда, с которой можно идти дальше.</span>
           </span>
-          <span aria-hidden className="rounded-2xl bg-white p-4 text-foreground shadow-[0_24px_50px_-20px_rgb(0_0_0/0.5)] transition-transform duration-500 group-hover:-translate-y-1">
-            <b className="block truncate text-sm font-extrabold">{idea?.title ?? "Бот расписания"}</b>
-            <span className="mt-0.5 block text-xs text-muted-foreground">Места в команде</span>
-            <span className="mt-3 grid gap-1.5">
-              {slots.map((s) => (
-                <span key={s.name} className="flex items-center justify-between gap-2 rounded-xl bg-tone px-3 py-2 text-xs font-semibold">
-                  <span className="truncate">{s.name}</span>
-                  <span className="shrink-0 text-brand-ink">{plural(s.n, `${s.n} место`, `${s.n} места`, `${s.n} мест`)}</span>
+          <span aria-hidden className="grid gap-1.5 rounded-2xl bg-white p-2 text-foreground shadow-[0_24px_50px_-20px_rgb(0_0_0/0.5)] transition-transform duration-500 group-hover:-translate-y-1">
+            {startups.map((s) => (
+              <span key={s.id} className="flex items-center gap-3 rounded-xl bg-tone p-2 pr-3">
+                <span className="relative size-10 shrink-0 overflow-hidden rounded-lg bg-brand-soft">
+                  {s.cover_url && (
+                    // eslint-disable-next-line @next/next/no-img-element -- обложки уже пережаты api в WebP
+                    <img src={s.cover_url} alt="" className="size-full object-cover" />
+                  )}
                 </span>
-              ))}
-            </span>
-            {people.length > 0 && (
-              <span className="mt-3 flex items-center gap-2.5 border-t border-foreground/[0.08] pt-3 text-xs font-semibold text-muted-foreground">
-                <span className="flex shrink-0 -space-x-2">
-                  {people.slice(0, 3).map((p) => (
-                    // eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP
-                    <img key={p.slug} src={p.avatar_url!} alt="" className="size-7 rounded-full object-cover ring-2 ring-white" />
-                  ))}
+                <span className="min-w-0 flex-1">
+                  <b className="block truncate text-sm font-extrabold">{s.title}</b>
+                  <span className="block truncate text-xs text-muted-foreground">Ищут: {s.open_roles.map((r) => r.role.name).join(", ") || "команда собрана"}</span>
                 </span>
-                Откликнулись на роли
               </span>
-            )}
+            ))}
           </span>
         </span>
         <span className={cn(cta, "text-white")}>
-          Опубликовать идею
-          <ArrowRight aria-hidden className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
+          Смотреть стартапы
+          {arrow}
         </span>
       </PathLink>
 
-      {/* Хочу в команду. */}
-      <PathLink path="seeker" href="/startups" className={cn(card, "bg-tone hover:bg-tone-2 lg:col-span-2")} style={delay(60)}>
-        <span className="text-sm font-bold text-muted-foreground">Хочу в команду</span>
-        <h3 className="mt-3 text-[28px] leading-[1.05] font-extrabold tracking-[-0.04em] sm:text-[32px]">Найди проект под свою роль</h3>
-        <span aria-hidden className="mt-6 grid gap-1.5">
-          {startups.map((s) => (
-            <span key={s.id} className="flex items-center gap-3 rounded-2xl bg-white p-2.5 pr-3.5">
-              <span className="relative size-10 shrink-0 overflow-hidden rounded-xl bg-brand-soft">
-                {s.cover_url && (
-                  // eslint-disable-next-line @next/next/no-img-element -- обложки уже пережаты api в WebP
-                  <img src={s.cover_url} alt="" className="size-full object-cover" />
-                )}
+      {/* Есть идея. */}
+      <PathLink path="founder" href="/register?next=/startups/new" className={cn(card, "bg-tone hover:bg-tone-2 lg:col-span-2")} style={delay(60)}>
+        <span className="text-sm font-bold text-muted-foreground">Есть идея</span>
+        <h3 className="mt-3 text-[28px] leading-[1.05] font-extrabold tracking-[-0.04em] sm:text-[32px]">Собери под неё команду</h3>
+        <span aria-hidden className="mt-6 rounded-2xl bg-white p-4 transition-transform duration-500 group-hover:-translate-y-0.5">
+          <b className="block truncate text-sm font-extrabold">{idea?.title ?? "Твоя идея"}</b>
+          <span className="mt-0.5 block text-xs text-muted-foreground">Места в команде</span>
+          <span className="mt-3 grid gap-1.5">
+            {slots.map((s) => (
+              <span key={s.name} className="flex items-center justify-between gap-2 rounded-xl bg-tone px-3 py-2 text-xs font-semibold">
+                <span className="truncate">{s.name}</span>
+                <span className="shrink-0 text-brand-ink">{plural(s.n, `${s.n} место`, `${s.n} места`, `${s.n} мест`)}</span>
               </span>
-              <span className="min-w-0 flex-1">
-                <b className="block truncate text-sm font-extrabold">{s.title}</b>
-                <span className="block truncate text-xs text-muted-foreground">{s.open_roles.map((r) => r.role.name).join(", ") || "Команда собрана"}</span>
-              </span>
-            </span>
-          ))}
+            ))}
+          </span>
         </span>
         <span className={cn(cta, "text-brand-ink")}>
-          Смотреть стартапы
-          <ArrowRight aria-hidden className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
+          Опубликовать идею
+          {arrow}
         </span>
       </PathLink>
 
@@ -387,16 +382,17 @@ function Paths({ idea, startups, people, faces }: { idea?: Startup; startups: St
         )}
         <span className={cn(cta, "text-brand-ink")}>
           Кто такие сообщники
-          <ArrowRight aria-hidden className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
+          {arrow}
         </span>
       </Link>
 
       {/* Нужны люди. */}
       <Link href="/people" className={cn(card, "bg-foreground text-background hover:bg-[#1d2a3f] lg:col-span-3")} style={delay(180)}>
-        <span className="grid gap-8 sm:grid-cols-[minmax(0,1fr)_minmax(0,280px)] sm:items-end">
+        <span className="grid gap-8 sm:grid-cols-[minmax(0,1fr)_minmax(0,300px)] sm:items-start">
           <span>
             <span className="text-sm font-bold text-white/60">Нужны люди</span>
             <h3 className="mt-3 max-w-[16ch] text-[32px] leading-[1.02] font-extrabold tracking-[-0.04em] text-white sm:text-[40px]">Найди разработчика или дизайнера</h3>
+            <span className="mt-4 block max-w-[34ch] text-lg text-white/70">Фильтр по роли, навыкам и опыту.</span>
           </span>
           <span aria-hidden className="grid gap-1.5">
             {people.map((p) => (
@@ -416,7 +412,7 @@ function Paths({ idea, startups, people, faces }: { idea?: Startup; startups: St
         </span>
         <span className={cn(cta, "text-white")}>
           Смотреть людей
-          <ArrowRight aria-hidden className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
+          {arrow}
         </span>
       </Link>
     </Reveal>
@@ -425,29 +421,21 @@ function Paths({ idea, startups, people, faces }: { idea?: Startup; startups: St
 
 /* ───────────── Сообщники ───────────── */
 
-function Cofounders({ people, faces, total }: { people: Person[]; faces: Person[]; total: number }) {
+function Cofounders({ people, total }: { people: Person[]; total: number }) {
   return (
     <section aria-labelledby="cof-h" className={`${wrap} pt-[clamp(80px,9vw,128px)]`}>
-      <div className="grid gap-10 rounded-[36px] bg-brand-soft p-5 sm:p-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-12 lg:p-14">
-        <div className="flex flex-col p-2 sm:p-0">
-          <p className="text-sm font-bold text-brand-ink">Сообщники</p>
-          <h2 id="cof-h" className="mt-3 max-w-[13ch] text-[36px] leading-[1.02] sm:text-[48px] lg:text-[56px]">
-            Нет идеи? Придумайте её вместе
-          </h2>
-          <p className="mt-5 max-w-[42ch] text-lg text-muted-foreground">
-            {total} {plural(total, "человек ищет", "человека ищут", "человек ищут")}, с кем придумать проект.
-          </p>
-          {faces.length > 0 && (
-            <ul aria-hidden className="mt-8 grid max-w-[360px] grid-cols-6 gap-2">
-              {faces.map((p, i) => (
-                <li key={p.slug} className={cn("aspect-square overflow-hidden rounded-2xl bg-white", i % 3 === 1 && "translate-y-2")}>
-                  {/* eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP */}
-                  <img src={p.avatar_url!} alt="" loading="lazy" className="size-full object-cover" />
-                </li>
-              ))}
-            </ul>
-          )}
-          <div className="mt-10 flex flex-wrap gap-2.5 lg:mt-auto lg:pt-10">
+      <div className="rounded-[36px] bg-brand-soft p-6 sm:p-10 lg:p-12">
+        <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-6">
+          <div>
+            <p className="text-sm font-bold text-brand-ink">Сообщники</p>
+            <h2 id="cof-h" className="mt-3 max-w-[18ch] text-[32px] leading-[1.02] text-balance sm:text-[44px] lg:text-[52px]">
+              Нет идеи? Придумайте её вместе
+            </h2>
+            <p className="mt-4 max-w-[46ch] text-lg text-muted-foreground">
+              {total} {plural(total, "человек ищет", "человека ищут", "человек ищут")}, с кем придумать проект с нуля. Напиши тому, чьи навыки дополняют твои.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2.5">
             <Link href="/people?cofound=1" className={buttonVariants({ size: "lg" })}>
               Посмотреть всех
               <ArrowRight aria-hidden />
@@ -457,11 +445,32 @@ function Cofounders({ people, faces, total }: { people: Person[]; faces: Person[
             </Link>
           </div>
         </div>
-        <Reveal className="grid content-start gap-3">
+        <Reveal className="mt-10 grid grid-cols-2 gap-3 lg:grid-cols-4">
           {people.map((p, i) => (
-            <div key={p.slug} className="reveal-item" style={delay(i * 80)}>
-              <PersonCard person={p} surface="white" />
-            </div>
+            <Link
+              key={p.slug}
+              href={`/people/${p.slug}`}
+              className="reveal-item group flex flex-col rounded-[24px] bg-white p-2 transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgb(15_27_45/0.35)]"
+              style={delay(i * 70)}
+            >
+              <span className="relative block aspect-[4/5] overflow-hidden rounded-[18px] bg-tone">
+                {/* eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP */}
+                <img
+                  src={p.avatar_url_lg ?? p.avatar_url!}
+                  alt=""
+                  loading="lazy"
+                  className="size-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                />
+                {p.primary_role && (
+                  <span className="absolute bottom-2.5 left-2.5 max-w-[calc(100%-20px)] truncate rounded-full bg-white/95 px-3 py-1 text-xs font-bold">{p.primary_role.name}</span>
+                )}
+              </span>
+              <span className="flex flex-1 flex-col px-2.5 pt-3.5 pb-2">
+                <b className="truncate text-base font-extrabold tracking-[-0.02em] sm:text-lg">{p.display_name}</b>
+                {p.city && <span className="text-sm text-muted-foreground">{p.city}</span>}
+                {p.headline && <span className="mt-2 line-clamp-2 text-sm text-foreground/80 max-sm:hidden">{p.headline}</span>}
+              </span>
+            </Link>
           ))}
         </Reveal>
       </div>
@@ -472,9 +481,9 @@ function Cofounders({ people, faces, total }: { people: Person[]; faces: Person[
 /* ───────────── Три шага ───────────── */
 
 const STEPS = [
-  { icon: UserRound, title: "Расскажи о себе", text: "Роль, пара навыков и что ищешь. Резюме не нужно." },
-  { icon: Search, title: "Найди своих", text: "Идея, стартап или человек под твою роль." },
-  { icon: MessageCircle, title: "Напиши и созвонись", text: "Обсудите задачи и решите, делаете ли проект вместе." },
+  { icon: UserRound, title: "Создай профиль", text: "Роль, навыки и сколько часов в неделю готов уделять. Резюме не нужно." },
+  { icon: Search, title: "Выбери стартап", text: "Фильтр по роли, стадии проекта и оплате." },
+  { icon: MessageCircle, title: "Откликнись и созвонись", text: "Пара фраз о себе, а дальше обсуждаешь задачи с основателем." },
 ];
 
 function Steps() {
@@ -560,13 +569,13 @@ function OwnIdeaCard({ className, wide }: { className?: string; wide?: boolean }
 }
 
 const FAQ = [
-  ["У меня нет идеи. Мне сюда?", "Да. Включи в профиле «Ищу сообщников»: тебя найдут те, кто тоже хочет своё. Идею можно придумать вместе."],
-  ["У меня нет опыта. Со мной будут разговаривать?", "Здесь почти все в начале пути: студенты, выпускники курсов, начинающие основатели. Важнее, что ты умеешь и чем хочешь заниматься."],
-  ["А если мою идею украдут?", "Опиши её в общих чертах, а подробности расскажи тем, с кем решишь работать."],
-  ["Это бесплатно?", "Да. Профиль, сообщения, идеи и отклики бесплатны."],
+  ["Нужен ли опыт, чтобы попасть в стартап?", "Нет. Многие роли открыты для студентов и тех, кто после курсов. Важнее, что ты умеешь и сколько времени готов уделять."],
+  ["Что я получу, кроме опыта?", "Задачи из настоящего продукта, кейс в портфолио и людей, с которыми можно делать следующие проекты."],
   ["Мне будут платить?", "Зависит от проекта. В каждой роли написано: без оплаты, с оплатой или договоритесь."],
-  ["Можно просто пообщаться, без стартапа?", "Да. Обсуждай идеи и знакомься, проект может появиться позже."],
-];
+  ["Это бесплатно?", "Да. Профиль, отклики и сообщения бесплатны."],
+  ["У меня есть своя идея. Мне сюда?", "Да. Опиши её и отметь, кого не хватает, или найди сообщников и придумайте проект вместе."],
+  ["А если мою идею украдут?", "Опиши её в общих чертах, а подробности расскажи тем, с кем решишь работать."],
+]
 
 function Faq() {
   // Две независимые колонки: открытый вопрос не раздвигает соседнюю.
@@ -600,17 +609,17 @@ function FinalCta() {
         <div aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgb(14_26_52/0.85),rgb(14_26_52/0.55))]" />
         <div>
           <h2 id="final-h" className="max-w-[14ch] text-[40px] leading-[1.02] sm:text-[56px] lg:text-[64px]">
-            Начни с профиля
+            Найди свой первый стартап
           </h2>
-          <p className="mt-4 max-w-[40ch] text-lg text-white/85">Роль, пара навыков и что ищешь.</p>
+          <p className="mt-4 max-w-[40ch] text-lg text-white/85">Роли для студентов и начинающих: от прототипов до продуктов с пользователями.</p>
         </div>
         <div className="flex flex-wrap gap-2.5 lg:justify-end">
-          <PathLink path="seeker" href="/register" className={buttonVariants({ variant: "light", size: "lg" })}>
-            Создать профиль
+          <PathLink path="seeker" href="/startups" className={buttonVariants({ variant: "light", size: "lg" })}>
+            Смотреть стартапы
             <ArrowRight aria-hidden />
           </PathLink>
-          <PathLink path="founder" href="/register?next=/startups/new" className={buttonVariants({ variant: "onphoto", size: "lg" })}>
-            Опубликовать идею
+          <PathLink path="seeker" href="/register" className={buttonVariants({ variant: "onphoto", size: "lg" })}>
+            Создать профиль
           </PathLink>
         </div>
       </div>

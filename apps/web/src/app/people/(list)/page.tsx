@@ -44,26 +44,21 @@ export default async function PeoplePage({ searchParams }: Props) {
 
   return (
     <Container>
-      <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-6">
-        <div>
-          <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">{seo.h1}</h1>
-        </div>
-        {/* «Сообщники» — не отдельный каталог, а фильтр этого: плашка включает его и ведёт на объяснение. */}
+      <div className="flex flex-wrap items-center justify-between gap-x-10 gap-y-5">
+        <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">{seo.h1}</h1>
+        {/* «Сообщники» — не отдельный каталог, а фильтр этого: плашка в одну строку включает его и ведёт на объяснение. */}
         {(cof?.total ?? 0) > 0 && (
-          <div className="w-full rounded-3xl bg-brand-soft p-5 sm:w-auto sm:min-w-[360px] sm:p-6">
-            <p className="flex items-center gap-2 text-lg font-bold">
+          <div className="flex w-full flex-wrap items-center gap-x-5 gap-y-3 rounded-2xl bg-brand-soft py-3 pr-3 pl-5 sm:w-auto">
+            <p className="flex items-center gap-2 font-bold">
               <span aria-hidden className="size-2 rounded-full bg-brand" />
               {cofound ? "Показаны только сообщники" : `${cof?.total} ${plural(cof?.total ?? 0, "ищет", "ищут", "ищут")} сообщников`}
             </p>
-            <p className="mt-1 text-muted-foreground">Хотят придумать стартап с нуля вместе с другими.</p>
-            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
-              <Link href={toggleHref("/people", params, "cofound", cofound ? null : "1")} scroll={false} className={buttonVariants({ size: "sm" })}>
-                {cofound ? "Показать всех" : "Показать их"}
-              </Link>
-              <Link href="/people/cofounders" className="text-sm font-semibold text-brand-ink hover:text-brand-hover">
-                Кто такие сообщники
-              </Link>
-            </div>
+            <Link href="/people/cofounders" className="text-sm font-semibold text-brand-ink hover:text-brand-hover">
+              Кто это
+            </Link>
+            <Link href={toggleHref("/people", params, "cofound", cofound ? null : "1")} scroll={false} className={buttonVariants({ size: "sm", className: "sm:ml-2" })}>
+              {cofound ? "Показать всех" : "Показать их"}
+            </Link>
           </div>
         )}
       </div>
