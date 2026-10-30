@@ -124,16 +124,16 @@ export async function ProjectCatalog({ params }: { params: SearchParams }) {
           />
 
           {data && data.items.length > 0 ? (
-            <ul className="mt-4 grid gap-3 md:grid-cols-2">
+            <ul className="mt-4 grid gap-3">
               {data.items.map((s, i) => (
                 <StartupCard key={s.id} startup={s} as="li" eager={i < 6} />
               ))}
               {/* Последняя страница: пустое место в ряду — приглашение опубликовать свою идею, а не дыра в сетке. */}
               {page * LIMIT >= total && (
-                <li className={`h-full ${data.items.length % 2 === 0 ? "md:hidden" : ""}`}>
+                <li>
                   <Link
                     href="/startups/new"
-                    className="card-hover flex h-full min-h-[240px] flex-col justify-center gap-6 rounded-3xl bg-brand-soft p-6 hover:bg-marker sm:p-8"
+                    className="card-hover flex h-full flex-col justify-center gap-6 rounded-3xl bg-brand-soft p-6 hover:bg-marker sm:p-8"
                   >
                     <span>
                       <span className="block text-2xl leading-tight font-extrabold tracking-[-0.03em]">Твой проект здесь</span>
