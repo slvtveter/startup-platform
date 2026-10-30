@@ -57,7 +57,7 @@ function nearToken(rgb) {
 function inPage({ selector, mobile }) {
   const scope = selector ? [...document.querySelectorAll(selector)] : [document.body];
   const els = scope.flatMap((s) => [s, ...s.querySelectorAll("*")]).slice(0, 12000);
-  const out = { fonts: [], radii: [], colors: [], bgs: [], taps: [], imgs: [], ctas: 0 };
+  const out = { fonts: [], radii: [], colors: [], bgs: [], taps: [], targets: [], imgs: [], ctas: 0 };
   const label = (el) => {
     const t = (el.innerText || el.getAttribute("aria-label") || el.alt || "").trim().replace(/\s+/g, " ").slice(0, 40);
     const cls = typeof el.className === "string" ? el.className.split(" ").slice(0, 3).join(".") : "";
@@ -81,7 +81,8 @@ function inPage({ selector, mobile }) {
     if (interactive && mobile) {
       // WCAG 2.5.8: цель не меньше 24×24, если рядом нет запаса. Строчные ссылки в абзаце — исключение.
       const inline = el.tagName === "A" && s.display === "inline" && el.closest("p, li, dd");
-      if (!inline && (r.width < 24 || r.height < 24)) out.taps.push({ el: label(el), w: Math.round(r.width), h: Math.round(r.height) });
+      out.targets.push(r);
+      if (!inline && (r.width < 24 || r.height < 24)) out.taps.push({ el: label(el), w: Math.round(r.width), h: Math.round(r.height), r });
     }
     if (el.tagName === "IMG" && !el.hasAttribute("alt")) out.imgs.push(label(el));
     if ((el.tagName === "A" || el.tagName === "BUTTON") && r.top < innerHeight && r.bottom > 0 && r.height >= 36 && s.backgroundColor !== "rgba(0, 0, 0, 0)" && s.backgroundColor !== "rgb(255, 255, 255)") out.ctas++;
@@ -93,6 +94,17 @@ function inPage({ selector, mobile }) {
     const a = Number(hs[i - 1].tagName[1]), b = Number(hs[i].tagName[1]);
     if (b > a + 1) out.headingSkips.push(`${hs[i - 1].tagName} → ${hs[i].tagName} «${hs[i].innerText.slice(0, 30)}»`);
   }
+  // Исключение WCAG 2.5.8 по отступу: маленькая цель проходит, если круг 24 px вокруг её центра не задевает соседние цели.
+  for (const t of out.taps) {
+    const cx = t.r.left + t.r.width / 2, cy = t.r.top + t.r.height / 2;
+    t.crowded = out.targets.some((o) => {
+      if (o === t.r) return false;
+      const dx = Math.max(o.left - cx, 0, cx - o.right), dy = Math.max(o.top - cy, 0, cy - o.bottom);
+      return Math.hypot(dx, dy) < 12;
+    });
+    delete t.r;
+  }
+  delete out.targets;
   out.overflow = document.documentElement.scrollWidth - innerWidth;
   return out;
 }
@@ -161,7 +173,9 @@ for (const url of urls) {
       continue;
     }
     if (d.overflow > 1) add("fail", `горизонтальный скролл ${d.overflow}px`, "");
-    if (d.taps.length) add("fail", `тап-зоны меньше 24px ×${d.taps.length}`, d.taps.slice(0, 4).map((t) => `${t.el} ${t.w}×${t.h}`).join("; "));
+    const crowded = d.taps.filter((t) => t.crowded), alone = d.taps.filter((t) => !t.crowded);
+    if (crowded.length) add("fail", `тап-зоны меньше 24px вплотную к соседним ×${crowded.length}`, crowded.slice(0, 4).map((t) => `${t.el} ${t.w}×${t.h}`).join("; "));
+    if (alone.length) add("warn", `тап-зоны меньше 24px (проходят по отступу, но лучше ≥ 40) ×${alone.length}`, alone.slice(0, 4).map((t) => `${t.el} ${t.w}×${t.h}`).join("; "));
     if (d.imgs.length) add("fail", `img без alt ×${d.imgs.length}`, d.imgs.slice(0, 3).join("; "));
     if (!args.selector && d.h1 !== 1) add("warn", `h1 на странице: ${d.h1}`, "");
     if (d.headingSkips.length) add("warn", "пропуск уровня заголовка", d.headingSkips.slice(0, 3).join("; "));
