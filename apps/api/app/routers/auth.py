@@ -66,6 +66,7 @@ def me_out(user: User) -> MeOut:
             display_name=p.display_name,
             is_published=p.is_published,
             completeness=completeness(p)[0],
+            avatar_url=p.avatar_url,
         )
         if p
         else None,
