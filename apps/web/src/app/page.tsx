@@ -107,6 +107,10 @@ async function Landing() {
               logo: siteUrl("/brand/logo.svg"),
               description: "Стартапы, которые ищут студентов и начинающих в IT: первый опыт в настоящей команде.",
             },
+            {
+              "@type": "FAQPage",
+              mainEntity: FAQ.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
+            },
           ],
         }}
       />
