@@ -21,7 +21,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: g.title,
     description: g.description,
     alternates: { canonical: `/guides/${g.slug}` },
-    openGraph: { type: "article", title: g.title, description: g.description },
+    // openGraph сегмента целиком заменяет общий из layout, поэтому повторяем сайт, язык и картинку.
+    openGraph: {
+      type: "article",
+      siteName: "Envola",
+      locale: "ru_RU",
+      title: g.title,
+      description: g.description,
+      images: [
+        { url: "/opengraph-image", width: 1200, height: 630, alt: "Envola" },
+      ],
+    },
   };
 }
 
