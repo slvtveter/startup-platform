@@ -64,6 +64,7 @@ def to_card(s: Startup) -> StartupCard:
         status=s.status,
         published_at=s.published_at,
         owner_name=_display_name(s.owner),
+        owner_avatar_url=_pub_avatar(s.owner),
         open_roles=[_brief(r) for r in s.roles if r.is_open],
         team_size=1 + sum(1 for m in s.members if m.user_id != s.owner_id),
         is_demo=is_demo(s.owner),

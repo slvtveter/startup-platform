@@ -5464,6 +5464,17 @@
             "type": "string",
             "title": "Owner Name"
           },
+          "owner_avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Avatar Url"
+          },
           "open_roles": {
             "items": {
               "$ref": "#/components/schemas/RoleBrief"
@@ -6904,6 +6915,17 @@
             "type": "string",
             "title": "Owner Name"
           },
+          "owner_avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Avatar Url"
+          },
           "open_roles": {
             "items": {
               "$ref": "#/components/schemas/RoleBrief"
@@ -7001,6 +7023,17 @@
           "owner_name": {
             "type": "string",
             "title": "Owner Name"
+          },
+          "owner_avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Avatar Url"
           },
           "open_roles": {
             "items": {

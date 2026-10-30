@@ -22,45 +22,6 @@ export function toggleHref(basePath: string, params: SearchParams, name: string,
   return s ? `${basePath}?${s}` : basePath;
 }
 
-/**
- * Быстрый фильтр на виду: один ряд переключателей одной группы (не переносится, прокручивается вбок) («Все», «Идеи», «MVP»…).
- * «Все» снимает группу; остальные можно выбрать несколько. Ссылки — работает без JS.
- */
-export function QuickChips({
-  basePath,
-  params,
-  name,
-  options,
-  allLabel = "Все",
-}: {
-  basePath: string;
-  params: SearchParams;
-  name: string;
-  options: Option[];
-  allLabel?: string;
-}) {
-  const selected = asList(params[name]);
-  const chip = "inline-flex h-10 items-center rounded-full px-4 text-sm font-semibold whitespace-nowrap transition-colors";
-  const on = "bg-foreground text-background";
-  const off = "bg-tone text-foreground hover:bg-tone-2";
-  const onHover = "hover:bg-[#1d2a3f]";
-  return (
-    <nav aria-label="Быстрый фильтр" className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [mask-image:linear-gradient(90deg,#000_88%,transparent)] [scrollbar-width:none] sm:mx-0 sm:px-0">
-      <Link href={toggleHref(basePath, params, name, null)} scroll={false} aria-current={selected.length === 0 ? "true" : undefined} className={`${chip} ${selected.length === 0 ? `${on} ${onHover}` : off}`}>
-        {allLabel}
-      </Link>
-      {options.map((o) => {
-        const active = selected.includes(o.value);
-        return (
-          <Link key={o.value} href={toggleHref(basePath, params, name, o.value)} scroll={false} aria-current={active ? "true" : undefined} className={`${chip} ${active ? `${on} ${onHover}` : off}`}>
-            {o.label}
-          </Link>
-        );
-      })}
-    </nav>
-  );
-}
-
 export function Pager({ basePath, params, total, limit, page }: { basePath: string; params: SearchParams; total: number; limit: number; page: number }) {
   const pages = Math.ceil(total / limit);
   if (pages <= 1) return null;

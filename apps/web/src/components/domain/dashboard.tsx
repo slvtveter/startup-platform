@@ -44,7 +44,7 @@ export async function Dashboard() {
   // Сообщники для тебя: ищут, с кем начать, и у них другая роль — дополнят, а не повторят.
   const { data: cof } = await listPeople({ client, query: { cofound: true, limit: 24 } });
   const myRole = profile?.primary_role?.slug;
-  const partners = (cof?.items ?? []).filter((p) => p.slug !== profile?.slug && p.primary_role?.slug !== myRole).slice(0, 4);
+  const partners = (cof?.items ?? []).filter((p) => p.slug !== profile?.slug && p.primary_role?.slug !== myRole).slice(0, 2);
   const name = profile?.display_name;
   const myStartups = mine ?? [];
   const myApps = apps ?? [];
@@ -216,11 +216,11 @@ export async function Dashboard() {
               <h2 className="text-xl sm:text-2xl">Сообщники для тебя</h2>
               <p className="mt-1 text-muted-foreground">Хотят придумать стартап с нуля, и их навыки дополняют твои. Напиши первым.</p>
             </div>
-            <Link href="/people/cofounders" className="ml-auto text-sm font-semibold text-brand-ink hover:underline">
-              Все сообщники
+            <Link href="/people?cofound=1" className="ml-auto text-sm font-semibold text-brand-ink hover:underline">
+              Посмотреть всех
             </Link>
           </div>
-          <ul className="mt-6 grid grid-cols-1 gap-2 sm:gap-3 md:grid-cols-2">
+          <ul className="mt-6 grid gap-3">
             {partners.map((p) => (
               <PersonCard key={p.slug} person={p} as="li" />
             ))}
@@ -232,7 +232,7 @@ export async function Dashboard() {
         <div className="flex flex-wrap items-end gap-2">
           <div>
             <h2 className="text-xl sm:text-2xl">Подходят тебе</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Подбор по твоей роли, навыкам и условиям</p>
+            <p className="mt-1 text-muted-foreground">Подбор по твоей роли, навыкам и условиям.</p>
           </div>
           <Link href="/startups" className="ml-auto text-sm font-semibold text-brand-ink hover:underline">
             Все стартапы
@@ -245,15 +245,17 @@ export async function Dashboard() {
             ))}
           </div>
         ) : (
-          <EmptyState
-            title="Пока нечего предложить"
-            text="Укажи роль и навыки в профиле, и здесь появятся стартапы, которым ты нужен."
-            action={
-              <Link href="/me/profile" className={buttonVariants({ variant: "brand" })}>
-                Заполнить профиль
-              </Link>
-            }
-          />
+          <div className="mt-6">
+            <EmptyState
+              title="Пока нечего предложить"
+              text="Укажи роль и навыки в профиле, и здесь появятся стартапы, которым ты нужен."
+              action={
+                <Link href="/me/profile" className={buttonVariants({ variant: "brand" })}>
+                  Заполнить профиль
+                </Link>
+              }
+            />
+          </div>
         )}
       </section>
     </Container>
