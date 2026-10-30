@@ -17,6 +17,7 @@ import { JsonLd, breadcrumbs, siteUrl } from "@/components/site/json-ld";
 import { getPerson, getStartup, listMyStartups } from "@/lib/api";
 import { AVAILABILITY, COFOUND, LEVEL, LINK_KIND, TERMS, termsOf } from "@/lib/labels";
 import { getMe, serverClient } from "@/lib/server-api";
+import { roleLower } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -27,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     path: { slug },
   });
   if (!data) return { title: "Профиль не найден" };
-  const title = `${data.display_name}${data.primary_role ? `, ${data.primary_role.name.toLowerCase()}` : ""}`;
+  const title = `${data.display_name}${data.primary_role ? `, ${roleLower(data.primary_role.name)}` : ""}`;
   // Короткий заголовок вроде «-» поисковик показал бы как сниппет: собираем описание из роли и навыков.
   const skills = data.skills.slice(0, 5).map((s) => s.name).join(", ");
   const description =
