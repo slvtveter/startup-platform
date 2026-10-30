@@ -167,7 +167,7 @@ jobs:
           curl -skf https://localhost/api/health | grep '"db":"ok"'
           # web стартует отдельно от api: ждём и его, иначе гонка на холодном старте.
           for i in $(seq 1 40); do curl -skf -o /dev/null https://localhost/ && break; sleep 3; done
-          curl -skf https://localhost/ | grep -q "Здесь стартапы начинаются с разговора"
+          curl -skf https://localhost/ | grep -q "Найди, с кем делать стартап"
           curl -skf https://localhost/startups > /dev/null
           # OG-картинка рендерится в prod-образе: шрифты из assets/og-fonts попали в сборку.
           curl -skf -o /tmp/og.png https://localhost/startups/no-such-startup/opengraph-image
