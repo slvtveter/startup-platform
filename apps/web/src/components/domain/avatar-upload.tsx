@@ -1,6 +1,7 @@
 "use client";
 
 import { UserRound } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -20,10 +21,13 @@ export function AvatarUpload({
   /** Фото появилось или удалено: редактор пересчитывает заполненность. */
   onChange?: (url: string | null) => void;
 }) {
+  const router = useRouter();
   const [url, setUrlState] = useState(initialUrl);
   const setUrl = (v: string | null) => {
     setUrlState(v);
     onChange?.(v);
+    // Аватар в шапке рисует сервер: обновляем его сразу, без перезагрузки страницы.
+    router.refresh();
   };
   const [busy, setBusy] = useState(false);
   const input = useRef<HTMLInputElement>(null);

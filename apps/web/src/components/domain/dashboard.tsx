@@ -3,7 +3,6 @@ import Link from "next/link";
 
 import { Container, EmptyState } from "@/components/domain/page-header";
 import { SeatRow } from "@/components/domain/seats";
-import { PersonCard } from "@/components/domain/person-card";
 import { StartupCard } from "@/components/domain/startup-card";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -15,7 +14,7 @@ import {
   unreadChats,
   type ApplicationOut,
 } from "@/lib/api";
-import { APP_STATUS, plural, timeAgo } from "@/lib/labels";
+import { APP_STATUS, initials, plural, timeAgo } from "@/lib/labels";
 import { nextStep } from "@/lib/next-step";
 import { getMe, serverClient } from "@/lib/server-api";
 import { cn } from "@/lib/utils";
@@ -67,185 +66,143 @@ export async function Dashboard() {
     { href: "/chats", label: "Сообщения", hint: "непрочитанные диалоги", value: chats?.count ?? 0, icon: MessageCircleIcon },
   ];
 
+  const firstName = name?.split(/\s+/)[0];
+  const waitingTotal = stats.reduce((n, x) => n + x.value, 0);
+  const findPeople = myStartups.some((m) => m.open_roles.length > 0);
+
   return (
     <Container>
-      <div className="flex flex-wrap items-end gap-x-6 gap-y-4">
+      <div className="flex flex-wrap items-end gap-x-6 gap-y-5">
         <div className="min-w-0">
-          <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">{name ? `Привет, ${name}` : "Привет!"}</h1>
-          <p className="mt-3 text-lg text-muted-foreground max-sm:hidden">Отклики, приглашения и сообщения по твоим проектам.</p>
+          <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">{firstName ? `Привет, ${firstName}` : "Привет!"}</h1>
+          <p className="mt-2 text-muted-foreground sm:mt-3 sm:text-lg">Отклики, приглашения и стартапы под твою роль.</p>
         </div>
         <div className="grid w-full grid-cols-2 gap-2 sm:ml-auto sm:flex sm:w-auto">
           {/* Основателю с открытыми местами нужнее люди, остальным — проекты. */}
-          {myStartups.some((m) => m.open_roles.length > 0) ? (
-            <Link href={`/people?${myStartups.flatMap((m) => m.open_roles.map((r) => `role=${r.role.slug}`)).filter((v, i, a) => a.indexOf(v) === i).join("&")}`} className={buttonVariants({ variant: "outline" })}>
+          {findPeople ? (
+            <Link href={`/people?${myStartups.flatMap((m) => m.open_roles.map((r) => `role=${r.role.slug}`)).filter((v, i, a) => a.indexOf(v) === i).join("&")}`} className={buttonVariants()}>
               <SearchIcon aria-hidden className="size-4" />
               Найти людей
             </Link>
           ) : (
-            <Link href="/startups" className={buttonVariants({ variant: "outline" })}>
+            <Link href="/startups" className={buttonVariants()}>
               <SearchIcon aria-hidden className="size-4" />
               Найти стартап
             </Link>
           )}
-          <Link href="/startups/new" className={buttonVariants()}>
+          <Link href="/startups/new" className={buttonVariants({ variant: "outline" })}>
             <PlusIcon aria-hidden className="size-4" />
-            Предложить идею
+            Своя идея
           </Link>
         </div>
       </div>
 
-      <section
-        aria-labelledby="next-step"
-        className="mt-6 flex flex-col gap-3 rounded-[28px] bg-brand-soft px-5 py-5 sm:flex-row sm:items-center sm:gap-6 sm:px-6"
-      >
+      <section aria-labelledby="next-step" className="mt-8 flex flex-col gap-4 rounded-[24px] bg-brand-soft p-5 sm:flex-row sm:items-center sm:gap-6 sm:px-6">
         <div className="min-w-0">
-          <h2 id="next-step" className="font-sans text-base font-semibold tracking-normal">
+          <h2 id="next-step" className="font-sans text-lg font-bold tracking-normal">
             {step.title}
           </h2>
-          <p className="text-sm text-muted-foreground">{step.text}</p>
+          <p className="mt-1 text-muted-foreground">{step.text}</p>
         </div>
-        <Link href={step.href} className={buttonVariants({ variant: "brand", size: "sm", className: "shrink-0 sm:ml-auto" })}>
+        <Link href={step.href} className={buttonVariants({ variant: "brand", className: "shrink-0 sm:ml-auto" })}>
           {step.cta}
         </Link>
       </section>
 
       {profile && profile.completeness < 80 && (
-        <Link
-          href="/me/profile"
-          className="card-hover mt-3 flex flex-col gap-3 rounded-[28px] bg-tone px-5 py-5 hover:bg-tone-2 sm:flex-row sm:items-center sm:gap-6 sm:px-6"
-        >
+        <Link href="/me/profile" className="card-hover mt-3 flex items-center gap-4 rounded-[24px] bg-tone p-5 hover:bg-tone-2 sm:px-6">
           <span className="min-w-0 flex-1">
-            <span className="flex items-baseline gap-3">
+            <span className="flex items-baseline justify-between gap-3">
               <span className="font-semibold">Профиль заполнен на {profile.completeness}%</span>
-              {profile.missing[0] && <span className="text-sm text-muted-foreground max-sm:hidden">дальше: {profile.missing[0].toLowerCase()}</span>}
+              {profile.missing[0] && <span className="truncate text-sm text-muted-foreground max-sm:hidden">дальше: {profile.missing[0].toLowerCase()}</span>}
             </span>
-            <span aria-hidden className="mt-2.5 block h-2 overflow-hidden rounded-full bg-white">
+            <span aria-hidden className="mt-3 block h-2 overflow-hidden rounded-full bg-white">
               <span className="block h-full rounded-full bg-brand" style={{ width: `${Math.max(profile.completeness, 3)}%` }} />
             </span>
           </span>
-          <span className="inline-flex shrink-0 items-center gap-1.5 text-sm font-bold text-brand-ink">
-            Дополнить профиль
-            <ArrowRightIcon aria-hidden className="size-4" />
-          </span>
+          <ArrowRightIcon aria-hidden className="size-5 shrink-0 text-brand-ink" />
         </Link>
       )}
 
-      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Panel title="Мои стартапы" href="/me/startups" more={myStartups.length > 0 ? "Управлять" : undefined}>
-          {myStartups.length > 0 ? (
-            <ul className="divide-y">
-              {myStartups.slice(0, 5).map((m) => {
-                const open = m.open_roles.reduce((n, r) => n + (r.slots ?? 1), 0);
-                return (
-                  <li key={m.id}>
-                    <Link href={`/me/startups/${m.slug}`} className="group flex items-center gap-3 py-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate font-semibold group-hover:text-brand-ink">{m.title}</div>
-                        <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
-                          <SeatRow filled={m.team_size ?? 1} open={open} />
-                          <span>
-                            {m.views_30d ?? 0} {plural(m.views_30d ?? 0, "просмотр", "просмотра", "просмотров")} за 30 дней
-                          </span>
-                        </div>
-                      </div>
-                      {m.pending_applications > 0 ? (
-                        <span className="shrink-0 rounded-full bg-brand px-2.5 py-1 text-xs font-semibold text-white">
-                          +{m.pending_applications}{" "}
-                          {plural(m.pending_applications, "отклик", "отклика", "откликов")}
-                        </span>
-                      ) : (
-                        <ArrowRightIcon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
-                      )}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <PanelEmpty
-              text="Опиши идею и отметь, кого не хватает. На свободные роли смогут откликаться."
-              href="/startups/new"
-              cta="Предложить идею"
-            />
-          )}
-        </Panel>
-
-        <Panel title="Мои отклики" href="/me/applications" more={myApps.length > 0 ? "Все отклики" : undefined}>
-          {activeApps.length > 0 ? (
-            <ul className="divide-y">
-              {activeApps.slice(0, 5).map((a) => (
-                <AppRow key={a.id} app={a} />
-              ))}
-            </ul>
-          ) : (
-            <PanelEmpty
-              text={myApps.length > 0 ? "Активных откликов нет. Посмотри, кому ты нужен сейчас." : "Найди роль под свои навыки и откликнись."}
-              href="/startups"
-              cta="Найти стартап"
-            />
-          )}
-        </Panel>
-      </div>
-
-      <ul aria-label="Что ждёт ответа" className="mt-4 grid grid-cols-4 gap-2 sm:gap-3">
-        {stats.map((s) => (
-          <li key={s.label}>
-            <Link
-              href={s.href}
-              className={cn(
-                "group flex h-full flex-col rounded-2xl bg-tone p-3 transition-colors duration-200 hover:bg-tone-2 sm:rounded-2xl sm:p-4",
-                s.value > 0 && "bg-brand-soft hover:bg-marker",
-              )}
-            >
-              <span className="flex items-center gap-2 text-xs leading-tight font-semibold sm:text-sm">
-                <s.icon aria-hidden className={cn("size-4 max-sm:hidden", s.value > 0 ? "text-brand-ink" : "text-muted-foreground")} />
-                {s.label}
-              </span>
-              <span className="mt-1 text-xl font-extrabold tracking-[-0.03em] tabular-nums sm:mt-3 sm:text-[32px]">{s.value}</span>
-              <span className="mt-0.5 hidden text-xs text-muted-foreground sm:block">{s.hint}</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-
-
-      {partners.length > 0 && (
-        <section className="mt-12">
-          <div className="flex flex-wrap items-end gap-2">
-            <div>
-              <h2 className="text-xl sm:text-2xl">Сообщники для тебя</h2>
-              <p className="mt-1 text-muted-foreground">Хотят придумать стартап с нуля, и их навыки дополняют твои. Напиши первым.</p>
-            </div>
-            <Link href="/people?cofound=1" className="ml-auto text-sm font-semibold text-brand-ink hover:underline">
-              Посмотреть всех
-            </Link>
-          </div>
-          <ul className="mt-6 grid gap-3">
-            {partners.map((p) => (
-              <PersonCard key={p.slug} person={p} as="li" />
-            ))}
-          </ul>
-        </section>
+      {/* Счётчики показываем, только когда что-то ждёт ответа: ряд нулей у новичка — шум. */}
+      {waitingTotal > 0 && (
+        <ul aria-label="Что ждёт ответа" className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+          {stats.map((st) => (
+            <li key={st.label}>
+              <Link
+                href={st.href}
+                className={cn(
+                  "flex h-full items-center justify-between gap-3 rounded-2xl bg-tone p-4 transition-colors duration-200 hover:bg-tone-2 sm:flex-col sm:items-start sm:justify-start",
+                  st.value > 0 && "bg-brand-soft hover:bg-marker",
+                )}
+              >
+                <span className="flex items-center gap-2 text-sm leading-tight font-semibold">
+                  <st.icon aria-hidden className={cn("size-4 max-sm:hidden", st.value > 0 ? "text-brand-ink" : "text-muted-foreground")} />
+                  {st.label}
+                </span>
+                <span className="text-2xl font-extrabold tracking-[-0.03em] tabular-nums sm:text-[32px]">{st.value}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       )}
 
-      <section className="mt-12">
-        <div className="flex flex-wrap items-end gap-2">
-          <div>
-            <h2 className="text-xl sm:text-2xl">Подходят тебе</h2>
-            <p className="mt-1 text-muted-foreground">Подбор по твоей роли, навыкам и условиям.</p>
-          </div>
-          <Link href="/startups" className="ml-auto text-sm font-semibold text-brand-ink hover:underline">
-            Все стартапы
-          </Link>
+      {/* Панели — только когда в них есть что показать; пустые подсказки уже в карточке следующего шага. */}
+      {(myStartups.length > 0 || activeApps.length > 0) && (
+        <div className="mt-8 grid grid-cols-1 gap-3 lg:grid-cols-2">
+          {myStartups.length > 0 && (
+            <Panel title="Мои стартапы" href="/me/startups" more="Управлять">
+              <ul className="divide-y">
+                {myStartups.slice(0, 5).map((m) => {
+                  const open = m.open_roles.reduce((n, r) => n + (r.slots ?? 1), 0);
+                  return (
+                    <li key={m.id}>
+                      <Link href={`/me/startups/${m.slug}`} className="group flex items-center gap-3 py-3">
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate font-semibold group-hover:text-brand-ink">{m.title}</div>
+                          <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
+                            <SeatRow filled={m.team_size ?? 1} open={open} />
+                            <span>
+                              {m.views_30d ?? 0} {plural(m.views_30d ?? 0, "просмотр", "просмотра", "просмотров")} за 30 дней
+                            </span>
+                          </div>
+                        </div>
+                        {m.pending_applications > 0 ? (
+                          <span className="shrink-0 rounded-full bg-brand px-2.5 py-1 text-xs font-semibold text-white">
+                            +{m.pending_applications} {plural(m.pending_applications, "отклик", "отклика", "откликов")}
+                          </span>
+                        ) : (
+                          <ArrowRightIcon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+                        )}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </Panel>
+          )}
+          {activeApps.length > 0 && (
+            <Panel title="Мои отклики" href="/me/applications" more="Все отклики">
+              <ul className="divide-y">
+                {activeApps.slice(0, 5).map((a) => (
+                  <AppRow key={a.id} app={a} />
+                ))}
+              </ul>
+            </Panel>
+          )}
         </div>
+      )}
+
+      <section className="mt-12 sm:mt-16">
+        <SectionHead title="Подходят тебе" text="Стартапы под твою роль, навыки и условия." href="/startups" more="Все стартапы" />
         {recs && recs.length > 0 ? (
-          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:mt-6 sm:grid-cols-2 lg:grid-cols-3">
             {recs.map((r) => (
               <StartupCard key={r.startup.id} startup={r.startup} reasons={r.reasons} />
             ))}
           </div>
         ) : (
-          <div className="mt-6">
+          <div className="mt-5 sm:mt-6">
             <EmptyState
               title="Пока нечего предложить"
               text="Укажи роль и навыки в профиле, и здесь появятся стартапы, которым ты нужен."
@@ -258,13 +215,58 @@ export async function Dashboard() {
           </div>
         )}
       </section>
+
+      {partners.length > 0 && (
+        <section className="mt-12 sm:mt-16">
+          <SectionHead title="Сообщники для тебя" text="Хотят придумать проект с нуля, и их навыки дополняют твои." href="/people?cofound=1" more="Все" />
+          <ul className="mt-5 grid gap-2 sm:mt-6 sm:grid-cols-2 sm:gap-3">
+            {partners.map((p) => (
+              <li key={p.slug}>
+                <Link href={`/people/${p.slug}`} className="card-hover flex items-center gap-4 rounded-[24px] bg-tone p-3 pr-5 hover:bg-tone-2">
+                  {p.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP
+                    <img src={p.avatar_url} alt="" loading="lazy" className="size-16 shrink-0 rounded-2xl object-cover" />
+                  ) : (
+                    <span aria-hidden className="grid size-16 shrink-0 place-items-center rounded-2xl bg-brand-soft text-lg font-extrabold text-brand-ink">
+                      {initials(p.display_name)}
+                    </span>
+                  )}
+                  <span className="min-w-0 flex-1">
+                    <b className="block truncate text-base font-bold text-brand-ink">{p.primary_role?.name ?? p.display_name}</b>
+                    <span className="block truncate text-sm">
+                      {p.display_name}
+                      {p.city && <span className="text-muted-foreground"> · {p.city}</span>}
+                    </span>
+                    {p.headline && <span className="mt-0.5 block truncate text-sm text-muted-foreground">{p.headline}</span>}
+                  </span>
+                  <ArrowRightIcon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </Container>
+  );
+}
+
+function SectionHead({ title, text, href, more }: { title: string; text: string; href: string; more: string }) {
+  return (
+    <div className="flex items-end justify-between gap-4">
+      <div className="min-w-0">
+        <h2 className="text-2xl sm:text-[32px]">{title}</h2>
+        <p className="mt-1.5 text-muted-foreground">{text}</p>
+      </div>
+      <Link href={href} className="shrink-0 pb-0.5 text-sm font-semibold text-brand-ink hover:text-brand-hover">
+        {more}
+      </Link>
+    </div>
   );
 }
 
 function Panel({ title, href, more, children }: { title: string; href: string; more?: string; children: React.ReactNode }) {
   return (
-    <section className="flex flex-col rounded-[28px] bg-tone p-6">
+    <section className="flex flex-col rounded-[24px] bg-tone p-5 sm:p-6">
       <div className="flex items-center gap-2">
         <h2 className="font-sans text-lg font-bold tracking-normal">{title}</h2>
         {more && (
@@ -275,17 +277,6 @@ function Panel({ title, href, more, children }: { title: string; href: string; m
       </div>
       <div className="mt-2 flex flex-1 flex-col">{children}</div>
     </section>
-  );
-}
-
-function PanelEmpty({ text, href, cta }: { text: string; href: string; cta: string }) {
-  return (
-    <div className="flex flex-1 flex-col items-start justify-center gap-3 py-4">
-      <p className="text-sm text-muted-foreground">{text}</p>
-      <Link href={href} className={buttonVariants({ variant: "outline", size: "sm" })}>
-        {cta}
-      </Link>
-    </div>
   );
 }
 

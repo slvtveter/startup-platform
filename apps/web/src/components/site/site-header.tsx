@@ -67,6 +67,7 @@ export async function SiteHeader() {
               <UserMenu
                 email={user.email}
                 name={user.profile?.display_name || user.email.split("@")[0]}
+                avatarUrl={user.profile?.avatar_url}
                 isAdmin={user.is_admin}
                 inbox={{ mine: inbox?.mine ?? 0, incoming: inbox?.incoming ?? 0 }}
               />

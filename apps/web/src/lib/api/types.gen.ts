@@ -734,6 +734,10 @@ export type MeProfile = {
      * Completeness
      */
     completeness: number;
+    /**
+     * Avatar Url
+     */
+    avatar_url?: string | null;
 };
 
 /**

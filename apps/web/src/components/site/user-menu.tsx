@@ -4,7 +4,7 @@ import { LogOut, Rocket, Send, Settings, Shield, UserRound, type LucideIcon } fr
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,11 +26,14 @@ type Item = { href: string; label: string; icon: LucideIcon; badge?: number };
 export function UserMenu({
   email,
   name,
+  avatarUrl,
   isAdmin,
   inbox,
 }: {
   email: string;
   name: string;
+  /** Фото из профиля; без него — инициалы. */
+  avatarUrl?: string | null;
   isAdmin: boolean;
   inbox: { mine: number; incoming: number };
 }) {
@@ -54,6 +57,7 @@ export function UserMenu({
         aria-label={`Меню аккаунта ${initials(name)}${unread ? `, новых событий: ${unread}` : ""}`}
       >
         <Avatar className="size-9">
+          {avatarUrl && <AvatarImage src={avatarUrl} alt="" className="object-cover" />}
           <AvatarFallback className="bg-foreground text-sm font-bold text-background">{initials(name)}</AvatarFallback>
         </Avatar>
         {unread > 0 && (
@@ -63,9 +67,10 @@ export function UserMenu({
       <DropdownMenuContent align="end" className="w-64 p-1.5">
         <DropdownMenuGroup>
           <DropdownMenuLabel className="flex items-center gap-3 px-2 py-2 font-normal">
-            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-foreground text-sm font-bold text-background">
-              {initials(name)}
-            </span>
+            <Avatar className="size-9 shrink-0">
+              {avatarUrl && <AvatarImage src={avatarUrl} alt="" className="object-cover" />}
+              <AvatarFallback className="bg-foreground text-sm font-bold text-background">{initials(name)}</AvatarFallback>
+            </Avatar>
             <span className="min-w-0">
               <span className="block truncate font-semibold text-foreground">{name}</span>
               <span className="block truncate text-xs text-muted-foreground">{email}</span>

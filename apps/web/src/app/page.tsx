@@ -65,8 +65,10 @@ async function Landing() {
       more: { href: "/startups?stage=prototype&stage=mvp&stage=launched", label: "Все стартапы" },
       content: (
         <div className={grid}>
-          {startups.slice(0, 6).map((s) => (
-            <StartupCard key={s.id} startup={s} />
+          {startups.slice(0, 6).map((s, i) => (
+            <div key={s.id} className={cn(i >= 3 && "max-sm:hidden")}>
+              <StartupCard startup={s} />
+            </div>
           ))}
         </div>
       ),
@@ -131,7 +133,8 @@ async function Landing() {
 
       {cofounders.length > 0 && <Cofounders people={cofounders.slice(0, 4)} total={cofounders.length} />}
 
-      <Section eyebrow="Три шага" title="Как попасть в команду стартапа">
+
+      <Section eyebrow="Три шага" title="Как попасть в команду стартапа" className="max-md:hidden">
         <Steps />
       </Section>
 
@@ -162,13 +165,13 @@ function Hero({ startup, faces }: { startup?: Startup; faces: Person[] }) {
           <span aria-hidden className="size-1.5 rounded-full bg-brand" />
           Для студентов и начинающих в IT
         </p>
-        <h1 className="mt-6 text-[44px] leading-[0.98] tracking-[-0.045em] text-balance sm:text-[60px] lg:text-[64px]">
+        <h1 className="mt-5 text-[38px] leading-[1] tracking-[-0.045em] text-balance sm:mt-6 sm:text-[60px] sm:leading-[0.98] lg:text-[64px]">
           Получи первый опыт в настоящем <span className="text-brand">стартапе</span>
         </h1>
         <p className="mt-6 max-w-[44ch] text-lg text-muted-foreground sm:text-xl">
           Стартапы ищут разработчиков, дизайнеров и маркетологов на первые роли. Без резюме и стажа.
         </p>
-        <div className="mt-9 flex flex-wrap gap-2.5">
+        <div className="mt-8 grid gap-2.5 sm:mt-9 sm:flex sm:flex-wrap">
           <PathLink path="seeker" href="/startups" className={buttonVariants({ size: "lg" })}>
             Смотреть стартапы
             <ArrowRight aria-hidden />
@@ -209,7 +212,7 @@ function Hero({ startup, faces }: { startup?: Startup; faces: Person[] }) {
         </div>
 
         {startup && role && (
-          <div className="chat-msg absolute top-5 left-4 flex max-w-[320px] items-end gap-2 sm:top-8 sm:left-6 lg:-left-10" style={delay(500)}>
+          <div className="chat-msg absolute top-5 left-4 flex max-w-[320px] items-end gap-2 max-sm:hidden sm:top-8 sm:left-6 lg:-left-10" style={delay(500)}>
             {startup.owner_avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP
               <img src={startup.owner_avatar_url} alt="" className="size-9 shrink-0 rounded-full object-cover ring-2 ring-white" />
@@ -281,12 +284,12 @@ function RoleStrip({ roles }: { roles: { slug: string; name: string; n: number }
         <h2 id="roles-h" className="shrink-0 text-lg font-bold tracking-[-0.01em] lg:w-44">
           Кого ищут прямо сейчас
         </h2>
-        <ul className="flex flex-wrap gap-2">
+        <ul className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
           {roles.slice(0, 8).map((r) => (
             <li key={r.slug}>
               <Link
                 href={`/startups?role=${r.slug}`}
-                className="inline-flex h-10 items-center gap-2 rounded-full bg-white pr-2 pl-4 text-sm font-semibold transition-colors hover:bg-brand-soft hover:text-brand-ink"
+                className="inline-flex h-10 items-center gap-2 rounded-full bg-white pr-2 pl-4 text-sm font-semibold whitespace-nowrap transition-colors hover:bg-brand-soft hover:text-brand-ink"
               >
                 {r.name}
                 <span className="grid h-6 min-w-6 place-items-center rounded-full bg-tone px-1.5 text-xs font-bold tabular-nums">{r.n}</span>
@@ -294,7 +297,7 @@ function RoleStrip({ roles }: { roles: { slug: string; name: string; n: number }
             </li>
           ))}
           <li>
-            <Link href="/startups" className="inline-flex h-10 items-center gap-1.5 px-3 text-sm font-bold text-brand-ink hover:text-brand-hover">
+            <Link href="/startups" className="inline-flex h-10 items-center gap-1.5 px-3 text-sm font-bold whitespace-nowrap text-brand-ink hover:text-brand-hover">
               Все стартапы
               <ArrowRight aria-hidden className="size-4" />
             </Link>
@@ -308,8 +311,8 @@ function RoleStrip({ roles }: { roles: { slug: string; name: string; n: number }
 /* ───────────── Четыре дороги ───────────── */
 
 function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: Startup; people: Person[]; faces: Person[] }) {
-  const card = "reveal-item card-hover group flex flex-col overflow-hidden rounded-[32px] p-7 sm:p-9";
-  const cta = "mt-auto inline-flex items-center gap-1.5 pt-8 font-bold";
+  const card = "reveal-item card-hover group flex flex-col overflow-hidden rounded-[28px] p-6 sm:rounded-[32px] sm:p-9";
+  const cta = "mt-auto inline-flex items-center gap-1.5 pt-6 font-bold sm:pt-8";
   const arrow = <ArrowRight aria-hidden className="size-4 transition-transform duration-300 group-hover:translate-x-1" />;
   const slots = idea?.open_roles.length
     ? idea.open_roles.slice(0, 2).map((r) => ({ name: r.role.name, n: r.slots ?? 1 }))
@@ -327,7 +330,7 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
             <h3 className="mt-3 max-w-[14ch] text-[32px] leading-[1.02] font-extrabold tracking-[-0.04em] sm:text-[40px]">Залети в стартап и набери опыт</h3>
             <span className="mt-4 block max-w-[34ch] text-lg text-white/80">Настоящие задачи, кейс в портфолио и команда, с которой можно идти дальше.</span>
           </span>
-          <span aria-hidden className="grid gap-1.5 rounded-2xl bg-white p-2 text-foreground shadow-[0_24px_50px_-20px_rgb(0_0_0/0.5)] transition-transform duration-500 group-hover:-translate-y-1">
+          <span aria-hidden className="grid gap-1.5 rounded-2xl bg-white p-2 text-foreground max-sm:hidden shadow-[0_24px_50px_-20px_rgb(0_0_0/0.5)] transition-transform duration-500 group-hover:-translate-y-1">
             {startups.map((s) => (
               <span key={s.id} className="flex items-center gap-3 rounded-xl bg-tone p-2 pr-3">
                 <span className="relative size-10 shrink-0 overflow-hidden rounded-lg bg-brand-soft">
@@ -354,7 +357,7 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
       <PathLink path="founder" href="/register?next=/startups/new" className={cn(card, "bg-tone hover:bg-tone-2 lg:col-span-2")} style={delay(60)}>
         <span className="text-sm font-bold text-muted-foreground">Есть идея</span>
         <h3 className="mt-3 text-[28px] leading-[1.05] font-extrabold tracking-[-0.04em] sm:text-[32px]">Собери под неё команду</h3>
-        <span aria-hidden className="mt-6 rounded-2xl bg-white p-4 transition-transform duration-500 group-hover:-translate-y-0.5">
+        <span aria-hidden className="mt-6 rounded-2xl bg-white p-4 max-sm:hidden transition-transform duration-500 group-hover:-translate-y-0.5">
           <b className="block truncate text-sm font-extrabold">{idea?.title ?? "Твоя идея"}</b>
           <span className="mt-0.5 block text-xs text-muted-foreground">Места в команде</span>
           <span className="mt-3 grid gap-1.5">
@@ -377,7 +380,7 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
         <span className="text-sm font-bold text-muted-foreground">Нет идеи</span>
         <h3 className="mt-3 text-[28px] leading-[1.05] font-extrabold tracking-[-0.04em] sm:text-[32px]">Придумай её вместе с сообщниками</h3>
         {faces.length > 0 && (
-          <span aria-hidden className="mt-6 flex -space-x-3">
+          <span aria-hidden className="mt-6 flex -space-x-3 max-sm:mt-5">
             {faces.map((p) => (
               // eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP
               <img key={p.slug} src={p.avatar_url!} alt="" className="size-14 rounded-full object-cover ring-4 ring-tone transition-transform duration-500 group-hover:-translate-y-0.5" />
@@ -398,7 +401,7 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
             <h3 className="mt-3 max-w-[16ch] text-[32px] leading-[1.02] font-extrabold tracking-[-0.04em] text-white sm:text-[40px]">Найди разработчика или дизайнера</h3>
             <span className="mt-4 block max-w-[34ch] text-lg text-white/70">Фильтр по роли, навыкам и опыту.</span>
           </span>
-          <span aria-hidden className="grid gap-1.5">
+          <span aria-hidden className="grid gap-1.5 max-sm:hidden">
             {people.map((p) => (
               <span key={p.slug} className="flex items-center gap-3 rounded-2xl bg-white/10 p-2.5 pr-3.5 text-white">
                 {/* eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP */}
@@ -427,7 +430,7 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
 
 function Cofounders({ people, total }: { people: Person[]; total: number }) {
   return (
-    <section aria-labelledby="cof-h" className={`${wrap} pt-[clamp(80px,9vw,128px)]`}>
+    <section aria-labelledby="cof-h" className={`${wrap} pt-[clamp(80px,9vw,128px)] max-md:hidden`}>
       <div className="rounded-[36px] bg-brand-soft p-6 sm:p-10 lg:p-12">
         <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-6">
           <div>
@@ -516,17 +519,20 @@ function Section({
   eyebrow,
   title,
   lead,
+  className,
   children,
 }: {
   id?: string;
   eyebrow?: string;
   title: string;
   lead?: string;
+  /** Например, max-md:hidden: на телефоне блок не нужен. */
+  className?: string;
   children: React.ReactNode;
 }) {
   const hid = `${id ?? title.slice(0, 12).replace(/\s+/g, "-")}-h`;
   return (
-    <section id={id} aria-labelledby={hid} className={`${wrap} scroll-mt-24 pt-[clamp(80px,9vw,128px)]`}>
+    <section id={id} aria-labelledby={hid} className={cn(wrap, "scroll-mt-24 pt-[clamp(72px,9vw,128px)]", className)}>
       <div className="mb-10 flex flex-wrap items-end gap-x-10 gap-y-4">
         <div>
           {eyebrow && <p className="mb-3 text-sm font-bold text-brand-ink">{eyebrow}</p>}

@@ -95,6 +95,7 @@ class MeProfile(BaseModel):
     display_name: str
     is_published: bool
     completeness: int
+    avatar_url: str | None = None
 
 
 class SessionOut(BaseModel):
