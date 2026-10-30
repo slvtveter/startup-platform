@@ -3,16 +3,16 @@
 import { MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { ApplicationStatusBadge, SkillChip } from "@/components/domain/badges";
-import { PersonAvatar } from "@/components/domain/person-card";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { acceptApplication, rejectApplication, withdrawApplication, type ApplicationOut } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
-import { LEVEL, timeAgo } from "@/lib/labels";
+import { LEVEL, initials, timeAgo } from "@/lib/labels";
+import { cn } from "@/lib/utils";
 
 const REJECT_TEMPLATES = ["Роль уже закрыта", "Нужен опыт в этой области", "Не совпадаем по времени"];
 
@@ -23,43 +23,24 @@ const NEXT_STEPS = [
   "Спроси, какие задачи на первую неделю и кто в команде их проверяет.",
 ];
 
-const STEP_LABELS: Record<string, string> = {
-  accepted: "Принят",
-  rejected: "Отказ",
-  withdrawn: "Отозван",
-};
+/** Строка контекста: на какую роль и когда; после решения — когда ответили. */
+function contextLine(app: ApplicationOut, perspective: "candidate" | "founder") {
+  const invite = app.direction === "invite";
+  const lead =
+    perspective === "founder" ? (invite ? "Ты пригласил на роль" : "Откликается на роль") : invite ? "Тебя зовут на роль" : "Твой отклик на роль";
+  const decided = app.decided_at ? `, ответ ${timeAgo(app.decided_at)}` : "";
+  return { lead, when: `${timeAgo(app.created_at)}${decided}` };
+}
 
-/** Путь отклика: отправлен → решение (при принятии сразу открываются контакты). Будущий шаг приглушён. */
-function StatusTimeline({ app }: { app: ApplicationOut }) {
-  const decided = app.status !== "pending";
-  // Принятие и открытие контактов — одно действие, поэтому и один шаг.
-  const decision =
-    app.status === "accepted" ? "Принят, контакты открыты" : decided ? (STEP_LABELS[app.status] ?? "Решение") : "Ждёт решения";
-  const steps = [
-    { label: app.direction === "invite" ? "Приглашение" : "Отправлен", done: true, at: app.created_at },
-    { label: decision, done: decided, at: app.decided_at },
-  ];
-  return (
-    <ol className="mt-4 flex flex-col items-start gap-1.5 text-xs sm:flex-row sm:items-center sm:gap-2" aria-label="Статус заявки">
-      {steps.map((step, i) => (
-        <li key={i} className="flex items-center gap-2">
-          {/* На узком экране шаги идут столбиком, и соединительная черта только мешает. */}
-          {i > 0 && <span aria-hidden className={`hidden h-px w-6 sm:block ${step.done ? "bg-foreground" : "bg-border"}`} />}
-          <span
-            className={`rounded-full px-2.5 py-1 font-semibold ${
-              step.done
-                ? app.status === "rejected" && i === 1
-                  ? "bg-secondary text-muted-foreground"
-                  : "bg-foreground text-background"
-                : "border border-dashed text-muted-foreground"
-            }`}
-          >
-            {step.label}
-            {step.done && step.at ? `, ${timeAgo(step.at)}` : ""}
-          </span>
-        </li>
-      ))}
-    </ol>
+/** Фото человека или инициалы на мягком фоне. */
+function Face({ name, url }: { name: string; url?: string | null }) {
+  return url ? (
+    // eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP
+    <img src={url} alt="" loading="lazy" decoding="async" className="size-14 shrink-0 rounded-2xl bg-tone-2 object-cover" />
+  ) : (
+    <span aria-hidden className="grid size-14 shrink-0 place-items-center rounded-2xl bg-brand-soft text-lg font-extrabold text-brand-ink">
+      {initials(name)}
+    </span>
   );
 }
 
@@ -85,44 +66,77 @@ export function ApplicationCard({ app, perspective }: { app: ApplicationOut; per
     router.refresh();
   }
 
-  const isInvite = app.direction === "invite";
-  const person = app.applicant;
-  const highlight = app.can_decide ? "border-foreground border-2" : app.status === "accepted" ? "border-success-ink/40" : "";
+  const [expanded, setExpanded] = useState(false);
+  const person = perspective === "founder" ? app.applicant : null;
+  const meta = person
+    ? [person.primary_role?.name, person.experience_level && LEVEL[person.experience_level], person.city].filter(Boolean).join(" · ")
+    : "";
+  const skills = person?.skills.slice(0, 5) ?? [];
+  const moreSkills = (person?.skills.length ?? 0) - skills.length;
+  // «Показать целиком» — только если текст реально не влез в три строки (на телефоне это раньше, чем на десктопе).
+  const messageRef = useRef<HTMLSpanElement>(null);
+  const [overflowing, setOverflowing] = useState(false);
+  useEffect(() => {
+    const el = messageRef.current;
+    if (!el) return;
+    const check = () => setOverflowing(el.scrollHeight > el.clientHeight + 1);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const ctx = contextLine(app, perspective);
 
   return (
-    <article id={`app-${app.id}`} className={`scroll-mt-24 rounded-2xl border bg-card p-5 sm:p-6 ${highlight}`}>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-        {perspective === "founder" && person && <PersonAvatar name={person.display_name} />}
+    <article id={`app-${app.id}`} className={cn("scroll-mt-24 rounded-3xl border bg-card p-5 sm:p-6", app.can_decide && "border-foreground/25")}>
+      {/* Шапка как у записи в CRM: лицо, имя, одна строка о человеке, статус справа. */}
+      <div className="flex items-start gap-4">
+        {person && <Face name={person.display_name} url={person.avatar_url ?? person.avatar_url_lg} />}
         <div className="min-w-0 flex-1">
-          <div className="text-sm text-muted-foreground">
-            {perspective === "candidate" ? (
-              <Link href={`/startups/${app.startup_slug}`} className="font-semibold text-foreground hover:underline">
-                {app.startup_title}
-              </Link>
-            ) : person ? (
-              <Link href={`/people/${person.slug}`} className="font-semibold text-foreground hover:underline">
-                {person.display_name}
-              </Link>
-            ) : null}
-            {", "}
-            {isInvite ? (perspective === "candidate" ? "приглашение от основателя" : "вы пригласили") : "отклик"}, {timeAgo(app.created_at)}
+          <div className="flex items-start gap-3">
+            <h2 className="line-clamp-2 min-w-0 flex-1 text-lg leading-7 font-bold tracking-[-0.02em] break-words">
+              {person ? (
+                <Link href={`/people/${person.slug}`} className="hover:text-brand-ink">
+                  {person.display_name}
+                </Link>
+              ) : (
+                <Link href={`/startups/${app.startup_slug}`} className="hover:text-brand-ink">
+                  {app.startup_title}
+                </Link>
+              )}
+            </h2>
+            <ApplicationStatusBadge status={app.status} className="mt-0.5 shrink-0" />
           </div>
-          <div className="mt-0.5 text-xl font-bold">{app.role_title}</div>
-          {perspective === "founder" && person && (
-            <div className="mt-2 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
-              {person.experience_level && <span className="mr-1">{LEVEL[person.experience_level]}</span>}
-              {person.skills.slice(0, 5).map((s) => (
-                <SkillChip key={s.slug} name={s.name} />
-              ))}
-            </div>
-          )}
+          {meta && <p className="text-sm text-muted-foreground">{meta}</p>}
         </div>
-        <ApplicationStatusBadge status={app.status} className="self-start" />
       </div>
 
-      <StatusTimeline app={app} />
-
-      <p className="mt-4 rounded-xl bg-secondary p-4 text-base leading-relaxed whitespace-pre-line">{app.message}</p>
+      <p className="mt-4 text-sm text-muted-foreground">
+        {ctx.lead} <span className="font-bold text-foreground">{app.role_title}</span> · {ctx.when}
+      </p>
+      <blockquote className="mt-2 border-l-2 border-cornflower pl-4 text-base leading-relaxed">
+        <span ref={messageRef} className={cn("whitespace-pre-line", !expanded && "line-clamp-3")}>
+          {app.message}
+        </span>
+        {(overflowing || expanded) && (
+          <button
+            type="button"
+            onClick={() => setExpanded(!expanded)}
+            aria-expanded={expanded}
+            className="mt-1 block text-sm font-bold text-brand-ink hover:underline"
+          >
+            {expanded ? "Свернуть" : "Показать целиком"}
+          </button>
+        )}
+      </blockquote>
+      {skills.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {skills.map((s) => (
+            <SkillChip key={s.slug} name={s.name} />
+          ))}
+          {moreSkills > 0 && <SkillChip name={`+${moreSkills}`} />}
+        </div>
+      )}
       {app.decision_note && <p className="mt-3 text-sm text-muted-foreground">Комментарий: {app.decision_note}</p>}
 
       {app.contacts && (
@@ -134,7 +148,12 @@ export function ApplicationCard({ app, perspective }: { app: ApplicationOut; per
           {app.contacts.telegram && (
             <div>
               <div className="text-success-ink">Telegram</div>
-              <a href={`https://t.me/${app.contacts.telegram}`} target="_blank" rel="noopener noreferrer" className="font-bold underline">
+              <a
+                href={`https://t.me/${app.contacts.telegram}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-8 items-center font-bold underline"
+              >
                 @{app.contacts.telegram}
               </a>
             </div>
@@ -142,7 +161,7 @@ export function ApplicationCard({ app, perspective }: { app: ApplicationOut; per
           {app.contacts.email && (
             <div>
               <div className="text-success-ink">Email</div>
-              <a href={`mailto:${app.contacts.email}`} className="font-bold underline">
+              <a href={`mailto:${app.contacts.email}`} className="inline-flex min-h-8 items-center font-bold underline">
                 {app.contacts.email}
               </a>
             </div>
@@ -164,58 +183,61 @@ export function ApplicationCard({ app, perspective }: { app: ApplicationOut; per
         </div>
       )}
 
-      {(app.can_decide || app.can_withdraw) && (
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          {app.can_decide && !rejecting && (
+      {/* Одна строка действий: решение слева, переписка справа. Во время отказа — только форма отказа. */}
+      {rejecting ? (
+        <div className="mt-5 grid gap-2">
+          <div className="flex flex-wrap gap-2">
+            {REJECT_TEMPLATES.map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setNote(t)}
+                className="rounded-full border px-3 py-1 text-xs font-semibold hover:border-foreground"
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+          <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Причина (необязательно, но вежливо)" />
+          <div className="flex gap-2">
+            <Button variant="destructive" onClick={() => act("reject")} disabled={busy}>
+              Отправить отказ
+            </Button>
+            <Button variant="ghost" onClick={() => setRejecting(false)}>
+              Отмена
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-5 flex flex-wrap items-center gap-2">
+          {app.can_decide && (
             <>
-              <Button className="bg-success-ink text-primary-foreground hover:bg-success-ink/90" onClick={() => act("accept")} disabled={busy}>
+              <Button variant="brand" onClick={() => act("accept")} disabled={busy}>
                 Принять
               </Button>
               <Button variant="outline" onClick={() => setRejecting(true)} disabled={busy}>
                 Отклонить
               </Button>
-              {perspective === "founder" && person && (
-                <Link href={`/people/${person.slug}`} className="px-2 text-sm font-semibold text-muted-foreground hover:text-foreground">
-                  Профиль и портфолио
-                </Link>
-              )}
             </>
           )}
-          {rejecting && (
-            <div className="grid w-full gap-2">
-              <div className="flex flex-wrap gap-2">
-                {REJECT_TEMPLATES.map((t) => (
-                  <button key={t} type="button" onClick={() => setNote(t)} className="rounded-full border px-3 py-1 text-xs font-semibold hover:border-foreground">
-                    {t}
-                  </button>
-                ))}
-              </div>
-              <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Причина (необязательно, но вежливо)" />
-              <div className="flex gap-2">
-                <Button variant="destructive" onClick={() => act("reject")} disabled={busy}>
-                  Отправить отказ
-                </Button>
-                <Button variant="ghost" onClick={() => setRejecting(false)}>
-                  Отмена
-                </Button>
-              </div>
-            </div>
-          )}
           {app.can_withdraw && (
-            <Button variant="ghost" onClick={() => act("withdraw")} disabled={busy}>
-              Отозвать отклик
+            <Button variant="outline" onClick={() => act("withdraw")} disabled={busy}>
+              {app.direction === "invite" ? "Отозвать приглашение" : "Отозвать отклик"}
             </Button>
           )}
+          {app.status !== "withdrawn" && (
+            <Link
+              href={`/chats/application/${app.id}`}
+              className={buttonVariants({
+                variant: "ghost",
+                className: "sm:ml-auto",
+              })}
+            >
+              <MessageCircle aria-hidden />
+              {perspective === "founder" ? "Написать кандидату" : "Написать основателю"}
+            </Link>
+          )}
         </div>
-      )}
-      {app.status !== "withdrawn" && (
-        <Link
-          href={`/chats/application/${app.id}`}
-          className={buttonVariants({ variant: "outline", size: "sm", className: "mt-4 w-fit" })}
-        >
-          <MessageCircle aria-hidden className="size-4" />
-          {perspective === "founder" ? "Написать кандидату" : "Написать основателю"}
-        </Link>
       )}
     </article>
   );

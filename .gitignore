@@ -19,3 +19,6 @@ node_modules
 infra/.env.prod
 infra/.env.ci
 infra/backups/
+
+# Песочница вариантов дизайна (скилл envola-design), в git не попадает
+apps/web/src/app/design-lab/

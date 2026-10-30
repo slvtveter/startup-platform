@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+/* Песочница вариантов (скилл envola-design) лежит в .gitignore, а Tailwind такие файлы сам не сканирует. */
+@source "./design-lab";
 
 @custom-variant dark (&:is(.dark *));
 

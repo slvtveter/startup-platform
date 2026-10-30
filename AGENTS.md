@@ -10,6 +10,7 @@
 - `apps/web` — Next.js (App Router, TS), Tailwind, shadcn/ui. Только UI и SSR. Перед правками прочитай `apps/web/AGENTS.md` (версия Next новее, чем знают модели).
 - `infra` — Docker Compose, Caddyfile. Caddy: `/api/*` → api, остальное → web.
 - `docs` — продукт и исследования.
+- `.claude/skills/envola-design` — дизайн через референсы: библиотека ~55 сайтов, разборы паттернов, скрипты съёмки и аудита. Любую задачу по дизайну экрана или компонента начинать с его `SKILL.md`.
 
 ## Команды
 `make setup`, `make dev`, `make seed`, `make test`, `make lint`, `make fmt`, `make migration m="..."`, `make migrate`, `make gen-client`, `make create-admin email=...`.

@@ -77,9 +77,12 @@ export function PersonCard({
   const more = person.skills.length - skills.length;
   const photo = person.avatar_url ?? person.avatar_url_lg;
   const title = person.primary_role?.name ?? person.display_name;
+  // Прочерк или точка вместо текста — то же, что пустое поле: строку не рисуем.
+  const headline = filled(person.headline);
+  const city = filled(person.city);
   const rows: [string, React.ReactNode][] = [];
   if (level) rows.push(["Опыт", level]);
-  if (person.headline) rows.push(["О себе", <span key="h" className="line-clamp-2">{person.headline}</span>]);
+  if (headline) rows.push(["О себе", <span key="h" className="line-clamp-2">{headline}</span>]);
   if (skills.length)
     rows.push([
       "Навыки",
@@ -124,7 +127,7 @@ export function PersonCard({
             </div>
             <p className="mt-0.5 truncate text-base">
               {person.primary_role && <span className="font-semibold">{person.display_name}</span>}
-              {person.city && <span className="text-muted-foreground">{person.primary_role ? " · " : ""}{person.city}</span>}
+              {city && <span className="text-muted-foreground">{person.primary_role ? " · " : ""}{city}</span>}
             </p>
             {(cofound || terms.length > 0 || availability) && (
               <span className="mt-3 flex flex-wrap gap-1.5 max-sm:hidden">
@@ -152,6 +155,11 @@ export function PersonCard({
       </Link>
     </Tag>
   );
+}
+
+function filled(value: string) {
+  const v = value.trim();
+  return /^[-–—.\s]*$/.test(v) ? "" : v;
 }
 
 function Badges({ cofound, terms, availability, chip }: { cofound: boolean; terms: string[]; availability: string | null; chip: string }) {
