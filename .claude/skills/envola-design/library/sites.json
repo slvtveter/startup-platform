@@ -1,0 +1,1477 @@
+{
+  "version": 1,
+  "updated": "2026-10-30",
+  "tags": {
+    "home-hero": {
+      "desc": "первый экран главной: заголовок, подзаголовок, главное действие, визуал",
+      "aliases": [
+        "главная",
+        "первый экран",
+        "hero",
+        "лендинг",
+        "заголовок"
+      ]
+    },
+    "home-sections": {
+      "desc": "порядок и состав секций лендинга",
+      "aliases": [
+        "секции",
+        "структура главной",
+        "лендинг",
+        "порядок блоков"
+      ]
+    },
+    "social-proof": {
+      "desc": "лица, цифры, логотипы, отзывы, истории",
+      "aliases": [
+        "доверие",
+        "отзывы",
+        "цифры",
+        "логотипы",
+        "истории успеха"
+      ]
+    },
+    "faq": {
+      "desc": "вопросы и страхи",
+      "aliases": [
+        "вопросы",
+        "страхи",
+        "возражения"
+      ]
+    },
+    "nav": {
+      "desc": "шапка, меню, мобильная навигация",
+      "aliases": [
+        "шапка",
+        "меню",
+        "навигация",
+        "header"
+      ]
+    },
+    "footer": {
+      "desc": "подвал",
+      "aliases": [
+        "подвал"
+      ]
+    },
+    "catalog": {
+      "desc": "страница-список (вакансии, люди, проекты)",
+      "aliases": [
+        "каталог",
+        "список",
+        "лента",
+        "выдача",
+        "листинг"
+      ]
+    },
+    "filters": {
+      "desc": "фильтры, фасеты, сортировка, состояние в URL",
+      "aliases": [
+        "фильтр",
+        "фасеты",
+        "сортировка",
+        "чипы"
+      ]
+    },
+    "search": {
+      "desc": "строка поиска, фраза-поиск, подсказки",
+      "aliases": [
+        "поиск",
+        "строка поиска",
+        "подбор"
+      ]
+    },
+    "startup-card": {
+      "desc": "карточка проекта / вакансии / компании в списке",
+      "aliases": [
+        "карточка стартапа",
+        "вакансия",
+        "карточка вакансии",
+        "проект",
+        "карточка проекта",
+        "компания"
+      ]
+    },
+    "person-card": {
+      "desc": "карточка человека / кандидата / специалиста в списке",
+      "aliases": [
+        "карточка человека",
+        "резюме",
+        "специалист",
+        "кандидат в каталоге",
+        "сообщник",
+        "талант",
+        "люди"
+      ]
+    },
+    "lead-card": {
+      "desc": "карточка записи в CRM / ATS: кандидат, лид, отклик",
+      "aliases": [
+        "карточка лида",
+        "лид",
+        "карточка кандидата",
+        "отклик",
+        "заявка",
+        "crm",
+        "ats",
+        "клиент",
+        "карточка клиента"
+      ]
+    },
+    "applicant-pipeline": {
+      "desc": "воронка откликов: канбан, статусы, массовые действия",
+      "aliases": [
+        "воронка",
+        "канбан",
+        "статусы откликов",
+        "pipeline",
+        "управление откликами"
+      ]
+    },
+    "profile-page": {
+      "desc": "публичный профиль человека",
+      "aliases": [
+        "профиль",
+        "страница человека",
+        "портфолио",
+        "визитка"
+      ]
+    },
+    "startup-page": {
+      "desc": "страница проекта / вакансии / компании",
+      "aliases": [
+        "страница стартапа",
+        "страница вакансии",
+        "страница компании",
+        "детальная"
+      ]
+    },
+    "application-flow": {
+      "desc": "отклик, заявка, первое сообщение",
+      "aliases": [
+        "откликнуться",
+        "подать заявку",
+        "первое сообщение",
+        "apply"
+      ]
+    },
+    "onboarding": {
+      "desc": "анкета после регистрации, выбор роли",
+      "aliases": [
+        "онбординг",
+        "анкета",
+        "выбор роли",
+        "welcome"
+      ]
+    },
+    "auth": {
+      "desc": "вход и регистрация",
+      "aliases": [
+        "вход",
+        "регистрация",
+        "логин",
+        "signup"
+      ]
+    },
+    "chat": {
+      "desc": "переписка, инбокс",
+      "aliases": [
+        "чат",
+        "переписка",
+        "сообщения",
+        "инбокс",
+        "мессенджер"
+      ]
+    },
+    "dashboard": {
+      "desc": "кабинет, «мои» страницы",
+      "aliases": [
+        "кабинет",
+        "дашборд",
+        "мои стартапы",
+        "личный кабинет"
+      ]
+    },
+    "empty-state": {
+      "desc": "пустые состояния, холодный старт",
+      "aliases": [
+        "пусто",
+        "пустое состояние",
+        "холодный старт",
+        "ничего не найдено"
+      ]
+    },
+    "forms": {
+      "desc": "формы, мастера, редакторы",
+      "aliases": [
+        "форма",
+        "мастер",
+        "визард",
+        "редактор",
+        "создание"
+      ]
+    },
+    "pricing": {
+      "desc": "тарифы и платные опции",
+      "aliases": [
+        "тарифы",
+        "цены",
+        "оплата",
+        "подписка",
+        "продвижение"
+      ]
+    },
+    "community-feed": {
+      "desc": "лента сообщества, посты, обсуждения",
+      "aliases": [
+        "лента сообщества",
+        "посты",
+        "обсуждения",
+        "комьюнити"
+      ]
+    },
+    "events": {
+      "desc": "ивенты, хакатоны",
+      "aliases": [
+        "ивенты",
+        "хакатон",
+        "мероприятия"
+      ]
+    },
+    "seo-landing": {
+      "desc": "посадочные страницы под запросы",
+      "aliases": [
+        "seo",
+        "посадочная",
+        "лендинг под запрос"
+      ]
+    },
+    "typography": {
+      "desc": "шрифт и шкала кеглей как эталон",
+      "aliases": [
+        "шрифт",
+        "типографика",
+        "кегли"
+      ]
+    },
+    "color": {
+      "desc": "палитра как эталон",
+      "aliases": [
+        "цвет",
+        "палитра"
+      ]
+    },
+    "motion": {
+      "desc": "анимация и микровзаимодействия",
+      "aliases": [
+        "анимация",
+        "движение",
+        "микровзаимодействия"
+      ]
+    },
+    "mobile": {
+      "desc": "мобильная версия как эталон",
+      "aliases": [
+        "мобильная",
+        "телефон",
+        "адаптив"
+      ]
+    }
+  },
+  "sites": [
+    {
+      "id": "yc-cofounder",
+      "name": "YC Co-Founder Matching",
+      "region": "global",
+      "kind": "niche",
+      "why": "самый близкий по смыслу: поиск сооснователя, «приходи с идеей или без»",
+      "tags": [
+        "home-hero",
+        "social-proof",
+        "faq",
+        "person-card",
+        "onboarding"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://www.ycombinator.com/cofounder-matching"
+        }
+      ]
+    },
+    {
+      "id": "workatastartup",
+      "name": "Work at a Startup (YC)",
+      "region": "global",
+      "kind": "niche",
+      "why": "вакансии в стартапах YC: карточка компании + ролей, фильтры по роли",
+      "tags": [
+        "home-hero",
+        "catalog",
+        "startup-card",
+        "filters",
+        "startup-page"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://www.workatastartup.com/"
+        },
+        {
+          "key": "catalog",
+          "url": "https://www.workatastartup.com/companies"
+        }
+      ]
+    },
+    {
+      "id": "yc-companies",
+      "name": "YC Startup Directory",
+      "region": "global",
+      "kind": "niche",
+      "why": "каталог стартапов: плотная карточка, фасеты слева, счётчик",
+      "tags": [
+        "catalog",
+        "filters",
+        "startup-card",
+        "startup-page",
+        "seo-landing"
+      ],
+      "pages": [
+        {
+          "key": "catalog",
+          "url": "https://www.ycombinator.com/companies"
+        },
+        {
+          "key": "detail",
+          "url": "https://www.ycombinator.com/companies/airbnb"
+        }
+      ]
+    },
+    {
+      "id": "wellfound",
+      "name": "Wellfound (AngelList Talent)",
+      "region": "global",
+      "kind": "niche",
+      "why": "развилка «компании / кандидаты», карточка стартапа с ролями, фраза-поиск",
+      "tags": [
+        "home-hero",
+        "search",
+        "startup-card",
+        "startup-page",
+        "seo-landing"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://wellfound.com/"
+        },
+        {
+          "key": "catalog",
+          "url": "https://wellfound.com/jobs"
+        }
+      ]
+    },
+    {
+      "id": "peerlist",
+      "name": "Peerlist",
+      "region": "global",
+      "kind": "niche",
+      "why": "профиль-витрина работ, одно маленькое действие «занять ник», живые аватары",
+      "tags": [
+        "home-hero",
+        "profile-page",
+        "person-card",
+        "social-proof",
+        "community-feed"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://peerlist.io/"
+        },
+        {
+          "key": "catalog",
+          "url": "https://peerlist.io/jobs"
+        }
+      ]
+    },
+    {
+      "id": "contra",
+      "name": "Contra",
+      "region": "global",
+      "kind": "niche",
+      "why": "фриланс-профили с портфолио, поле-намерение с чипсами, табы Projects / People",
+      "tags": [
+        "home-hero",
+        "search",
+        "person-card",
+        "profile-page"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://contra.com/"
+        },
+        {
+          "key": "catalog",
+          "url": "https://contra.com/discover"
+        }
+      ]
+    },
+    {
+      "id": "indiehackers",
+      "name": "Indie Hackers",
+      "region": "global",
+      "kind": "niche",
+      "why": "главная = лента сообщества, гость видит то же, что участник",
+      "tags": [
+        "community-feed",
+        "home-sections",
+        "catalog"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://www.indiehackers.com/"
+        },
+        {
+          "key": "catalog",
+          "url": "https://www.indiehackers.com/products"
+        }
+      ]
+    },
+    {
+      "id": "producthunt",
+      "name": "Product Hunt",
+      "region": "global",
+      "kind": "niche",
+      "why": "лента запусков дня, плотная строка-карточка с иконкой 48–64px и счётчиком",
+      "tags": [
+        "community-feed",
+        "startup-card",
+        "startup-page",
+        "catalog"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://www.producthunt.com/"
+        }
+      ]
+    },
+    {
+      "id": "devpost",
+      "name": "Devpost",
+      "region": "global",
+      "kind": "niche",
+      "why": "хакатоны: две кнопки-роли, теги «Beginner friendly», честные пустые состояния",
+      "tags": [
+        "home-hero",
+        "catalog",
+        "filters",
+        "events",
+        "empty-state",
+        "startup-card"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://devpost.com/"
+        },
+        {
+          "key": "catalog",
+          "url": "https://devpost.com/hackathons"
+        }
+      ]
+    },
+    {
+      "id": "hh",
+      "name": "hh.ru",
+      "region": "ru",
+      "kind": "niche",
+      "why": "главный российский эталон вакансии и резюме: плотная выдача, привычные русскому глазу поля",
+      "tags": [
+        "home-hero",
+        "search",
+        "catalog",
+        "filters",
+        "startup-card",
+        "person-card",
+        "seo-landing",
+        "mobile"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://hh.ru/"
+        },
+        {
+          "key": "catalog",
+          "url": "https://hh.ru/search/vacancy?text=%D1%81%D1%82%D0%B0%D0%B6%D0%B5%D1%80&area=1"
+        },
+        {
+          "key": "people",
+          "url": "https://hh.ru/search/resume?text=python&area=1"
+        }
+      ]
+    },
+    {
+      "id": "habr-career",
+      "name": "Хабр Карьера",
+      "region": "ru",
+      "kind": "niche",
+      "why": "IT-вакансии и специалисты в России: карточка вакансии с компанией-значком, резюме с навыками",
+      "tags": [
+        "home-hero",
+        "search",
+        "catalog",
+        "filters",
+        "startup-card",
+        "person-card",
+        "profile-page",
+        "seo-landing"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://career.habr.com/"
+        },
+        {
+          "key": "catalog",
+          "url": "https://career.habr.com/vacancies?type=all"
+        },
+        {
+          "key": "people",
+          "url": "https://career.habr.com/resumes"
+        }
+      ]
+    },
+    {
+      "id": "getmatch",
+      "name": "getmatch",
+      "region": "ru",
+      "kind": "niche",
+      "why": "IT-вакансии с вилкой на карточке, аккуратная русская типографика",
+      "tags": [
+        "catalog",
+        "filters",
+        "startup-card",
+        "startup-page"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://getmatch.ru/"
+        },
+        {
+          "key": "catalog",
+          "url": "https://getmatch.ru/vacancies"
+        }
+      ]
+    },
+    {
+      "id": "cofounderslab",
+      "name": "CoFoundersLab",
+      "region": "global",
+      "kind": "niche",
+      "why": "антипример: абстрактные фичи, ни одного реального человека",
+      "tags": [
+        "home-hero",
+        "home-sections"
+      ],
+      "antipattern": true,
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://cofounderslab.com/"
+        }
+      ]
+    },
+    {
+      "id": "himalayas",
+      "name": "Himalayas",
+      "region": "global",
+      "kind": "niche",
+      "why": "удалённые вакансии: чистая карточка компании, профили людей, большие SEO-каталоги",
+      "tags": [
+        "catalog",
+        "filters",
+        "startup-card",
+        "startup-page",
+        "profile-page",
+        "seo-landing"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://himalayas.app/"
+        },
+        {
+          "key": "catalog",
+          "url": "https://himalayas.app/jobs"
+        },
+        {
+          "key": "companies",
+          "url": "https://himalayas.app/companies"
+        }
+      ],
+      "access": "каталоги закрыты проверкой безопасности, главная открывается"
+    },
+    {
+      "id": "wttj",
+      "name": "Welcome to the Jungle (Otta)",
+      "region": "global",
+      "kind": "niche",
+      "why": "вакансия, рассказанная через людей и фото офиса, сильная страница компании",
+      "tags": [
+        "startup-card",
+        "startup-page",
+        "catalog",
+        "filters"
+      ],
+      "pages": [
+        {
+          "key": "catalog",
+          "url": "https://www.welcometothejungle.com/en/jobs"
+        },
+        {
+          "key": "companies",
+          "url": "https://www.welcometothejungle.com/en/companies"
+        }
+      ]
+    },
+    {
+      "id": "dribbble",
+      "name": "Dribbble",
+      "region": "global",
+      "kind": "niche",
+      "why": "фильтры в одну строку, мета карточки одной строкой, каталог дизайнеров для найма",
+      "tags": [
+        "catalog",
+        "filters",
+        "person-card",
+        "profile-page"
+      ],
+      "pages": [
+        {
+          "key": "catalog",
+          "url": "https://dribbble.com/shots/popular"
+        },
+        {
+          "key": "people",
+          "url": "https://dribbble.com/designers"
+        }
+      ]
+    },
+    {
+      "id": "behance",
+      "name": "Behance",
+      "region": "global",
+      "kind": "niche",
+      "why": "поиск с переключателем «Проекты / Люди», карточка проекта как обложка",
+      "tags": [
+        "search",
+        "catalog",
+        "person-card",
+        "profile-page"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://www.behance.net/"
+        },
+        {
+          "key": "people",
+          "url": "https://www.behance.net/search/users"
+        }
+      ],
+      "access": "bot-wall: headless и headed Playwright получают 403/проверку; смотреть через Claude in Chrome или по памяти"
+    },
+    {
+      "id": "layers",
+      "name": "Layers",
+      "region": "global",
+      "kind": "niche",
+      "why": "сообщество дизайнеров: профиль-портфолио, лента работ, вакансии",
+      "tags": [
+        "community-feed",
+        "profile-page",
+        "person-card",
+        "catalog"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://layers.to/"
+        }
+      ]
+    },
+    {
+      "id": "arc-dev",
+      "name": "Arc.dev",
+      "region": "global",
+      "kind": "niche",
+      "why": "карточка разработчика для найма: навыки, опыт, ставка, проверенность",
+      "tags": [
+        "home-hero",
+        "person-card",
+        "profile-page",
+        "catalog"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://arc.dev/"
+        },
+        {
+          "key": "people",
+          "url": "https://arc.dev/hire-developers/python"
+        }
+      ]
+    },
+    {
+      "id": "toptal",
+      "name": "Toptal",
+      "region": "global",
+      "kind": "niche",
+      "why": "SEO-посадочные «Hire X developers» с карточками специалистов",
+      "tags": [
+        "person-card",
+        "seo-landing",
+        "social-proof"
+      ],
+      "pages": [
+        {
+          "key": "people",
+          "url": "https://www.toptal.com/developers/python"
+        }
+      ]
+    },
+    {
+      "id": "github-profile",
+      "name": "GitHub profile",
+      "region": "global",
+      "kind": "niche",
+      "why": "профиль как доказательство работы: закреплённые проекты, активность",
+      "tags": [
+        "profile-page",
+        "person-card"
+      ],
+      "pages": [
+        {
+          "key": "profile",
+          "url": "https://github.com/karpathy"
+        }
+      ]
+    },
+    {
+      "id": "luma",
+      "name": "Luma",
+      "region": "global",
+      "kind": "niche",
+      "why": "ивенты сообществ: карточка с обложкой и временем, подписка на календарь",
+      "tags": [
+        "events",
+        "catalog",
+        "startup-card",
+        "startup-page",
+        "typography"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://lu.ma/"
+        },
+        {
+          "key": "catalog",
+          "url": "https://lu.ma/discover"
+        }
+      ]
+    },
+    {
+      "id": "attio",
+      "name": "Attio",
+      "region": "global",
+      "kind": "ats-crm",
+      "why": "эталон карточки записи CRM: шапка с атрибутами, таймлайн, связи",
+      "tags": [
+        "lead-card",
+        "applicant-pipeline",
+        "dashboard",
+        "home-hero",
+        "typography"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://attio.com/"
+        }
+      ]
+    },
+    {
+      "id": "folk",
+      "name": "folk",
+      "region": "global",
+      "kind": "ats-crm",
+      "why": "CRM контактов: человек как карточка, группы, лёгкий воронки",
+      "tags": [
+        "lead-card",
+        "applicant-pipeline",
+        "home-hero"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://www.folk.app/"
+        }
+      ]
+    },
+    {
+      "id": "twenty",
+      "name": "Twenty CRM",
+      "region": "global",
+      "kind": "ats-crm",
+      "why": "открытая CRM: карточка записи с полями слева и таймлайном справа, канбан",
+      "tags": [
+        "lead-card",
+        "applicant-pipeline",
+        "dashboard"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://twenty.com/"
+        }
+      ]
+    },
+    {
+      "id": "ashby",
+      "name": "Ashby",
+      "region": "global",
+      "kind": "ats-crm",
+      "why": "ATS: карточка кандидата, стадии, оценки интервьюеров",
+      "tags": [
+        "lead-card",
+        "applicant-pipeline",
+        "dashboard"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://www.ashbyhq.com/"
+        }
+      ]
+    },
+    {
+      "id": "huntflow",
+      "name": "Хантфлоу",
+      "region": "ru",
+      "kind": "ats-crm",
+      "why": "российский ATS: воронка кандидатов, карточка кандидата, русские формулировки статусов",
+      "tags": [
+        "lead-card",
+        "applicant-pipeline"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://huntflow.ru/"
+        }
+      ]
+    },
+    {
+      "id": "teamtailor",
+      "name": "Teamtailor",
+      "region": "global",
+      "kind": "ats-crm",
+      "why": "карьерные страницы компаний и ATS: отклик в один шаг",
+      "tags": [
+        "lead-card",
+        "applicant-pipeline",
+        "application-flow",
+        "startup-page"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://www.teamtailor.com/"
+        }
+      ]
+    },
+    {
+      "id": "pipedrive",
+      "name": "Pipedrive",
+      "region": "global",
+      "kind": "ats-crm",
+      "why": "классическая воронка сделок: канбан-колонки, карточка сделки",
+      "tags": [
+        "applicant-pipeline",
+        "lead-card"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://www.pipedrive.com/"
+        }
+      ],
+      "access": "bot-wall: headless и headed Playwright получают 403/проверку; смотреть через Claude in Chrome или по памяти"
+    },
+    {
+      "id": "linear",
+      "name": "Linear",
+      "region": "global",
+      "kind": "product",
+      "why": "двухтоновый заголовок, реальный UI вместо картинки, строгая тёмная/светлая система",
+      "tags": [
+        "home-hero",
+        "home-sections",
+        "typography",
+        "motion",
+        "dashboard"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://linear.app/"
+        }
+      ]
+    },
+    {
+      "id": "stripe",
+      "name": "Stripe",
+      "region": "global",
+      "kind": "product",
+      "why": "живой счётчик, направляющие сетки, плотные и при этом спокойные секции",
+      "tags": [
+        "home-hero",
+        "home-sections",
+        "social-proof",
+        "typography",
+        "color",
+        "footer"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://stripe.com/en-us"
+        }
+      ]
+    },
+    {
+      "id": "vercel",
+      "name": "Vercel",
+      "region": "global",
+      "kind": "product",
+      "why": "монохром, одна главная кнопка, много воздуха",
+      "tags": [
+        "home-hero",
+        "typography",
+        "nav"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://vercel.com/"
+        }
+      ]
+    },
+    {
+      "id": "notion",
+      "name": "Notion",
+      "region": "global",
+      "kind": "product",
+      "why": "плашка внутри заголовка, свой графический язык, тёплый тон",
+      "tags": [
+        "home-hero",
+        "home-sections",
+        "social-proof",
+        "typography"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://www.notion.com/"
+        }
+      ]
+    },
+    {
+      "id": "airbnb",
+      "name": "Airbnb",
+      "region": "global",
+      "kind": "product",
+      "why": "карточка без контейнера, полки-карусели, сегментированный поиск",
+      "tags": [
+        "catalog",
+        "search",
+        "startup-card",
+        "filters",
+        "mobile"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://www.airbnb.com/"
+        }
+      ]
+    },
+    {
+      "id": "raycast",
+      "name": "Raycast",
+      "region": "global",
+      "kind": "product",
+      "why": "тёмный продуктовый лендинг, каталог расширений с карточками-иконками",
+      "tags": [
+        "home-hero",
+        "catalog",
+        "startup-card",
+        "motion"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://www.raycast.com/"
+        },
+        {
+          "key": "catalog",
+          "url": "https://www.raycast.com/store"
+        }
+      ]
+    },
+    {
+      "id": "cal",
+      "name": "Cal.com",
+      "region": "global",
+      "kind": "product",
+      "why": "продукт прямо в первом экране, строгий серо-чёрный интерфейс",
+      "tags": [
+        "home-hero",
+        "forms",
+        "social-proof"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://cal.com/"
+        }
+      ]
+    },
+    {
+      "id": "resend",
+      "name": "Resend",
+      "region": "global",
+      "kind": "product",
+      "why": "тёмный минимализм, крупный серифный заголовок, аккуратные письма",
+      "tags": [
+        "home-hero",
+        "typography",
+        "motion"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://resend.com/"
+        }
+      ]
+    },
+    {
+      "id": "framer",
+      "name": "Framer",
+      "region": "global",
+      "kind": "product",
+      "why": "галерея шаблонов как каталог, крупная типографика",
+      "tags": [
+        "home-hero",
+        "catalog",
+        "motion"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://www.framer.com/"
+        }
+      ]
+    },
+    {
+      "id": "mercury",
+      "name": "Mercury",
+      "region": "global",
+      "kind": "product",
+      "why": "спокойная серьёзная подача сложной темы, продукт крупно",
+      "tags": [
+        "home-hero",
+        "typography",
+        "color",
+        "dashboard"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://mercury.com/"
+        }
+      ]
+    },
+    {
+      "id": "figma",
+      "name": "Figma",
+      "region": "global",
+      "kind": "product",
+      "why": "яркий, но системный лендинг; комьюнити-каталог файлов и авторов",
+      "tags": [
+        "home-hero",
+        "catalog",
+        "person-card",
+        "color"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://www.figma.com/"
+        },
+        {
+          "key": "catalog",
+          "url": "https://www.figma.com/community"
+        }
+      ]
+    },
+    {
+      "id": "supabase",
+      "name": "Supabase",
+      "region": "global",
+      "kind": "product",
+      "why": "тёмная дев-эстетика, стена отзывов как соцдоказательство",
+      "tags": [
+        "home-hero",
+        "social-proof",
+        "footer"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://supabase.com/"
+        }
+      ]
+    },
+    {
+      "id": "posthog",
+      "name": "PostHog",
+      "region": "global",
+      "kind": "product",
+      "why": "смелый собственный тон текстов, страница вакансий как продукт",
+      "tags": [
+        "home-sections",
+        "startup-page",
+        "typography"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://posthog.com/"
+        },
+        {
+          "key": "careers",
+          "url": "https://posthog.com/careers"
+        }
+      ]
+    },
+    {
+      "id": "superhuman",
+      "name": "Superhuman",
+      "region": "global",
+      "kind": "product",
+      "why": "инбокс как эталон скорости: список писем, клавиатура, фокус",
+      "tags": [
+        "chat",
+        "home-hero",
+        "typography"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://superhuman.com/"
+        }
+      ]
+    },
+    {
+      "id": "drinkit",
+      "name": "Drinkit",
+      "region": "ru",
+      "kind": "ru-best",
+      "why": "референс владельца: аккуратно, не броско, строгость, дизайнерское решение",
+      "tags": [
+        "home-hero",
+        "typography",
+        "color",
+        "mobile"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://drinkit.ru/"
+        }
+      ]
+    },
+    {
+      "id": "aeza",
+      "name": "Aeza",
+      "region": "ru",
+      "kind": "ru-best",
+      "why": "референс владельца: строгая сетка, тёмные плотные блоки, факты цифрами",
+      "tags": [
+        "home-hero",
+        "home-sections",
+        "pricing",
+        "typography"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://aeza.net/"
+        }
+      ]
+    },
+    {
+      "id": "tjournal",
+      "name": "Т—Ж",
+      "region": "ru",
+      "kind": "ru-best",
+      "why": "русская редакционная типографика, тон на «ты», сложное простыми словами",
+      "tags": [
+        "typography",
+        "community-feed",
+        "faq"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://t-j.ru/"
+        }
+      ]
+    },
+    {
+      "id": "tbank",
+      "name": "Т-Банк",
+      "region": "ru",
+      "kind": "ru-best",
+      "why": "массовый российский продукт: крупные карточки-продукты, ясные CTA, мобильность",
+      "tags": [
+        "home-hero",
+        "home-sections",
+        "forms",
+        "mobile"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://www.tbank.ru/"
+        }
+      ]
+    },
+    {
+      "id": "samokat",
+      "name": "Самокат",
+      "region": "ru",
+      "kind": "ru-best",
+      "why": "яркий бренд, но простая навигация; карьерный раздел",
+      "tags": [
+        "home-hero",
+        "color"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://samokat.ru/"
+        }
+      ],
+      "access": "bot-wall: headless и headed Playwright получают 403/проверку; смотреть через Claude in Chrome или по памяти"
+    },
+    {
+      "id": "practicum",
+      "name": "Яндекс Практикум",
+      "region": "ru",
+      "kind": "ru-best",
+      "why": "та же аудитория (вкатывающиеся в IT): каталог профессий, карьерный трек, страхи новичка",
+      "tags": [
+        "home-hero",
+        "catalog",
+        "faq",
+        "social-proof",
+        "onboarding"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://practicum.yandex.ru/"
+        }
+      ]
+    },
+    {
+      "id": "yandex-jobs",
+      "name": "Карьера в Яндексе",
+      "region": "ru",
+      "kind": "ru-best",
+      "why": "вакансии большой компании: фильтры по направлениям, стажировки отдельной веткой",
+      "tags": [
+        "catalog",
+        "filters",
+        "startup-card",
+        "startup-page"
+      ],
+      "pages": [
+        {
+          "key": "catalog",
+          "url": "https://yandex.ru/jobs/vacancies"
+        }
+      ]
+    },
+    {
+      "id": "avito",
+      "name": "Авито",
+      "region": "ru",
+      "kind": "ru-best",
+      "why": "массовый каталог объявлений: плотная сетка, фильтры, привычный русскому пользователю паттерн",
+      "tags": [
+        "catalog",
+        "filters",
+        "search",
+        "startup-card",
+        "mobile"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://www.avito.ru/"
+        }
+      ]
+    },
+    {
+      "id": "vc",
+      "name": "vc.ru",
+      "region": "ru",
+      "kind": "ru-best",
+      "why": "русскоязычное стартап-комьюнити: лента, профиль автора, комментарии",
+      "tags": [
+        "community-feed",
+        "profile-page",
+        "nav"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://vc.ru/"
+        }
+      ]
+    },
+    {
+      "id": "habr",
+      "name": "Хабр",
+      "region": "ru",
+      "kind": "ru-best",
+      "why": "IT-аудитория, привычная нашим пользователям: лента, профиль, хабы",
+      "tags": [
+        "community-feed",
+        "profile-page"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://habr.com/ru/feed/"
+        }
+      ]
+    },
+    {
+      "id": "ozon-career",
+      "name": "Ozon Карьера",
+      "region": "ru",
+      "kind": "ru-best",
+      "why": "российский карьерный сайт: стажировки для студентов, путь кандидата",
+      "tags": [
+        "home-hero",
+        "catalog",
+        "startup-card",
+        "faq"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://career.ozon.ru/"
+        }
+      ],
+      "access": "bot-wall: headless и headed Playwright получают 403/проверку; смотреть через Claude in Chrome или по памяти"
+    },
+    {
+      "id": "tbank-education",
+      "name": "Т-Образование",
+      "region": "ru",
+      "kind": "ru-best",
+      "why": "студенческая аудитория: стажировки, школы, отбор, понятная механика",
+      "tags": [
+        "home-hero",
+        "faq",
+        "onboarding",
+        "catalog"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://education.tbank.ru/"
+        }
+      ]
+    },
+    {
+      "id": "discord-discovery",
+      "name": "Discord",
+      "region": "global",
+      "kind": "community",
+      "why": "сообщества как карточки с обложкой, участниками онлайн",
+      "tags": [
+        "home-hero",
+        "catalog",
+        "chat"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://discord.com/"
+        }
+      ]
+    },
+    {
+      "id": "telegram-web",
+      "name": "Telegram",
+      "region": "global",
+      "kind": "community",
+      "why": "привычный нашей аудитории мессенджер: пузыри, список чатов, онлайн",
+      "tags": [
+        "chat"
+      ],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://telegram.org/"
+        }
+      ]
+    },
+    {
+      "id": "envola",
+      "name": "Envola (мы)",
+      "region": "ru",
+      "kind": "self",
+      "why": "наш прод — снимаем в том же формате для сравнения",
+      "tags": [],
+      "pages": [
+        {
+          "key": "home",
+          "url": "https://envola.ru/"
+        },
+        {
+          "key": "catalog",
+          "url": "https://envola.ru/startups"
+        },
+        {
+          "key": "people",
+          "url": "https://envola.ru/people"
+        }
+      ]
+    }
+  ]
+}
