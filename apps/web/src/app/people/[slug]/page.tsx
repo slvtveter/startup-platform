@@ -28,9 +28,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
   if (!data) return { title: "Профиль не найден" };
   const title = `${data.display_name}${data.primary_role ? `, ${data.primary_role.name.toLowerCase()}` : ""}`;
+  // Короткий заголовок вроде «-» поисковик показал бы как сниппет: собираем описание из роли и навыков.
+  const skills = data.skills.slice(0, 5).map((s) => s.name).join(", ");
+  const description =
+    data.headline.trim().length >= 20
+      ? data.headline
+      : `${title}. ${skills ? `Навыки: ${skills}. ` : ""}Профиль на Envola, где собирают команды для стартапов.`;
   return {
     title,
-    description: data.headline || undefined,
+    description,
     alternates: { canonical: `/people/${data.slug}` },
     // Примеры (app.scripts.demo) не должны попасть в поиск как настоящие люди.
     ...(data.is_demo ? { robots: { index: false, follow: true } } : {}),
