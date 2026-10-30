@@ -113,7 +113,7 @@ export function ApplyDialog({ roleId, roleTitle, startupTitle, state, needs, rol
             {roleTitle} в {startupTitle}
           </DialogTitle>
           <DialogDescription>
-            Основатель увидит твой профиль и это сообщение. Контакты откроются обеим сторонам, только если отклик примут.
+            Основатель увидит твой профиль и это сообщение.
           </DialogDescription>
         </DialogHeader>
         {state === "unverified" ? (

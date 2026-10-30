@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { buttonVariants } from "@/components/ui/button";
 
-export type Option = { value: string; label: string };
+export type Option = { value: string; label: string; count?: number };
 export type SearchParams = Record<string, string | string[] | undefined>;
 
 export function asList(v: string | string[] | undefined): string[] {

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { invitePerson } from "@/lib/api";
@@ -30,7 +30,6 @@ export function InviteDialog({ slug, name, options }: { slug: string; name: stri
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Пригласить: {name}</DialogTitle>
-          <DialogDescription>Если приглашение примут, вы оба увидите контакты друг друга.</DialogDescription>
         </DialogHeader>
         <div className="grid gap-1.5">
           <Label htmlFor="invite-role">Место в команде</Label>

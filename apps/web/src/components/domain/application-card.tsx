@@ -80,7 +80,7 @@ export function ApplicationCard({ app, perspective }: { app: ApplicationOut; per
           : await withdrawApplication({ path });
     setBusy(false);
     if (res.error) return toast.error(errorMessage(res.error));
-    toast.success(kind === "accept" ? "Готово! Контакты открыты обеим сторонам." : kind === "reject" ? "Отказ отправлен" : "Отклик отозван");
+    toast.success(kind === "accept" ? "Отклик принят" : kind === "reject" ? "Отказ отправлен" : "Отклик отозван");
     setRejecting(false);
     router.refresh();
   }

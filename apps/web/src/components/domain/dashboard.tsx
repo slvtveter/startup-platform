@@ -72,7 +72,7 @@ export async function Dashboard() {
       <div className="flex flex-wrap items-end gap-x-6 gap-y-4">
         <div className="min-w-0">
           <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">{name ? `Привет, ${name}` : "Привет!"}</h1>
-          <p className="mt-3 text-lg text-muted-foreground max-sm:hidden">Всё важное по твоим стартапам и откликам — здесь.</p>
+          <p className="mt-3 text-lg text-muted-foreground max-sm:hidden">Отклики, приглашения и сообщения по твоим проектам.</p>
         </div>
         <div className="grid w-full grid-cols-2 gap-2 sm:ml-auto sm:flex sm:w-auto">
           {/* Основателю с открытыми местами нужнее люди, остальным — проекты. */}
@@ -163,7 +163,7 @@ export async function Dashboard() {
             </ul>
           ) : (
             <PanelEmpty
-              text="Есть идея? Опиши её за пару минут — и люди начнут откликаться на роли в команде."
+              text="Опиши идею и отметь, кого не хватает. На свободные роли смогут откликаться."
               href="/startups/new"
               cta="Предложить идею"
             />
@@ -179,7 +179,7 @@ export async function Dashboard() {
             </ul>
           ) : (
             <PanelEmpty
-              text={myApps.length > 0 ? "Активных откликов нет. Посмотри, кому ты нужен сейчас." : "Откликнись на роль — основатели обычно отвечают в течение 72 часов."}
+              text={myApps.length > 0 ? "Активных откликов нет. Посмотри, кому ты нужен сейчас." : "Найди роль под свои навыки и откликнись."}
               href="/startups"
               cta="Найти стартап"
             />
@@ -220,7 +220,7 @@ export async function Dashboard() {
               Все сообщники
             </Link>
           </div>
-          <ul className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-4">
+          <ul className="mt-6 grid grid-cols-1 gap-2 sm:gap-3 md:grid-cols-2">
             {partners.map((p) => (
               <PersonCard key={p.slug} person={p} as="li" />
             ))}

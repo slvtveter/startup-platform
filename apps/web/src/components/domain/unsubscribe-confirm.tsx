@@ -23,7 +23,7 @@ export function UnsubscribeConfirm({ u, k, t }: { u: string; k: string; t: strin
       <div>
         <h1 className="text-2xl sm:text-[32px]">Готово, больше не пришлём</h1>
         <p className="mt-3 text-muted-foreground">
-          Вы отписались от писем «{state.done}». Включить их обратно можно в настройках аккаунта.
+          Ты отписался от писем «{state.done}». Включить их обратно можно в настройках аккаунта.
         </p>
         <Link href="/me/settings" className={buttonVariants({ variant: "outline", className: "mt-6" })}>
           Настройки писем

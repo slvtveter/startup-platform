@@ -41,7 +41,7 @@ export default async function MyApplicationsPage({
       <MarkSeen section="mine" />
       <PageHeader
         title="Мои отклики"
-        description="Отклики на роли и приглашения от основателей. Основатели обычно отвечают за 2–3 дня."
+        description="Отклики на роли и приглашения от основателей."
       />
       <nav
         aria-label="Фильтр заявок"

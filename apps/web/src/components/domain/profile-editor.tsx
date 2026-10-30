@@ -267,7 +267,7 @@ export function ProfileEditor({
             <div>
               <Label htmlFor="headline">Коротко о себе</Label>
               <Input id="headline" maxLength={140} className="mt-1.5 h-11" value={f.headline} onChange={(e) => set("headline", e.target.value)} placeholder="UI/UX дизайнер после курсов, ищу первый реальный проект" />
-              <p className="mt-1 text-xs text-muted-foreground">Одна строка: её видно на карточке в каталоге.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Одна строка о себе.</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
@@ -286,7 +286,7 @@ export function ProfileEditor({
           <div key="s1" className="wizard-step-forward mt-8 grid gap-6">
             <div>
               <h2 className="text-2xl">Что ты умеешь?</h2>
-              <p className="mt-1 text-muted-foreground">По навыкам основатели найдут тебя в каталоге, а мы подберём подходящие стартапы.</p>
+              <p className="mt-1 text-muted-foreground">Начни вводить название навыка.</p>
               <div className="mt-4">
                 <SkillPicker all={skills} value={f.skills} onChange={(v) => set("skills", v)} />
               </div>
@@ -362,7 +362,7 @@ export function ProfileEditor({
               <span>
                 <span className="block font-bold">Ищу сообщников, чтобы придумать стартап с нуля</span>
                 <span className="mt-1 block text-sm text-muted-foreground">
-                  Попадёшь в раздел «Сообщники»: там собираются те, кто хочет накидать идей и запустить своё вместе. Идея не нужна.
+                  Идея не нужна.
                 </span>
               </span>
             </button>
@@ -398,7 +398,7 @@ export function ProfileEditor({
             </div>
             <div className="rounded-2xl bg-tone p-5">
               <div className="font-bold">Контакты</div>
-              <p className="mt-1 text-sm text-muted-foreground">Не видны в каталоге. Откроются только тем, с кем вы взаимно договоритесь.</p>
+              <p className="mt-1 text-sm text-muted-foreground">В каталоге не показываются.</p>
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 <div>
                   <Label htmlFor="tg">Telegram</Label>
@@ -468,9 +468,9 @@ export function ProfileEditor({
               </ul>
             </>
           ) : (
-            <p className="mt-5 text-sm font-semibold text-success-ink">Всё заполнено, профиль выглядит сильно</p>
+            <p className="mt-5 text-sm font-semibold text-success-ink">Профиль заполнен полностью</p>
           )}
-          {missing.length > 0 && <p className="mt-4 text-xs text-muted-foreground">С фото и портфолио основатели отвечают заметно чаще.</p>}
+          {missing.length > 0 && <p className="mt-4 text-xs text-muted-foreground">По фото и портфолио основателю проще понять, кто ты и что умеешь.</p>}
         </div>
         <div className="rounded-[28px] bg-tone p-6">
           <div className="font-bold">{profile.is_published ? "Опубликован" : "Не опубликован"}</div>
