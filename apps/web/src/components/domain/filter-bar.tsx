@@ -10,7 +10,16 @@ import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/com
 import { cn } from "@/lib/utils";
 
 /** Группа фильтра: список с галочками (можно несколько) или одиночный переключатель («Ищет сообщников»). */
-export type FilterGroup = { name: string; title: string; options: Option[]; toggle?: boolean };
+export type FilterGroup = {
+  name: string;
+  title: string;
+  options: Option[];
+  toggle?: boolean;
+  /** Подпись строки «снять группу» («Все стадии»). Без неё такой строки нет. */
+  allLabel?: string;
+  /** false — группы нет в шторке на телефоне (там она стоит отдельным рядом над поиском). */
+  sheet?: boolean;
+};
 export type SortOption = { value: string; label: string; short: string };
 
 const pill =
@@ -19,9 +28,9 @@ const pillOff = "bg-tone text-foreground hover:bg-tone-2";
 const pillOn = "bg-brand-soft text-brand-ink hover:bg-marker";
 
 /**
- * Панель каталога в одну строку: широкий поиск слева, справа компактные фильтры-выпадашки и сортировка.
- * На узком экране — поиск во всю ширину, под ним «Фильтры» (шторка со всеми группами) и сортировка.
- * Ниже — счётчик и активные фильтры чипами. Состояние живёт в URL, переключения не плодят историю.
+ * Панель над выдачей: поиск и сортировка. Фильтры на широком экране стоят слева колонкой (FilterSidebar),
+ * на узком — в шторке «Фильтры» под поиском. Ниже — счётчик и активные фильтры чипами.
+ * Состояние живёт в URL.
  */
 export function CatalogToolbar({
   basePath,
@@ -106,62 +115,9 @@ export function CatalogToolbar({
           </button>
         </form>
 
-        {/* Широкий экран: каждая группа — своя кнопка. */}
-        <div className="hidden items-center gap-2 lg:flex">
-          {groups.map((g) => {
-            const selected = asList(params[g.name]);
-            if (g.toggle) {
-              const on = selected.includes(g.options[0].value);
-              return (
-                <Link
-                  key={g.name}
-                  href={toggleHref(basePath, params, g.name, on ? null : g.options[0].value)}
-                  scroll={false}
-                  replace
-                  aria-current={on ? "true" : undefined}
-                  className={cn(pill, on ? pillOn : pillOff)}
-                >
-                  <span aria-hidden className={cn("size-2 rounded-full", on ? "bg-brand" : "bg-cornflower")} />
-                  {g.title}
-                </Link>
-              );
-            }
-            return (
-              <DropdownMenu key={g.name}>
-                <DropdownMenuTrigger className={cn(pill, selected.length > 0 ? pillOn : pillOff)}>
-                  {g.title}
-                  {selected.length > 0 && (
-                    <span className="grid size-5 place-items-center rounded-full bg-brand text-xs font-bold text-white">{selected.length}</span>
-                  )}
-                  <ChevronDown aria-hidden className="size-4 opacity-70" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" side="bottom" className="max-h-[min(24rem,var(--available-height))] w-72 p-1.5">
-                  <p className="px-2 pt-1 pb-2 text-xs font-semibold text-muted-foreground">Можно выбрать несколько</p>
-                  {g.options.map((o) => {
-                    const on = selected.includes(o.value);
-                    return (
-                      <DropdownMenuItem
-                        key={o.value}
-                        closeOnClick={false}
-                        role="menuitemcheckbox"
-                        aria-checked={on}
-                        onClick={() => go(toggleHref(basePath, params, g.name, o.value))}
-                        className="gap-2.5 rounded-lg py-2"
-                      >
-                        <Box on={on} />
-                        <span className={cn(on && "font-semibold")}>{o.label}</span>
-                        <span className="sr-only">{on ? ", выбрано" : ""}</span>
-                      </DropdownMenuItem>
-                    );
-                  })}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            );
-          })}
-          {sortMenu}
-        </div>
+        <div className="hidden lg:block">{sortMenu}</div>
 
-        {/* Узкий экран: все группы в шторке, рядом сортировка. */}
+        {/* Узкий экран: все группы в шторке, рядом сортировка. Группы с sheet: false (стадия) стоят над поиском. */}
         <div className="flex w-full items-center gap-2 lg:hidden">
           <Sheet>
             <SheetTrigger className={cn(pill, activeCount > 0 ? pillOn : pillOff)}>
@@ -174,7 +130,7 @@ export function CatalogToolbar({
                 <SheetTitle className="text-xl font-extrabold tracking-[-0.02em]">Фильтры</SheetTitle>
               </div>
               <div className="grid gap-6 overflow-y-auto px-5 pt-2 pb-4">
-                {groups.map((g) => {
+                {groups.filter((g) => g.sheet !== false).map((g) => {
                   const selected = asList(params[g.name]);
                   return (
                     <fieldset key={g.name}>
@@ -256,5 +212,93 @@ function Box({ on }: { on: boolean }) {
     >
       {on && <Check className="size-3" strokeWidth={3} />}
     </span>
+  );
+}
+
+/** Сколько вариантов группы видно сразу; остальные — под «Показать все». */
+const VISIBLE = 6;
+
+/**
+ * Фильтры колонкой слева, как на hh: группы с галочками всегда на виду, без выпадашек.
+ * Только для широкого экрана; на узком те же группы в шторке CatalogToolbar.
+ */
+export function FilterSidebar({ basePath, params, groups }: { basePath: string; params: SearchParams; groups: FilterGroup[] }) {
+  const active = groups.some((g) => asList(params[g.name]).length > 0);
+  const q = typeof params.q === "string" && params.q ? params.q : null;
+  return (
+    <aside aria-label="Фильтры" className="hidden lg:block">
+      <div className="grid gap-7">
+        <div className="flex h-11 items-center justify-between">
+          <h2 className="text-lg font-bold tracking-normal">Фильтры</h2>
+          {active && (
+            <Link href={q ? `${basePath}?q=${encodeURIComponent(q)}` : basePath} scroll={false} className="text-sm font-semibold text-brand-ink hover:text-brand-hover">
+              Сбросить
+            </Link>
+          )}
+        </div>
+        {groups.map((g) => {
+          const selected = asList(params[g.name]);
+          const row = "flex min-h-9 items-center gap-2.5 rounded-lg px-2 -mx-2 text-sm transition-colors hover:bg-tone";
+          if (g.toggle) {
+            const o = g.options[0];
+            const on = selected.includes(o.value);
+            return (
+              <Link key={g.name} href={toggleHref(basePath, params, g.name, on ? null : o.value)} scroll={false} replace role="checkbox" aria-checked={on} className={cn(row, "items-start py-2")}>
+                <Box on={on} />
+                <span>
+                  <span className="block font-semibold">{g.title}</span>
+                  <span className="mt-0.5 block text-muted-foreground">{o.label}</span>
+                </span>
+              </Link>
+            );
+          }
+          const options = g.options.map((o) => (
+            <li key={o.value}>
+              <Option href={toggleHref(basePath, params, g.name, o.value)} on={selected.includes(o.value)} label={o.label} count={o.count} className={row} />
+            </li>
+          ));
+          // Выбранный вариант из хвоста не прячем под «Показать все».
+          const hiddenSelected = g.options.slice(VISIBLE).some((o) => selected.includes(o.value));
+          const long = g.options.length > VISIBLE + 1 && !hiddenSelected;
+          return (
+            <fieldset key={g.name}>
+              <legend className="mb-1.5 text-sm font-bold">{g.title}</legend>
+              <ul>
+                {g.allLabel && (
+                  <li>
+                    <Option href={toggleHref(basePath, params, g.name, null)} on={selected.length === 0} radio label={g.allLabel} count={g.options.reduce((n, o) => n + (o.count ?? 0), 0)} className={row} />
+                  </li>
+                )}
+                {long ? options.slice(0, VISIBLE) : options}
+              </ul>
+              {long && (
+                <details className="group/more">
+                  <summary className="mt-1 cursor-pointer list-none text-sm font-semibold text-brand-ink hover:text-brand-hover group-open/more:hidden [&::-webkit-details-marker]:hidden">
+                    Показать все ({g.options.length})
+                  </summary>
+                  <ul>{options.slice(VISIBLE)}</ul>
+                </details>
+              )}
+            </fieldset>
+          );
+        })}
+      </div>
+    </aside>
+  );
+}
+
+function Option({ href, on, label, count, radio, className }: { href: string; on: boolean; label: string; count?: number; radio?: boolean; className: string }) {
+  return (
+    <Link href={href} scroll={false} replace role={radio ? "radio" : "checkbox"} aria-checked={on} className={className}>
+      {radio ? (
+        <span aria-hidden className={cn("grid size-[18px] shrink-0 place-items-center rounded-full border-[1.5px] transition-colors", on ? "border-brand" : "border-input bg-white")}>
+          {on && <span className="size-2 rounded-full bg-brand" />}
+        </span>
+      ) : (
+        <Box on={on} />
+      )}
+      <span className={cn("min-w-0 flex-1", on && "font-semibold")}>{label}</span>
+      {count !== undefined && <span className="text-muted-foreground tabular-nums">{count}</span>}
+    </Link>
   );
 }

@@ -44,14 +44,14 @@ export default async function IncomingPage({ params }: { params: Promise<{ slug:
       </div>
       {pending.length > 0 && (
         <p className="mt-6 rounded-xl bg-warn-soft px-5 py-3 text-sm text-warn-ink">
-          Ответь в течение 72 часов: кандидаты, которым быстро отвечают, чаще остаются в проекте.
+          Постарайся ответить в течение трёх дней.
         </p>
       )}
       {apps.length === 0 ? (
         <div className="mt-8">
           <EmptyState
             title="Откликов пока нет"
-            text="Пригласи подходящих людей из каталога сам: так команда соберётся быстрее."
+            text="Пригласи подходящих людей из каталога сам."
             action={
               <Link href="/people" className={buttonVariants({ variant: "brand" })}>
                 Открыть каталог людей

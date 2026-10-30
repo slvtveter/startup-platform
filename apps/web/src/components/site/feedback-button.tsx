@@ -29,7 +29,7 @@ export function FeedbackButton() {
     const { error } = await sendFeedback({ body: { text, page_url: pathname } });
     setBusy(false);
     if (error) return toast.error(errorMessage(error));
-    toast.success("Спасибо! Мы прочитаем каждое сообщение.");
+    toast.success("Сообщение отправлено, спасибо");
     setText("");
     setOpen(false);
   }
@@ -40,7 +40,7 @@ export function FeedbackButton() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Обратная связь</DialogTitle>
-          <DialogDescription>Нашли баг или есть идея? Напишите, это сразу увидит команда.</DialogDescription>
+          <DialogDescription>Нашёл ошибку или есть идея? Напиши, сообщение придёт команде Envola.</DialogDescription>
         </DialogHeader>
         <Textarea
           value={text}

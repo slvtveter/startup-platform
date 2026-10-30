@@ -1,7 +1,7 @@
 type ApiErrorBody = { error?: { code?: string; message?: string; details?: unknown } };
 
 /** Сообщение для пользователя из единого формата ошибок API. */
-export function errorMessage(error: unknown, fallback = "Что-то пошло не так. Попробуйте ещё раз.") {
+export function errorMessage(error: unknown, fallback = "Что-то пошло не так. Попробуй ещё раз.") {
   const body = error as ApiErrorBody | undefined;
   const message = body?.error?.message ?? fallback;
   const details = body?.error?.details;

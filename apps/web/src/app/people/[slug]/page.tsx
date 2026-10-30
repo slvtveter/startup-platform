@@ -293,11 +293,6 @@ export default async function PersonPage({ params }: Props) {
               )}
             </div>
           </div>
-          {!p.is_demo && (
-            <p className="px-1 text-sm text-muted-foreground">
-              Переписка идёт на Envola. Телеграм и почта откроются, когда человек примет приглашение в команду.
-            </p>
-          )}
         </aside>
       </div>
 

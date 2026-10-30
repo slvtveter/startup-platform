@@ -182,8 +182,7 @@ export default async function StartupPage({ params }: Props) {
           </div>
           {s.is_demo && (
             <p className="mt-4 max-w-[52ch] text-sm text-muted-foreground">
-              Это пример проекта: так выглядит стартап на Envola. Откликнуться на него нельзя — опубликуй свою идею, и
-              люди смогут откликаться уже на неё.
+              Это пример проекта, откликнуться на него нельзя.
             </p>
           )}
         </div>
@@ -207,8 +206,8 @@ export default async function StartupPage({ params }: Props) {
           </div>
           {s.status === "draft" && (
             <p className="mt-4 rounded-2xl bg-white p-4 text-sm">
-              <b>Это черновик — его пока видишь только ты.</b> Подтверди почту и нажми «Опубликовать» в редакторе, тогда проект
-              появится в каталоге и люди смогут откликаться.{" "}
+              <b>Это черновик, его видишь только ты.</b> Подтверди почту и опубликуй проект в редакторе.
+              {" "}
               <Link href={`/startups/${s.slug}/edit`} className="font-bold text-brand-ink hover:underline">
                 Перейти к публикации
               </Link>
@@ -218,7 +217,7 @@ export default async function StartupPage({ params }: Props) {
             <li className="rounded-2xl bg-white p-4">
               <b className="block">{s.cover_url ? "Обложка есть" : "Добавь обложку"}</b>
               <span className="mt-1 block text-sm text-muted-foreground">
-                {s.cover_url ? "Её видно в каталоге и на главной." : "С фото карточку открывают заметно чаще, чем с буквой."}
+                {s.cover_url ? "Поменять её можно в редакторе." : "Фото продукта или команды."}
               </span>
               {!s.cover_url && (
                 <Link href={`/startups/${s.slug}/edit`} className="mt-2 inline-block text-sm font-bold text-brand-ink hover:underline">
@@ -238,7 +237,7 @@ export default async function StartupPage({ params }: Props) {
             </li>
             <li className="rounded-2xl bg-white p-4">
               <b className="block">Поделись ссылкой</b>
-              <span className="mt-1 block text-sm text-muted-foreground">В чатах вуза и у друзей — так приходят первые отклики.</span>
+              <span className="mt-1 block text-sm text-muted-foreground">Например, в чате курса или вуза.</span>
               <span className="mt-2 inline-block">
                 <ShareButton title={s.title} text={s.pitch} path={`/startups/${s.slug}`} />
               </span>
@@ -429,26 +428,6 @@ export default async function StartupPage({ params }: Props) {
               </a>
             )}
           </div>
-          {!s.is_owner && !s.is_demo && (
-            <div className="rounded-[28px] bg-white p-6 shadow-[0_0_0_1.5px_var(--border)]">
-              <div className="text-sm font-bold">Что будет после отклика</div>
-              <ol className="mt-3 grid gap-3 text-sm">
-                {[
-                  ["Пара фраз о себе", "Отклик уходит основателю вместе с твоим профилем."],
-                  ["Ответ обычно за 2–3 дня", "Основатель может сразу написать тебе в сообщения."],
-                  ["Контакты открываются", "Когда отклик примут, вы видите телеграм и почту друг друга."],
-                ].map(([t, d], i) => (
-                  <li key={t} className="flex gap-3">
-                    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-brand-soft text-xs font-extrabold text-brand-ink">{i + 1}</span>
-                    <span>
-                      <b className="block">{t}</b>
-                      <span className="text-muted-foreground">{d}</span>
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          )}
         </aside>
       </div>
 

@@ -30,7 +30,7 @@ export function nextStep(i: NextStepInput): NextStep {
     return {
       kind: "answer",
       title: `Ответь на ${total} ${plural(total, "отклик", "отклика", "откликов")}`,
-      text: "Люди ждут решения. Быстрый ответ повышает доверие к твоей команде, а скорость ответа видна на странице стартапа.",
+      text: "Люди ждут решения.",
       href: `/me/startups/${incoming[0].slug}`,
       cta: "Открыть отклики",
     };
@@ -71,7 +71,7 @@ export function nextStep(i: NextStepInput): NextStep {
     return {
       kind: "apply",
       title: "Выбери первое место в команде",
-      text: "Ниже стартапы, которые подходят под твою роль и навыки. Отклик занимает пару минут.",
+      text: "Ниже стартапы под твою роль и навыки.",
       href: "/startups",
       cta: "Все свободные места",
     };
@@ -80,7 +80,7 @@ export function nextStep(i: NextStepInput): NextStep {
     return {
       kind: "wait",
       title: `${pending} ${plural(pending, "отклик ждёт", "отклика ждут", "откликов ждут")} ответа`,
-      text: "Основатели обычно отвечают за 2–3 дня. Пока ждёшь, можно откликнуться ещё на одно место.",
+      text: "Пока ждёшь, можно откликнуться ещё на одно место.",
       href: "/me/applications",
       cta: "Мои отклики",
     };
@@ -90,7 +90,7 @@ export function nextStep(i: NextStepInput): NextStep {
     return {
       kind: "invite",
       title: "Новых откликов пока нет",
-      text: "Не жди, пока найдут тебя: посмотри людей с подходящими навыками и позови их на свободное место.",
+      text: "Посмотри людей с подходящими навыками и позови их на свободное место.",
       href: "/people",
       cta: "Найти людей",
     };
@@ -98,7 +98,7 @@ export function nextStep(i: NextStepInput): NextStep {
   return {
     kind: "invite",
     title: "Ты уже в команде",
-    text: "Можно откликнуться ещё на одно место. Раз в неделю пришлём на почту новые роли под твой профиль.",
+    text: "Можно откликнуться ещё на одно место.",
     href: "/startups",
     cta: "Смотреть стартапы",
   };

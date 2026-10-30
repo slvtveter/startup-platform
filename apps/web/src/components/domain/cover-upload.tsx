@@ -41,7 +41,7 @@ export function CoverUpload({ startup }: { startup: StartupDetail }) {
       <div>
         <h2 className="text-lg font-extrabold tracking-[-0.02em]">Обложка</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Фото продукта, команды или того, для кого вы его делаете. Горизонтальное, JPEG, PNG или WebP до 5 МБ. Без обложки покажем первую букву названия.
+          Фото продукта, команды или того, для кого вы его делаете. Горизонтальное, JPEG, PNG или WebP до 5 МБ.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button type="button" variant="outline" disabled={busy} onClick={() => input.current?.click()}>

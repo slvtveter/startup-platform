@@ -204,7 +204,7 @@ export function SecuritySettings({ email, verified }: { email: string; verified:
       </SettingRow>
       {pendingEmail && (
         <p className="mx-5 my-4 rounded-xl bg-secondary p-3 text-sm sm:mx-6">
-          Мы отправили ссылку на {pendingEmail}. Пока вы по ней не перейдёте, вход работает по текущему адресу.
+          Мы отправили ссылку на {pendingEmail}. Пока ты по ней не перейдёшь, вход работает по текущему адресу.
         </p>
       )}
       {editing === "email" && (

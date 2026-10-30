@@ -55,7 +55,7 @@ export function ResumeUpload({
           <span className="block font-semibold">Резюме в PDF</span>
         )}
         <span className="block text-sm text-muted-foreground">
-          {name ? "Открывается только у вошедших на Envola" : "До 5 МБ. Необязательно, но с ним проще понять твой опыт."}
+          {name ? "Открывается только у вошедших на Envola" : "PDF до 5 МБ, необязательно."}
         </span>
       </div>
       <input

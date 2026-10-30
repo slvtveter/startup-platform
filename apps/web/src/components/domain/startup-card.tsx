@@ -88,7 +88,7 @@ export function StartupCard({
         href={`/startups/${startup.slug}`}
         className="card-hover group flex h-full flex-col rounded-[28px] bg-tone p-2 hover:bg-tone-2"
       >
-        <span className="relative block aspect-[16/9] shrink-0 overflow-hidden rounded-2xl">
+        <span className="relative block aspect-[2/1] shrink-0 overflow-hidden rounded-2xl">
           <StartupCover startup={startup} eager={eager} />
           <span className="absolute top-3 left-3 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-foreground shadow-sm">
             {STAGE[startup.stage] ?? startup.stage}
@@ -96,9 +96,16 @@ export function StartupCard({
           <TermsBadge terms={startup.terms} className="absolute top-3 right-3" />
         </span>
         <div className="flex flex-1 flex-col px-4 pt-4 pb-4">
-          <h3 className="truncate text-xl leading-tight font-extrabold tracking-[-0.03em]" title={startup.title}>
-            {startup.title}
-          </h3>
+          <span className="flex items-center gap-2">
+            <h3 className="truncate text-xl leading-tight font-extrabold tracking-[-0.03em]" title={startup.title}>
+              {startup.title}
+            </h3>
+            {startup.is_demo && (
+              <span title="Пример: так выглядит карточка на Envola" className="shrink-0 rounded-md bg-white px-2 py-0.5 text-xs leading-5 font-semibold text-muted-foreground">
+                Пример
+              </span>
+            )}
+          </span>
           {/* Суть всегда занимает две строки: карточки в ряду держат один ритм, даже если текст короткий. */}
           <p className="mt-1.5 line-clamp-2 min-h-[42px] text-base leading-[21px] text-muted-foreground">{startup.pitch}</p>
           <span className="mt-4 flex h-7 min-w-0 items-center gap-1.5 overflow-hidden" aria-label="Кого ищут">
@@ -130,10 +137,9 @@ export function StartupCard({
           <span className="mt-auto pt-5">
             <span className="flex items-center gap-2 border-t border-foreground/[0.08] pt-3.5 text-sm text-muted-foreground">
               <span className="min-w-0 truncate">
-                Основатель <span className="font-semibold text-foreground">{startup.owner_name}</span>
+                <span className="font-semibold text-foreground">{startup.owner_name}</span>
                 {team > 1 ? ` и ещё ${team - 1}` : ""}
               </span>
-              {startup.is_demo && <span title="Пример: так выглядит карточка на Envola" className="shrink-0 rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-muted-foreground shadow-[inset_0_0_0_1px_var(--border)]">Пример</span>}
               <span className="ml-auto inline-flex shrink-0 items-center gap-1 font-bold text-brand-ink">
                 {open > 0 ? plural(open, `${open} место`, `${open} места`, `${open} мест`) : "Подробнее"}
                 <ArrowRight aria-hidden className="size-3.5" />

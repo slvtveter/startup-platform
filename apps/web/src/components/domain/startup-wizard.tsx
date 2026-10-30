@@ -49,8 +49,8 @@ type Step = { key: string; title: string; hint: string; ready: (f: Form, roles: 
 
 // Сначала стадия: от неё зависят подсказки дальше (у идеи «что уже есть» — это опросы и макеты, не пользователи).
 const STEPS: Step[] = [
-  { key: "stage", title: "На какой стадии проект?", hint: "Честно: новичкам важно понимать, во что они идут. Идея без единой строчки кода — тоже нормально.", ready: () => true },
-  { key: "title", title: "Как называется проект?", hint: "Рабочее название — потом можно поменять. Не придумывается? Нажми «Придумать».", ready: (f) => f.title.trim().length >= 2 },
+  { key: "stage", title: "На какой стадии проект?", hint: "Новичкам важно понимать, во что они идут. Идея без кода тоже подходит.", ready: () => true },
+  { key: "title", title: "Как называется проект?", hint: "Рабочее, его можно поменять. Если не придумывается, нажми «Придумать».", ready: (f) => f.title.trim().length >= 2 },
   { key: "pitch", title: "Идея одной фразой", hint: "Что это и для кого. Её увидят в ленте первой.", ready: (f) => f.pitch.trim().length >= 10 },
   { key: "description", title: "Расскажи подробнее", hint: "Главное — проблема. Остальное можно дописать потом.", ready: (f) => f.description.trim().length >= MIN_DESCRIPTION },
   { key: "terms", title: "На каких условиях зовёшь людей?", hint: "Видно на карточке и в фильтрах.", ready: () => true },
@@ -187,14 +187,14 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
     if (publish) {
       const { error } = await publishStartup({ path: { startup_id: s.id } });
       if (!error) {
-        toast.success("Стартап опубликован — люди уже могут откликаться");
+        toast.success("Стартап опубликован, на роли уже можно откликаться");
         router.push(`/startups/${s.slug}`);
         router.refresh();
         return;
       }
       toast.error(errorMessage(error));
     } else {
-      toast.success(emailVerified ? "Черновик сохранён" : "Черновик сохранён. Подтверди почту — и можно публиковать.");
+      toast.success(emailVerified ? "Черновик сохранён" : "Черновик сохранён. Подтверди почту, чтобы опубликовать");
     }
     router.push(`/startups/${s.slug}/edit`);
     router.refresh();
@@ -382,8 +382,7 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
                   <Input aria-label="Telegram-канал" placeholder="Telegram-канал: @channel" className="h-11" value={form.telegram} onChange={(e) => set("telegram", e.target.value)} />
                 </div>
                 <p className="rounded-2xl bg-brand-soft p-4 text-sm">
-                  После публикации откроется страница проекта: там можно добавить обложку, поправить задачи каждой роли и сразу
-                  найти людей под открытые места.
+                  Обложку и задачи ролей можно поправить на странице проекта.
                 </p>
                 <dl className="grid gap-3 rounded-2xl bg-tone p-5 text-sm">
                   <Summary label="Название" value={form.title} onEdit={() => jump(0)} />
@@ -460,7 +459,7 @@ function Counter({ value, min, max }: { value: number; min: number; max?: number
   const left = min - value;
   return (
     <p className={cn("mt-2 text-xs", left > 0 ? "text-muted-foreground" : "text-success-ink")}>
-      {left > 0 ? `Ещё ${left} ${plural(left, "символ", "символа", "символов")}` : "Отлично, этого хватит"}
+      {left > 0 ? `Ещё ${left} ${plural(left, "символ", "символа", "символов")}` : "Достаточно"}
       {max ? ` · ${value}/${max}` : ""}
     </p>
   );

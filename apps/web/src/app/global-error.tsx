@@ -9,9 +9,9 @@ export default function GlobalError({ reset }: { error: Error & { digest?: strin
     <html lang="ru">
       <body style={{ margin: 0, background: "#ffffff", color: "#0F1B2D", fontFamily: "system-ui, sans-serif" }}>
         <main style={{ maxWidth: 560, margin: "0 auto", padding: "96px 16px" }}>
-          <h1 style={{ fontSize: 32, lineHeight: 1.2, margin: 0 }}>Сайт споткнулся</h1>
+          <h1 style={{ fontSize: 32, lineHeight: 1.2, margin: 0 }}>Страница не загрузилась</h1>
           <p style={{ marginTop: 12, fontSize: 18, color: "#565b77" }}>
-            Мы уже видим ошибку в логах. Попробуйте ещё раз — обычно этого хватает.
+            Мы получили отчёт об ошибке. Обнови страницу, обычно это помогает.
           </p>
           <button
             type="button"

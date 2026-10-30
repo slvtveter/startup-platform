@@ -15,7 +15,7 @@ export default async function ConfirmEmailPage({ searchParams }: { searchParams:
   return (
     <AuthCard title={error ? "Ссылка не сработала" : "Почта изменена"}>
       <p className="text-muted-foreground">
-        {error ? errorMessage(error) : "Теперь входите по новому адресу. Письма тоже будут приходить на него."}
+        {error ? errorMessage(error) : "Теперь входи по новому адресу. Письма тоже будут приходить на него."}
       </p>
       <Link href="/me/settings" className={buttonVariants({ size: "lg", className: "mt-6 w-full" })}>
         К настройкам

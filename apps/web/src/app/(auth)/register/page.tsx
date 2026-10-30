@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "Регистрация" };
 export default async function RegisterPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const { next } = await searchParams;
   return (
-    <AuthCard tab="register" next={next} title="Создать аккаунт" subtitle="Бесплатно и без резюме. Почту подтвердим кодом, профиль заполним на следующем шаге.">
+    <AuthCard tab="register" next={next} title="Создать аккаунт" subtitle="Бесплатно и без резюме.">
       <Suspense>
         <AuthForm mode="register" />
       </Suspense>

@@ -21,7 +21,7 @@ export default async function WelcomePage() {
       </ol>
       <h1 className="mt-3 text-[32px] sm:text-[48px] lg:text-[56px] leading-[1.04]">С чего начнёшь?</h1>
       <p className="mt-3 max-w-[52ch] text-lg text-muted-foreground">
-        Выбери, что ближе сейчас. Потом заполним профиль за три коротких шага и сразу покажем тех, кто тебе подходит. Передумать можно в любой момент.
+        Выбери, что тебе ближе. Передумать можно в любой момент.
       </p>
       <div className="mt-8">
         <WelcomeChoice />

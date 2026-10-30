@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 const STEPS = [
   ["Отметься", "В профиле включи «Ищу сообщников». Идея не нужна: достаточно навыков и желания сделать своё."],
   ["Напиши первым", "Выбери пару человек с другими навыками: разработчику нужен дизайнер, дизайнеру — разработчик и маркетолог."],
-  ["Накидайте идеи", "Созвонитесь на полчаса, обсудите, что бесит в жизни и учёбе. Лучшую мысль опубликуйте как идею — она соберёт остальных."],
+  ["Накидайте идеи", "Созвонитесь на полчаса, обсудите, что неудобно в учёбе, работе или быту. Лучшую мысль опубликуйте как идею, чтобы к ней присоединились другие."],
 ];
 
 const STARTERS = [
@@ -94,14 +94,14 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
             <p className="max-w-[44ch] text-muted-foreground sm:ml-auto">
               {total > 0
                 ? `${total} ${plural(total, "человек хочет", "человека хотят", "человек хотят")} придумать стартап с нуля. Напиши тому, чьи навыки дополняют твои.`
-                : "Пока никто не отметился. Стань первым — тебе напишут, когда появятся люди с подходящими навыками."}
+                : "Пока здесь никого нет. Включи в профиле «Ищу сообщников», и тебя увидят первым."}
             </p>
           </div>
           <div className="mb-5">
             <QuickChips basePath="/people/cofounders" params={params} name="role" allLabel="Все роли" options={(roles ?? []).map((r) => ({ value: r.slug, label: r.name }))} />
           </div>
           {people && people.items.length > 0 && (
-            <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 md:grid-cols-3 xl:grid-cols-4">
+            <ul className="grid grid-cols-1 gap-2 sm:gap-3 md:grid-cols-2 xl:grid-cols-3">
               {people.items.map((p) => (
                 <PersonCard key={p.slug} person={p} as="li" />
               ))}
@@ -134,7 +134,7 @@ export default async function CofoundersPage({ searchParams }: { searchParams: P
                 Не знаешь, с чего начать разговор?
               </h2>
               <p className="mt-4 max-w-[40ch] text-muted-foreground">
-                Возьми готовое первое сообщение и поправь под себя. Короткое и честное сообщение работает лучше длинного письма.
+                Возьми готовое первое сообщение и поправь под себя. На короткое сообщение отвечают охотнее, чем на длинное письмо.
               </p>
             </div>
             <ul className="grid gap-2.5">
