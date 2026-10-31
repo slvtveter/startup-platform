@@ -12,7 +12,6 @@ export default function NotFound() {
       <div className="relative grid min-h-[60svh] place-items-center overflow-hidden rounded-[36px] bg-tone px-6 py-16 text-center">
         <Sticker name="cursor" className="absolute top-10 left-[8%] size-20 -rotate-12 max-md:hidden" />
         <Sticker name="arrow" className="absolute right-[9%] bottom-12 size-24 rotate-6 max-md:hidden" />
-        <Sticker name="spark" className="absolute top-14 right-[14%] size-14 rotate-12 max-md:hidden" />
         <div>
           <p className="text-sm font-bold tracking-wide text-brand-ink uppercase">Ошибка 404</p>
           <h1 className="mt-3 text-[36px] sm:text-[48px] lg:text-[64px] leading-[1.02]">Такой страницы нет</h1>

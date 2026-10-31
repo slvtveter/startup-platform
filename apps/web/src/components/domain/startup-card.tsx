@@ -91,6 +91,7 @@ export function StartupCard({
   as: Tag = "div",
   eager,
   href,
+  compact = false,
 }: {
   startup: StartupCardData;
   reasons?: string[];
@@ -98,6 +99,8 @@ export function StartupCard({
   eager?: boolean;
   /** Куда вести вместо страницы проекта (витрина главной: таких проектов в базе нет). */
   href?: string;
+  /** Плотнее: суть в одну строку, меньше отступы — четыре карточки и заголовок помещаются в один экран. */
+  compact?: boolean;
 }) {
   const open = startup.open_roles.reduce((n, r) => n + (r.slots ?? 1), 0);
   const team = startup.team_size ?? 1;
@@ -105,7 +108,7 @@ export function StartupCard({
   const more = startup.open_roles.length - roles.length;
   return (
     <Tag className="h-full">
-      <Link href={href ?? `/startups/${startup.slug}`} className="card-hover group flex h-full flex-col rounded-3xl bg-tone p-5 hover:bg-tone-2 sm:p-6">
+      <Link href={href ?? `/startups/${startup.slug}`} className={cn("card-hover group flex h-full flex-col rounded-3xl bg-tone p-5 hover:bg-tone-2", !compact && "sm:p-6")}>
         <span className="flex items-center gap-4">
           <StartupMark startup={startup} eager={eager} />
           <span className="min-w-0 flex-1">
@@ -127,10 +130,10 @@ export function StartupCard({
           </span>
         </span>
 
-        <p className="mt-4 line-clamp-2 text-base leading-6 text-foreground/80">{startup.pitch}</p>
+        <p className={cn("text-base leading-6 text-foreground/80", compact ? "mt-3 line-clamp-1" : "mt-4 line-clamp-2")}>{startup.pitch}</p>
 
         {roles.length > 0 ? (
-          <span className="mt-4 flex flex-wrap gap-1.5" aria-label="Кого ищут">
+          <span className={cn("flex flex-wrap gap-1.5", compact ? "mt-3" : "mt-4")} aria-label="Кого ищут">
             {roles.map((r) => (
               <span key={r.id} className="rounded-full bg-white px-3 py-1 text-sm leading-5 font-semibold">
                 {r.title}
@@ -153,8 +156,8 @@ export function StartupCard({
           </span>
         )}
 
-        <span className="mt-auto pt-5">
-          <span className="flex items-center gap-2 border-t border-foreground/[0.08] pt-4 text-sm text-muted-foreground">
+        <span className={cn("mt-auto", compact ? "pt-4" : "pt-5")}>
+          <span className={cn("flex items-center gap-2 border-t border-foreground/[0.08] text-sm text-muted-foreground", compact ? "pt-3" : "pt-4")}>
             {startup.owner_avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP
               <img src={startup.owner_avatar_url} alt="" loading="lazy" decoding="async" className="size-7 shrink-0 rounded-full bg-tone-2 object-cover" />

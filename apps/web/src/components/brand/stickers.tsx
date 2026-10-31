@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
  *
  * Стиль (docs/ux/design-system.md, «Наклейки»):
  * - сетка 64×64, линии 5 (как «e» в логотипе), концы и углы скруглены;
- * - не больше двух цветов бренда плюс белый: василёк #5B8CF0, синий #3B6FE4, чернила #0F1B2D, мягкий #D6E2FD;
+ * - не больше двух цветов бренда плюс белый: василёк #5B8CF0, синий #3B6FE4, второй цвет (--second), мягкий #D6E2FD;
  * - белая обводка по контуру (как у вырезанной наклейки) и мягкая тень — класс .sticker;
  * - без текста и градиентов; лёгкий поворот −12…12° задаётся снаружи (rotate-*);
  * - на экран не больше 2–3 наклеек, только как акцент у заголовка, края фото или карточки.
@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 
 const C = "#5B8CF0"; // cornflower
 const B = "#3B6FE4"; // brand
-const I = "#0F1B2D"; // ink
+const I = "var(--second)"; // второй цвет вместо чёрного (globals.css)
 const S = "#D6E2FD"; // soft
 const W = "#fff";
 
@@ -41,13 +41,7 @@ const STICKERS = {
       <circle cx="33" cy="38" r="3" fill={W} />
     </>
   ),
-  /** Искра: первый опыт, «получилось». */
-  spark: (
-    <>
-      <path d="M30 6 C32 22 38 28 54 30 C38 32 32 38 30 56 C28 38 22 32 6 30 C22 28 28 22 30 6 Z" fill={C} {...cut} />
-      <circle cx="52" cy="12" r="5" fill={I} {...cut} />
-    </>
-  ),
+
   /** Курсор с щелчком: действие, отклик. */
   cursor: (
     <>
@@ -69,18 +63,16 @@ const STICKERS = {
       <path d="M24 24 l-8 8 l8 8 M40 24 l8 8 l-8 8 M35 21 l-6 22" {...line} stroke={C} />
     </>
   ),
-  /** Кривая Безье с узлами: дизайнеры. */
+  /** Перо векторного редактора: дизайнеры. */
   pen: (
     <>
-      <rect x="6" y="10" width="52" height="44" rx="14" fill={S} {...cut} />
-      <path d="M14 44 C20 18 44 46 50 20" {...line} stroke={B} />
-      <path d="M14 44 L26 20 M50 20 L38 44" fill="none" stroke={I} strokeWidth="2.5" strokeLinecap="round" />
-      <rect x="10" y="40" width="8" height="8" rx="2" fill={W} stroke={I} strokeWidth="2.5" />
-      <rect x="46" y="16" width="8" height="8" rx="2" fill={W} stroke={I} strokeWidth="2.5" />
-      <circle cx="26" cy="20" r="3" fill={I} />
-      <circle cx="38" cy="44" r="3" fill={I} />
+      <path d="M32 6 L50 30 L42 48 H22 L14 30 Z" fill={C} {...cut} />
+      <path d="M32 9 V27" {...line} stroke={W} strokeWidth={3.5} />
+      <circle cx="32" cy="31" r="4.5" fill={W} />
+      <rect x="20" y="47" width="24" height="11" rx="4" fill={I} {...cut} />
     </>
   ),
+
   /** Растущие столбики: аналитика и маркетинг. */
   chart: (
     <>
@@ -99,21 +91,28 @@ const STICKERS = {
       <path d="M27 24 a7 7 0 0 1 7 -6" {...line} stroke={W} strokeWidth={4} />
     </>
   ),
-  /** Две точки, связанные дугой: сообщники, команда. */
-  link: (
+  /** Пазл: два человека дополняют друг друга — сообщники, команда. */
+  team: (
     <>
-      <path d="M16 42 C16 18 48 18 48 42" {...line} stroke={W} strokeWidth={13} />
-      <path d="M16 42 C16 18 48 18 48 42" {...line} stroke={I} />
-      <circle cx="16" cy="44" r="10" fill={C} {...cut} />
-      <circle cx="48" cy="44" r="10" fill={B} {...cut} />
+      <path d="M8 22 a8 8 0 0 1 8 -8 h14 v9 a6 6 0 1 1 0 12 v15 h-14 a8 8 0 0 1 -8 -8 z" fill={C} {...cut} transform="rotate(-6 20 32)" />
+      <path d="M34 14 h14 a8 8 0 0 1 8 8 v20 a8 8 0 0 1 -8 8 h-14 v-15 a6 6 0 1 0 0 -12 z" fill={I} {...cut} transform="translate(2 2) rotate(6 46 32)" />
     </>
   ),
+
   /** Часы: свободные часы в неделю. */
   clock: (
     <>
       <circle cx="32" cy="32" r="26" fill={S} {...cut} />
       <path d="M32 18 v14 l9 6" {...line} stroke={I} />
       <circle cx="32" cy="32" r="3.5" fill={B} />
+    </>
+  ),
+  /** Вопрос в реплике: частые вопросы, помощь. */
+  question: (
+    <>
+      <path d="M14 8 h36 a10 10 0 0 1 10 10 v20 a10 10 0 0 1 -10 10 h-16 l-10 9 v-9 h-10 a10 10 0 0 1 -10 -10 v-20 a10 10 0 0 1 10 -10 z" fill={C} {...cut} />
+      <path d="M25 21 a7 7 0 1 1 9.5 6.5 c-1.8 .8 -2.5 2 -2.5 4" {...line} stroke={W} strokeWidth={5} />
+      <circle cx="32" cy="40" r="3.2" fill={W} />
     </>
   ),
   /** Плюс: добавить, опубликовать. */

@@ -77,7 +77,7 @@ export async function ProjectCatalog({ params }: { params: SearchParams }) {
           href={toggleHref(BASE, params, "stage", null)}
           scroll={false}
           aria-current={stage.length === 0 ? "true" : undefined}
-          className={cn(chip, stage.length === 0 ? "bg-foreground text-background hover:bg-[#1d2a3f]" : "bg-tone hover:bg-tone-2")}
+          className={cn(chip, stage.length === 0 ? "bg-second text-on-second hover:bg-second-hover" : "bg-tone hover:bg-tone-2")}
         >
           Все
           <span className={cn(badge, stage.length === 0 ? "bg-white/15" : "bg-white")}>{all}</span>
@@ -90,7 +90,7 @@ export async function ProjectCatalog({ params }: { params: SearchParams }) {
               href={toggleHref(BASE, params, "stage", s.value)}
               scroll={false}
               aria-current={on ? "true" : undefined}
-              className={cn(chip, on ? "bg-foreground text-background hover:bg-[#1d2a3f]" : "bg-tone hover:bg-tone-2")}
+              className={cn(chip, on ? "bg-second text-on-second hover:bg-second-hover" : "bg-tone hover:bg-tone-2")}
             >
               {s.label}
               <span className={cn(badge, on ? "bg-white/15" : "bg-white")}>{counts[s.value]}</span>

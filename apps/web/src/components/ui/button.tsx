@@ -8,7 +8,7 @@ const buttonVariantsBase = cva(
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-brand-hover",
-        ink: "bg-foreground text-background hover:bg-[#1d2a3f]",
+        ink: "bg-second text-on-second hover:bg-second-hover",
         light: "bg-white text-foreground hover:bg-brand-soft",
         onphoto: "bg-transparent text-white shadow-[inset_0_0_0_1.5px_rgb(255_255_255/0.45)] hover:bg-white/12",
         brand: "bg-brand text-primary-foreground hover:bg-brand-hover",

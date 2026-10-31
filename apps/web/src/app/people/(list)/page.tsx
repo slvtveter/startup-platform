@@ -91,7 +91,7 @@ export default async function PeoplePage({ searchParams }: Props) {
           ) : (
             <div className="mt-4">
               <EmptyState
-                sticker="link"
+                sticker="team"
                 title="Никого не нашли"
                 text={q ? `По запросу «${q}» никого нет. Попробуй другое слово или убери часть фильтров.` : "Попробуй убрать часть фильтров."}
                 action={

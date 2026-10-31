@@ -58,7 +58,7 @@ export function UserMenu({
       >
         <Avatar className="size-9">
           {avatarUrl && <AvatarImage src={avatarUrl} alt="" className="object-cover" />}
-          <AvatarFallback className="bg-foreground text-sm font-bold text-background">{initials(name)}</AvatarFallback>
+          <AvatarFallback className="bg-second text-sm font-bold text-on-second">{initials(name)}</AvatarFallback>
         </Avatar>
         {unread > 0 && (
           <span aria-hidden className="absolute -top-0.5 -right-0.5 size-3 rounded-full border-2 border-background bg-brand" />
@@ -69,7 +69,7 @@ export function UserMenu({
           <DropdownMenuLabel className="flex items-center gap-3 px-2 py-2 font-normal">
             <Avatar className="size-9 shrink-0">
               {avatarUrl && <AvatarImage src={avatarUrl} alt="" className="object-cover" />}
-              <AvatarFallback className="bg-foreground text-sm font-bold text-background">{initials(name)}</AvatarFallback>
+              <AvatarFallback className="bg-second text-sm font-bold text-on-second">{initials(name)}</AvatarFallback>
             </Avatar>
             <span className="min-w-0">
               <span className="block truncate font-semibold text-foreground">{name}</span>

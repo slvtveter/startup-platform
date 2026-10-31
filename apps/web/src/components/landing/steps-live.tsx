@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import type { PersonCard as Person } from "@/lib/api";
@@ -13,9 +14,9 @@ import { cn } from "@/lib/utils";
  */
 
 const STEPS = [
-  { title: "Создай профиль", text: "Роль, навыки и свободные часы в неделю. Резюме не нужно." },
-  { title: "Выбери стартап", text: "Фильтр по роли, стадии и оплате." },
-  { title: "Откликнись и созвонись", text: "Обсуди с основателем задачи и сроки." },
+  { title: "Создай профиль", text: "Роль, навыки и свободные часы в неделю. Резюме не нужно.", href: "/register" },
+  { title: "Выбери стартап", text: "Фильтр по роли, стадии и оплате.", href: "/startups" },
+  { title: "Откликнись и созвонись", text: "Обсуди с основателем задачи и сроки.", href: "/register" },
 ];
 
 const CSS = `
@@ -106,17 +107,18 @@ export function StepsLive({ role, person }: { role?: string; person?: Person }) 
   );
 }
 
+/** Шаг — ссылка: «Создай профиль» и «Откликнись» ведут в регистрацию, «Выбери стартап» — в каталог. */
 function Panel({ i, children }: { i: number; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col rounded-[28px] bg-tone p-2">
+    <Link href={STEPS[i].href} className="card-hover group flex flex-col rounded-[28px] bg-tone p-2 hover:bg-tone-2">
       <div aria-hidden className="grid h-44 place-items-center rounded-[20px] bg-white px-6">
         {children}
       </div>
       <div className="px-5 pt-5 pb-6">
         <p className="text-sm font-bold text-brand-ink">Шаг {i + 1}</p>
-        <h3 className="mt-1.5 text-2xl font-extrabold tracking-[-0.03em]">{STEPS[i].title}</h3>
+        <h3 className="mt-1.5 text-2xl font-extrabold tracking-[-0.03em] transition-colors group-hover:text-brand-ink">{STEPS[i].title}</h3>
         <p className="mt-2 text-muted-foreground">{STEPS[i].text}</p>
       </div>
-    </div>
+    </Link>
   );
 }

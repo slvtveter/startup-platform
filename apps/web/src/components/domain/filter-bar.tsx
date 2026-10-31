@@ -148,7 +148,7 @@ export function CatalogToolbar({
                               onClick={() => go(toggleHref(basePath, params, g.name, o.value))}
                               className={cn(
                                 "inline-flex min-h-10 items-center gap-1.5 rounded-full px-4 py-2 text-left text-sm font-semibold transition-colors disabled:bg-transparent disabled:text-muted-foreground disabled:shadow-[inset_0_0_0_1px_var(--border)]",
-                                on ? "bg-foreground text-background" : "bg-tone hover:bg-tone-2",
+                                on ? "bg-second text-on-second" : "bg-tone hover:bg-tone-2",
                               )}
                             >
                               {o.label}

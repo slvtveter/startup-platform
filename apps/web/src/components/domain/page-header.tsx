@@ -25,7 +25,7 @@ export function EmptyState({
   title,
   text,
   action,
-  sticker = "spark",
+  sticker = "cursor",
 }: {
   title: string;
   text?: string;

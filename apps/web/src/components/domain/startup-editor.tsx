@@ -144,7 +144,7 @@ export function StartupEditor({ startup, roles, skills }: { startup?: StartupDet
                 key={st}
                 type="button"
                 onClick={() => set("stage", st)}
-                className={cn("rounded-full border px-4 py-2 text-sm font-semibold", form.stage === st && "border-foreground bg-foreground text-background")}
+                className={cn("rounded-full border px-4 py-2 text-sm font-semibold", form.stage === st && "border-second bg-second text-on-second")}
               >
                 {STAGE[st]}
               </button>

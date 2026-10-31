@@ -52,12 +52,15 @@ export function PersonCard({
   eager,
   surface = "tone",
   href,
+  compact = false,
 }: {
   person: PersonCardData;
   as?: "div" | "li";
   eager?: boolean;
   /** Куда вести вместо профиля (витрина главной: таких людей в базе нет). */
   href?: string;
+  /** Плитка для главной: без строк «Опыт / О себе», навыки одной строкой, одинаковая высота. */
+  compact?: boolean;
   /** На цветной подложке карточка белая, чипы внутри — серые. */
   surface?: "tone" | "white";
 }) {
@@ -75,9 +78,9 @@ export function PersonCard({
   const headline = filled(person.headline);
   const city = filled(person.city);
   const rows: [string, React.ReactNode][] = [];
-  if (level) rows.push(["Опыт", level]);
-  if (headline) rows.push(["О себе", <span key="h" className="line-clamp-2">{headline}</span>]);
-  if (skills.length)
+  if (level && !compact) rows.push(["Опыт", level]);
+  if (headline && !compact) rows.push(["О себе", <span key="h" className="line-clamp-2">{headline}</span>]);
+  if (skills.length && !compact)
     rows.push([
       "Навыки",
       <span key="s" className="flex flex-wrap gap-1.5">
@@ -92,10 +95,14 @@ export function PersonCard({
   const cols = "grid grid-cols-[64px_minmax(0,1fr)] gap-x-4 sm:grid-cols-[96px_minmax(0,1fr)] sm:gap-x-6";
 
   return (
-    <Tag>
+    <Tag className={compact ? "h-full" : undefined}>
       <Link
         href={href ?? `/people/${person.slug}`}
-        className={cn("card-hover group block rounded-3xl p-5 sm:p-7", white ? "bg-white hover:bg-tone" : "bg-tone hover:bg-tone-2")}
+        className={cn(
+          "card-hover group block rounded-3xl p-5",
+          compact ? "flex h-full flex-col sm:p-6" : "sm:p-7",
+          white ? "bg-white hover:bg-tone" : "bg-tone hover:bg-tone-2",
+        )}
       >
         <div className={cols}>
           <span className="relative size-16 overflow-hidden rounded-2xl bg-tone-2 sm:size-24">
@@ -124,13 +131,19 @@ export function PersonCard({
               {city && <span className="text-muted-foreground">{person.primary_role ? " · " : ""}{city}</span>}
             </p>
             {(cofound || terms.length > 0 || availability) && (
-              <span className="mt-3 flex flex-wrap gap-1.5 max-sm:hidden">
+              <span
+                className={cn(
+                  "mt-3 flex gap-1.5 max-sm:hidden",
+                  compact ? "overflow-hidden [mask-image:linear-gradient(90deg,#000_85%,transparent)] [&>*]:shrink-0 [&>*]:whitespace-nowrap" : "flex-wrap",
+                )}
+              >
                 <Badges cofound={cofound} terms={terms} availability={availability} chip={chip} />
               </span>
             )}
           </div>
         </div>
         {/* На телефоне бейджи под фото во всю ширину: рядом с ним им тесно. */}
+        {compact && <span className="block h-4 shrink-0" />}
         {(cofound || terms.length > 0 || availability) && (
           <span className="mt-4 flex flex-wrap gap-1.5 sm:hidden">
             <Badges cofound={cofound} terms={terms} availability={availability} chip={chip} />
@@ -145,6 +158,15 @@ export function PersonCard({
               </div>
             ))}
           </dl>
+        )}
+        {compact && skills.length > 0 && (
+          <span className="mt-auto flex gap-1.5 overflow-hidden border-t border-foreground/[0.08] pt-4 [mask-image:linear-gradient(90deg,#000_85%,transparent)]" aria-label="Навыки">
+            {person.skills.map((s) => (
+              <span key={s.slug} className={cn("shrink-0 rounded-full px-2.5 py-0.5 text-sm font-semibold whitespace-nowrap", chip)}>
+                {s.name}
+              </span>
+            ))}
+          </span>
         )}
       </Link>
     </Tag>

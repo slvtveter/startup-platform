@@ -18,7 +18,7 @@ from app.scripts.demo_data import FOUNDERS, PEOPLE, STARTUPS
 API = "http://localhost:8080/api"
 ROOT = Path(__file__).resolve().parents[3]
 OUT = ROOT / "apps/web/public/showcase"
-WEB = ROOT / "apps/web/src/lib/showcase.ts"
+WEB = ROOT / "apps/web/src/lib/showcase.data.ts"
 MEDIA = Path(__file__).parent / "demo_media"
 
 
@@ -67,7 +67,7 @@ src = [
     "/**",
     " * Витрина главной: придуманные стартапы и люди, не связанные с базой (не меняются от новых регистраций).",
     " * Сгенерировано app/scripts/showcase_export.py из demo_data.py, фото — Pexels (бесплатная лицензия) в public/showcase.",
-    " * Карточки ведут не на страницы (их нет), а в каталог по роли — см. startupHref и personHref.",
+    " * Карточки ведут не на страницы (их нет), а в каталог по роли — выбор карточек и ссылки — в showcase.ts.",
     " */",
     'import type { PersonCard, StartupCard } from "@/lib/api";',
     "",

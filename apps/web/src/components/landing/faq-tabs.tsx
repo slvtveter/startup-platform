@@ -18,7 +18,7 @@ export function FaqTabs({ items }: { items: [string, string][] }) {
             onClick={() => setActive(i)}
             className={cn(
               "flex items-center gap-4 rounded-2xl px-5 py-4 text-left text-lg font-bold transition-colors",
-              i === active ? "bg-foreground text-background" : "bg-tone hover:bg-tone-2",
+              i === active ? "bg-second text-on-second" : "bg-tone hover:bg-tone-2",
             )}
           >
             {q}

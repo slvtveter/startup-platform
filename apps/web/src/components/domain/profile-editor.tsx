@@ -78,7 +78,7 @@ function Choice({ active, onClick, children }: { active: boolean; onClick: () =>
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={cn("rounded-full px-4 py-2 text-sm font-semibold transition-colors", active ? "bg-foreground text-background" : "bg-tone hover:bg-tone-2")}
+      className={cn("rounded-full px-4 py-2 text-sm font-semibold transition-colors", active ? "bg-second text-on-second" : "bg-tone hover:bg-tone-2")}
     >
       {children}
     </button>
@@ -227,7 +227,7 @@ export function ProfileEditor({
                 <span
                   className={cn(
                     "grid size-8 place-items-center rounded-full transition-colors duration-200",
-                    i === step ? "bg-brand text-primary-foreground" : i < step ? "bg-foreground text-background" : "bg-tone text-muted-foreground",
+                    i === step ? "bg-brand text-primary-foreground" : i < step ? "bg-second text-on-second" : "bg-tone text-muted-foreground",
                   )}
                 >
                   {i < step ? <Check aria-hidden className="size-4" strokeWidth={3} /> : i + 1}

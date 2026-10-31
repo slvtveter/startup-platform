@@ -4,7 +4,7 @@ import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Sticker, type StickerName } from "@/components/brand/stickers";
+import { Sticker } from "@/components/brand/stickers";
 import { Dashboard } from "@/components/domain/dashboard";
 import { PersonCard } from "@/components/domain/person-card";
 import { StartupCard } from "@/components/domain/startup-card";
@@ -17,10 +17,10 @@ import { Reveal } from "@/components/site/reveal";
 import { TrackView } from "@/components/site/track-view";
 import { buttonVariants } from "@/components/ui/button";
 import { startupFacets, type PersonCard as Person, type StartupCard as Startup } from "@/lib/api";
-import { COFOUND, plural } from "@/lib/labels";
+import { plural } from "@/lib/labels";
 import { PHOTOS } from "@/lib/photos";
 import { getMe, getRoles, publicClient } from "@/lib/server-api";
-import { IDEAS, PEOPLE, STARTUPS, personHref, startupHref } from "@/lib/showcase";
+import { COFOUNDER_FACES, HERO_FACES, HOME_PEOPLE, IDEAS, PATH_PEOPLE, STARTUPS, STEP_PERSON, personHref, startupHref } from "@/lib/showcase";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
@@ -48,7 +48,6 @@ async function Landing() {
     .filter((r) => r.n > 0)
     .sort((a, b) => b.n - a.n);
 
-  const cofounders = PEOPLE.filter((p) => p.looking_for.includes(COFOUND));
   const grid = "grid gap-3 lg:grid-cols-2";
   const feed: FeedTab[] = [
     {
@@ -59,7 +58,7 @@ async function Landing() {
         <div className={grid}>
           {STARTUPS.slice(0, 4).map((s, i) => (
             <div key={s.slug} className={cn(i >= 3 && "max-sm:hidden")}>
-              <StartupCard startup={s} href={startupHref(s)} />
+              <StartupCard startup={s} href={startupHref(s)} compact />
             </div>
           ))}
         </div>
@@ -72,9 +71,9 @@ async function Landing() {
       content: (
         <div className={grid}>
           {IDEAS.slice(0, 3).map((s) => (
-            <StartupCard key={s.slug} startup={s} href={startupHref(s)} />
+            <StartupCard key={s.slug} startup={s} href={startupHref(s)} compact />
           ))}
-          <OwnIdeaCard />
+          <OwnIdeaCard className="min-h-0" />
         </div>
       ),
     },
@@ -103,37 +102,42 @@ async function Landing() {
         }}
       />
 
-      <Hero faces={PEOPLE.slice(0, 5)} />
+      <Hero faces={HERO_FACES} />
 
       {roles.length > 0 && <RoleStrip roles={roles} />}
 
       <Section eyebrow="С чего начать" title="Четыре дороги в команду">
-        <Paths startups={STARTUPS.slice(0, 3)} idea={IDEAS[0]} people={PEOPLE.slice(5, 8)} faces={cofounders.slice(0, 6)} />
+        <Paths startups={STARTUPS.slice(0, 3)} idea={IDEAS[0]} people={PATH_PEOPLE} faces={COFOUNDER_FACES} />
       </Section>
 
-      <Section id="feed" eyebrow="Так выглядят проекты на Envola" title="Стартапы, которые ищут людей" sticker={<Sticker name="spark" className="size-20 rotate-6 lg:size-24" />}>
+      <Section id="feed" title="Стартапы, которые ищут людей" tight>
         <HomeFeed tabs={feed} />
       </Section>
 
-      <Section eyebrow="Так выглядят профили" title="Кто уже ищет команду" sticker={<StickerPair a="code" b="pen" />}>
+      <Section
+        title="Кто уже ищет команду"
+        tight
+        aside={
+          <Link href="/people" className="inline-flex items-center gap-1.5 font-bold text-brand-ink transition-colors hover:text-brand-hover">
+            Все люди
+            <ArrowRight aria-hidden className="size-4" />
+          </Link>
+        }
+      >
         <div className={grid}>
-          {PEOPLE.slice(8, 12).map((p, i) => (
+          {HOME_PEOPLE.map((p, i) => (
             <div key={p.slug} className={cn(i >= 2 && "max-sm:hidden")}>
-              <PersonCard person={p} href={personHref(p)} />
+              <PersonCard person={p} href={personHref(p)} compact />
             </div>
           ))}
         </div>
-        <Link href="/people" className="mt-6 inline-flex items-center gap-1.5 font-bold text-brand-ink transition-colors hover:text-brand-hover">
-          Все люди
-          <ArrowRight aria-hidden className="size-4" />
-        </Link>
       </Section>
 
       <Section title="Как попасть в команду стартапа">
-        <StepsLive role={STARTUPS[0]?.open_roles[0]?.role.name} person={PEOPLE[0]} />
+        <StepsLive role={STARTUPS[0]?.open_roles[0]?.role.name} person={STEP_PERSON} />
       </Section>
 
-      <Section id="faq" eyebrow="Вопросы" title="Частые вопросы" sticker={<Sticker name="chat" className="size-20 -rotate-6 lg:size-24" />}>
+      <Section id="faq" title="Частые вопросы" sticker={<Sticker name="question" className="size-20 -rotate-6 lg:size-24" />}>
         <FaqTabs items={FAQ} />
       </Section>
 
@@ -177,7 +181,7 @@ function Hero({ faces }: { faces: Person[] }) {
         )}
       </div>
 
-      {/* Фото и наклейки бренда по краям (как стикеры у Drinkit): знак, разговор, искра. */}
+      {/* Фото и наклейки бренда по краям (как стикеры у Drinkit): знак и разговор. */}
       <div className="relative px-[4%] py-[5%]">
         <div className="relative aspect-[4/3.4] overflow-hidden rounded-[36px] sm:aspect-[4/3] lg:aspect-square">
           <Image
@@ -193,7 +197,6 @@ function Hero({ faces }: { faces: Person[] }) {
         </div>
         <Sticker name="mark" className="absolute top-0 left-0 size-[24%] -rotate-12" />
         <Sticker name="chat" className="absolute right-0 bottom-[6%] size-[24%] rotate-6" />
-        <Sticker name="spark" className="absolute top-[3%] right-[7%] size-[13%] rotate-12" />
       </div>
     </section>
   );
@@ -302,7 +305,7 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
 
       {/* Нет идеи. */}
       <Link href="/people/cofounders" className={cn(card, "bg-tone hover:bg-tone-2 lg:col-span-2")} style={delay(120)}>
-        <Sticker name="link" className="absolute top-5 right-5 size-14 -rotate-6 sm:size-16" />
+        <Sticker name="team" className="absolute top-5 right-5 size-14 -rotate-6 sm:size-16" />
         <span className="text-sm font-bold text-muted-foreground">Нет идеи</span>
         <h3 className="mt-3 pr-14 text-[28px] leading-[1.05] font-extrabold tracking-[-0.04em] sm:pr-16 sm:text-[32px]">Придумай её вместе с сообщниками</h3>
         {faces.length > 0 && (
@@ -319,21 +322,21 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
         </span>
       </Link>
 
-      {/* Нужны люди. */}
-      <Link href="/people" className={cn(card, "bg-foreground text-background hover:bg-[#1d2a3f] lg:col-span-3")} style={delay(180)}>
+      {/* Нужны люди: светлая, превью людей поднимается при наведении, как в остальных карточках. */}
+      <Link href="/people" className={cn(card, "bg-brand-soft hover:bg-marker lg:col-span-3")} style={delay(180)}>
         <span className="grid gap-8 sm:grid-cols-[minmax(0,1fr)_minmax(0,300px)] sm:items-start">
           <span>
-            <span className="text-sm font-bold text-white/60">Нужны люди</span>
-            <h3 className="mt-3 max-w-[16ch] text-[32px] leading-[1.02] font-extrabold tracking-[-0.04em] text-white sm:text-[40px]">Найди разработчика или дизайнера</h3>
+            <span className="text-sm font-bold text-brand-ink">Нужны люди</span>
+            <h3 className="mt-3 max-w-[16ch] text-[32px] leading-[1.02] font-extrabold tracking-[-0.04em] sm:text-[40px]">Найди разработчика или дизайнера</h3>
           </span>
-          <span aria-hidden className="grid gap-1.5 max-sm:hidden">
+          <span aria-hidden className="grid gap-1.5 rounded-2xl bg-white p-2 transition-transform duration-500 group-hover:-translate-y-1 max-sm:hidden">
             {people.map((p) => (
-              <span key={p.slug} className="flex items-center gap-3 rounded-2xl bg-white/10 p-2.5 pr-3.5 text-white">
-                {/* eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP */}
-                <img src={p.avatar_url!} alt="" className="size-10 shrink-0 rounded-xl object-cover" />
+              <span key={p.slug} className="flex items-center gap-3 rounded-xl bg-tone p-2 pr-3">
+                {/* eslint-disable-next-line @next/next/no-img-element -- фото витрины уже пережаты в WebP */}
+                <img src={p.avatar_url!} alt="" className="size-10 shrink-0 rounded-lg object-cover" />
                 <span className="min-w-0 flex-1">
                   <b className="block truncate text-sm font-extrabold">{p.primary_role?.name ?? p.display_name}</b>
-                  <span className="block truncate text-xs text-white/60">
+                  <span className="block truncate text-xs text-muted-foreground">
                     {p.display_name}
                     {p.city ? ` · ${p.city}` : ""}
                   </span>
@@ -342,7 +345,7 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
             ))}
           </span>
         </span>
-        <span className={cn(cta, "text-white")}>
+        <span className={cn(cta, "text-brand-ink")}>
           Смотреть людей
           {arrow}
         </span>
@@ -360,6 +363,8 @@ function Section({
   lead,
   className,
   sticker,
+  aside,
+  tight = false,
   children,
 }: {
   id?: string;
@@ -370,20 +375,25 @@ function Section({
   className?: string;
   /** Наклейка бренда справа от заголовка (на телефоне скрыта). */
   sticker?: React.ReactNode;
+  /** Ссылка или действие справа от заголовка (видно и на телефоне). */
+  aside?: React.ReactNode;
+  /** Плотная шапка: заголовок в одну строку, меньше отступ до содержимого — секция влезает в экран. */
+  tight?: boolean;
   children: React.ReactNode;
 }) {
   const hid = `${id ?? title.slice(0, 12).replace(/\s+/g, "-")}-h`;
   return (
     <section id={id} aria-labelledby={hid} className={cn(wrap, "scroll-mt-24 pt-[clamp(72px,9vw,128px)]", className)}>
-      <div className="mb-10 flex flex-wrap items-end gap-x-10 gap-y-4">
+      <div className={cn("flex flex-wrap items-end gap-x-10 gap-y-4", tight ? "mb-6" : "mb-10")}>
         <div>
           {eyebrow && <p className="mb-3 text-sm font-bold text-brand-ink">{eyebrow}</p>}
-          <h2 id={hid} className="max-w-[18ch] text-[32px] leading-[1.02] text-balance sm:text-[44px] lg:text-[48px]">
+          <h2 id={hid} className={cn("text-[32px] leading-[1.02] text-balance sm:text-[44px] lg:text-[48px]", !tight && "max-w-[18ch]")}>
             {title}
           </h2>
         </div>
         {lead && <p className="max-w-[40ch] text-lg text-muted-foreground sm:ml-auto">{lead}</p>}
         {sticker && <div className="ml-auto self-center max-sm:hidden">{sticker}</div>}
+        {aside && <div className="ml-auto pb-1.5">{aside}</div>}
       </div>
       {children}
     </section>
@@ -442,15 +452,6 @@ const FAQ: [string, string][] = [
   ["Это бесплатно?", "Да. Профиль, отклики и переписка бесплатны, платных функций нет."],
 ];
 
-/** Две наклейки внахлёст у заголовка: роли (код и дизайн). */
-function StickerPair({ a, b }: { a: StickerName; b: StickerName }) {
-  return (
-    <span className="relative block h-20 w-32 lg:h-24 lg:w-40">
-      <Sticker name={a} className="absolute top-0 left-0 size-16 -rotate-12 lg:size-20" />
-      <Sticker name={b} className="absolute right-0 bottom-0 size-16 rotate-6 lg:size-20" />
-    </span>
-  );
-}
 
 function FinalCta() {
   return (
