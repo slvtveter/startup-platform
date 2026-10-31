@@ -6,7 +6,9 @@ import { HydratedFlag } from "@/components/site/hydrated-flag";
 import { Metrika } from "@/components/site/metrika";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
+import { TermsGate } from "@/components/site/terms-gate";
 import { Toaster } from "@/components/ui/sonner";
+import { getMe } from "@/lib/server-api";
 
 import "./globals.css";
 
@@ -31,7 +33,9 @@ export const metadata: Metadata = {
 // Цвет панели браузера на телефоне — как фон шапки.
 export const viewport: Viewport = { themeColor: "#ffffff" };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // Тот же запрос, что в шапке (getMe кешируется на время рендера).
+  const user = await getMe();
   return (
     <html lang="ru" className={`${manrope.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
@@ -44,7 +48,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </a>
         <SiteHeader />
         <main id="main" tabIndex={-1} className="flex-1 outline-none">
-          {children}
+          <TermsGate needed={!!user?.needs_terms}>{children}</TermsGate>
         </main>
         <SiteFooter />
         <CookieNotice />

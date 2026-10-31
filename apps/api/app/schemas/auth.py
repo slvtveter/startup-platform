@@ -7,6 +7,9 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 class RegisterIn(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
+    # Две отдельные галочки в форме: без них аккаунт не создаётся.
+    accept_terms: Literal[True]
+    adult: Literal[True]
     utm_source: str | None = Field(default=None, max_length=64)
 
     @field_validator("email")
@@ -111,7 +114,14 @@ class MeOut(BaseModel):
     email: str
     is_admin: bool
     email_verified: bool
+    # Нет согласия с действующей редакцией соглашения: показываем экран согласия.
+    needs_terms: bool
     profile: MeProfile | None
+
+
+class TermsIn(BaseModel):
+    accept_terms: Literal[True]
+    adult: Literal[True]
 
 
 class SocialProvidersOut(BaseModel):

@@ -1,38 +1,6 @@
 import { UserPlus, Users } from "lucide-react";
 
 import { plural } from "@/lib/labels";
-import { cn } from "@/lib/utils";
-
-/**
- * «Место в команде» — главная единица интерфейса (docs/ux/design-system.md).
- * Занятое место — чернильный квадрат с инициалами, свободное — маркерный пунктир.
- */
-export function Seat({
-  filled,
-  initials,
-  size = "md",
-  className,
-}: {
-  filled: boolean;
-  initials?: string;
-  size?: "sm" | "md" | "lg";
-  className?: string;
-}) {
-  const dims = { sm: "size-6 rounded-[6px] text-xs", md: "size-8 rounded-lg text-xs", lg: "size-11 rounded-xl text-sm" }[size];
-  return (
-    <span
-      aria-hidden
-      className={cn(
-        "inline-flex shrink-0 items-center justify-center font-bold",
-        dims,
-        filled ? "bg-foreground text-background" : "border-[1.5px] border-dashed border-cornflower bg-brand-soft",
-        className,
-      )}
-    >
-      {filled ? initials : null}
-    </span>
-  );
-}
 
 export function initialsOf(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);

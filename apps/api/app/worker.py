@@ -1,7 +1,8 @@
 """Воркер фоновых задач (KAN-91): `python -m app.worker`.
 
 Разбирает очередь jobs, раз в час отправляет напоминания основателям
-об откликах без ответа, а по понедельникам — подборку новых ролей (KAN-107).
+об откликах без ответа и чистит устаревшие сессии и журналы входа,
+а по понедельникам — подборку новых ролей (KAN-107).
 """
 
 import asyncio
@@ -13,6 +14,7 @@ from app.core.logging import setup_logging
 from app.db.session import SessionLocal
 from app.services import jobs, mail  # noqa: F401 — mail регистрирует обработчик send_mail
 from app.services.applications import remind_stale
+from app.services.cleanup import purge_expired
 from app.services.digest import send_weekly
 
 logger = logging.getLogger("app.worker")
@@ -38,6 +40,7 @@ async def main() -> None:
                     # Подборка по понедельникам; повторный вызов в ту же неделю ничего не шлёт.
                     if datetime.now(UTC).weekday() == 0:
                         logger.info(f"digests sent: {await send_weekly(db)}")
+                    await purge_expired(db)
                     next_remind = datetime.now(UTC) + REMIND_EVERY
                 while not stop.is_set() and await jobs.run_once(db):
                     pass

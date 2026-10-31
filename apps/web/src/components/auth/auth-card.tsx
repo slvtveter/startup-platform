@@ -2,11 +2,11 @@ import { Check } from "lucide-react";
 import Image from "next/image";
 
 import { AuthFrame } from "@/components/auth/auth-frame";
-import { FACES, PHOTOS } from "@/lib/photos";
+import { PHOTOS } from "@/lib/photos";
 
 /**
- * Рамка раздела входа (app/(auth)/layout.tsx): слева карточка (AuthFrame), справа фото с репликой —
- * тот же «разговор», что на главной. Живёт в layout, поэтому при переходе «Вход ⇄ Регистрация»
+ * Рамка раздела входа (app/(auth)/layout.tsx): слева карточка (AuthFrame), справа фото с коротким
+ * обещанием. Живёт в layout, поэтому при переходе «Вход ⇄ Регистрация»
  * ничего не перерисовывается: карточка плавно меняет высоту, меняется только форма внутри.
  */
 export function AuthShell({ children }: { children: React.ReactNode }) {
@@ -21,14 +21,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
       <div className="relative isolate hidden overflow-hidden rounded-[36px] p-10 text-white lg:flex lg:flex-col lg:justify-end">
         <Image src={PHOTOS.videoCall} alt="" fill preload placeholder="blur" sizes="50vw" className="-z-20 object-cover" />
         <div aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgb(10_18_34/0.1),rgb(10_18_34/0.78))]" />
-        <div className="flex max-w-[400px] items-end gap-2.5">
-          <Image src={FACES.kirill} alt="" width={36} height={36} className="size-9 rounded-full object-cover shadow-[0_0_0_2px_rgb(255_255_255/0.8)]" />
-          <p className="rounded-2xl rounded-bl-md bg-white px-3.5 py-2.5 text-base leading-snug text-foreground shadow-[0_14px_40px_rgb(0_0_0/0.25)]">
-            <small className="mb-0.5 block text-xs font-bold text-muted-foreground">Кирилл, frontend</small>
-            Привет! Видел твою идею, могу взять на себя фронт. Созвонимся?
-          </p>
-        </div>
-        <p className="mt-8 max-w-[18ch] text-[36px] leading-[1.02] font-extrabold tracking-[-0.04em]">Здесь стартапы начинаются с разговора</p>
+        <p className="max-w-[18ch] text-[36px] leading-[1.02] font-extrabold tracking-[-0.04em]">Здесь стартапы начинаются с разговора</p>
         <ul className="mt-5 grid gap-2 text-base font-semibold text-white/90">
           {["Бесплатно и без резюме", "Профиль за пару минут"].map((t) => (
             <li key={t} className="flex items-center gap-2.5">

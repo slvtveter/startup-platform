@@ -2,6 +2,7 @@
 from app.models.application import Application
 from app.models.catalog import Role, Skill
 from app.models.chat import Conversation, Message
+from app.models.consent import Consent
 from app.models.ops import AdminAction, Event, Feedback, Job, Report
 from app.models.profile import Profile, ProfileLink
 from app.models.startup import Startup, StartupMember, StartupRole
@@ -11,6 +12,7 @@ __all__ = [
     "AdminAction",
     "Application",
     "AuthAttempt",
+    "Consent",
     "Conversation",
     "EmailToken",
     "Event",

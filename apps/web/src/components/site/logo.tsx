@@ -16,15 +16,6 @@ const MARK = (
   </>
 );
 
-/** Только знак, например для аватарки или фавиконки внутри интерфейса. */
-export function LogoMark({ className = "size-[26px]" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 64 64" aria-hidden className={`shrink-0 ${className}`}>
-      {MARK}
-    </svg>
-  );
-}
-
 /** Знак со словом. Высоту задаёт className (h-6, h-7…), ширина считается сама. */
 export function Wordmark({ className = "h-[26px]" }: { className?: string }) {
   return (

@@ -15,7 +15,10 @@ def _code_from_mail(index: int = -1) -> str:
 
 
 async def _signup(client, email: str = "a@a.ru", password: str = "secret-pass-1"):
-    r = await client.post("/api/auth/register", json={"email": email, "password": password})
+    r = await client.post(
+        "/api/auth/register",
+        json={"email": email, "password": password, "accept_terms": True, "adult": True},
+    )
     assert r.status_code == 202, r.text
     r = await client.post("/api/auth/code", json={"email": email, "code": _code_from_mail()})
     assert r.status_code == 200, r.text
@@ -24,7 +27,13 @@ async def _signup(client, email: str = "a@a.ru", password: str = "secret-pass-1"
 
 async def test_register_needs_code_from_mail(client):
     r = await client.post(
-        "/api/auth/register", json={"email": "Maria@Mail.ru", "password": "secret-pass-1"}
+        "/api/auth/register",
+        json={
+            "email": "Maria@Mail.ru",
+            "password": "secret-pass-1",
+            "accept_terms": True,
+            "adult": True,
+        },
     )
     assert r.status_code == 202
     assert r.json() == {"email": "maria@mail.ru"}
@@ -39,7 +48,13 @@ async def test_register_needs_code_from_mail(client):
 
     # Без кода войти по паролю нельзя: снова уходит код.
     r = await client.post(
-        "/api/auth/login", json={"email": "maria@mail.ru", "password": "secret-pass-1"}
+        "/api/auth/login",
+        json={
+            "email": "maria@mail.ru",
+            "password": "secret-pass-1",
+            "accept_terms": True,
+            "adult": True,
+        },
     )
     assert r.status_code == 403 and r.json()["error"]["code"] == "email_unverified"
     assert (await client.get("/api/auth/me")).status_code == 401
@@ -57,14 +72,23 @@ async def test_register_needs_code_from_mail(client):
 
     assert (await client.post("/api/auth/logout")).status_code == 200
     r = await client.post(
-        "/api/auth/login", json={"email": "maria@mail.ru", "password": "secret-pass-1"}
+        "/api/auth/login",
+        json={
+            "email": "maria@mail.ru",
+            "password": "secret-pass-1",
+            "accept_terms": True,
+            "adult": True,
+        },
     )
     assert r.status_code == 200
     assert (await client.get("/api/auth/me")).status_code == 200
 
 
 async def test_wrong_code_attempts_are_limited(client):
-    await client.post("/api/auth/register", json={"email": "a@a.ru", "password": "secret-pass-1"})
+    await client.post(
+        "/api/auth/register",
+        json={"email": "a@a.ru", "password": "secret-pass-1", "accept_terms": True, "adult": True},
+    )
     code = _code_from_mail()
     wrong = "000000" if code != "000000" else "111111"
     for _ in range(5):
@@ -87,28 +111,42 @@ async def test_resend_does_not_reveal_users(client):
 
 async def test_unverified_signup_can_be_restarted(client):
     """Опечатка в пароле до подтверждения: повторная регистрация задаёт пароль заново."""
-    await client.post("/api/auth/register", json={"email": "a@a.ru", "password": "first-pass-1"})
+    await client.post(
+        "/api/auth/register",
+        json={"email": "a@a.ru", "password": "first-pass-1", "accept_terms": True, "adult": True},
+    )
     r = await client.post(
-        "/api/auth/register", json={"email": "a@a.ru", "password": "second-pass-2"}
+        "/api/auth/register",
+        json={"email": "a@a.ru", "password": "second-pass-2", "accept_terms": True, "adult": True},
     )
     assert r.status_code == 202
     await client.post("/api/auth/code", json={"email": "a@a.ru", "code": _code_from_mail()})
     await client.post("/api/auth/logout")
-    r = await client.post("/api/auth/login", json={"email": "a@a.ru", "password": "second-pass-2"})
+    r = await client.post(
+        "/api/auth/login",
+        json={"email": "a@a.ru", "password": "second-pass-2", "accept_terms": True, "adult": True},
+    )
     assert r.status_code == 200
 
 
 async def test_duplicate_email(client):
     await _signup(client)
-    r = await client.post("/api/auth/register", json={"email": "a@a.ru", "password": "x-pass-123"})
+    r = await client.post(
+        "/api/auth/register",
+        json={"email": "a@a.ru", "password": "x-pass-123", "accept_terms": True, "adult": True},
+    )
     assert r.status_code == 409
 
 
 async def test_wrong_password_and_unknown_user_same_message(client):
     await _signup(client)
-    wrong = await client.post("/api/auth/login", json={"email": "a@a.ru", "password": "nope-nope"})
+    wrong = await client.post(
+        "/api/auth/login",
+        json={"email": "a@a.ru", "password": "nope-nope", "accept_terms": True, "adult": True},
+    )
     unknown = await client.post(
-        "/api/auth/login", json={"email": "x@x.ru", "password": "nope-nope"}
+        "/api/auth/login",
+        json={"email": "x@x.ru", "password": "nope-nope", "accept_terms": True, "adult": True},
     )
     assert wrong.status_code == unknown.status_code == 401
     assert wrong.json()["error"]["message"] == unknown.json()["error"]["message"]
@@ -128,7 +166,8 @@ async def test_legacy_verification_link(make_user):
 async def test_password_reset_by_code(client):
     await _signup(client)
     other = await client.post(
-        "/api/auth/login", json={"email": "a@a.ru", "password": "secret-pass-1"}
+        "/api/auth/login",
+        json={"email": "a@a.ru", "password": "secret-pass-1", "accept_terms": True, "adult": True},
     )
     assert other.status_code == 200
     await client.post("/api/auth/password/forgot", json={"email": "A@a.ru"})
@@ -146,14 +185,23 @@ async def test_password_reset_by_code(client):
     assert r.status_code == 400
     r = await client.post(
         "/api/auth/password/reset-code",
-        json={"email": "a@a.ru", "code": code, "password": "brand-new-pass"},
+        json={
+            "email": "a@a.ru",
+            "code": code,
+            "password": "brand-new-pass",
+            "accept_terms": True,
+            "adult": True,
+        },
     )
     assert r.status_code == 200
     # Старые сессии закрыты, новая — открыта сразу.
     sessions = (await client.get("/api/auth/sessions")).json()
     assert len(sessions) == 1
     await client.post("/api/auth/logout")
-    r = await client.post("/api/auth/login", json={"email": "a@a.ru", "password": "brand-new-pass"})
+    r = await client.post(
+        "/api/auth/login",
+        json={"email": "a@a.ru", "password": "brand-new-pass", "accept_terms": True, "adult": True},
+    )
     assert r.status_code == 200
 
 
@@ -171,11 +219,23 @@ async def test_login_rate_limit(client):
         await _signup(client)
         for _ in range(5):
             r = await client.post(
-                "/api/auth/login", json={"email": "a@a.ru", "password": "wrong-pass"}
+                "/api/auth/login",
+                json={
+                    "email": "a@a.ru",
+                    "password": "wrong-pass",
+                    "accept_terms": True,
+                    "adult": True,
+                },
             )
             assert r.status_code == 401
         r = await client.post(
-            "/api/auth/login", json={"email": "a@a.ru", "password": "secret-pass-1"}
+            "/api/auth/login",
+            json={
+                "email": "a@a.ru",
+                "password": "secret-pass-1",
+                "accept_terms": True,
+                "adult": True,
+            },
         )
         assert r.status_code == 429
     finally:
@@ -195,16 +255,27 @@ async def test_change_password_and_delete_account(client):
     )
     assert r.status_code == 200
     assert (await client.delete("/api/auth/account")).status_code == 200
-    r = await client.post("/api/auth/login", json={"email": "a@a.ru", "password": "another-pass"})
+    r = await client.post(
+        "/api/auth/login",
+        json={"email": "a@a.ru", "password": "another-pass", "accept_terms": True, "adult": True},
+    )
     assert r.status_code == 401
 
 
 async def test_change_email_requires_confirmation_from_new_address(make_user, client):
     maria = await make_user("maria@mail.ru")
     await make_user("taken@mail.ru")
-    body = {"new_email": "maria.new@mail.ru", "password": "secret-pass-1"}
+    body = {
+        "new_email": "maria.new@mail.ru",
+        "password": "secret-pass-1",
+        "accept_terms": True,
+        "adult": True,
+    }
     assert (
-        await maria.post("/api/auth/change-email", json=body | {"password": "wrong"})
+        await maria.post(
+            "/api/auth/change-email",
+            json=body | {"password": "wrong", "accept_terms": True, "adult": True},
+        )
     ).status_code == 400
     r = await maria.post("/api/auth/change-email", json=body | {"new_email": "taken@mail.ru"})
     assert r.status_code == 409
@@ -218,7 +289,13 @@ async def test_change_email_requires_confirmation_from_new_address(make_user, cl
     # До подтверждения работает старый адрес.
     assert (await maria.get("/api/auth/me")).json()["email"] == "maria@mail.ru"
     r = await client.post(
-        "/api/auth/login", json={"email": "maria@mail.ru", "password": "secret-pass-1"}
+        "/api/auth/login",
+        json={
+            "email": "maria@mail.ru",
+            "password": "secret-pass-1",
+            "accept_terms": True,
+            "adult": True,
+        },
     )
     assert r.status_code == 200
 
@@ -226,7 +303,13 @@ async def test_change_email_requires_confirmation_from_new_address(make_user, cl
     me = (await maria.get("/api/auth/me")).json()
     assert me["email"] == "maria.new@mail.ru" and me["email_verified"] is True
     r = await client.post(
-        "/api/auth/login", json={"email": "maria.new@mail.ru", "password": "secret-pass-1"}
+        "/api/auth/login",
+        json={
+            "email": "maria.new@mail.ru",
+            "password": "secret-pass-1",
+            "accept_terms": True,
+            "adult": True,
+        },
     )
     assert r.status_code == 200
     # Ссылка одноразовая.
@@ -236,7 +319,13 @@ async def test_change_email_requires_confirmation_from_new_address(make_user, cl
 async def test_change_password_logs_out_other_devices(make_user, client):
     maria = await make_user("maria@mail.ru")
     r = await client.post(
-        "/api/auth/login", json={"email": "maria@mail.ru", "password": "secret-pass-1"}
+        "/api/auth/login",
+        json={
+            "email": "maria@mail.ru",
+            "password": "secret-pass-1",
+            "accept_terms": True,
+            "adult": True,
+        },
     )
     assert r.status_code == 200
     r = await maria.post(
@@ -256,7 +345,13 @@ async def test_login_limited_per_ip_across_emails(client):
         codes = [
             (
                 await client.post(
-                    "/api/auth/login", json={"email": f"u{i}@a.ru", "password": "wrong-pass"}
+                    "/api/auth/login",
+                    json={
+                        "email": f"u{i}@a.ru",
+                        "password": "wrong-pass",
+                        "accept_terms": True,
+                        "adult": True,
+                    },
                 )
             ).status_code
             for i in range(9)
@@ -271,7 +366,12 @@ async def test_sessions_list_and_revoke_others(make_user, client):
     maria = await make_user("maria@mail.ru")
     other = await client.post(
         "/api/auth/login",
-        json={"email": "maria@mail.ru", "password": "secret-pass-1"},
+        json={
+            "email": "maria@mail.ru",
+            "password": "secret-pass-1",
+            "accept_terms": True,
+            "adult": True,
+        },
         headers={"User-Agent": "Mozilla/5.0 (iPhone) Safari"},
     )
     assert other.status_code == 200
@@ -304,7 +404,13 @@ async def test_old_sessions_are_pruned_on_login(make_user, client):
     await make_user("maria@mail.ru")
     for _ in range(MAX_SESSIONS + 5):
         r = await client.post(
-            "/api/auth/login", json={"email": "maria@mail.ru", "password": "secret-pass-1"}
+            "/api/auth/login",
+            json={
+                "email": "maria@mail.ru",
+                "password": "secret-pass-1",
+                "accept_terms": True,
+                "adult": True,
+            },
         )
         assert r.status_code == 200
     sessions = (await client.get("/api/auth/sessions")).json()

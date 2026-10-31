@@ -1,6 +1,6 @@
 # Дизайн-система v3
 
-Источник — концепт `design/concepts-v3/a-razgovor` (выбран 27.10.2026). Токены живут в `apps/web/src/app/globals.css`, компоненты — в `apps/web/src/components`. Исследование ЦА — `docs/ux/research.md`, разборы конкурентов — `docs/research/`.
+Источник — концепт v3 «Разговор» (выбран 27.10.2026; макеты концептов удалены из репозитория 31.10.2026, чтобы не путаться). Токены живут в `apps/web/src/app/globals.css`, компоненты — в `apps/web/src/components`. Исследование ЦА — `docs/ux/research.md`, разборы конкурентов — `docs/research/`.
 
 v2 (жёлтый маркер свободных мест, Unbounded + Golos, ультрамарин) больше не используется.
 

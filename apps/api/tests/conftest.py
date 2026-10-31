@@ -120,7 +120,10 @@ async def make_user(catalog) -> AsyncIterator[MakeUser]:
     ) -> AsyncClient:
         c = _new_client()
         clients.append(c)
-        r = await c.post("/api/auth/register", json={"email": email, "password": "secret-pass-1"})
+        r = await c.post(
+            "/api/auth/register",
+            json={"email": email, "password": "secret-pass-1", "accept_terms": True, "adult": True},
+        )
         assert r.status_code == 202, r.text
         values: dict = {}
         if verified:

@@ -70,7 +70,13 @@ async def test_platform_startup_goes_to_owner_after_email_verification(make_user
     # Основатель регистрируется: до подтверждения почты права не переходят.
     founder = client
     await founder.post(
-        "/api/auth/register", json={"email": "founder@mail.ru", "password": "secret-pass-1"}
+        "/api/auth/register",
+        json={
+            "email": "founder@mail.ru",
+            "password": "secret-pass-1",
+            "accept_terms": True,
+            "adult": True,
+        },
     )
     assert (await founder.get(f"/api/startups/{s['slug']}")).json()["is_owner"] is False
     r = await founder.post(
