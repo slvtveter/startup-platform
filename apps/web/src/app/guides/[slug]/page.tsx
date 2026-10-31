@@ -84,7 +84,7 @@ export default async function GuidePage({ params }: Props) {
         />
         <Link
           href="/guides"
-          className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-foreground"
+          className="inline-flex min-h-6 items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-foreground"
         >
           <ChevronLeftIcon aria-hidden className="size-4" />
           Все гайды

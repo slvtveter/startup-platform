@@ -313,13 +313,13 @@ export function SessionsSettings({ sessions }: { sessions: SessionOut[] }) {
   return (
     <>
       <div className="px-5 py-4 sm:px-6">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="min-w-0 flex-1">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="min-w-0 sm:flex-1">
             <div className="font-medium">Где выполнен вход</div>
             <div className="mt-0.5 text-sm text-muted-foreground">Не узнаёшь устройство — заверши сеанс и смени пароль.</div>
           </div>
           {others.length > 0 && (
-            <Button variant="outline" size="sm" onClick={revokeOthers}>
+            <Button variant="outline" size="sm" onClick={revokeOthers} className="self-start sm:self-auto">
               Выйти на других устройствах
             </Button>
           )}

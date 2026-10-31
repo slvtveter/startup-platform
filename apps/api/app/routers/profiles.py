@@ -1,5 +1,5 @@
 import urllib.parse
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Query, UploadFile
 from fastapi.responses import FileResponse
@@ -67,12 +67,13 @@ async def list_people(
     looking_for: Annotated[list[str], Query()] = [],  # noqa: B006
     cofound: bool = False,
     q: str | None = None,
+    sort: Literal["new", "experience"] = "new",
     limit: Annotated[int, Query(ge=1, le=100)] = 24,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> Page[PersonCard]:
     """looking_for — условия (любое из); cofound — только ищущие сообщников, вместе с условиями."""
     rows, total = await service.list_people(
-        db, role, skill, level, looking_for, q, limit, offset, cofound=cofound
+        db, role, skill, level, looking_for, q, limit, offset, cofound=cofound, sort=sort
     )
     return Page(items=[service.to_card(p) for p in rows], total=total, limit=limit, offset=offset)
 

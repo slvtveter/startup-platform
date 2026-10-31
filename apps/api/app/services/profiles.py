@@ -1,4 +1,4 @@
-from sqlalchemy import Select, and_, exists, false, func, or_, select
+from sqlalchemy import Select, and_, case, exists, false, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.demo import is_demo
@@ -236,6 +236,7 @@ async def list_people(
     limit: int,
     offset: int,
     cofound: bool = False,
+    sort: str = "new",
 ) -> tuple[list[Profile], int]:
     # Порог каталога: роль, описание в одну строку и хотя бы один навык. Пустые карточки
     # отталкивают основателей; по прямой ссылке профиль по-прежнему открывается.
@@ -262,6 +263,14 @@ async def list_people(
     q = (q or "").strip()
     # Сначала профили с описанием: пустые карточки в начале каталога отталкивают основателей.
     order = [(Profile.headline == "").asc(), Profile.updated_at.desc()]
+    if sort == "experience":
+        # Сначала с опытом: junior → стажировка → курсы → без опыта → не указан.
+        rank = case(
+            {"junior": 0, "internship": 1, "courses": 2, "no_experience": 3},
+            value=Profile.experience_level,
+            else_=4,
+        )
+        order.insert(1, rank.asc())
     if q and not search.has_text(q):
         stmt = stmt.where(false())
     elif q:

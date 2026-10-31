@@ -66,6 +66,13 @@ export async function Dashboard() {
     { href: "/chats", label: "Сообщения", hint: "непрочитанные диалоги", value: chats?.count ?? 0, icon: MessageCircleIcon },
   ];
 
+  // Кого позвать: люди под открытые роли моих стартапов. Закрывает пустую половину ряда, когда у
+  // основателя нет своих откликов, и даёт следующее действие прямо отсюда.
+  const openRoleSlugs = [...new Set(myStartups.flatMap((m) => m.open_roles.map((r) => r.role.slug)))];
+  const { data: fit } =
+    openRoleSlugs.length > 0 ? await listPeople({ client, query: { role: openRoleSlugs, limit: 8 } }) : { data: undefined };
+  const candidates = (fit?.items ?? []).filter((p) => p.slug !== profile?.slug).slice(0, 4);
+
   const firstName = name?.split(/\s+/)[0];
   const waitingTotal = stats.reduce((n, x) => n + x.value, 0);
   const findPeople = myStartups.some((m) => m.open_roles.length > 0);
@@ -178,6 +185,34 @@ export async function Dashboard() {
                     </li>
                   );
                 })}
+              </ul>
+            </Panel>
+          )}
+          {activeApps.length === 0 && candidates.length > 0 && (
+            <Panel title="Кого позвать в команду" href={`/people?${openRoleSlugs.map((r) => `role=${r}`).join("&")}`} more="Все">
+              <ul className="divide-y">
+                {candidates.map((p) => (
+                  <li key={p.slug}>
+                    <Link href={`/people/${p.slug}`} className="group flex items-center gap-3 py-3">
+                      {p.avatar_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP
+                        <img src={p.avatar_url} alt="" className="size-10 shrink-0 rounded-xl object-cover" />
+                      ) : (
+                        <span aria-hidden className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand-soft text-sm font-bold text-brand-ink">
+                          {initials(p.display_name)}
+                        </span>
+                      )}
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-semibold group-hover:text-brand-ink">{p.primary_role?.name ?? p.display_name}</span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          {p.display_name}
+                          {p.city ? ` · ${p.city}` : ""}
+                        </span>
+                      </span>
+                      <ArrowRightIcon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </Panel>
           )}

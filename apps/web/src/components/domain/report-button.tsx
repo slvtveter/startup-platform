@@ -30,7 +30,7 @@ export function ReportButton({ targetType, targetId }: { targetType: "profile" |
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger className="text-sm text-muted-foreground hover:text-destructive">Пожаловаться</DialogTrigger>
+      <DialogTrigger className="inline-flex min-h-6 items-center text-sm text-muted-foreground hover:text-destructive">Пожаловаться</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Пожаловаться</DialogTitle>

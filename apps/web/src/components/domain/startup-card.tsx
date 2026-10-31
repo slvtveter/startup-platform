@@ -116,16 +116,13 @@ export function StartupCard({
               <h3 className="truncate text-xl leading-7 font-extrabold tracking-[-0.03em] text-brand-ink transition-colors group-hover:text-brand-hover" title={startup.title}>
                 {startup.title}
               </h3>
-              {startup.is_demo && (
-                <span title="Пример: так выглядит карточка на Envola" className="shrink-0 text-xs font-semibold text-muted-foreground">
-                  Пример
-                </span>
-              )}
             </span>
             <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
               <span className="font-semibold">{STAGE[startup.stage] ?? startup.stage}</span>
               <span aria-hidden className="text-muted-foreground">·</span>
               <TermsBadge terms={startup.terms} className="px-2 py-0.5" />
+              {/* Пример — тихо, в конце служебной строки: карточка не должна кричать, что она ненастоящая. */}
+              {startup.is_demo && <span className="text-xs text-muted-foreground">· пример</span>}
             </span>
           </span>
         </span>
