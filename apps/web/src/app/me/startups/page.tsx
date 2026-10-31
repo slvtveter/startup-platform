@@ -30,6 +30,7 @@ export default async function MyStartupsPage() {
       {items.length === 0 ? (
         <div className="mt-8">
           <EmptyState
+            sticker="bulb"
             title="У тебя пока нет стартапов"
             text="Опиши идею, открой роли и собери первую команду."
             action={

@@ -1,18 +1,25 @@
+import { Sticker, type StickerName } from "@/components/brand/stickers";
 import { cn } from "@/lib/utils";
 
 export function PageHeader({
   title,
   description,
   actions,
+  sticker,
 }: {
   title: string;
   description?: React.ReactNode;
   actions?: React.ReactNode;
+  /** Наклейка бренда рядом с заголовком (на телефоне скрыта). */
+  sticker?: StickerName;
 }) {
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
       <div>
-        <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">{title}</h1>
+        <h1 className="flex items-center gap-4 text-[32px] leading-[1.05] sm:text-[48px]">
+          {title}
+          {sticker && <Sticker name={sticker} className="size-14 shrink-0 -rotate-6 max-sm:hidden" />}
+        </h1>
         {description && <p className="mt-3 max-w-2xl text-lg text-muted-foreground">{description}</p>}
       </div>
       {actions && <div className="flex gap-2 sm:ml-auto">{actions}</div>}
@@ -20,9 +27,21 @@ export function PageHeader({
   );
 }
 
-export function EmptyState({ title, text, action }: { title: string; text?: string; action?: React.ReactNode }) {
+export function EmptyState({
+  title,
+  text,
+  action,
+  sticker = "cursor",
+}: {
+  title: string;
+  text?: string;
+  action?: React.ReactNode;
+  /** Наклейка бренда над заголовком. */
+  sticker?: StickerName;
+}) {
   return (
     <div className="rounded-3xl bg-tone px-6 py-14 text-center">
+      <Sticker name={sticker} className="mx-auto mb-5 size-16 -rotate-6" />
       <div className="text-xl font-extrabold tracking-[-0.02em]">{title}</div>
       {text && <p className="mx-auto mt-2 max-w-md text-muted-foreground">{text}</p>}
       {action && <div className="mt-5 flex justify-center">{action}</div>}

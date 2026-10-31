@@ -50,6 +50,7 @@ export default async function IncomingPage({ params }: { params: Promise<{ slug:
       {apps.length === 0 ? (
         <div className="mt-8">
           <EmptyState
+            sticker="chat"
             title="Откликов пока нет"
             text="Пригласи подходящих людей из каталога сам."
             action={

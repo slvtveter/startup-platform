@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { Sticker } from "@/components/brand/stickers";
 import { CatalogToolbar, FilterSidebar, type FilterGroup } from "@/components/domain/filter-bar";
 import { Pager, asList, toggleHref, type SearchParams } from "@/components/domain/filters";
 import { Container, EmptyState } from "@/components/domain/page-header";
@@ -45,7 +46,10 @@ export default async function PeoplePage({ searchParams }: Props) {
   return (
     <Container>
       <div className="flex flex-wrap items-center justify-between gap-x-10 gap-y-5">
-        <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">{seo.h1}</h1>
+        <h1 className="flex items-center gap-4 text-[32px] leading-[1.05] sm:text-[48px]">
+          {seo.h1}
+          <Sticker name="search" className="size-14 shrink-0 -rotate-6 max-sm:hidden" />
+        </h1>
         {/* «Сообщники» — не отдельный каталог, а фильтр этого: плашка в одну строку включает его и ведёт на объяснение. */}
         {(cof?.total ?? 0) > 0 && (
           <div className="flex w-full flex-wrap items-center gap-x-5 gap-y-3 rounded-2xl bg-brand-soft py-3 pr-3 pl-5 sm:w-auto">
@@ -53,10 +57,14 @@ export default async function PeoplePage({ searchParams }: Props) {
               <span aria-hidden className="size-2 rounded-full bg-brand" />
               {cofound ? "Показаны только сообщники" : `${cof?.total} ${plural(cof?.total ?? 0, "ищет", "ищут", "ищут")} сообщников`}
             </p>
-            <Link href="/people/cofounders" className="text-sm font-semibold text-brand-ink hover:text-brand-hover">
+            <Link href="/people/cofounders" className="inline-flex min-h-6 items-center text-sm font-semibold text-brand-ink hover:text-brand-hover">
               Кто это
             </Link>
-            <Link href={toggleHref("/people", params, "cofound", cofound ? null : "1")} scroll={false} className={buttonVariants({ size: "sm", className: "sm:ml-2" })}>
+            <Link
+              href={toggleHref("/people", params, "cofound", cofound ? null : "1")}
+              scroll={false}
+              className={buttonVariants({ size: "sm", className: "sm:ml-2" })}
+            >
               {cofound ? "Показать всех" : "Показать их"}
             </Link>
           </div>
@@ -87,6 +95,7 @@ export default async function PeoplePage({ searchParams }: Props) {
           ) : (
             <div className="mt-4">
               <EmptyState
+                sticker="team"
                 title="Никого не нашли"
                 text={q ? `По запросу «${q}» никого нет. Попробуй другое слово или убери часть фильтров.` : "Попробуй убрать часть фильтров."}
                 action={

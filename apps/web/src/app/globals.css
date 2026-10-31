@@ -12,6 +12,9 @@
   --color-brand-soft: var(--brand-soft);
   --color-brand-ink: var(--brand-ink);
   --color-brand-hover: var(--brand-hover);
+  --color-second: var(--second);
+  --color-second-hover: var(--second-hover);
+  --color-on-second: var(--on-second);
   --color-cornflower: var(--cornflower);
   --color-tone: var(--tone);
   --color-tone-2: var(--tone-2);
@@ -99,6 +102,11 @@
   --brand-soft: #ecf1fe;
   --brand-ink: #2b57c2;
   --cornflower: #5b8cf0;
+  /* Второй цвет — небесный светлый (выбран 31.10.2026: чёрный, тёмно-синий и персик отвергнуты как резкие) вместо чёрного в заливках (выбранные чипы и вкладки, тёмные карточки, части наклеек).
+     Чернила #0f1b2d остаются для текста. */
+  --second: #9ec2ff;
+  --second-hover: #8ab5ff;
+  --on-second: #0f1b2d;
   --tone: #f4f6fa;
   --tone-2: #e6ebf4;
   /* Бывший «маркер» свободных мест теперь тоже васильковый: одно акцентное семейство на весь сайт. */
@@ -355,6 +363,11 @@
 }
 .auth-pop {
   animation: pop-in 400ms var(--ease-out) backwards;
+}
+
+/* Наклейки бренда (components/brand/stickers.tsx): тень тонирована чернилами, а не чёрным. */
+.sticker {
+  filter: drop-shadow(0 10px 14px rgb(15 27 45 / 0.16)) drop-shadow(0 1px 2px rgb(15 27 45 / 0.12));
 }
 
 /* Юридические документы (/terms, /privacy): текст юриста без классов — оформляем по тегам. */

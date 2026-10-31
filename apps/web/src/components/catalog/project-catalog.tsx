@@ -62,6 +62,7 @@ export async function ProjectCatalog({ params }: { params: SearchParams }) {
   return (
     <Container>
       <PageHeader
+        sticker="flag"
         title={seo.h1}
         actions={
           <Link href="/startups/new" className={buttonVariants()}>
@@ -77,10 +78,10 @@ export async function ProjectCatalog({ params }: { params: SearchParams }) {
           href={toggleHref(BASE, params, "stage", null)}
           scroll={false}
           aria-current={stage.length === 0 ? "true" : undefined}
-          className={cn(chip, stage.length === 0 ? "bg-foreground text-background hover:bg-[#1d2a3f]" : "bg-tone hover:bg-tone-2")}
+          className={cn(chip, stage.length === 0 ? "bg-second text-on-second hover:bg-second-hover" : "bg-tone hover:bg-tone-2")}
         >
           Все
-          <span className={cn(badge, stage.length === 0 ? "bg-white/15" : "bg-white")}>{all}</span>
+          <span className={cn(badge, stage.length === 0 ? "bg-white/50" : "bg-white")}>{all}</span>
         </Link>
         {STAGES.map((s) => {
           const on = stage.includes(s.value);
@@ -90,10 +91,10 @@ export async function ProjectCatalog({ params }: { params: SearchParams }) {
               href={toggleHref(BASE, params, "stage", s.value)}
               scroll={false}
               aria-current={on ? "true" : undefined}
-              className={cn(chip, on ? "bg-foreground text-background hover:bg-[#1d2a3f]" : "bg-tone hover:bg-tone-2")}
+              className={cn(chip, on ? "bg-second text-on-second hover:bg-second-hover" : "bg-tone hover:bg-tone-2")}
             >
               {s.label}
-              <span className={cn(badge, on ? "bg-white/15" : "bg-white")}>{counts[s.value]}</span>
+              <span className={cn(badge, on ? "bg-white/50" : "bg-white")}>{counts[s.value]}</span>
             </Link>
           );
         })}
@@ -116,7 +117,7 @@ export async function ProjectCatalog({ params }: { params: SearchParams }) {
               // h2 между h1 страницы и h3 карточек: порядок заголовков для экранных читалок.
               <span className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
                 <h2 className="text-base font-bold tracking-normal">{countLabel}</h2>
-                <Link href="/me/settings" className="text-sm font-semibold text-brand-ink transition-colors hover:text-brand-hover">
+                <Link href="/me/settings" className="inline-flex min-h-6 items-center text-sm font-semibold text-brand-ink transition-colors hover:text-brand-hover">
                   Присылать новые роли на почту
                 </Link>
               </span>

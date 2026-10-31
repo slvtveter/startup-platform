@@ -61,8 +61,8 @@ FOUNDERS = [
         "full_time",
     ),
     Person(
-        "artem-kim",
-        "Артём Ким",
+        "artem-nikitin",
+        "Артём Никитин",
         "ml",
         "Новосибирск",
         "Делаю StudyMate: тесты к экзамену из твоих конспектов",
@@ -76,8 +76,8 @@ FOUNDERS = [
         "https://github.com/",
     ),
     Person(
-        "timur-galiev",
-        "Тимур Галиев",
+        "denis-galkin",
+        "Денис Галкин",
         "backend",
         "Казань",
         "Основатель Квартала, backend на Python",
@@ -100,8 +100,8 @@ FOUNDERS = [
         ["free", "cofound"],
     ),
     Person(
-        "oleg-van",
-        "Олег Ван",
+        "oleg-vasilev",
+        "Олег Васильев",
         "product",
         "Москва",
         "Fermo: фермерские продукты по подписке",
@@ -113,8 +113,8 @@ FOUNDERS = [
         "full_time",
     ),
     Person(
-        "daniel-adu",
-        "Даниэль Аду",
+        "daniil-andreev",
+        "Даниил Андреев",
         "frontend",
         "Москва",
         "Делаю Tripsy — планировщик поездок для компании друзей",
@@ -139,8 +139,8 @@ FOUNDERS = [
         "internship",
     ),
     Person(
-        "mark-adebayo",
-        "Марк Адебайо",
+        "mark-belousov",
+        "Марк Белоусов",
         "backend",
         "Москва",
         "CaseLab: учебные кейсы от реальных компаний",
@@ -151,8 +151,8 @@ FOUNDERS = [
         ["negotiable", "cofound"],
     ),
     Person(
-        "sabina-yusupova",
-        "Сабина Юсупова",
+        "svetlana-yudina",
+        "Светлана Юдина",
         "marketer",
         "Казань",
         "Маркетолог, запускаю «Резюме за вечер»",
@@ -193,8 +193,8 @@ PEOPLE = [
         "https://github.com/",
     ),
     Person(
-        "alina-tsoy",
-        "Алина Цой",
+        "alina-tsvetkova",
+        "Алина Цветкова",
         "designer",
         "Москва",
         "UX/UI дизайнер, 3 курс ВШЭ. Хочу в команду, где дизайн решает",
@@ -262,8 +262,8 @@ PEOPLE = [
         "junior",
     ),
     Person(
-        "david-kazaryan",
-        "Давид Казарян",
+        "alena-kuznetsova",
+        "Алёна Кузнецова",
         "backend",
         "Ростов-на-Дону",
         "Backend на Go, хочу придумать стартап с командой",
@@ -276,8 +276,8 @@ PEOPLE = [
         "https://github.com/",
     ),
     Person(
-        "zhanna-kamara",
-        "Жанна Камара",
+        "zhenya-komarova",
+        "Женя Комарова",
         "analyst",
         "Москва",
         "Аналитик данных, SQL и Power BI",
@@ -289,8 +289,8 @@ PEOPLE = [
         "internship",
     ),
     Person(
-        "arjun-mehta",
-        "Арджун Мехта",
+        "nastya-ershova",
+        "Настя Ершова",
         "ml",
         "Москва",
         "ML в рекомендациях, магистратура Сколтеха",
@@ -302,13 +302,14 @@ PEOPLE = [
         "internship",
     ),
     Person(
-        "tigran-arutyunyan",
-        "Тигран Арутюнян",
+        "irina-guseva",
+        "Ирина Гусева",
         "product",
         "Москва",
-        "Продакт без идеи, но с желанием. Ищу сообщников",
-        "Стажировался продактом в финтехе, умею проводить интервью и считать гипотезы. Своей идеи "
-        "пока нет, зато есть время и злость. Давайте соберёмся и придумаем что-то вместе.",
+        "Продакт после стажировки в финтехе. Ищу сообщников",
+        "Полгода стажировалась продактом в финтехе: интервью с пользователями, гипотезы, метрики. "
+        "Своей идеи пока нет, зато есть время и желание довести продукт до первых пользователей. "
+        "Ищу разработчика и дизайнера, с кем придумать проект с нуля.",
         ["Customer-Development", "Unit-экономика", "Jira", "SQL"],
         ["free", "cofound"],
         "full_time",
@@ -328,8 +329,8 @@ PEOPLE = [
         "junior",
     ),
     Person(
-        "yuna-pak",
-        "Юна Пак",
+        "yulia-panova",
+        "Юля Панова",
         "designer",
         "Владивосток",
         "Дизайнер интерфейсов, хочу сделать свой стартап",
@@ -367,8 +368,8 @@ PEOPLE = [
         "internship",
     ),
     Person(
-        "madina-abdullaeva",
-        "Мадина Абдуллаева",
+        "marina-abramova",
+        "Марина Абрамова",
         "marketer",
         "Москва",
         "Маркетолог, ищу команду, чтобы запустить что-то своё",
@@ -393,8 +394,8 @@ PEOPLE = [
         "courses",
     ),
     Person(
-        "maksim-li",
-        "Максим Ли",
+        "maksim-lisitsyn",
+        "Максим Лисицын",
         "designer",
         "Москва",
         "Продуктовый дизайнер, рисую Tripsy",
@@ -407,8 +408,8 @@ PEOPLE = [
         "https://www.behance.net/",
     ),
     Person(
-        "samir-rakhimov",
-        "Самир Рахимов",
+        "semyon-rakhmanov",
+        "Семён Рахманов",
         "devops",
         "Казань",
         "DevOps: Docker, CI/CD, мониторинг",
@@ -424,17 +425,18 @@ PEOPLE = [
         "Егор Волков",
         "backend",
         "Томск",
-        "Студент 2 курса ТПУ, Python. Ищу ребят на свой первый стартап",
-        "Учусь на программной инженерии, пишу на Python и FastAPI. Опыта в командах пока нет, но "
-        "очень хочу. Готов и к готовым проектам, и придумать что-то с нуля вместе.",
+        "Backend на Python, 2 курс ТПУ. Сделал бота для расписания своего потока",
+        "Учусь на программной инженерии в Томске. Написал Telegram-бота с расписанием для своего потока, им "
+        "пользуются 400 человек. Хочу в команду, где можно писать настоящий бэкенд и разбираться в базе "
+        "данных. Свободен 15 часов в неделю, по вечерам и на выходных.",
         ["Python", "FastAPI", "Git", "SQL"],
         ["free", "cofound"],
         "part_time",
         "no_experience",
     ),
     Person(
-        "rinat-khayrullin",
-        "Ринат Хайруллин",
+        "roman-kharitonov",
+        "Роман Харитонов",
         "mobile",
         "Уфа",
         "iOS-разработчик на Swift",
@@ -479,7 +481,7 @@ STARTUPS = [
     ),
     Idea(
         "studymate",
-        "artem-kim",
+        "artem-nikitin",
         "StudyMate",
         "Тесты и карточки к экзамену из твоих конспектов",
         "prototype",
@@ -508,7 +510,7 @@ STARTUPS = [
     ),
     Idea(
         "kvartal",
-        "timur-galiev",
+        "denis-galkin",
         "Квартал",
         "Приложение для жильцов: заявки в УК, голосования, объявления",
         "prototype",
@@ -533,7 +535,7 @@ STARTUPS = [
                 6,
             ),
         ],
-        [("samir-rakhimov", "DevOps")],
+        [("semyon-rakhmanov", "DevOps")],
     ),
     Idea(
         "petly",
@@ -565,7 +567,7 @@ STARTUPS = [
     ),
     Idea(
         "fermo",
-        "oleg-van",
+        "oleg-vasilev",
         "Fermo",
         "Фермерские продукты по подписке из Подмосковья",
         "launched",
@@ -594,7 +596,7 @@ STARTUPS = [
     ),
     Idea(
         "tripsy",
-        "daniel-adu",
+        "daniil-andreev",
         "Tripsy",
         "Планировщик поездок для компании друзей: маршрут и общий бюджет",
         "mvp",
@@ -619,7 +621,7 @@ STARTUPS = [
                 8,
             ),
         ],
-        [("maksim-li", "Дизайнер")],
+        [("maksim-lisitsyn", "Дизайнер")],
     ),
     Idea(
         "roomly",
@@ -651,7 +653,7 @@ STARTUPS = [
     ),
     Idea(
         "caselab",
-        "mark-adebayo",
+        "mark-belousov",
         "CaseLab",
         "Учебные кейсы от реальных компаний для студентов",
         "idea",
@@ -682,7 +684,7 @@ STARTUPS = [
     ),
     Idea(
         "rezyume",
-        "sabina-yusupova",
+        "svetlana-yudina",
         "Резюме за вечер",
         "Мидлы разбирают резюме джунов за 300 ₽",
         "idea",

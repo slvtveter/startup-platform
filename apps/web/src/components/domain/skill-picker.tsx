@@ -36,7 +36,7 @@ export function SkillPicker({
               key={slug}
               type="button"
               onClick={() => onChange(value.filter((v) => v !== slug))}
-              className="inline-flex items-center gap-1 rounded-full bg-foreground px-3 py-1.5 text-sm font-semibold text-background"
+              className="inline-flex items-center gap-1 rounded-full bg-second px-3 py-1.5 text-sm font-semibold text-on-second"
             >
               {bySlug.get(slug)?.name ?? slug} <XIcon className="size-3.5" />
             </button>

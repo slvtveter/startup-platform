@@ -4,18 +4,23 @@ import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { Sticker } from "@/components/brand/stickers";
 import { Dashboard } from "@/components/domain/dashboard";
+import { PersonCard } from "@/components/domain/person-card";
 import { StartupCard } from "@/components/domain/startup-card";
+import { FaqTabs } from "@/components/landing/faq-tabs";
 import { HomeFeed, type FeedTab } from "@/components/landing/home-feed";
+import { StepsLive } from "@/components/landing/steps-live";
 import { JsonLd, siteUrl } from "@/components/site/json-ld";
 import { PathLink } from "@/components/site/path-link";
 import { Reveal } from "@/components/site/reveal";
 import { TrackView } from "@/components/site/track-view";
 import { buttonVariants } from "@/components/ui/button";
-import { listPeople, listStartups, startupFacets, type PersonCard as Person, type StartupCard as Startup } from "@/lib/api";
-import { COFOUND, STAGE, initials, plural } from "@/lib/labels";
+import { startupFacets, type PersonCard as Person, type StartupCard as Startup } from "@/lib/api";
+import { plural } from "@/lib/labels";
 import { PHOTOS } from "@/lib/photos";
-import { getMe, getRoles, serverClient } from "@/lib/server-api";
+import { getMe, getRoles, publicClient } from "@/lib/server-api";
+import { COFOUNDER_FACES, HERO_FACES, HOME_PEOPLE, IDEAS, PATH_PEOPLE, STARTUPS, STEP_PERSON, personHref, startupHref } from "@/lib/showcase";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
@@ -29,18 +34,13 @@ const wrap = "mx-auto w-full max-w-[1360px] px-4 sm:px-6 lg:px-10";
 const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
 /**
- * Лендинг для гостя. Главное — попасть в стартап и быстро набрать опыт; идеи и сообщники — дополнение.
- * Порядок по разбору конкурентов (docs/research/competitors-home.md): первый экран с живыми фрагментами
- * интерфейса → кого ищут → стартапы → четыре дороги → сообщники → три шага → вопросы → призыв.
+ * Лендинг для гостя. Главное — попасть в стартап и быстро набрать опыт; идеи — дополнение.
+ * Порядок (редизайн v4, docs/research/2026-10-31-home-graphics.md): первый экран → кого ищут →
+ * четыре дороги → проекты → люди → как попасть в команду → вопросы → призыв.
+ * Карточки проектов и людей — постоянная витрина (lib/showcase.ts), не зависят от базы; цифры ролей — живые.
  */
 async function Landing() {
-  const client = await serverClient();
-  const [allRoles, { data: facets }, { data: catalog }, { data: people }] = await Promise.all([
-    getRoles(),
-    startupFacets({ client }),
-    listStartups({ client, query: { limit: 100 } }),
-    listPeople({ client, query: { limit: 100 } }),
-  ]);
+  const [allRoles, { data: facets }] = await Promise.all([getRoles(), startupFacets({ client: publicClient() })]);
 
   // Сколько проектов ищет каждую роль — чипсы «кого ищут» с числами, как «Популярное» на hh.
   const roles = allRoles
@@ -48,51 +48,36 @@ async function Landing() {
     .filter((r) => r.n > 0)
     .sort((a, b) => b.n - a.n);
 
-  // На главной закреплены примеры (is_demo): новые профили и проекты не сдвигают карточки витрины.
-  const projects = pinned(catalog?.items ?? []);
-  const startups = projects.filter((s) => s.stage !== "idea");
-  const ideas = projects.filter((s) => s.stage === "idea");
-  const folks = pinned(people?.items ?? []).filter((p) => p.avatar_url);
-  const cofounders = folks.filter((p) => p.looking_for.includes(COFOUND));
-  const featured = startups.find((s) => s.open_roles.length > 0 && s.owner_avatar_url) ?? startups[0];
-
-  const grid = "grid gap-3 sm:grid-cols-2 lg:grid-cols-3";
-  const feed: FeedTab[] = [];
-  if (startups.length)
-    feed.push({
+  const grid = "grid gap-3 lg:grid-cols-2";
+  const feed: FeedTab[] = [
+    {
       value: "startups",
       label: "Стартапы",
       more: { href: "/startups?stage=prototype&stage=mvp&stage=launched", label: "Все стартапы" },
       content: (
         <div className={grid}>
-          {startups.slice(0, 6).map((s, i) => (
-            <div key={s.id} className={cn(i >= 3 && "max-sm:hidden")}>
-              <StartupCard startup={s} />
+          {STARTUPS.slice(0, 4).map((s, i) => (
+            <div key={s.slug} className={cn(i >= 3 && "max-sm:hidden")}>
+              <StartupCard startup={s} href={startupHref(s)} compact />
             </div>
           ))}
         </div>
       ),
-    });
-  if (ideas.length) {
-    const shown = ideas.slice(0, 5);
-    feed.push({
+    },
+    {
       value: "ideas",
       label: "Идеи",
       more: { href: "/startups?stage=idea", label: "Все идеи" },
       content: (
         <div className={grid}>
-          {shown.map((s) => (
-            <StartupCard key={s.id} startup={s} />
+          {IDEAS.slice(0, 3).map((s) => (
+            <StartupCard key={s.slug} startup={s} href={startupHref(s)} compact />
           ))}
-          {/* Приглашение добивает последний ряд до конца: на широком экране тянется на свободные колонки. */}
-          <OwnIdeaCard
-            wide={shown.length % 3 !== 2}
-            className={cn(shown.length % 2 === 0 && "sm:col-span-2", { 0: "lg:col-span-3", 1: "lg:col-span-2", 2: "lg:col-span-1" }[shown.length % 3])}
-          />
+          <OwnIdeaCard className="min-h-0" />
         </div>
       ),
-    });
-  }
+    },
+  ];
 
   return (
     <>
@@ -117,29 +102,49 @@ async function Landing() {
         }}
       />
 
-      <Hero startup={featured} faces={folks.slice(0, 5)} />
+      <Hero faces={HERO_FACES} />
 
       {roles.length > 0 && <RoleStrip roles={roles} />}
 
-      {feed.length > 0 && (
-        <Section id="feed" eyebrow="Сейчас в каталоге" title="Стартапы, которые ищут людей">
-          <HomeFeed tabs={feed} />
-        </Section>
-      )}
-
       <Section eyebrow="С чего начать" title="Четыре дороги в команду">
-        <Paths startups={startups.slice(0, 3)} idea={ideas[0]} people={folks.slice(5, 8)} faces={cofounders.slice(0, 6)} />
+        <Paths startups={STARTUPS.slice(0, 3)} idea={IDEAS[0]} people={PATH_PEOPLE} faces={COFOUNDER_FACES} />
       </Section>
 
-      {cofounders.length > 0 && <Cofounders people={cofounders.slice(0, 4)} total={cofounders.length} />}
-
-
-      <Section title="Как попасть в команду стартапа" className="max-md:hidden">
-        <Steps />
+      <Section id="feed" title="Стартапы, которые ищут людей" tight sticker={<Sticker name="megaphone" className="size-16 -rotate-6 lg:size-20" />}>
+        <HomeFeed tabs={feed} />
       </Section>
 
-      <Section id="faq" eyebrow="Вопросы" title="Частые вопросы">
-        <Faq />
+      <Section
+        title="Кто уже ищет команду"
+        tight
+        sticker={
+          <span className="relative block h-16 w-28 lg:h-20 lg:w-32">
+            <Sticker name="code" className="absolute top-0 left-0 size-14 -rotate-12 lg:size-16" />
+            <Sticker name="pen" className="absolute right-0 bottom-0 size-14 rotate-6 lg:size-16" />
+          </span>
+        }
+        aside={
+          <Link href="/people" className="inline-flex items-center gap-1.5 font-bold text-brand-ink transition-colors hover:text-brand-hover">
+            Все люди
+            <ArrowRight aria-hidden className="size-4" />
+          </Link>
+        }
+      >
+        <div className={grid}>
+          {HOME_PEOPLE.map((p, i) => (
+            <div key={p.slug} className={cn(i >= 2 && "max-sm:hidden")}>
+              <PersonCard person={p} href={personHref(p)} compact />
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Как попасть в команду стартапа">
+        <StepsLive role={STARTUPS[0]?.open_roles[0]?.role.name} person={STEP_PERSON} />
+      </Section>
+
+      <Section id="faq" title="Частые вопросы" sticker={<Sticker name="question" className="size-20 -rotate-6 lg:size-24" />}>
+        <FaqTabs items={FAQ} stickers={["cap", "coin", "clock", "bulb", "like"]} />
       </Section>
 
       <FinalCta />
@@ -147,27 +152,16 @@ async function Landing() {
   );
 }
 
-/** Только примеры, если они есть; иначе (локально без сида) — всё как есть. */
-function pinned<T extends { is_demo?: boolean }>(items: T[]) {
-  return items.some((x) => x.is_demo) ? items.filter((x) => x.is_demo) : items;
-}
-
 /* ───────────── Первый экран ───────────── */
 
-function Hero({ startup, faces }: { startup?: Startup; faces: Person[] }) {
+function Hero({ faces }: { faces: Person[] }) {
   return (
     <section className={`${wrap} grid items-center gap-10 pt-8 pb-4 sm:pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.02fr)] lg:gap-14 lg:pt-14`}>
       <div className="max-w-[640px]">
-        <p className="inline-flex items-center gap-2 rounded-full bg-brand-soft px-3.5 py-1.5 text-sm font-bold text-brand-ink">
-          <span aria-hidden className="size-1.5 rounded-full bg-brand" />
-          Для студентов и начинающих в IT
-        </p>
-        <h1 className="mt-5 text-[38px] leading-[1] tracking-[-0.045em] text-balance sm:mt-6 sm:text-[60px] sm:leading-[0.98] lg:text-[64px]">
+        <h1 className="text-[36px] leading-[1] tracking-[-0.045em] text-balance sm:text-[56px] lg:text-[64px]">
           Получи первый опыт в настоящем <span className="text-brand">стартапе</span>
         </h1>
-        <p className="mt-6 max-w-[44ch] text-lg text-muted-foreground sm:text-xl">
-          Можно без опыта и без резюме.
-        </p>
+        <p className="mt-6 max-w-[44ch] text-lg text-muted-foreground sm:text-xl">Можно без опыта и без резюме.</p>
         <div className="mt-8 grid gap-2.5 sm:mt-9 sm:flex sm:flex-wrap">
           <PathLink path="seeker" href="/startups" className={buttonVariants({ size: "lg" })}>
             Смотреть стартапы
@@ -181,7 +175,7 @@ function Hero({ startup, faces }: { startup?: Startup; faces: Person[] }) {
           <div className="mt-9 flex items-center gap-3.5">
             <span className="flex shrink-0 -space-x-2.5">
               {faces.map((p) => (
-                // eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP
+                // eslint-disable-next-line @next/next/no-img-element -- фото витрины уже пережаты в WebP
                 <img key={p.slug} src={p.avatar_url!} alt="" className="size-10 rounded-full object-cover ring-[3px] ring-background" />
               ))}
             </span>
@@ -193,9 +187,9 @@ function Hero({ startup, faces }: { startup?: Startup; faces: Person[] }) {
         )}
       </div>
 
-      {/* Фото и поверх карточка настоящего стартапа из каталога (как у Wellfound). */}
-      <div className="relative">
-        <div className="relative aspect-[4/3.4] overflow-hidden rounded-[32px] sm:aspect-[4/3] lg:aspect-[5/5.2]">
+      {/* Фото и наклейки бренда по краям (как стикеры у Drinkit): знак и разговор. */}
+      <div className="relative px-[4%] py-[5%]">
+        <div className="relative aspect-[4/3.4] overflow-hidden rounded-[36px] sm:aspect-[4/3] lg:aspect-square">
           <Image
             src={PHOTOS.heroTeam}
             alt="Команда обсуждает проект за столом с ноутбуком"
@@ -203,43 +197,12 @@ function Hero({ startup, faces }: { startup?: Startup; faces: Person[] }) {
             preload
             placeholder="blur"
             quality={85}
-            sizes="(min-width: 1024px) 50vw, 100vw"
+            sizes="(min-width: 1024px) 48vw, 100vw"
             className="object-cover object-[60%_40%]"
           />
         </div>
-
-        {startup && (
-          <Link
-            href={`/startups/${startup.slug}`}
-            className="chat-msg absolute right-4 bottom-4 left-4 flex items-center gap-3.5 rounded-3xl bg-white p-3 shadow-[0_24px_50px_-16px_rgb(15_27_45/0.45)] transition-shadow duration-200 hover:shadow-[0_24px_50px_-12px_rgb(15_27_45/0.55)] sm:right-auto sm:bottom-6 sm:left-6 sm:w-[380px] lg:-left-10"
-            style={delay(900)}
-          >
-            <span className="relative size-16 shrink-0 overflow-hidden rounded-2xl bg-brand-soft">
-              {startup.cover_url ? (
-                // eslint-disable-next-line @next/next/no-img-element -- обложки уже пережаты api в WebP
-                <img src={startup.cover_url} alt="" className="size-full object-cover" />
-              ) : (
-                <span className="grid size-full place-items-center text-xl font-extrabold text-brand-ink">{initials(startup.title)}</span>
-              )}
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="flex items-center gap-2">
-                <b className="truncate text-base font-extrabold tracking-[-0.02em]">{startup.title}</b>
-                <span className="shrink-0 rounded-full bg-tone px-2 py-0.5 text-[11px] font-bold">{STAGE[startup.stage]}</span>
-              </span>
-              <span className="mt-0.5 block truncate text-sm text-muted-foreground">{startup.pitch}</span>
-              {startup.open_roles.length > 0 && (
-                <span className="mt-1.5 flex gap-1 overflow-hidden">
-                  {startup.open_roles.slice(0, 2).map((r) => (
-                    <span key={r.id} className="truncate rounded-full bg-brand-soft px-2 py-0.5 text-xs font-bold text-brand-ink">
-                      Ищут: {r.role.name}
-                    </span>
-                  ))}
-                </span>
-              )}
-            </span>
-          </Link>
-        )}
+        <Sticker name="mark" className="absolute top-0 left-0 size-[24%] -rotate-12" />
+        <Sticker name="chat" className="absolute right-0 bottom-[6%] size-[24%] rotate-6" />
       </div>
     </section>
   );
@@ -251,9 +214,12 @@ function RoleStrip({ roles }: { roles: { slug: string; name: string; n: number }
   return (
     <section aria-labelledby="roles-h" className={`${wrap} pt-12`}>
       <div className="flex flex-col gap-4 rounded-[28px] bg-tone p-5 sm:p-6 lg:flex-row lg:items-center lg:gap-8">
-        <h2 id="roles-h" className="shrink-0 text-lg font-bold tracking-[-0.01em] lg:w-44">
-          Кого ищут прямо сейчас
-        </h2>
+        <div className="flex shrink-0 items-center gap-3 lg:w-60">
+          <Sticker name="search" className="size-12 shrink-0 -rotate-6 max-sm:hidden" />
+          <h2 id="roles-h" className="text-lg font-bold tracking-[-0.01em]">
+            Кого ищут прямо сейчас
+          </h2>
+        </div>
         <ul className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [mask-image:linear-gradient(90deg,#000_85%,transparent)] [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 sm:[mask-image:none]">
           {roles.slice(0, 8).map((r) => (
             <li key={r.slug}>
@@ -281,7 +247,7 @@ function RoleStrip({ roles }: { roles: { slug: string; name: string; n: number }
 /* ───────────── Четыре дороги ───────────── */
 
 function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: Startup; people: Person[]; faces: Person[] }) {
-  const card = "reveal-item card-hover group flex flex-col overflow-hidden rounded-[28px] p-6 sm:rounded-[32px] sm:p-9";
+  const card = "reveal-item card-hover group relative flex flex-col overflow-hidden rounded-[28px] p-6 sm:rounded-[32px] sm:p-9";
   const cta = "mt-auto inline-flex items-center gap-1.5 pt-6 font-bold sm:pt-8";
   const arrow = <ArrowRight aria-hidden className="size-4 transition-transform duration-300 group-hover:translate-x-1" />;
   const slots = idea?.open_roles.length
@@ -300,7 +266,8 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
             <h3 className="mt-3 max-w-[14ch] text-[32px] leading-[1.02] font-extrabold tracking-[-0.04em] sm:text-[40px]">Залети в стартап и набери опыт</h3>
             <span className="mt-4 block max-w-[34ch] text-lg text-white/80">Настоящие задачи и кейс в портфолио.</span>
           </span>
-          <span aria-hidden className="grid gap-1.5 rounded-2xl bg-white p-2 text-foreground max-sm:hidden shadow-[0_24px_50px_-20px_rgb(0_0_0/0.5)] transition-transform duration-500 group-hover:-translate-y-1">
+          <span aria-hidden className="relative grid gap-1.5 rounded-2xl bg-white p-2 text-foreground max-sm:hidden shadow-[0_24px_50px_-20px_rgb(0_0_0/0.5)] transition-transform duration-500 group-hover:-translate-y-1">
+            <Sticker name="cap" className="absolute -top-7 -right-6 z-10 size-16 rotate-12" />
             {startups.map((s) => (
               <span key={s.id} className="flex items-center gap-3 rounded-xl bg-tone p-2 pr-3">
                 <span className="relative size-10 shrink-0 overflow-hidden rounded-lg bg-brand-soft">
@@ -325,8 +292,9 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
 
       {/* Есть идея. */}
       <PathLink path="founder" href="/register?next=/startups/new" className={cn(card, "bg-tone hover:bg-tone-2 lg:col-span-2")} style={delay(60)}>
+        <Sticker name="bulb" className="absolute top-5 right-5 size-14 rotate-12 sm:size-16" />
         <span className="text-sm font-bold text-muted-foreground">Есть идея</span>
-        <h3 className="mt-3 text-[28px] leading-[1.05] font-extrabold tracking-[-0.04em] sm:text-[32px]">Собери под неё команду</h3>
+        <h3 className="mt-3 pr-14 text-[28px] leading-[1.05] font-extrabold tracking-[-0.04em] sm:pr-16 sm:text-[32px]">Собери под неё команду</h3>
         <span aria-hidden className="mt-6 rounded-2xl bg-white p-4 max-sm:hidden transition-transform duration-500 group-hover:-translate-y-0.5">
           <b className="block truncate text-sm font-extrabold">{idea?.title ?? "Твоя идея"}</b>
           <span className="mt-0.5 block text-xs text-muted-foreground">Места в команде</span>
@@ -347,8 +315,9 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
 
       {/* Нет идеи. */}
       <Link href="/people/cofounders" className={cn(card, "bg-tone hover:bg-tone-2 lg:col-span-2")} style={delay(120)}>
+        <Sticker name="team" className="absolute top-5 right-5 size-14 -rotate-6 sm:size-16" />
         <span className="text-sm font-bold text-muted-foreground">Нет идеи</span>
-        <h3 className="mt-3 text-[28px] leading-[1.05] font-extrabold tracking-[-0.04em] sm:text-[32px]">Придумай её вместе с сообщниками</h3>
+        <h3 className="mt-3 pr-14 text-[28px] leading-[1.05] font-extrabold tracking-[-0.04em] sm:pr-16 sm:text-[32px]">Придумай её вместе с сообщниками</h3>
         {faces.length > 0 && (
           <span aria-hidden className="mt-6 flex -space-x-3 max-sm:mt-5">
             {faces.map((p) => (
@@ -363,21 +332,22 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
         </span>
       </Link>
 
-      {/* Нужны люди. */}
-      <Link href="/people" className={cn(card, "bg-foreground text-background hover:bg-[#1d2a3f] lg:col-span-3")} style={delay(180)}>
+      {/* Нужны люди: светлая, превью людей поднимается при наведении, как в остальных карточках. */}
+      <Link href="/people" className={cn(card, "bg-brand-soft hover:bg-marker lg:col-span-3")} style={delay(180)}>
         <span className="grid gap-8 sm:grid-cols-[minmax(0,1fr)_minmax(0,300px)] sm:items-start">
           <span>
-            <span className="text-sm font-bold text-white/60">Нужны люди</span>
-            <h3 className="mt-3 max-w-[16ch] text-[32px] leading-[1.02] font-extrabold tracking-[-0.04em] text-white sm:text-[40px]">Найди разработчика или дизайнера</h3>
+            <span className="text-sm font-bold text-brand-ink">Нужны люди</span>
+            <h3 className="mt-3 max-w-[16ch] text-[32px] leading-[1.02] font-extrabold tracking-[-0.04em] sm:text-[40px]">Найди разработчика или дизайнера</h3>
           </span>
-          <span aria-hidden className="grid gap-1.5 max-sm:hidden">
+          <span aria-hidden className="relative grid gap-1.5 rounded-2xl bg-white p-2 transition-transform duration-500 group-hover:-translate-y-1 max-sm:hidden">
+            <Sticker name="code" className="absolute -top-7 -right-6 z-10 size-16 rotate-12" />
             {people.map((p) => (
-              <span key={p.slug} className="flex items-center gap-3 rounded-2xl bg-white/10 p-2.5 pr-3.5 text-white">
-                {/* eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP */}
-                <img src={p.avatar_url!} alt="" className="size-10 shrink-0 rounded-xl object-cover" />
+              <span key={p.slug} className="flex items-center gap-3 rounded-xl bg-tone p-2 pr-3">
+                {/* eslint-disable-next-line @next/next/no-img-element -- фото витрины уже пережаты в WebP */}
+                <img src={p.avatar_url!} alt="" className="size-10 shrink-0 rounded-lg object-cover" />
                 <span className="min-w-0 flex-1">
                   <b className="block truncate text-sm font-extrabold">{p.primary_role?.name ?? p.display_name}</b>
-                  <span className="block truncate text-xs text-white/60">
+                  <span className="block truncate text-xs text-muted-foreground">
                     {p.display_name}
                     {p.city ? ` · ${p.city}` : ""}
                   </span>
@@ -386,97 +356,11 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
             ))}
           </span>
         </span>
-        <span className={cn(cta, "text-white")}>
+        <span className={cn(cta, "text-brand-ink")}>
           Смотреть людей
           {arrow}
         </span>
       </Link>
-    </Reveal>
-  );
-}
-
-/* ───────────── Сообщники ───────────── */
-
-function Cofounders({ people, total }: { people: Person[]; total: number }) {
-  return (
-    <section aria-labelledby="cof-h" className={`${wrap} pt-[clamp(80px,9vw,128px)] max-md:hidden`}>
-      <div className="rounded-[36px] bg-brand-soft p-6 sm:p-10 lg:p-12">
-        <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-6">
-          <div>
-            <p className="text-sm font-bold text-brand-ink">Сообщники</p>
-            <h2 id="cof-h" className="mt-3 max-w-[18ch] text-[32px] leading-[1.02] text-balance sm:text-[44px] lg:text-[52px]">
-              Нет идеи? Придумайте её вместе
-            </h2>
-            <p className="mt-4 max-w-[46ch] text-lg text-muted-foreground">
-              {total} {plural(total, "человек ищет", "человека ищут", "человек ищут")}, с кем придумать проект с нуля.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2.5">
-            <Link href="/people?cofound=1" className={buttonVariants({ size: "lg" })}>
-              Посмотреть всех
-              <ArrowRight aria-hidden />
-            </Link>
-            <Link href="/register?next=/me/profile" className={buttonVariants({ variant: "light", size: "lg" })}>
-              Я тоже ищу
-            </Link>
-          </div>
-        </div>
-        <Reveal className="mt-10 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {people.map((p, i) => (
-            <Link
-              key={p.slug}
-              href={`/people/${p.slug}`}
-              className="reveal-item group flex flex-col rounded-[24px] bg-white p-2 transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgb(15_27_45/0.35)]"
-              style={delay(i * 70)}
-            >
-              <span className="relative block aspect-[4/5] overflow-hidden rounded-[18px] bg-tone">
-                {/* eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP */}
-                <img
-                  src={p.avatar_url_lg ?? p.avatar_url!}
-                  alt=""
-                  loading="lazy"
-                  className="size-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                />
-                {p.primary_role && (
-                  <span className="absolute bottom-2.5 left-2.5 max-w-[calc(100%-20px)] truncate rounded-full bg-white/95 px-3 py-1 text-xs font-bold">{p.primary_role.name}</span>
-                )}
-              </span>
-              <span className="flex flex-1 flex-col px-2.5 pt-3.5 pb-2">
-                <b className="truncate text-base font-extrabold tracking-[-0.02em] sm:text-lg">{p.display_name}</b>
-                {p.city && <span className="text-sm text-muted-foreground">{p.city}</span>}
-                {p.headline && <span className="mt-2 line-clamp-2 text-sm text-foreground/80 max-sm:hidden">{p.headline}</span>}
-              </span>
-            </Link>
-          ))}
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-/* ───────────── Как попасть в команду ───────────── */
-
-const STEPS = [
-  { title: "Создай профиль", text: "Роль, навыки и свободные часы в неделю." },
-  { title: "Выбери стартап", text: "Под твою роль, с оплатой или без." },
-  { title: "Откликнись и созвонись", text: "Обсуди задачи с основателем." },
-];
-
-/** Одна строка-таймлайн: линия прорисовывается слева направо, шаги проявляются по очереди. Без иконок и номеров. */
-function Steps() {
-  return (
-    <Reveal>
-      <ol className="relative grid gap-10 md:grid-cols-3 md:gap-8">
-        <span aria-hidden className="absolute inset-x-0 top-[7px] h-0.5 rounded-full bg-tone-2 max-md:hidden" />
-        <span aria-hidden className="reveal-line absolute inset-x-0 top-[7px] h-0.5 rounded-full bg-cornflower max-md:hidden" />
-        {STEPS.map((s, i) => (
-          <li key={s.title} className="reveal-item relative" style={delay(150 + i * 120)}>
-            <span aria-hidden className="block size-4 rounded-full bg-brand ring-4 ring-background" />
-            <h3 className="mt-6 text-2xl font-extrabold tracking-[-0.03em]">{s.title}</h3>
-            <p className="mt-2 max-w-[30ch] text-lg text-muted-foreground">{s.text}</p>
-          </li>
-        ))}
-      </ol>
     </Reveal>
   );
 }
@@ -489,6 +373,9 @@ function Section({
   title,
   lead,
   className,
+  sticker,
+  aside,
+  tight = false,
   children,
 }: {
   id?: string;
@@ -497,19 +384,31 @@ function Section({
   lead?: string;
   /** Например, max-md:hidden: на телефоне блок не нужен. */
   className?: string;
+  /** Наклейка бренда справа от заголовка (на телефоне скрыта). */
+  sticker?: React.ReactNode;
+  /** Ссылка или действие справа от заголовка (видно и на телефоне). */
+  aside?: React.ReactNode;
+  /** Плотная шапка: заголовок в одну строку, меньше отступ до содержимого — секция влезает в экран. */
+  tight?: boolean;
   children: React.ReactNode;
 }) {
   const hid = `${id ?? title.slice(0, 12).replace(/\s+/g, "-")}-h`;
   return (
     <section id={id} aria-labelledby={hid} className={cn(wrap, "scroll-mt-24 pt-[clamp(72px,9vw,128px)]", className)}>
-      <div className="mb-10 flex flex-wrap items-end gap-x-10 gap-y-4">
+      <div className={cn("flex flex-wrap items-end gap-x-10 gap-y-4", tight ? "mb-6" : "mb-10")}>
         <div>
           {eyebrow && <p className="mb-3 text-sm font-bold text-brand-ink">{eyebrow}</p>}
-          <h2 id={hid} className="max-w-[18ch] text-[32px] leading-[1.02] text-balance sm:text-[44px] lg:text-[52px]">
+          <h2 id={hid} className={cn("text-[32px] leading-[1.02] text-balance sm:text-[44px] lg:text-[48px]", !tight && "max-w-[18ch]")}>
             {title}
           </h2>
         </div>
         {lead && <p className="max-w-[40ch] text-lg text-muted-foreground sm:ml-auto">{lead}</p>}
+        {(sticker || aside) && (
+          <div className="ml-auto flex items-center gap-8">
+            {sticker && <div className="max-sm:hidden">{sticker}</div>}
+            {aside && <div>{aside}</div>}
+          </div>
+        )}
       </div>
       {children}
     </section>
@@ -547,38 +446,27 @@ function OwnIdeaCard({ className, wide }: { className?: string; wide?: boolean }
   );
 }
 
-const FAQ = [
-  ["Нужен ли опыт, чтобы попасть в стартап?", "Нет. Важнее, что ты умеешь и сколько времени готов уделять."],
-  ["Что я получу, кроме опыта?", "Задачи из настоящего продукта, кейс в портфолио и людей, с которыми можно делать следующие проекты."],
-  ["Мне будут платить?", "Зависит от проекта. В каждой роли написано: без оплаты, с оплатой или договоритесь."],
-  ["Это бесплатно?", "Да. Профиль, отклики и сообщения бесплатны."],
-  ["У меня есть своя идея. Мне сюда?", "Да. Опиши её и отметь, кого не хватает, или найди сообщников и придумайте проект вместе."],
-  ["А если мою идею украдут?", "Опиши её в общих чертах, а подробности расскажи тем, с кем решишь работать."],
-]
+// Топ-5 страхов новичка: разбор конкурентов (YC: деньги и обязательства) и UX-исследование (опыт, учёба, своя идея).
+const FAQ: [string, string][] = [
+  [
+    "У меня нет опыта. Меня возьмут?",
+    "Да. Здесь собраны стартапы, которые готовы брать студентов и начинающих. Основателю на старте важнее, что ты берёшься за задачи и доводишь их до конца, чем строчки в резюме. Учебные проекты и курсовые тоже считаются: добавь их в профиль.",
+  ],
+  [
+    "Мне будут платить?",
+    "Зависит от проекта. У каждой роли написано: без оплаты, оплачивается или обсуждается, а в каталоге есть фильтр по оплате. Если денег нет, ты получаешь задачи из настоящего продукта и кейс в портфолио. Договорись на созвоне, что войдёт в кейс.",
+  ],
+  [
+    "Получится совмещать с учёбой?",
+    "В каждой роли указано, сколько часов в неделю ждут. Выбирай то, что влезает в твоё расписание, и сразу скажи основателю про сессию и пары. Со стартапом о таком договориться проще, чем с работодателем.",
+  ],
+  [
+    "У меня своя идея. Мне сюда?",
+    "Да. Опиши идею в двух словах и отметь, кого не хватает в команде: разработчики и дизайнеры увидят её в разделе идей и смогут откликнуться. Подробности, которыми не хочется делиться со всеми, расскажешь на созвоне.",
+  ],
+  ["Это бесплатно?", "Да. Профиль, отклики и переписка бесплатны, платных функций нет."],
+];
 
-function Faq() {
-  // Две независимые колонки: открытый вопрос не раздвигает соседнюю.
-  const half = Math.ceil(FAQ.length / 2);
-  return (
-    <div className="grid items-start gap-2 md:grid-cols-2">
-      {[FAQ.slice(0, half), FAQ.slice(half)].map((col, c) => (
-        <div key={c} className="grid gap-2">
-          {col.map(([q, a]) => (
-            <details key={q} className="faq group rounded-2xl bg-tone transition-colors open:bg-brand-soft hover:bg-tone-2 open:hover:bg-brand-soft">
-              <summary className="flex list-none items-center gap-4 px-[22px] py-5 text-lg font-bold [&::-webkit-details-marker]:hidden">
-                {q}
-                <span aria-hidden className="ml-auto grid size-7 shrink-0 place-items-center rounded-full bg-white">
-                  <PlusIcon className="size-4 transition-transform duration-300 group-open:rotate-45" />
-                </span>
-              </summary>
-              <p className="faq-answer px-[22px] pb-[22px] text-foreground/75">{a}</p>
-            </details>
-          ))}
-        </div>
-      ))}
-    </div>
-  );
-}
 
 function FinalCta() {
   return (
@@ -586,8 +474,10 @@ function FinalCta() {
       <div className="relative isolate grid gap-8 overflow-hidden rounded-[36px] px-6 py-[clamp(56px,7vw,112px)] text-white sm:px-[clamp(24px,5vw,72px)] lg:grid-cols-[1.2fr_1fr] lg:items-end">
         <Image src={PHOTOS.teamEvening} alt="" fill placeholder="blur" sizes="(min-width: 1360px) 1360px, 100vw" className="-z-20 object-cover" />
         <div aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgb(14_26_52/0.85),rgb(14_26_52/0.55))]" />
+        <Sticker name="flag" className="absolute top-8 right-10 size-20 rotate-12 max-lg:hidden" />
+        <Sticker name="mark" className="absolute top-24 right-36 size-16 -rotate-6 max-lg:hidden" />
         <div>
-          <h2 id="final-h" className="max-w-[14ch] text-[40px] leading-[1.02] sm:text-[56px] lg:text-[64px]">
+          <h2 id="final-h" className="max-w-[14ch] text-[36px] leading-[1.02] sm:text-[56px] lg:text-[64px]">
             Найди свой первый стартап
           </h2>
           <p className="mt-4 max-w-[40ch] text-lg text-white/85">От прототипов до продуктов с пользователями.</p>

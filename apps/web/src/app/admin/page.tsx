@@ -36,7 +36,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         actions={
           <div className="flex gap-1 rounded-lg border bg-card p-1 text-sm font-semibold">
             {["7", "30", "90"].map((d) => (
-              <Link key={d} href={`/admin?days=${d}`} className={`rounded-md px-3 py-1.5 ${d === days ? "bg-foreground text-background" : ""}`}>
+              <Link key={d} href={`/admin?days=${d}`} className={`rounded-md px-3 py-1.5 ${d === days ? "bg-second text-on-second" : ""}`}>
                 {d} дней
               </Link>
             ))}

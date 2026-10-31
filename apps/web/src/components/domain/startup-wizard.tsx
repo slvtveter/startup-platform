@@ -249,7 +249,7 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
                         key={n}
                         type="button"
                         onClick={() => set("title", n)}
-                        className={cn("rounded-full px-3 py-1.5 text-sm font-semibold transition-colors", form.title === n ? "bg-foreground text-background" : "bg-tone hover:bg-tone-2")}
+                        className={cn("rounded-full px-3 py-1.5 text-sm font-semibold transition-colors", form.title === n ? "bg-second text-on-second" : "bg-tone hover:bg-tone-2")}
                       >
                         {n}
                       </button>
