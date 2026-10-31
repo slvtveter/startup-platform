@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { AvatarUpload } from "@/components/domain/avatar-upload";
 import { ResumeUpload } from "@/components/domain/resume-upload";
 import { SkillPicker } from "@/components/domain/skill-picker";
+import { usePublishWithConsent } from "@/components/domain/publish-consent";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -125,6 +126,7 @@ export function ProfileEditor({
   goal?: Goal;
 }) {
   const router = useRouter();
+  const { publish: publishWithConsent, dialog: consentDialog } = usePublishWithConsent();
   const top = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -196,8 +198,13 @@ export function ProfileEditor({
       }
     }
     if (!(await save())) return;
-    const { error } = await publishMyProfile({ body: { published } });
-    if (error) return toast.error(errorMessage(error));
+    if (published) {
+      const r = await publishWithConsent();
+      if (!r.ok) return r.message ? toast.error(r.message) : undefined;
+    } else {
+      const { error } = await publishMyProfile({ body: { published } });
+      if (error) return toast.error(errorMessage(error));
+    }
     if (published) reachGoal("profile_published");
     toast.success(published ? "Профиль опубликован" : "Профиль скрыт из каталога");
     if (published && after) router.push(after.href);
@@ -213,6 +220,7 @@ export function ProfileEditor({
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+      {consentDialog}
       <div ref={top} className="scroll-mt-24 rounded-[28px] bg-card p-6 shadow-[0_0_0_1px_var(--border)] sm:p-8">
         {/* На телефоне боковая колонка уходит вниз — полоска нужна здесь; на широком экране она справа. */}
         <div className="mb-6 lg:hidden">

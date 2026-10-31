@@ -2,7 +2,7 @@ from sqlalchemy import Select, and_, case, exists, false, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.demo import is_demo
-from app.core.errors import AppError, NotFound
+from app.core.errors import AppError, NotFound, PublicationConsentRequired
 from app.db import search
 from app.models import (
     Application,
@@ -26,6 +26,7 @@ from app.schemas.profile import (
     PersonDetail,
     ProfileUpdate,
 )
+from app.services import consents
 from app.services.events import track
 from app.services.slug import unique_slug
 
@@ -205,13 +206,19 @@ async def update_profile(db: AsyncSession, user: User, data: ProfileUpdate) -> N
     await db.commit()
 
 
-async def set_published(db: AsyncSession, user: User, published: bool) -> None:
+async def set_published(
+    db: AsyncSession, user: User, published: bool, consent: bool = False
+) -> None:
     p = user.profile
     assert p is not None
     if published:
         blockers = publish_blockers(user, p)
         if blockers:
             raise AppError("Профиль пока нельзя опубликовать", blockers)
+        if consent:
+            consents.record_publication(db, user)
+        elif not consents.has_publication(user):
+            raise PublicationConsentRequired("Нужно согласие на публикацию профиля")
         if not p.is_published:
             track(db, "profile_published", user.id, "profile", p.id)
     p.is_published = published

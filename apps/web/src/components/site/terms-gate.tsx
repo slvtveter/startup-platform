@@ -10,7 +10,7 @@ import { acceptTerms, logout } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 
 /** Сами документы читаются и без согласия. */
-const OPEN = ["/terms", "/privacy", "/cookies"];
+const OPEN = ["/terms", "/privacy", "/cookies", "/profile/publication-consent"];
 
 /**
  * Вошедший без согласия с действующей редакцией соглашения (вход через соцсети, старый аккаунт,

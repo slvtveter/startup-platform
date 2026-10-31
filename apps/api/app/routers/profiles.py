@@ -54,7 +54,7 @@ async def delete_my_resume(user: CurrentUser, db: DbSession) -> MyProfileOut:
 
 @router.post("/profile/me/publish", response_model=MyProfileOut)
 async def publish_my_profile(data: PublishIn, user: CurrentUser, db: DbSession) -> MyProfileOut:
-    await service.set_published(db, user, data.published)
+    await service.set_published(db, user, data.published, data.consent)
     return await service.my_profile(db, user)
 
 

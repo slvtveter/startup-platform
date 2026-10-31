@@ -19,6 +19,10 @@ class AppError(Exception):
         self.details = details
 
 
+class PublicationConsentRequired(AppError):
+    code = "publication_consent_required"
+
+
 class NotFound(AppError):
     status_code = 404
     code = "not_found"

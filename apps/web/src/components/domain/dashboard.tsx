@@ -2,6 +2,7 @@ import { ArrowRightIcon, InboxIcon, MailIcon, MessageCircleIcon, PlusIcon, Searc
 import Link from "next/link";
 
 import { Container, EmptyState } from "@/components/domain/page-header";
+import { PublicationConsentBanner } from "@/components/domain/publication-consent-banner";
 import { SeatRow } from "@/components/domain/seats";
 import { StartupCard } from "@/components/domain/startup-card";
 import { buttonVariants } from "@/components/ui/button";
@@ -103,6 +104,12 @@ export async function Dashboard() {
           </Link>
         </div>
       </div>
+
+      {user.needs_publication_consent && (
+        <div className="mt-8">
+          <PublicationConsentBanner />
+        </div>
+      )}
 
       <section aria-labelledby="next-step" className="mt-8 flex flex-col gap-4 rounded-[24px] bg-brand-soft p-5 sm:flex-row sm:items-center sm:gap-6 sm:px-6">
         <div className="min-w-0">

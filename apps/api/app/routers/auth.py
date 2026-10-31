@@ -63,6 +63,7 @@ def me_out(user: User) -> MeOut:
         is_admin=user.is_admin,
         email_verified=user.email_verified,
         needs_terms=consents.needs_terms(user),
+        needs_publication_consent=consents.needs_publication(user),
         profile=MeProfile(
             slug=p.slug,
             display_name=p.display_name,

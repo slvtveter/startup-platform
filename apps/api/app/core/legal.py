@@ -7,3 +7,5 @@
 
 TERMS_VERSION = "2026-10-31"
 PRIVACY_VERSION = "2026-10-31"
+# Согласие на распространение сведений профиля (ст. 10.1 152-ФЗ): /profile/publication-consent.
+PUBLICATION_VERSION = "2026-10-31"

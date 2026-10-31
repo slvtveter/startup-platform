@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { usePublishWithConsent } from "@/components/domain/publish-consent";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -81,15 +82,24 @@ export function ProfileSettings({
   showEmail: boolean;
 }) {
   const router = useRouter();
+  const { publish: publishWithConsent, dialog: consentDialog } = usePublishWithConsent();
   const [isPublished, setPublished] = useState(published);
   const [emailVisible, setEmailVisible] = useState(showEmail);
 
   async function togglePublished(next: boolean) {
     setPublished(next);
-    const { error } = await publishMyProfile({ body: { published: next } });
-    if (error) {
-      setPublished(!next);
-      return toast.error(errorMessage(error));
+    if (next) {
+      const r = await publishWithConsent();
+      if (!r.ok) {
+        setPublished(false);
+        return r.message ? toast.error(r.message) : undefined;
+      }
+    } else {
+      const { error } = await publishMyProfile({ body: { published: next } });
+      if (error) {
+        setPublished(true);
+        return toast.error(errorMessage(error));
+      }
     }
     toast.success(next ? "Профиль виден в каталоге" : "Профиль скрыт из каталога");
     router.refresh();
@@ -107,6 +117,7 @@ export function ProfileSettings({
 
   return (
     <SettingsCard id="profile" title="Профиль" description="Кто и что видит о тебе на платформе.">
+      {consentDialog}
       <SettingRow
         title="Показывать в каталоге людей"
         hint={

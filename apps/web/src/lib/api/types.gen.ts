@@ -715,6 +715,10 @@ export type MeOut = {
      * Needs Terms
      */
     needs_terms: boolean;
+    /**
+     * Needs Publication Consent
+     */
+    needs_publication_consent?: boolean;
     profile: MeProfile | null;
 };
 
@@ -1363,6 +1367,10 @@ export type PublishIn = {
      * Published
      */
     published: boolean;
+    /**
+     * Consent
+     */
+    consent?: boolean;
 };
 
 /**

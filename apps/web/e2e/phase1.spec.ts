@@ -79,6 +79,10 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
   // Полоска заполненности растёт на лету, без сохранения.
   await expect(candidate.getByRole("progressbar").first()).not.toHaveAttribute("aria-valuenow", "0");
   await candidate.getByRole("button", { name: "Опубликовать и продолжить" }).click();
+  // Отдельное согласие на публикацию профиля (ст. 10.1 152-ФЗ).
+  const consent = candidate.getByRole("dialog", { name: "Согласие на публикацию профиля" });
+  await consent.getByRole("checkbox").check();
+  await consent.getByRole("button", { name: "Опубликовать" }).click();
   await candidate.waitForURL(/\/startups$/);
 
   // --- Отклик ---
