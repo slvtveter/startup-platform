@@ -399,10 +399,12 @@
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-.legal table {
-  display: block;
-  overflow-x: auto;
+.legal-scroll {
   margin-top: 1rem;
+  overflow-x: auto;
+}
+.legal table {
+  margin-top: 0;
   border-collapse: collapse;
   font-size: 0.875rem;
   line-height: 1.25rem;
