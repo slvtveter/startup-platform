@@ -23,3 +23,8 @@ export function fieldErrors(error: unknown): Record<string, string> {
   }
   return out;
 }
+
+/** Код ошибки API (error.code), например "publication_consent_required". */
+export function apiCode(error: unknown) {
+  return (error as { error?: { code?: string } } | undefined)?.error?.code;
+}

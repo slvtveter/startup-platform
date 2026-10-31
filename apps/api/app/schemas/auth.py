@@ -116,6 +116,8 @@ class MeOut(BaseModel):
     email_verified: bool
     # Нет согласия с действующей редакцией соглашения: показываем экран согласия.
     needs_terms: bool
+    # Профиль опубликован без согласия с действующей редакцией (ст. 10.1): просим подтвердить.
+    needs_publication_consent: bool = False
     profile: MeProfile | None
 
 

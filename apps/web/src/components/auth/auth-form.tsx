@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { login, register, verifyCode } from "@/lib/api";
-import { errorMessage, fieldErrors } from "@/lib/errors";
+import { apiCode, errorMessage, fieldErrors } from "@/lib/errors";
 import { goal } from "@/lib/metrika";
 
 export function safeNext(next: string | null, fallback: string) {
@@ -53,9 +53,6 @@ export function SignedIn({ title = "Готово" }: { title?: string }) {
   );
 }
 
-function apiCode(error: unknown) {
-  return (error as { error?: { code?: string } } | undefined)?.error?.code;
-}
 
 /**
  * Вход и регистрация по почте. Регистрация — в два шага: почта и пароль, потом код из письма,

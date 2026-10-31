@@ -152,7 +152,7 @@ async def make_user(catalog) -> AsyncIterator[MakeUser]:
                 },
             )
             assert r.status_code == 200, r.text
-            r = await c.post("/api/profile/me/publish", json={"published": True})
+            r = await c.post("/api/profile/me/publish", json={"published": True, "consent": True})
             assert r.status_code == 200, r.text
         return c
 

@@ -26,6 +26,8 @@ class User(TimestampMixin, Base):
     seen_incoming_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # Редакция соглашения, с которой человек согласился последней (журнал — таблица consents).
     terms_version: Mapped[str | None] = mapped_column(String(32))
+    # Редакция согласия на публикацию профиля (ст. 10.1), последняя принятая.
+    publication_version: Mapped[str | None] = mapped_column(String(32))
 
     profile: Mapped["Profile | None"] = relationship(  # noqa: F821
         back_populates="user", uselist=False, cascade="all, delete-orphan", lazy="selectin"

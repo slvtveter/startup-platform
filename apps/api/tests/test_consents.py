@@ -91,3 +91,33 @@ async def test_purge_drops_old_security_logs(make_user):
         # Через 31 день сессия истекла.
         await purge_expired(db, now=datetime.now(UTC) + timedelta(days=31))
         assert await db.scalar(select(func.count()).select_from(Session)) == 0
+
+
+async def test_publication_needs_separate_consent(make_user):
+    c = await make_user("pub@b.ru", published=True)
+    me = (await c.get("/api/auth/me")).json()
+    assert me["needs_publication_consent"] is False
+    rows = await _journal("pub@b.ru")
+    assert [r.kind for r in rows if r.kind == "publication"] == ["publication"]
+
+    # Скрыть и снова опубликовать — согласие уже есть, галочка не нужна.
+    assert (await c.post("/api/profile/me/publish", json={"published": False})).status_code == 200
+    r = await c.post("/api/profile/me/publish", json={"published": True})
+    assert r.status_code == 200, r.text
+
+
+async def test_publish_without_consent_is_refused(make_user):
+    c = await make_user("nopub@b.ru", published=True)
+    async with SessionLocal() as db:
+        u = await db.scalar(select(User).where(User.email == "nopub@b.ru"))
+        u.publication_version = None
+        await db.commit()
+    # Старый опубликованный профиль: просим подтвердить, но из каталога не убираем.
+    assert (await c.get("/api/auth/me")).json()["needs_publication_consent"] is True
+    await c.post("/api/profile/me/publish", json={"published": False})
+    r = await c.post("/api/profile/me/publish", json={"published": True})
+    assert r.status_code == 400
+    assert r.json()["error"]["code"] == "publication_consent_required"
+    r = await c.post("/api/profile/me/publish", json={"published": True, "consent": True})
+    assert r.status_code == 200
+    assert (await c.get("/api/auth/me")).json()["needs_publication_consent"] is False

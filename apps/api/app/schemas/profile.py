@@ -35,6 +35,8 @@ class ProfileUpdate(BaseModel):
 
 class PublishIn(BaseModel):
     published: bool
+    # Галочка «даю согласие на распространение сведений профиля» (ст. 10.1 152-ФЗ).
+    consent: bool = False
 
 
 class PersonCard(ORM):

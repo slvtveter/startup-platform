@@ -5171,6 +5171,11 @@
             "type": "boolean",
             "title": "Needs Terms"
           },
+          "needs_publication_consent": {
+            "type": "boolean",
+            "title": "Needs Publication Consent",
+            "default": false
+          },
           "profile": {
             "anyOf": [
               {
@@ -6379,6 +6384,11 @@
           "published": {
             "type": "boolean",
             "title": "Published"
+          },
+          "consent": {
+            "type": "boolean",
+            "title": "Consent",
+            "default": false
           }
         },
         "type": "object",
