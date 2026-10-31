@@ -20,6 +20,8 @@ const STATUS: Record<string, string> = {
   withdrawn: "Отозван",
 };
 
+// Время и день считаются в поясе браузера, а сервер рендерит в UTC: расхождение при гидрации
+// ожидаемо, элементы помечены suppressHydrationWarning — на экране остаётся местное время.
 function dayLabel(iso: string) {
   const d = new Date(iso);
   const today = new Date();
@@ -51,7 +53,9 @@ function ApplicationMessage({ m }: { m: MessageOut }) {
         <span className="ml-auto shrink-0 rounded-full bg-background px-2 py-0.5 text-xs font-semibold">{STATUS[a.status] ?? a.status}</span>
       </div>
       <p className="px-4 py-3 text-base whitespace-pre-line">{m.body}</p>
-      <div className="px-4 pb-2 text-right text-xs text-muted-foreground">{time(m.created_at)}</div>
+      <div className="px-4 pb-2 text-right text-xs text-muted-foreground" suppressHydrationWarning>
+        {time(m.created_at)}
+      </div>
     </div>
   );
 }
@@ -129,7 +133,9 @@ export function ChatThread({ chat, initial }: { chat: ConversationOut; initial: 
           return (
             <li key={m.id}>
               {newDay && (
-                <div className="my-3 text-center text-xs font-semibold text-muted-foreground">{dayLabel(m.created_at)}</div>
+                <div className="my-3 text-center text-xs font-semibold text-muted-foreground" suppressHydrationWarning>
+                  {dayLabel(m.created_at)}
+                </div>
               )}
               {m.application ? (
                 <ApplicationMessage m={m} />
@@ -142,7 +148,7 @@ export function ChatThread({ chat, initial }: { chat: ConversationOut; initial: 
                     )}
                   >
                     {m.body}
-                    <span className={cn("ml-2 align-bottom text-xs", m.mine ? "text-white/90" : "text-muted-foreground")}>
+                    <span className={cn("ml-2 align-bottom text-xs", m.mine ? "text-white/90" : "text-muted-foreground")} suppressHydrationWarning>
                       {time(m.created_at)}
                     </span>
                   </div>
