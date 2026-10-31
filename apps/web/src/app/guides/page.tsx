@@ -15,6 +15,7 @@ export default function GuidesPage() {
     <Container>
       <div className="max-w-4xl">
         <PageHeader
+          sticker="star"
           title="Гайды"
           description="Как начать в IT и собрать команду, коротко и по делу."
         />

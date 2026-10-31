@@ -16,7 +16,7 @@ from PIL import Image, ImageOps
 from app.scripts.demo_data import FOUNDERS, PEOPLE, STARTUPS
 
 API = "http://localhost:8080/api"
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[4]
 OUT = ROOT / "apps/web/public/showcase"
 WEB = ROOT / "apps/web/src/lib/showcase.data.ts"
 MEDIA = Path(__file__).parent / "demo_media"

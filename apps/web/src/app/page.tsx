@@ -110,13 +110,19 @@ async function Landing() {
         <Paths startups={STARTUPS.slice(0, 3)} idea={IDEAS[0]} people={PATH_PEOPLE} faces={COFOUNDER_FACES} />
       </Section>
 
-      <Section id="feed" title="Стартапы, которые ищут людей" tight>
+      <Section id="feed" title="Стартапы, которые ищут людей" tight sticker={<Sticker name="megaphone" className="size-16 -rotate-6 lg:size-20" />}>
         <HomeFeed tabs={feed} />
       </Section>
 
       <Section
         title="Кто уже ищет команду"
         tight
+        sticker={
+          <span className="relative block h-16 w-28 lg:h-20 lg:w-32">
+            <Sticker name="code" className="absolute top-0 left-0 size-14 -rotate-12 lg:size-16" />
+            <Sticker name="pen" className="absolute right-0 bottom-0 size-14 rotate-6 lg:size-16" />
+          </span>
+        }
         aside={
           <Link href="/people" className="inline-flex items-center gap-1.5 font-bold text-brand-ink transition-colors hover:text-brand-hover">
             Все люди
@@ -138,7 +144,7 @@ async function Landing() {
       </Section>
 
       <Section id="faq" title="Частые вопросы" sticker={<Sticker name="question" className="size-20 -rotate-6 lg:size-24" />}>
-        <FaqTabs items={FAQ} />
+        <FaqTabs items={FAQ} stickers={["cap", "coin", "clock", "bulb", "like"]} />
       </Section>
 
       <FinalCta />
@@ -208,9 +214,12 @@ function RoleStrip({ roles }: { roles: { slug: string; name: string; n: number }
   return (
     <section aria-labelledby="roles-h" className={`${wrap} pt-12`}>
       <div className="flex flex-col gap-4 rounded-[28px] bg-tone p-5 sm:p-6 lg:flex-row lg:items-center lg:gap-8">
-        <h2 id="roles-h" className="shrink-0 text-lg font-bold tracking-[-0.01em] lg:w-44">
-          Кого ищут прямо сейчас
-        </h2>
+        <div className="flex shrink-0 items-center gap-3 lg:w-60">
+          <Sticker name="search" className="size-12 shrink-0 -rotate-6 max-sm:hidden" />
+          <h2 id="roles-h" className="text-lg font-bold tracking-[-0.01em]">
+            Кого ищут прямо сейчас
+          </h2>
+        </div>
         <ul className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [mask-image:linear-gradient(90deg,#000_85%,transparent)] [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 sm:[mask-image:none]">
           {roles.slice(0, 8).map((r) => (
             <li key={r.slug}>
@@ -257,7 +266,8 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
             <h3 className="mt-3 max-w-[14ch] text-[32px] leading-[1.02] font-extrabold tracking-[-0.04em] sm:text-[40px]">Залети в стартап и набери опыт</h3>
             <span className="mt-4 block max-w-[34ch] text-lg text-white/80">Настоящие задачи и кейс в портфолио.</span>
           </span>
-          <span aria-hidden className="grid gap-1.5 rounded-2xl bg-white p-2 text-foreground max-sm:hidden shadow-[0_24px_50px_-20px_rgb(0_0_0/0.5)] transition-transform duration-500 group-hover:-translate-y-1">
+          <span aria-hidden className="relative grid gap-1.5 rounded-2xl bg-white p-2 text-foreground max-sm:hidden shadow-[0_24px_50px_-20px_rgb(0_0_0/0.5)] transition-transform duration-500 group-hover:-translate-y-1">
+            <Sticker name="cap" className="absolute -top-7 -right-6 z-10 size-16 rotate-12" />
             {startups.map((s) => (
               <span key={s.id} className="flex items-center gap-3 rounded-xl bg-tone p-2 pr-3">
                 <span className="relative size-10 shrink-0 overflow-hidden rounded-lg bg-brand-soft">
@@ -329,7 +339,8 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
             <span className="text-sm font-bold text-brand-ink">Нужны люди</span>
             <h3 className="mt-3 max-w-[16ch] text-[32px] leading-[1.02] font-extrabold tracking-[-0.04em] sm:text-[40px]">Найди разработчика или дизайнера</h3>
           </span>
-          <span aria-hidden className="grid gap-1.5 rounded-2xl bg-white p-2 transition-transform duration-500 group-hover:-translate-y-1 max-sm:hidden">
+          <span aria-hidden className="relative grid gap-1.5 rounded-2xl bg-white p-2 transition-transform duration-500 group-hover:-translate-y-1 max-sm:hidden">
+            <Sticker name="code" className="absolute -top-7 -right-6 z-10 size-16 rotate-12" />
             {people.map((p) => (
               <span key={p.slug} className="flex items-center gap-3 rounded-xl bg-tone p-2 pr-3">
                 {/* eslint-disable-next-line @next/next/no-img-element -- фото витрины уже пережаты в WebP */}
@@ -392,8 +403,12 @@ function Section({
           </h2>
         </div>
         {lead && <p className="max-w-[40ch] text-lg text-muted-foreground sm:ml-auto">{lead}</p>}
-        {sticker && <div className="ml-auto self-center max-sm:hidden">{sticker}</div>}
-        {aside && <div className="ml-auto pb-1.5">{aside}</div>}
+        {(sticker || aside) && (
+          <div className="ml-auto flex items-center gap-8">
+            {sticker && <div className="max-sm:hidden">{sticker}</div>}
+            {aside && <div>{aside}</div>}
+          </div>
+        )}
       </div>
       {children}
     </section>
@@ -459,7 +474,7 @@ function FinalCta() {
       <div className="relative isolate grid gap-8 overflow-hidden rounded-[36px] px-6 py-[clamp(56px,7vw,112px)] text-white sm:px-[clamp(24px,5vw,72px)] lg:grid-cols-[1.2fr_1fr] lg:items-end">
         <Image src={PHOTOS.teamEvening} alt="" fill placeholder="blur" sizes="(min-width: 1360px) 1360px, 100vw" className="-z-20 object-cover" />
         <div aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgb(14_26_52/0.85),rgb(14_26_52/0.55))]" />
-        <Sticker name="star" className="absolute top-8 right-10 size-20 rotate-12 max-lg:hidden" />
+        <Sticker name="flag" className="absolute top-8 right-10 size-20 rotate-12 max-lg:hidden" />
         <Sticker name="mark" className="absolute top-24 right-36 size-16 -rotate-6 max-lg:hidden" />
         <div>
           <h2 id="final-h" className="max-w-[14ch] text-[36px] leading-[1.02] sm:text-[56px] lg:text-[64px]">

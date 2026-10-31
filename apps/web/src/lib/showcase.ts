@@ -9,20 +9,21 @@ import { IDEAS, PEOPLE, STARTUPS } from "./showcase.data";
 
 export { IDEAS, STARTUPS };
 
+/** По началу слага: генератор может добавить к нему хвост вроде «-80b9». */
 function pick(slugs: string[]) {
-  return slugs.map((s) => PEOPLE.find((p) => p.slug === s)).filter((p): p is PersonCard => !!p);
+  return slugs.map((s) => PEOPLE.find((p) => p.slug === s || p.slug.startsWith(`${s}-`))).filter((p): p is PersonCard => !!p);
 }
 
 /** Секция «Кто уже ищет команду». */
-export const HOME_PEOPLE = pick(["kirill-morozov-62b4", "alina-tsoy", "ilya-savin", "zhanna-kamara"]);
+export const HOME_PEOPLE = pick(["kirill-morozov", "vera-sokolova", "ilya-savin", "liza-gromova"]);
 /** Лица под кнопками первого экрана. */
-export const HERO_FACES = pick(["yuna-pak", "kseniya-orlova", "tigran-arutyunyan", "anna-smirnova", "kristina-belaya"]);
+export const HERO_FACES = pick(["kristina-belaya", "daniil-andreev", "svetlana-yudina", "arseniy-belov", "eva-lunina"]);
 /** Карточка «Нужны люди» в «Четырёх дорогах». */
-export const PATH_PEOPLE = pick(["kristina-belaya", "polina-mironova", "timur-galiev"]);
+export const PATH_PEOPLE = pick(["denis-galkin", "maksim-lisitsyn", "polina-mironova"]);
 /** Карточка «Нет идеи»: те, кто ищет сообщников. */
-export const COFOUNDER_FACES = pick(["yuna-pak", "tigran-arutyunyan", "kirill-morozov-62b4", "alina-tsoy", "anna-smirnova"]);
+export const COFOUNDER_FACES = pick(["irina-guseva", "yulya-panova", "kirill-morozov", "alena-kuznetsova", "eva-lunina"]);
 /** Человек в анимации шага «Создай профиль». */
-export const STEP_PERSON = pick(["ilya-savin"])[0];
+export const STEP_PERSON = pick(["daniil-andreev"])[0];
 
 /** Витрина ведёт в каталог по роли: так клик по примеру показывает настоящие проекты и людей. */
 export function startupHref(s: StartupCard) {

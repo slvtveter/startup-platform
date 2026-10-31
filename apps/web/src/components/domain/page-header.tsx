@@ -5,15 +5,21 @@ export function PageHeader({
   title,
   description,
   actions,
+  sticker,
 }: {
   title: string;
   description?: React.ReactNode;
   actions?: React.ReactNode;
+  /** Наклейка бренда рядом с заголовком (на телефоне скрыта). */
+  sticker?: StickerName;
 }) {
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
       <div>
-        <h1 className="text-[32px] leading-[1.05] sm:text-[48px]">{title}</h1>
+        <h1 className="flex items-center gap-4 text-[32px] leading-[1.05] sm:text-[48px]">
+          {title}
+          {sticker && <Sticker name={sticker} className="size-14 shrink-0 -rotate-6 max-sm:hidden" />}
+        </h1>
         {description && <p className="mt-3 max-w-2xl text-lg text-muted-foreground">{description}</p>}
       </div>
       {actions && <div className="flex gap-2 sm:ml-auto">{actions}</div>}

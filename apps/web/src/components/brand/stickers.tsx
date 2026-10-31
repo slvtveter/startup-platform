@@ -45,8 +45,8 @@ const STICKERS = {
   /** Курсор с щелчком: действие, отклик. */
   cursor: (
     <>
-      <path d="M20 16 L48 34 L35 37 L42 51 L35 54 L28 40 L20 48 Z" fill={I} {...cut} />
-      <path d="M12 12 l-5 -5 M20 8 v-6 M8 20 h-6" {...line} stroke={C} strokeWidth={4} />
+      <path d="M20 16 L48 34 L35 37 L42 51 L35 54 L28 40 L20 48 Z" fill={B} {...cut} />
+      <path d="M12 12 l-5 -5 M20 8 v-6 M8 20 h-6" {...line} stroke={I} strokeWidth={4} />
     </>
   ),
   /** Галочка: отклик принят, всё готово. */
@@ -60,7 +60,7 @@ const STICKERS = {
   code: (
     <>
       <rect x="6" y="10" width="52" height="44" rx="14" fill={I} {...cut} />
-      <path d="M24 24 l-8 8 l8 8 M40 24 l8 8 l-8 8 M35 21 l-6 22" {...line} stroke={C} />
+      <path d="M24 24 l-8 8 l8 8 M40 24 l8 8 l-8 8 M35 21 l-6 22" {...line} stroke={B} />
     </>
   ),
   /** Перо векторного редактора: дизайнеры. */
@@ -115,11 +115,84 @@ const STICKERS = {
       <circle cx="32" cy="40" r="3.2" fill={W} />
     </>
   ),
+  /** Шапка выпускника: студенты, без опыта. */
+  cap: (
+    <>
+      <path d="M17 31 V43 Q32 52 47 43 V31 L32 38 Z" fill={I} {...cut} />
+      <path d="M5 26 L32 13 L59 26 L32 39 Z" fill={B} {...cut} />
+      <path d="M32 26 L50 31 V43" {...line} stroke={C} strokeWidth={3.5} />
+      <circle cx="50" cy="46" r="4" fill={C} />
+    </>
+  ),
+  /** Портфель: кейс в портфолио, опыт. */
+  case: (
+    <>
+      <path d="M24 18 v-3 a5 5 0 0 1 5 -5 h6 a5 5 0 0 1 5 5 v3" {...line} stroke={W} strokeWidth={10} />
+      <path d="M24 18 v-3 a5 5 0 0 1 5 -5 h6 a5 5 0 0 1 5 5 v3" {...line} stroke={I} />
+      <rect x="7" y="18" width="50" height="36" rx="11" fill={B} {...cut} />
+      <path d="M7 33 H57" stroke={C} strokeWidth="3" />
+      <rect x="27" y="28" width="10" height="10" rx="3" fill={I} />
+    </>
+  ),
+  /** Видеозвонок: созвон с основателем. */
+  call: (
+    <>
+      <rect x="5" y="17" width="38" height="30" rx="10" fill={C} {...cut} />
+      <path d="M45 27 L58 19 V45 L45 37 Z" fill={I} {...cut} />
+      <circle cx="15" cy="27" r="3.2" fill={W} />
+    </>
+  ),
+  /** Монета с рублём: оплата. */
+  coin: (
+    <>
+      <circle cx="32" cy="32" r="26" fill={I} {...cut} />
+      <circle cx="32" cy="32" r="19" fill="none" stroke={W} strokeWidth="2.5" />
+      <path d="M28 21 V44 M28 21 h7 a6 6 0 0 1 0 12 h-11 M24 39 h12" {...line} stroke={B} strokeWidth={4.5} />
+    </>
+  ),
+  /** Лупа: найти, кого ищут. */
+  search: (
+    <>
+      <path d="M38 38 L53 53" {...line} stroke={W} strokeWidth={15} />
+      <path d="M38 38 L53 53" {...line} stroke={B} strokeWidth={8} />
+      <circle cx="27" cy="27" r="17" fill={S} {...cut} />
+      <circle cx="27" cy="27" r="14" fill="none" stroke={B} strokeWidth="5" />
+      <path d="M20 23 a8 8 0 0 1 7 -5" {...line} stroke={W} strokeWidth={3.5} />
+    </>
+  ),
+  /** Телефон: мобильная разработка, приложение. */
+  phone: (
+    <>
+      <rect x="17" y="5" width="30" height="54" rx="10" fill={B} {...cut} />
+      <rect x="21" y="11" width="22" height="38" rx="5" fill={I} />
+      <circle cx="32" cy="54" r="2.2" fill={W} />
+      <rect x="25" y="16" width="14" height="4" rx="2" fill={W} />
+      <rect x="25" y="24" width="9" height="4" rx="2" fill={W} />
+    </>
+  ),
+  /** Мегафон: маркетинг, объявить о проекте. */
+  megaphone: (
+    <>
+      <path d="M12 25 L40 11 V53 L12 39 Z" fill={C} {...cut} />
+      <rect x="6" y="24" width="12" height="16" rx="5" fill={B} {...cut} />
+      <path d="M17 39 L22 52" {...line} stroke={B} strokeWidth={5} />
+      <path d="M47 24 q6 8 0 16 M52 18 q11 14 0 28" {...line} stroke={I} strokeWidth={4} />
+    </>
+  ),
+  /** Флажок: старт, запуск, цель. */
+  flag: (
+    <>
+      <path d="M18 8 V57" {...line} stroke={W} strokeWidth={11} />
+      <path d="M18 8 V57" {...line} stroke={B} />
+      <path d="M21 10 H52 L44 22 L52 34 H21 Z" fill={C} {...cut} />
+      <circle cx="18" cy="8" r="4" fill={I} />
+    </>
+  ),
   /** Плюс: добавить, опубликовать. */
   plus: (
     <>
       <rect x="8" y="8" width="48" height="48" rx="16" fill={I} {...cut} />
-      <path d="M32 21 v22 M21 32 h22" {...line} stroke={W} strokeWidth={6} />
+      <path d="M32 21 v22 M21 32 h22" {...line} stroke={B} strokeWidth={6} />
     </>
   ),
   /** Волна: украшение у заголовков. */
@@ -133,8 +206,8 @@ const STICKERS = {
   arrow: (
     <>
       <path d="M10 14 C34 6 52 22 40 34 C32 42 22 34 30 28 C38 22 50 34 48 52" {...line} stroke={W} strokeWidth={11} />
-      <path d="M10 14 C34 6 52 22 40 34 C32 42 22 34 30 28 C38 22 50 34 48 52" {...line} stroke={I} />
-      <path d="M40 46 l8 7 l6 -9" {...line} stroke={I} />
+      <path d="M10 14 C34 6 52 22 40 34 C32 42 22 34 30 28 C38 22 50 34 48 52" {...line} stroke={B} />
+      <path d="M40 46 l8 7 l6 -9" {...line} stroke={B} />
     </>
   ),
   /** Сердце в реплике: понравился проект, «хочу в команду». */

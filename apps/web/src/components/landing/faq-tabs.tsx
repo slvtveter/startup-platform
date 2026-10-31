@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 
+import { Sticker, type StickerName } from "@/components/brand/stickers";
 import { cn } from "@/lib/utils";
 
 /** 2. Вопрос — ответ рядом: слева список вопросов, справа крупный ответ (на телефоне — список с ответами). */
-export function FaqTabs({ items }: { items: [string, string][] }) {
+/** stickers[i] — наклейка бренда в углу ответа на i-й вопрос. */
+export function FaqTabs({ items, stickers = [] }: { items: [string, string][]; stickers?: StickerName[] }) {
   const [active, setActive] = useState(0);
   return (
     <div className="grid gap-3 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
@@ -29,7 +31,8 @@ export function FaqTabs({ items }: { items: [string, string][] }) {
             : [btn],
         )}
       </div>
-      <div role="tabpanel" className="rounded-[28px] bg-brand-soft p-7 sm:p-10 max-lg:hidden">
+      <div role="tabpanel" className="relative overflow-hidden rounded-[28px] bg-brand-soft p-7 sm:p-10 max-lg:hidden">
+        {stickers[active] && <Sticker key={`s-${active}`} name={stickers[active]} className="absolute right-8 bottom-8 size-24 rotate-6 animate-[enter-up_420ms_cubic-bezier(0.22,1,0.36,1)_both]" />}
         <h3 className="text-[28px] leading-[1.1] font-extrabold tracking-[-0.03em]">{items[active][0]}</h3>
         <p key={active} className="mt-5 max-w-[56ch] animate-[enter-up_360ms_cubic-bezier(0.22,1,0.36,1)_both] text-xl leading-8 text-foreground/80">
           {items[active][1]}

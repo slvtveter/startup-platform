@@ -152,7 +152,7 @@ export function CatalogToolbar({
                               )}
                             >
                               {o.label}
-                              {o.count !== undefined && <span className={cn("tabular-nums", on ? "text-background/70" : "text-muted-foreground")}>{o.count}</span>}
+                              {o.count !== undefined && <span className={cn("tabular-nums", on ? "text-on-second/75" : "text-muted-foreground")}>{o.count}</span>}
                             </button>
                           );
                         })}
