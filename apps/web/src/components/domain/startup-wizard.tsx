@@ -409,14 +409,15 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
           </div>
         </div>
 
-        <div className="mt-8 flex items-center gap-2 border-t pt-6">
+        <div className="mt-8 flex flex-wrap items-center gap-2 border-t pt-6">
           {step > 0 && (
             <Button type="button" variant="ghost" onClick={() => go(-1)} disabled={busy}>
               <ArrowLeftIcon aria-hidden className="size-4" />
               Назад
             </Button>
           )}
-          <div className="ml-auto flex gap-2">
+          {/* На последнем шаге на телефоне две кнопки делят строку, «Назад» — над ними. */}
+          <div className={cn("ml-auto flex gap-2", last && "max-sm:w-full max-sm:[&>*]:flex-1")}>
             {last ? (
               <>
                 {emailVerified && (
@@ -508,9 +509,9 @@ function Choice({
 
 function Summary({ label, value, onEdit }: { label: string; value: string; onEdit: () => void }) {
   return (
-    <div className="flex items-start gap-3">
-      <dt className="w-32 shrink-0 text-muted-foreground">{label}</dt>
-      <dd className="min-w-0 flex-1 font-semibold break-words">{value || "—"}</dd>
+    <div className="flex flex-wrap items-start gap-x-3 gap-y-1">
+      <dt className="text-muted-foreground max-sm:flex-1 sm:w-32 sm:shrink-0">{label}</dt>
+      <dd className="min-w-0 font-semibold break-words max-sm:order-last max-sm:basis-full sm:flex-1">{value || "—"}</dd>
       <button type="button" onClick={onEdit} className="shrink-0 text-xs font-semibold text-brand-ink hover:underline">
         Изменить
       </button>
