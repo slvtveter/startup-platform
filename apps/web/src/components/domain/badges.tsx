@@ -41,21 +41,3 @@ export function SkillChip({ name, highlight = false, onTone = false }: { name: s
   );
 }
 
-/** Демо-карточка на пустом проде (app.scripts.demo): пример, а не настоящий человек или проект. */
-export function DemoBadge({ className }: { className?: string }) {
-  return (
-    <span className={cn(pill, "bg-white/90 font-semibold text-muted-foreground shadow-[inset_0_0_0_1px_var(--border)]", className)} title="Пример: так выглядит карточка на платформе">
-      Пример
-    </span>
-  );
-}
-
-export function DemoNotice({ kind }: { kind: "startup" | "person" }) {
-  return (
-    <p className="rounded-2xl bg-white p-4 text-sm text-muted-foreground">
-      {kind === "startup"
-        ? "Это пример проекта: так выглядит стартап на Envola. Откликнуться на него нельзя."
-        : "Это пример профиля: так выглядит человек на Envola. Написать ему нельзя."}
-    </p>
-  );
-}

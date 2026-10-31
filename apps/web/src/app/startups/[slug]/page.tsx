@@ -5,7 +5,6 @@ import { notFound } from "next/navigation";
 
 import { ApplyDialog, type ApplyState } from "@/components/domain/apply-dialog";
 import {
-  DemoBadge,
     SkillChip,
   StageBadge,
   StartupStatusBadge,
@@ -110,7 +109,7 @@ export default async function StartupPage({ params }: Props) {
       />
       <Link
         href={s.stage === "idea" ? "/startups?stage=idea" : "/startups"}
-        className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
+        className="inline-flex min-h-6 items-center gap-1 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
       >
         <ChevronLeftIcon className="size-4" /> {s.stage === "idea" ? "Все идеи" : "Все стартапы"}
       </Link>
@@ -120,7 +119,6 @@ export default async function StartupPage({ params }: Props) {
           <div className="flex flex-wrap gap-2">
             <StageBadge stage={s.stage} />
             <TermsBadge terms={s.terms} />
-            {s.is_demo && <DemoBadge />}
             {s.status === "closed" && openSeats === 0 ? (
               <span className="inline-flex items-center rounded-full bg-success-soft px-2.5 py-1 text-xs font-bold text-success-ink">
                 Команда собрана
@@ -175,14 +173,19 @@ export default async function StartupPage({ params }: Props) {
             )}
             {!s.is_demo && <ShareButton title={s.title} text={s.pitch} path={`/startups/${s.slug}`} />}
             {s.is_demo && (
-              <Link href="/startups/new" className={buttonVariants({ size: "lg" })}>
-                Опубликовать свою идею
-              </Link>
+              <>
+                <Link href={s.stage === "idea" ? "/startups?stage=idea" : "/startups"} className={buttonVariants({ size: "lg" })}>
+                  {s.stage === "idea" ? "Смотреть идеи" : "Смотреть стартапы"}
+                </Link>
+                <Link href="/startups/new" className={buttonVariants({ variant: "secondary", size: "lg" })}>
+                  Опубликовать свою
+                </Link>
+              </>
             )}
           </div>
           {s.is_demo && (
             <p className="mt-4 max-w-[52ch] text-sm text-muted-foreground">
-              Это пример проекта, откликнуться на него нельзя.
+              Это пример: так выглядит проект на Envola.
             </p>
           )}
         </div>

@@ -42,11 +42,6 @@ export default async function IncomingPage({ params }: { params: Promise<{ slug:
           }
         />
       </div>
-      {pending.length > 0 && (
-        <p className="mt-6 rounded-xl bg-warn-soft px-5 py-3 text-sm text-warn-ink">
-          Постарайся ответить в течение трёх дней.
-        </p>
-      )}
       {apps.length === 0 ? (
         <div className="mt-8">
           <EmptyState

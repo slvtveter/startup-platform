@@ -91,3 +91,16 @@ async def test_resume_upload_is_private(make_user, client):
 
     assert (await maria.delete("/api/profile/me/resume")).json()["resume_name"] == ""
     assert (await oleg.get(f"/api/people/{slug}/resume")).status_code == 404
+
+
+async def test_people_sort_by_experience(make_user, client):
+    newbie = await make_user("newbie@a.ru", published=True, name="Новичок")
+    await newbie.patch("/api/profile/me", json={"experience_level": "no_experience"})
+    junior = await make_user("junior@a.ru", published=True, name="Джун")
+    await junior.patch("/api/profile/me", json={"experience_level": "junior"})
+    # Новичок обновлён последним — по умолчанию (новые) он первый.
+    await newbie.patch("/api/profile/me", json={"city": "Казань"})
+    names = lambda r: [p["display_name"] for p in r.json()["items"]]  # noqa: E731
+    assert names(await client.get("/api/people"))[:2] == ["Новичок", "Джун"]
+    assert names(await client.get("/api/people?sort=experience"))[:2] == ["Джун", "Новичок"]
+    assert (await client.get("/api/people?sort=nope")).status_code == 422

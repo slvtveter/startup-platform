@@ -120,15 +120,11 @@ export function PersonCard({
               <h3 className="min-w-0 truncate text-xl leading-7 font-bold tracking-[-0.02em] text-brand-ink transition-colors group-hover:text-brand-hover sm:text-2xl sm:leading-8">
                 {title}
               </h3>
-              {person.is_demo && (
-                <span title="Пример: так выглядит карточка на Envola" className="ml-auto shrink-0 pt-1 text-xs font-semibold text-muted-foreground max-sm:hidden">
-                  Пример
-                </span>
-              )}
             </div>
             <p className="mt-0.5 truncate text-base">
               {person.primary_role && <span className="font-semibold">{person.display_name}</span>}
               {city && <span className="text-muted-foreground">{person.primary_role ? " · " : ""}{city}</span>}
+              {person.is_demo && <span className="text-xs text-muted-foreground"> · пример</span>}
             </p>
             {(cofound || terms.length > 0 || availability) && (
               <span

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { DemoBadge, DemoNotice, SkillChip } from "@/components/domain/badges";
+import { SkillChip } from "@/components/domain/badges";
 import { WriteDialog } from "@/components/domain/chat/write-dialog";
 import {
   InviteDialog,
@@ -115,7 +115,7 @@ export default async function PersonPage({ params }: Props) {
       />
       <Link
         href="/people"
-        className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-foreground"
+        className="inline-flex min-h-6 items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-foreground"
       >
         <ChevronLeftIcon className="size-4" /> Все люди
       </Link>
@@ -134,7 +134,6 @@ export default async function PersonPage({ params }: Props) {
                     Ищет сообщников на свой стартап
                   </span>
                 )}
-                {p.is_demo && <DemoBadge />}
               </div>
               <h1 className="mt-3 text-[36px] leading-[1.04] sm:text-[56px]">{p.display_name}</h1>
               <p className="mt-2 text-lg text-muted-foreground">{facts.join(", ")}</p>
@@ -262,10 +261,10 @@ export default async function PersonPage({ params }: Props) {
             <div className="mt-5">
               {p.is_demo ? (
                 <div className="grid gap-3">
-                  <DemoNotice kind="person" />
-                  <Link href="/people/cofounders" className={buttonVariants({ className: "w-full" })}>
-                    Смотреть, кто ищет сообщников
+                  <Link href={p.primary_role ? `/people?role=${p.primary_role.slug}` : "/people"} className={buttonVariants({ className: "w-full" })}>
+                    Найти похожих людей
                   </Link>
+                  <p className="text-center text-xs text-muted-foreground">Это пример: так выглядит профиль на Envola</p>
                 </div>
               ) : !user ? (
                 <Link

@@ -3020,6 +3020,10 @@ export type ListPeopleData = {
          */
         q?: string | null;
         /**
+         * Sort
+         */
+        sort?: 'new' | 'experience';
+        /**
          * Limit
          */
         limit?: number;

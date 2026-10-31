@@ -27,10 +27,11 @@ export default async function PeoplePage({ searchParams }: Props) {
   const selected = { role: asList(params.role), level: asList(params.level), looking_for: asList(params.looking_for) };
   const cofound = params.cofound === "1";
   const q = typeof params.q === "string" ? params.q : "";
+  const sort = params.sort === "experience" ? "experience" : "new";
   const client = await serverClient();
   const [roles, { data }, { data: cof }] = await Promise.all([
     getRoles(),
-    listPeople({ client, query: { ...selected, cofound, q: q || undefined, limit: LIMIT, offset: (page - 1) * LIMIT } }),
+    listPeople({ client, query: { ...selected, cofound, sort, q: q || undefined, limit: LIMIT, offset: (page - 1) * LIMIT } }),
     listPeople({ client, query: { cofound: true, limit: 1 } }),
   ]);
   const total = data?.total ?? 0;
@@ -50,25 +51,6 @@ export default async function PeoplePage({ searchParams }: Props) {
           {seo.h1}
           <Sticker name="search" className="size-14 shrink-0 -rotate-6 max-sm:hidden" />
         </h1>
-        {/* «Сообщники» — не отдельный каталог, а фильтр этого: плашка в одну строку включает его и ведёт на объяснение. */}
-        {(cof?.total ?? 0) > 0 && (
-          <div className="flex w-full flex-wrap items-center gap-x-5 gap-y-3 rounded-2xl bg-brand-soft py-3 pr-3 pl-5 sm:w-auto">
-            <p className="flex items-center gap-2 font-bold">
-              <span aria-hidden className="size-2 rounded-full bg-brand" />
-              {cofound ? "Показаны только сообщники" : `${cof?.total} ${plural(cof?.total ?? 0, "ищет", "ищут", "ищут")} сообщников`}
-            </p>
-            <Link href="/people/cofounders" className="inline-flex min-h-6 items-center text-sm font-semibold text-brand-ink hover:text-brand-hover">
-              Кто это
-            </Link>
-            <Link
-              href={toggleHref("/people", params, "cofound", cofound ? null : "1")}
-              scroll={false}
-              className={buttonVariants({ size: "sm", className: "sm:ml-2" })}
-            >
-              {cofound ? "Показать всех" : "Показать их"}
-            </Link>
-          </div>
-        )}
       </div>
 
       <div className="mt-8 lg:mt-10 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-12">
@@ -79,10 +61,27 @@ export default async function PeoplePage({ searchParams }: Props) {
             params={params}
             placeholder="Имя, роль, навык или город"
             groups={groups}
+            sorts={[
+              { value: "new", label: "Сначала новые", short: "новые" },
+              { value: "experience", label: "Сначала с опытом", short: "с опытом" },
+            ]}
             resultLabel={countLabel}
             summary={
               // h2 между h1 страницы и h3 карточек: порядок заголовков для экранных читалок.
-              <h2 className="text-base font-bold tracking-normal">{countLabel}</h2>
+              // «Сообщники» — не отдельный каталог, а фильтр: тихая ссылка рядом с числом включает его.
+              <span className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                <h2 className="text-base font-bold tracking-normal">{countLabel}</h2>
+                {(cof?.total ?? 0) > 0 && (
+                  <Link
+                    href={toggleHref("/people", params, "cofound", cofound ? null : "1")}
+                    scroll={false}
+                    className="inline-flex min-h-6 items-center gap-1.5 text-sm font-semibold text-brand-ink transition-colors hover:text-brand-hover"
+                  >
+                    <span aria-hidden className="size-1.5 rounded-full bg-brand" />
+                    {cofound ? "Показать всех" : `${cof?.total} ${plural(cof?.total ?? 0, "ищет", "ищут", "ищут")} сообщников`}
+                  </Link>
+                )}
+              </span>
             }
           />
 

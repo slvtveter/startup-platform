@@ -1264,6 +1264,20 @@
             }
           },
           {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "new",
+                "experience"
+              ],
+              "type": "string",
+              "default": "new",
+              "title": "Sort"
+            }
+          },
+          {
             "name": "limit",
             "in": "query",
             "required": false,
