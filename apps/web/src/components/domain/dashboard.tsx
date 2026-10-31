@@ -293,7 +293,7 @@ function SectionHead({ title, text, href, more }: { title: string; text: string;
         <h2 className="text-2xl sm:text-[32px]">{title}</h2>
         <p className="mt-1.5 text-muted-foreground">{text}</p>
       </div>
-      <Link href={href} className="shrink-0 pb-0.5 text-sm font-semibold text-brand-ink hover:text-brand-hover">
+      <Link href={href} className="inline-flex min-h-6 shrink-0 items-center text-sm font-semibold text-brand-ink hover:text-brand-hover">
         {more}
       </Link>
     </div>

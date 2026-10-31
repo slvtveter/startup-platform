@@ -114,7 +114,7 @@ export function ProfileSettings({
             <>
               Чтобы появиться в каталоге, заполни профиль
               {missing.length > 0 && `: ${missing.slice(0, 3).join(", ").toLowerCase()}`}.{" "}
-              <Link href="/me/profile" className="font-semibold text-brand-ink hover:underline">
+              <Link href="/me/profile" className="inline-flex min-h-6 items-center font-semibold text-brand-ink hover:underline">
                 Заполнить
               </Link>
             </>
@@ -131,7 +131,7 @@ export function ProfileSettings({
         <Switch checked={emailVisible} onChange={toggleEmail} aria-label="Показывать почту в контактах" />
       </SettingRow>
       <SettingRow title="Публичная страница" hint="Так профиль видят основатели.">
-        <Link href={`/people/${slug}`} className="text-sm font-semibold text-brand-ink hover:underline">
+        <Link href={`/people/${slug}`} className="inline-flex min-h-6 items-center text-sm font-semibold text-brand-ink hover:underline">
           Открыть
         </Link>
       </SettingRow>
