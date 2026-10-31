@@ -59,7 +59,7 @@ export default async function MyApplicationsPage({
                 value ? `/me/applications?view=${value}` : "/me/applications"
               }
               aria-current={current ? "page" : undefined}
-              className={`-mb-px border-b-2 px-3 py-2 ${current ? "border-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+              className={`-mb-px border-b-2 px-3 py-2 ${current ? "border-brand text-brand-ink" : "border-transparent text-muted-foreground hover:text-foreground"}`}
             >
               {label}
             </Link>
