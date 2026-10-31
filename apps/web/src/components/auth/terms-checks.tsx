@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { FieldError } from "@/components/auth/auth-card";
+import { cn } from "@/lib/utils";
 
 export type TermsState = { terms: boolean; adult: boolean };
 
@@ -34,11 +35,10 @@ export function TermsChecks({
             className={box}
           />
           <span>
-            Я ознакомился(-лась) с{" "}
-            <Link href="/terms" target="_blank" className={link}>
-              Пользовательским соглашением
-            </Link>{" "}
-            и принимаю его условия
+            Я ознакомился(-лась) с Пользовательским соглашением и принимаю его условия.{" "}
+            <Link href="/terms" target="_blank" className={cn(link, "inline-flex min-h-6 items-center")}>
+              Читать
+            </Link>
           </span>
         </label>
         <FieldError id="terms-error" message={errors.terms} />
@@ -60,7 +60,7 @@ export function TermsChecks({
       </div>
       <p>
         Как мы обрабатываем персональные данные:{" "}
-        <Link href="/privacy" target="_blank" className={link}>
+        <Link href="/privacy" target="_blank" className={cn(link, "inline-flex min-h-6 items-center")}>
           Политика конфиденциальности
         </Link>
       </p>
