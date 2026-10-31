@@ -30,7 +30,10 @@ export function PageEnter({ children }: { children: React.ReactNode }) {
   );
   return (
     <ParentMountedAt.Provider value={mountedAt}>
-      <div className={animate ? "page-enter" : undefined}>{children}</div>
+      {/* Класс ставится только на клиенте при переходе внутри сайта: расхождение с HTML сервера задумано. */}
+      <div className={animate ? "page-enter" : undefined} suppressHydrationWarning>
+        {children}
+      </div>
     </ParentMountedAt.Provider>
   );
 }
