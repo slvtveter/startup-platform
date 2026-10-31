@@ -31,9 +31,14 @@ const COLUMNS = [
       { href: "/people/cofounders", label: "Сообщники" },
       { href: "/guides", label: "Гайды" },
       { href: "/startups/new", label: "Добавить проект" },
-      { href: "/cookies", label: "Cookie и данные" },
     ],
   },
+];
+
+const LEGAL = [
+  { href: "/terms", label: "Пользовательское соглашение" },
+  { href: "/privacy", label: "Политика конфиденциальности" },
+  { href: "/cookies", label: "Cookie" },
 ];
 
 export function SiteFooter() {
@@ -85,6 +90,13 @@ export function SiteFooter() {
         </div>
         <div className="flex flex-wrap justify-between gap-2 border-t py-5 text-sm text-muted-foreground">
           <span>© {new Date().getFullYear()} envola</span>
+          <nav aria-label="Документы" className="flex flex-wrap gap-x-5 gap-y-2">
+            {LEGAL.map((l) => (
+              <Link key={l.href} href={l.href} className="transition-colors hover:text-foreground">
+                {l.label}
+              </Link>
+            ))}
+          </nav>
         </div>
       </div>
     </footer>

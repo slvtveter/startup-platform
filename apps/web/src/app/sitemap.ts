@@ -30,6 +30,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${site}/people`, changeFrequency: "daily", priority: 0.7 },
     { url: `${site}/people/cofounders`, changeFrequency: "daily", priority: 0.8 },
     { url: `${site}/guides`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${site}/terms`, changeFrequency: "yearly", priority: 0.1 },
+    { url: `${site}/privacy`, changeFrequency: "yearly", priority: 0.1 },
     ...GUIDES.map((g) => ({ url: `${site}/guides/${g.slug}`, lastModified: g.published, changeFrequency: "monthly" as const, priority: 0.7 })),
     ...Object.keys(facets?.role ?? {}).map((slug) => ({ url: `${site}/startups?role=${slug}`, changeFrequency: "daily" as const, priority: 0.7 })),
     ...peopleByRole.filter(([, n]) => n > 0).map(([slug]) => ({ url: `${site}/people?role=${slug}`, changeFrequency: "daily" as const, priority: 0.6 })),

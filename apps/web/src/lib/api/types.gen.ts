@@ -711,6 +711,10 @@ export type MeOut = {
      * Email Verified
      */
     email_verified: boolean;
+    /**
+     * Needs Terms
+     */
+    needs_terms: boolean;
     profile: MeProfile | null;
 };
 
@@ -1388,6 +1392,14 @@ export type RegisterIn = {
      * Password
      */
     password: string;
+    /**
+     * Accept Terms
+     */
+    accept_terms: true;
+    /**
+     * Adult
+     */
+    adult: true;
     /**
      * Utm Source
      */
@@ -2131,6 +2143,20 @@ export type TelegramAuthIn = {
 export type Terms = 'free' | 'paid' | 'negotiable';
 
 /**
+ * TermsIn
+ */
+export type TermsIn = {
+    /**
+     * Accept Terms
+     */
+    accept_terms: true;
+    /**
+     * Adult
+     */
+    adult: true;
+};
+
+/**
  * TokenIn
  */
 export type TokenIn = {
@@ -2357,6 +2383,31 @@ export type MeResponses = {
 };
 
 export type MeResponse = MeResponses[keyof MeResponses];
+
+export type AcceptTermsData = {
+    body: TermsIn;
+    path?: never;
+    query?: never;
+    url: '/api/auth/terms';
+};
+
+export type AcceptTermsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AcceptTermsError = AcceptTermsErrors[keyof AcceptTermsErrors];
+
+export type AcceptTermsResponses = {
+    /**
+     * Successful Response
+     */
+    200: MeOut;
+};
+
+export type AcceptTermsResponse = AcceptTermsResponses[keyof AcceptTermsResponses];
 
 export type VerifyEmailData = {
     body: TokenIn;

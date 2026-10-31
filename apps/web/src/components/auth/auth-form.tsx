@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
 import { FieldError } from "@/components/auth/auth-card";
+import { TermsChecks, termsErrors, type TermsState } from "@/components/auth/terms-checks";
 import { CodeStep } from "@/components/auth/code-step";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,7 +69,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
-  const [adult, setAdult] = useState(false);
+  const [consent, setConsent] = useState<TermsState>({ terms: false, adult: false });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [fields, setFields] = useState<Record<string, string>>({});
@@ -85,8 +86,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) errs.email = "Проверь адрес: нужен вид name@mail.ru";
     if (mode === "register" && password.length < 8) errs.password = "Пароль короче 8 символов";
     if (mode === "login" && !password) errs.password = "Введи пароль";
-    if (mode === "register" && !adult) errs.adult = "Подтверди, что тебе есть 18 лет и ты принимаешь условия";
-    return errs;
+    return mode === "register" ? { ...errs, ...termsErrors(consent) } : errs;
   }
 
   async function submit(e: React.FormEvent) {
@@ -111,7 +111,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       setError(errorMessage(res.error));
       return;
     }
-    const res = await register({ body: { ...body, utm_source: params.get("utm_source") || params.get("ref") || null } });
+    const res = await register({ body: { ...body, accept_terms: true, adult: true, utm_source: params.get("utm_source") || params.get("ref") || null } });
     setBusy(false);
     if (res.error) {
       setFields(fieldErrors(res.error));
@@ -197,24 +197,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         )}
         <FieldError id="password-error" message={fields.password} />
       </div>
-      {mode === "register" && (
-        <div>
-          <label className="flex gap-3 text-sm text-muted-foreground">
-            <input
-              id="adult"
-              type="checkbox"
-              required
-              aria-invalid={!!fields.adult}
-              aria-describedby={fields.adult ? "adult-error" : undefined}
-              checked={adult}
-              onChange={(e) => setAdult(e.target.checked)}
-              className="mt-0.5 size-4 accent-[var(--brand)]"
-            />
-            Мне есть 18 лет, я принимаю условия сервиса
-          </label>
-          <FieldError id="adult-error" message={fields.adult} />
-        </div>
-      )}
+      {mode === "register" && <TermsChecks value={consent} onChange={setConsent} errors={fields} />}
       {error && (
         <p role="alert" className="rounded-xl bg-destructive/10 px-3 py-2.5 text-sm text-destructive">
           {error}

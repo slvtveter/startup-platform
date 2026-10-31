@@ -5,15 +5,6 @@ import { TermsBadge } from "@/components/domain/badges";
 import { AVAILABILITY, COFOUND, LEVEL, initials, termsOf } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 
-export function PersonAvatar({ name, size = "md" }: { name: string; size?: "md" | "lg" }) {
-  const cls = size === "lg" ? "size-20 text-2xl" : "size-12 text-base";
-  return (
-    <span className={`grid shrink-0 place-items-center rounded-full bg-brand-soft font-extrabold text-brand-ink ${cls}`}>
-      {initials(name)}
-    </span>
-  );
-}
-
 /** Крупное фото человека или инициалы на мягком фоне, если фото нет. */
 export function PersonPhoto({
   person,

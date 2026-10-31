@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 export function PageHeader({
   title,
   description,
@@ -29,5 +31,6 @@ export function EmptyState({ title, text, action }: { title: string; text?: stri
 }
 
 export function Container({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <div className={`mx-auto w-full max-w-[1360px] px-4 py-10 sm:px-6 lg:px-10 ${className}`}>{children}</div>;
+  // cn (tailwind-merge): переданный max-w-* или py-* заменяет базовый, а не спорит с ним за порядок в CSS.
+  return <div className={cn("mx-auto w-full max-w-[1360px] px-4 py-10 sm:px-6 lg:px-10", className)}>{children}</div>;
 }

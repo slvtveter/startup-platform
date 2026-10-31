@@ -1,4 +1,4 @@
-import { ArrowRight, MessageCircle, PlusIcon, Search, UserRound } from "lucide-react";
+import { ArrowRight, PlusIcon } from "lucide-react";
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import Image from "next/image";
@@ -14,7 +14,7 @@ import { TrackView } from "@/components/site/track-view";
 import { buttonVariants } from "@/components/ui/button";
 import { listPeople, listStartups, startupFacets, type PersonCard as Person, type StartupCard as Startup } from "@/lib/api";
 import { COFOUND, STAGE, initials, plural } from "@/lib/labels";
-import { FACES, PHOTOS } from "@/lib/photos";
+import { PHOTOS } from "@/lib/photos";
 import { getMe, getRoles, serverClient } from "@/lib/server-api";
 import { cn } from "@/lib/utils";
 
@@ -134,7 +134,7 @@ async function Landing() {
       {cofounders.length > 0 && <Cofounders people={cofounders.slice(0, 4)} total={cofounders.length} />}
 
 
-      <Section eyebrow="Три шага" title="Как попасть в команду стартапа" className="max-md:hidden">
+      <Section title="Как попасть в команду стартапа" className="max-md:hidden">
         <Steps />
       </Section>
 
@@ -155,9 +155,6 @@ function pinned<T extends { is_demo?: boolean }>(items: T[]) {
 /* ───────────── Первый экран ───────────── */
 
 function Hero({ startup, faces }: { startup?: Startup; faces: Person[] }) {
-  const role = startup?.open_roles[0]?.role.name;
-  const second = startup?.open_roles[1]?.role.name ?? role;
-  const founder = startup?.owner_name.split(" ")[0];
   return (
     <section className={`${wrap} grid items-center gap-10 pt-8 pb-4 sm:pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.02fr)] lg:gap-14 lg:pt-14`}>
       <div className="max-w-[640px]">
@@ -196,7 +193,7 @@ function Hero({ startup, faces }: { startup?: Startup; faces: Person[] }) {
         )}
       </div>
 
-      {/* Фото и живые фрагменты интерфейса поверх (как у Wellfound): основатель пишет, кандидат откликается, карточка стартапа. */}
+      {/* Фото и поверх карточка настоящего стартапа из каталога (как у Wellfound). */}
       <div className="relative">
         <div className="relative aspect-[4/3.4] overflow-hidden rounded-[32px] sm:aspect-[4/3] lg:aspect-[5/5.2]">
           <Image
@@ -211,37 +208,10 @@ function Hero({ startup, faces }: { startup?: Startup; faces: Person[] }) {
           />
         </div>
 
-        {startup && role && (
-          <div className="chat-msg absolute top-5 left-4 flex max-w-[320px] items-end gap-2 max-sm:hidden sm:top-8 sm:left-6 lg:-left-10" style={delay(500)}>
-            {startup.owner_avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP
-              <img src={startup.owner_avatar_url} alt="" className="size-9 shrink-0 rounded-full object-cover ring-2 ring-white" />
-            ) : (
-              <Image src={FACES.alina} alt="" width={36} height={36} className="size-9 shrink-0 rounded-full object-cover ring-2 ring-white" />
-            )}
-            <p className="rounded-2xl rounded-bl-md bg-white px-3.5 py-2.5 text-[15px] leading-snug shadow-[0_18px_40px_-12px_rgb(15_27_45/0.35)]">
-              <small className="mb-0.5 block text-xs font-bold text-muted-foreground">
-                {founder}, основатель {startup.title}
-              </small>
-              Привет! Посмотрели твой профиль: нам как раз нужен {role}. Созвонимся на этой неделе?
-            </p>
-          </div>
-        )}
-
-        {second && (
-          <div className="chat-msg absolute top-[44%] right-4 flex items-center gap-2.5 rounded-full bg-white py-1.5 pr-4 pl-1.5 text-sm shadow-[0_18px_40px_-12px_rgb(15_27_45/0.35)] max-sm:hidden lg:-right-6" style={delay(1300)}>
-            <Image src={FACES.kirill} alt="" width={32} height={32} className="size-8 rounded-full object-cover" />
-            <span>
-              <b className="font-bold">Кирилл</b> <span className="text-muted-foreground">откликнулся: {second}</span>
-            </span>
-            <span aria-hidden className="size-2 rounded-full bg-[#22a06b]" />
-          </div>
-        )}
-
         {startup && (
           <Link
             href={`/startups/${startup.slug}`}
-            className="chat-msg absolute right-4 bottom-4 left-4 flex items-center gap-3.5 rounded-3xl bg-white p-3 shadow-[0_24px_50px_-16px_rgb(15_27_45/0.45)] transition-transform duration-300 hover:-translate-y-0.5 sm:right-auto sm:bottom-6 sm:left-6 sm:w-[380px] lg:-left-10"
+            className="chat-msg absolute right-4 bottom-4 left-4 flex items-center gap-3.5 rounded-3xl bg-white p-3 shadow-[0_24px_50px_-16px_rgb(15_27_45/0.45)] transition-shadow duration-200 hover:shadow-[0_24px_50px_-12px_rgb(15_27_45/0.55)] sm:right-auto sm:bottom-6 sm:left-6 sm:w-[380px] lg:-left-10"
             style={delay(900)}
           >
             <span className="relative size-16 shrink-0 overflow-hidden rounded-2xl bg-brand-soft">
@@ -484,29 +454,29 @@ function Cofounders({ people, total }: { people: Person[]; total: number }) {
   );
 }
 
-/* ───────────── Три шага ───────────── */
+/* ───────────── Как попасть в команду ───────────── */
 
 const STEPS = [
-  { icon: UserRound, title: "Создай профиль", text: "Роль, навыки и свободные часы в неделю." },
-  { icon: Search, title: "Выбери стартап", text: "Под твою роль, с оплатой или без." },
-  { icon: MessageCircle, title: "Откликнись и созвонись", text: "Обсуди задачи с основателем." },
+  { title: "Создай профиль", text: "Роль, навыки и свободные часы в неделю." },
+  { title: "Выбери стартап", text: "Под твою роль, с оплатой или без." },
+  { title: "Откликнись и созвонись", text: "Обсуди задачи с основателем." },
 ];
 
+/** Одна строка-таймлайн: линия прорисовывается слева направо, шаги проявляются по очереди. Без иконок и номеров. */
 function Steps() {
   return (
-    <Reveal className="grid gap-3 md:grid-cols-3">
-      {STEPS.map((s, i) => (
-        <div key={s.title} className="reveal-item relative rounded-[28px] bg-tone p-7 sm:p-8" style={delay(i * 70)}>
-          <span className="flex items-center justify-between">
-            <span className="grid size-12 place-items-center rounded-2xl bg-white text-brand">
-              <s.icon aria-hidden className="size-5" />
-            </span>
-            <span className="text-[56px] leading-none font-extrabold tracking-[-0.05em] text-foreground/[0.07] tabular-nums">{i + 1}</span>
-          </span>
-          <h3 className="mt-8 text-2xl font-extrabold tracking-[-0.03em]">{s.title}</h3>
-          <p className="mt-2 text-muted-foreground">{s.text}</p>
-        </div>
-      ))}
+    <Reveal>
+      <ol className="relative grid gap-10 md:grid-cols-3 md:gap-8">
+        <span aria-hidden className="absolute inset-x-0 top-[7px] h-0.5 rounded-full bg-tone-2 max-md:hidden" />
+        <span aria-hidden className="reveal-line absolute inset-x-0 top-[7px] h-0.5 rounded-full bg-cornflower max-md:hidden" />
+        {STEPS.map((s, i) => (
+          <li key={s.title} className="reveal-item relative" style={delay(150 + i * 120)}>
+            <span aria-hidden className="block size-4 rounded-full bg-brand ring-4 ring-background" />
+            <h3 className="mt-6 text-2xl font-extrabold tracking-[-0.03em]">{s.title}</h3>
+            <p className="mt-2 max-w-[30ch] text-lg text-muted-foreground">{s.text}</p>
+          </li>
+        ))}
+      </ol>
     </Reveal>
   );
 }

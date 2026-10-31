@@ -12,7 +12,7 @@ from app.core.errors import AppError, Conflict, EmailUnverified, TooManyRequests
 from app.core.security import check_password, hash_password_async, hash_token, new_token
 from app.models import EmailToken, Profile, Session, User
 from app.models.enums import TokenPurpose
-from app.services import mail, ratelimit
+from app.services import consents, mail, ratelimit
 from app.services import startups as startup_service
 from app.services.events import track
 
@@ -289,8 +289,12 @@ async def register(
     password: str,
     ip: str,
     utm_source: str | None,
+    user_agent: str = "",
 ) -> None:
-    """Аккаунт без входа: войти можно только после кода из письма (verify_code)."""
+    """Аккаунт без входа: войти можно только после кода из письма (verify_code).
+
+    Галочки «принимаю соглашение» и «мне есть 18» проверяет схема, здесь — запись в журнал.
+    """
     key = f"register:{ip}"
     await ratelimit.ensure_allowed(db, key)
     ratelimit.hit(db, key)
@@ -311,6 +315,7 @@ async def register(
         # Почта так и не подтверждена: повторная регистрация задаёт пароль заново.
         # Чужой аккаунт так не забрать — войти всё равно можно только с кодом из письма.
         user.password_hash = await hash_password_async(password)
+    consents.record_terms(db, user, "register", ip, user_agent)
     await send_code(db, user, TokenPurpose.email_code)  # делает commit
 
 

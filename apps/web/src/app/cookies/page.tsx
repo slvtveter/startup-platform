@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Container } from "@/components/domain/page-header";
 import { ConsentSwitch } from "@/components/site/consent-switch";
 
@@ -65,6 +67,13 @@ export default function CookiesPage() {
       <ConsentSwitch />
       <p className="mt-4 text-sm text-muted-foreground">
         Свой выбор мы храним в localStorage вашего браузера, на сервер он не уходит.
+      </p>
+      <p className="mt-10 text-muted-foreground">
+        Как мы обрабатываем персональные данные, написано в{" "}
+        <Link href="/privacy" className="font-semibold text-brand-ink underline underline-offset-2 hover:text-brand-hover">
+          политике конфиденциальности
+        </Link>
+        .
       </p>
     </Container>
   );

@@ -84,7 +84,13 @@ async def test_email_prefs_update_and_service_mail_has_no_unsubscribe(make_user,
 
     mail.outbox.clear()
     await client.post(
-        "/api/auth/register", json={"email": "new@mail.ru", "password": "secret-pass-1"}
+        "/api/auth/register",
+        json={
+            "email": "new@mail.ru",
+            "password": "secret-pass-1",
+            "accept_terms": True,
+            "adult": True,
+        },
     )
     text, html = _parts(mail.outbox[-1])
     assert "Отписаться" not in text and "служебное письмо" in html

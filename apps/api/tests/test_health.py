@@ -12,7 +12,10 @@ async def test_error_format_404(client):
 
 
 async def test_error_format_422(client):
-    resp = await client.post("/api/auth/register", json={"email": "bad", "password": "1"})
+    resp = await client.post(
+        "/api/auth/register",
+        json={"email": "bad", "password": "1", "accept_terms": True, "adult": True},
+    )
     assert resp.status_code == 422
     body = resp.json()["error"]
     assert body["code"] == "validation_error"
@@ -22,7 +25,7 @@ async def test_error_format_422(client):
 async def test_origin_check_blocks_foreign_site(client):
     resp = await client.post(
         "/api/auth/login",
-        json={"email": "a@b.ru", "password": "x"},
+        json={"email": "a@b.ru", "password": "x", "accept_terms": True, "adult": True},
         headers={"origin": "https://evil.example"},
     )
     assert resp.status_code == 403

@@ -27,11 +27,12 @@ from app.schemas.auth import (
     SignInOut,
     SocialProvidersOut,
     TelegramAuthIn,
+    TermsIn,
     TokenIn,
 )
 from app.schemas.common import OkOut
 from app.services import auth as auth_service
-from app.services import social
+from app.services import consents, social
 from app.services.profiles import completeness
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -61,6 +62,7 @@ def me_out(user: User) -> MeOut:
         email=user.email,
         is_admin=user.is_admin,
         email_verified=user.email_verified,
+        needs_terms=consents.needs_terms(user),
         profile=MeProfile(
             slug=p.slug,
             display_name=p.display_name,
@@ -76,7 +78,9 @@ def me_out(user: User) -> MeOut:
 @router.post("/register", response_model=CodeSentOut, status_code=202)
 async def register(data: RegisterIn, request: Request, db: DbSession) -> CodeSentOut:
     """Аккаунт создан, на почту ушёл код. Вход — после POST /auth/code."""
-    await auth_service.register(db, data.email, data.password, client_ip(request), data.utm_source)
+    await auth_service.register(
+        db, data.email, data.password, client_ip(request), data.utm_source, _ua(request)
+    )
     return CodeSentOut(email=data.email)
 
 
@@ -118,6 +122,14 @@ async def logout(request: Request, response: Response, db: DbSession) -> OkOut:
 
 @router.get("/me", response_model=MeOut)
 async def me(user: CurrentUser) -> MeOut:
+    return me_out(user)
+
+
+@router.post("/terms", response_model=MeOut)
+async def accept_terms(data: TermsIn, request: Request, user: CurrentUser, db: DbSession) -> MeOut:
+    """Согласие после входа: вход через соцсети или аккаунт старше действующей редакции."""
+    consents.record_terms(db, user, "prompt", client_ip(request), _ua(request))
+    await db.commit()
     return me_out(user)
 
 

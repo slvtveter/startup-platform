@@ -28,7 +28,7 @@ export async function codeFromMailpit(email: string) {
 
 /** Регистрация через API: код из письма подтверждает почту и ставит сессию в контекст страницы. */
 export async function registerViaApi(page: Page, email: string) {
-  expect((await page.request.post("/api/auth/register", { data: { email, password: "e2e-password-1" } })).ok()).toBeTruthy();
+  expect((await page.request.post("/api/auth/register", { data: { email, password: "e2e-password-1", accept_terms: true, adult: true } })).ok()).toBeTruthy();
   const res = await page.request.post("/api/auth/code", { data: { email, code: await codeFromMailpit(email) } });
   expect(res.ok()).toBeTruthy();
 }
@@ -40,7 +40,8 @@ export async function fillRegistration(page: Page, email: string) {
   await page.getByLabel("Email").fill(email);
   await expect(page.getByLabel("Email")).toHaveValue(email);
   await page.getByLabel("Пароль", { exact: true }).fill("e2e-password-1");
-  await page.getByText("Мне есть 18 лет").click();
+  await page.getByLabel(/Пользовательским соглашением/).check();
+  await page.getByLabel("Подтверждаю, что мне исполнилось 18 лет").check();
   await page.getByRole("button", { name: "Получить код на почту" }).click();
   // Код отправляется сам после шестой цифры.
   await page.getByLabel("Код из письма").fill(await codeFromMailpit(email));

@@ -14,7 +14,7 @@ test("member uploads an avatar and it shows on the public profile", async ({ pag
   await expect(page.getByRole("button", { name: "Заменить фото" })).toBeVisible();
 
   await page.goto("/people/mariya-kim");
-  const img = page.locator("header img");
+  const img = page.locator("main header img");
   await expect(img).toHaveAttribute("src", /\/media\/avatars\/.+-1024\.webp$/);
   const src = await img.getAttribute("src");
   const res = await page.request.get(src!);

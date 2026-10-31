@@ -1,0 +1,26 @@
+{
+  "revision": "working_v1",
+  "platform": "envola",
+  "site": "https://envola.ru/",
+  "files": [
+    {
+      "file": "01_terms_of_service.html",
+      "route": "/terms",
+      "acceptance": "required_at_registration",
+      "must_record": true
+    },
+    {
+      "file": "02_privacy_policy.html",
+      "route": "/privacy",
+      "acceptance": "public_disclosure_not_separate_consent",
+      "must_record": false
+    },
+    {
+      "file": "03_profile_publication_consent.html",
+      "route": "/profile/publication-consent",
+      "acceptance": "optional_explicit_at_profile_publication",
+      "must_record": true
+    }
+  ],
+  "publication_status": "DRAFT_NOT_PUBLISHABLE_UNTIL_OPERATOR_DETAILS_AND_FUNCTIONAL_MATCH_ARE_CONFIRMED"
+}

@@ -12,6 +12,7 @@ from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select
 
+from app.core.legal import TERMS_VERSION
 from app.core.security import hash_password
 from app.db.session import SessionLocal
 from app.models import Application, Profile, ProfileLink, Startup, StartupRole, User
@@ -261,9 +262,15 @@ STARTUPS = [
 async def _user(db, email: str, name: str, **profile) -> User:
     user = await db.scalar(select(User).where(User.email == email))
     if user:
+        # Синтетические аккаунты сразу с действующей редакцией соглашения: иначе экран согласия
+        # закрывает им сайт в e2e и на стенде.
+        user.terms_version = TERMS_VERSION
         return user
     user = User(
-        email=email, password_hash=hash_password("demo12345"), email_verified_at=datetime.now(UTC)
+        email=email,
+        password_hash=hash_password("demo12345"),
+        email_verified_at=datetime.now(UTC),
+        terms_version=TERMS_VERSION,
     )
     profile.setdefault("looking_for", [])
     user.profile = Profile(slug=slugify(name), display_name=name, skills=[], links=[], **profile)
