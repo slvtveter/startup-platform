@@ -112,13 +112,11 @@ async def test_publish_without_consent_is_refused(make_user):
         u = await db.scalar(select(User).where(User.email == "nopub@b.ru"))
         u.publication_version = None
         await db.commit()
-    # Старый опубликованный профиль без согласия: просим подтвердить, а пока скрываем.
+    # Старый опубликованный профиль без согласия: просим подтвердить, из каталога не убираем.
     me = (await c.get("/api/auth/me")).json()
     assert me["needs_publication_consent"] is True
     slug = me["profile"]["slug"]
-    people = (await c.get("/api/people?limit=100")).json()["items"]
-    assert slug not in [p["slug"] for p in people]
-    assert (await c.get(f"/api/people/{slug}")).status_code == 404
+    assert (await c.get(f"/api/people/{slug}")).status_code == 200
     await c.post("/api/profile/me/publish", json={"published": False})
     r = await c.post("/api/profile/me/publish", json={"published": True})
     assert r.status_code == 400
