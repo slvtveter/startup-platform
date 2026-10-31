@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
+import { Sticker } from "@/components/brand/stickers";
 import { Container } from "@/components/domain/page-header";
 import { PersonCard } from "@/components/domain/person-card";
 import { StartupCard } from "@/components/domain/startup-card";
@@ -25,6 +26,8 @@ const STEPS = [
   ["Напиши первым", "Выбери пару человек с другими навыками: разработчику нужен дизайнер, дизайнеру — разработчик и маркетолог."],
   ["Накидайте идеи", "Созвонитесь на полчаса, обсудите, что неудобно в учёбе, работе или быту. Лучшую мысль опубликуйте как идею, чтобы к ней присоединились другие."],
 ];
+
+const STEP_STICKERS = ["check", "chat", "bulb"] as const;
 
 export default async function CofoundersPage() {
   const user = await getMe();
@@ -54,7 +57,7 @@ export default async function CofoundersPage() {
           />
           <div aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgb(10_18_34/0.85),rgb(10_18_34/0.45)_60%,rgb(10_18_34/0.15))] max-md:bg-[linear-gradient(180deg,rgb(10_18_34/0.2),rgb(10_18_34/0.85)_55%)]" />
           <div className="max-w-[640px]">
-            <p className="text-sm font-bold tracking-wide text-white/80 uppercase">Сообщники</p>
+            <p className="text-sm font-bold text-white/80">Сообщники</p>
             <h1 className="mt-3 text-[36px] sm:text-[48px] lg:text-[64px] leading-[1.02]">Нет идеи? Найди тех, с кем её придумать</h1>
             <p className="mt-5 max-w-[48ch] text-base sm:text-lg text-white/90">
               Сообщники — разработчики, дизайнеры и маркетологи, которые хотят запустить свой проект, но не в одиночку. Познакомьтесь,
@@ -77,8 +80,8 @@ export default async function CofoundersPage() {
           <ol className="grid gap-3 md:grid-cols-3">
           {STEPS.map(([title, text], i) => (
             <li key={title} className="rounded-[28px] bg-tone p-6">
-              <span className="grid size-10 place-items-center rounded-full bg-white text-base font-extrabold text-brand-ink">{i + 1}</span>
-              <h3 className="mt-5 text-2xl font-extrabold tracking-[-0.03em]">{title}</h3>
+              <Sticker name={STEP_STICKERS[i]} className="size-14 -rotate-6" />
+              <h3 className="mt-4 text-2xl font-extrabold tracking-[-0.03em]">{title}</h3>
               <p className="mt-2 text-muted-foreground">{text}</p>
             </li>
           ))}

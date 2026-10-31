@@ -1,10 +1,11 @@
 "use client";
 
-import { ArrowRight, Lightbulb, Users, Rocket } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { Sticker } from "@/components/brand/stickers";
 import { getMyProfile, updateMyProfile, type LookingFor } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { cn } from "@/lib/utils";
@@ -12,21 +13,21 @@ import { cn } from "@/lib/utils";
 const CHOICES = [
   {
     key: "idea",
-    icon: Lightbulb,
+    sticker: "bulb",
     title: "Есть идея",
     text: "Опишу её в двух абзацах и отмечу, кого не хватает.",
     next: "/me/profile?welcome=idea",
   },
   {
     key: "cofound",
-    icon: Users,
+    sticker: "team",
     title: "Нет идеи, ищу сообщников",
     text: "Хочу найти людей и вместе придумать стартап с нуля.",
     next: "/me/profile?welcome=cofound",
   },
   {
     key: "join",
-    icon: Rocket,
+    sticker: "cap",
     title: "Хочу в команду",
     text: "Найду стартап, который уже работает и ищет людей.",
     next: "/me/profile?welcome=join",
@@ -65,9 +66,7 @@ export function WelcomeChoice() {
             c.key === "cofound" ? "bg-brand-soft hover:bg-marker" : "bg-tone hover:bg-tone-2",
           )}
         >
-          <span className="grid size-12 place-items-center rounded-2xl bg-white text-brand-ink">
-            <c.icon aria-hidden className="size-6" />
-          </span>
+          <Sticker name={c.sticker} className="size-16 -rotate-6 transition-transform duration-500 group-hover:-translate-y-0.5" />
           <span>
             <span className="block text-2xl leading-tight font-extrabold tracking-[-0.03em]">{c.title}</span>
             <span className="mt-2 block text-muted-foreground">{c.text}</span>

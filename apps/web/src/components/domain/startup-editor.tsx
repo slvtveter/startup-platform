@@ -159,7 +159,7 @@ export function StartupEditor({ startup, roles, skills }: { startup?: StartupDet
                 key={t}
                 type="button"
                 onClick={() => set("terms", t)}
-                className={cn("rounded-xl border p-4 text-left transition-colors", form.terms === t ? "border-foreground ring-2 ring-foreground" : "hover:border-foreground/40")}
+                className={cn("rounded-xl border p-4 text-left transition-colors", form.terms === t ? "border-brand bg-brand-soft ring-2 ring-brand" : "hover:border-foreground/40")}
               >
                 <div className="font-bold">{TERMS[t]}</div>
                 <div className="mt-0.5 text-sm text-muted-foreground">{TERMS_HINT[t]}</div>
