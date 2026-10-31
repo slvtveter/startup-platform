@@ -19,11 +19,11 @@ export function TermsChecks({
   onChange: (v: TermsState) => void;
   errors: Record<string, string>;
 }) {
-  const box = "mt-0.5 size-4 shrink-0 accent-[var(--brand)]";
+  const box = "size-6 shrink-0 accent-[var(--brand)]";
   return (
     <div className="grid gap-3 text-sm text-muted-foreground">
       <div>
-        <label className="flex gap-3">
+        <label className="flex items-start gap-3">
           <input
             id="terms"
             type="checkbox"
@@ -44,7 +44,7 @@ export function TermsChecks({
         <FieldError id="terms-error" message={errors.terms} />
       </div>
       <div>
-        <label className="flex gap-3">
+        <label className="flex items-start gap-3">
           <input
             id="adult"
             type="checkbox"
