@@ -122,7 +122,7 @@ export function StartupCard({
               <span aria-hidden className="text-muted-foreground">·</span>
               <TermsBadge terms={startup.terms} className="px-2 py-0.5" />
               {/* Пример — тихо, в конце служебной строки: карточка не должна кричать, что она ненастоящая. */}
-              {startup.is_demo && <span className="text-xs text-muted-foreground">· пример</span>}
+              {startup.is_demo && <span className="text-xs whitespace-nowrap text-muted-foreground">· пример</span>}
             </span>
           </span>
         </span>

@@ -29,12 +29,12 @@ export default async function SettingsPage() {
       <div className="mt-8 grid gap-8 lg:grid-cols-[200px_1fr]">
         {/* На десктопе — оглавление сбоку, на телефоне — ряд ссылок над разделами. */}
         <nav aria-label="Разделы настроек" className="lg:sticky lg:top-24 lg:self-start">
-          <ul className="flex gap-1 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible">
+          <ul className="flex flex-wrap gap-1 lg:flex-col">
             {SECTIONS.map((s) => (
               <li key={s.id} className="shrink-0">
                 <a
                   href={`#${s.id}`}
-                  className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                  className="flex items-center gap-2 rounded-full bg-tone px-3 py-2 text-sm font-semibold text-muted-foreground lg:rounded-lg lg:bg-transparent transition-colors hover:bg-secondary hover:text-foreground"
                 >
                   <s.icon aria-hidden className="size-4" />
                   {s.label}
