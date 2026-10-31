@@ -7,7 +7,7 @@ import { Sticker } from "@/components/brand/stickers";
 import { usePublishWithConsent } from "@/components/domain/publish-consent";
 import { Button } from "@/components/ui/button";
 
-/** Профиль уже в каталоге, а согласия на публикацию (ст. 10.1) нет: просим подтвердить, ничего не скрывая. */
+/** Профиль включён, но согласия на публикацию (ст. 10.1) нет: в каталоге его не видно, пока не подтвердишь. */
 export function PublicationConsentBanner() {
   const router = useRouter();
   const { publish, dialog } = usePublishWithConsent();
@@ -17,14 +17,14 @@ export function PublicationConsentBanner() {
       <Sticker name="check" className="size-12 shrink-0 -rotate-6 max-sm:hidden" />
       <div className="min-w-0 flex-1">
         <h2 className="font-sans text-lg font-bold tracking-normal">Подтверди публикацию профиля</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Профиль виден в каталоге. Нужна одна галочка — согласие на публикацию.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Пока нет согласия на публикацию, профиль скрыт из каталога. Нужна одна галочка.</p>
       </div>
       <Button
         variant="brand"
         onClick={async () => {
           const r = await publish();
           if (r.ok) {
-            toast.success("Готово, профиль остаётся в каталоге");
+            toast.success("Готово, профиль снова в каталоге");
             router.refresh();
           } else if (r.message) toast.error(r.message);
         }}

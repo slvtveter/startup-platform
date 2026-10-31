@@ -1,7 +1,7 @@
 from sqlalchemy import Select, and_, case, exists, false, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.demo import is_demo
+from app.core.demo import is_demo, real_user
 from app.core.errors import AppError, NotFound, PublicationConsentRequired
 from app.db import search
 from app.models import (
@@ -230,6 +230,9 @@ def _people_query() -> Select:
         select(Profile)
         .join(User, User.id == Profile.user_id)
         .where(Profile.is_published.is_(True), User.is_active.is_(True))
+        # Распространение сведений профиля — только с согласием по ст. 10.1 152-ФЗ.
+        # Примеры (почта @demo.invalid) — синтетические люди, согласие к ним не применяется.
+        .where(or_(User.publication_version.is_not(None), ~real_user()))
     )
 
 
