@@ -51,10 +51,13 @@ export function PersonCard({
   as: Tag = "div",
   eager,
   surface = "tone",
+  href,
 }: {
   person: PersonCardData;
   as?: "div" | "li";
   eager?: boolean;
+  /** Куда вести вместо профиля (витрина главной: таких людей в базе нет). */
+  href?: string;
   /** На цветной подложке карточка белая, чипы внутри — серые. */
   surface?: "tone" | "white";
 }) {
@@ -91,7 +94,7 @@ export function PersonCard({
   return (
     <Tag>
       <Link
-        href={`/people/${person.slug}`}
+        href={href ?? `/people/${person.slug}`}
         className={cn("card-hover group block rounded-3xl p-5 sm:p-7", white ? "bg-white hover:bg-tone" : "bg-tone hover:bg-tone-2")}
       >
         <div className={cols}>

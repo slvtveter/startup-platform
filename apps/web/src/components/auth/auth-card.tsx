@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 import Image from "next/image";
 
 import { AuthFrame } from "@/components/auth/auth-frame";
+import { Sticker } from "@/components/brand/stickers";
 import { PHOTOS } from "@/lib/photos";
 
 /**
@@ -21,6 +22,8 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
       <div className="relative isolate hidden overflow-hidden rounded-[36px] p-10 text-white lg:flex lg:flex-col lg:justify-end">
         <Image src={PHOTOS.videoCall} alt="" fill preload placeholder="blur" sizes="50vw" className="-z-20 object-cover" />
         <div aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgb(10_18_34/0.1),rgb(10_18_34/0.78))]" />
+        <Sticker name="chat" className="absolute top-10 right-10 size-24 rotate-6" />
+        <Sticker name="mark" className="absolute top-32 right-36 size-16 -rotate-12" />
         <p className="max-w-[18ch] text-[36px] leading-[1.02] font-extrabold tracking-[-0.04em]">Здесь стартапы начинаются с разговора</p>
         <ul className="mt-5 grid gap-2 text-base font-semibold text-white/90">
           {["Бесплатно и без резюме", "Профиль за пару минут"].map((t) => (

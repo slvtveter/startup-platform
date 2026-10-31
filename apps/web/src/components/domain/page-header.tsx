@@ -1,3 +1,4 @@
+import { Sticker, type StickerName } from "@/components/brand/stickers";
 import { cn } from "@/lib/utils";
 
 export function PageHeader({
@@ -20,9 +21,21 @@ export function PageHeader({
   );
 }
 
-export function EmptyState({ title, text, action }: { title: string; text?: string; action?: React.ReactNode }) {
+export function EmptyState({
+  title,
+  text,
+  action,
+  sticker = "spark",
+}: {
+  title: string;
+  text?: string;
+  action?: React.ReactNode;
+  /** Наклейка бренда над заголовком. */
+  sticker?: StickerName;
+}) {
   return (
     <div className="rounded-3xl bg-tone px-6 py-14 text-center">
+      <Sticker name={sticker} className="mx-auto mb-5 size-16 -rotate-6" />
       <div className="text-xl font-extrabold tracking-[-0.02em]">{title}</div>
       {text && <p className="mx-auto mt-2 max-w-md text-muted-foreground">{text}</p>}
       {action && <div className="mt-5 flex justify-center">{action}</div>}

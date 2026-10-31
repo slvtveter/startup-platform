@@ -357,6 +357,11 @@
   animation: pop-in 400ms var(--ease-out) backwards;
 }
 
+/* Наклейки бренда (components/brand/stickers.tsx): тень тонирована чернилами, а не чёрным. */
+.sticker {
+  filter: drop-shadow(0 10px 14px rgb(15 27 45 / 0.16)) drop-shadow(0 1px 2px rgb(15 27 45 / 0.12));
+}
+
 /* Юридические документы (/terms, /privacy): текст юриста без классов — оформляем по тегам. */
 .legal {
   font-size: 1rem;

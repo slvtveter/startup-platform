@@ -92,7 +92,7 @@ export function SiteFooter() {
           <span>© {new Date().getFullYear()} envola</span>
           <nav aria-label="Документы" className="flex flex-wrap gap-x-5 gap-y-2">
             {LEGAL.map((l) => (
-              <Link key={l.href} href={l.href} className="transition-colors hover:text-foreground">
+              <Link key={l.href} href={l.href} className="inline-flex min-h-6 items-center transition-colors hover:text-foreground">
                 {l.label}
               </Link>
             ))}

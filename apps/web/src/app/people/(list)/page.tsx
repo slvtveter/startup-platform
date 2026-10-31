@@ -56,7 +56,11 @@ export default async function PeoplePage({ searchParams }: Props) {
             <Link href="/people/cofounders" className="text-sm font-semibold text-brand-ink hover:text-brand-hover">
               Кто это
             </Link>
-            <Link href={toggleHref("/people", params, "cofound", cofound ? null : "1")} scroll={false} className={buttonVariants({ size: "sm", className: "sm:ml-2" })}>
+            <Link
+              href={toggleHref("/people", params, "cofound", cofound ? null : "1")}
+              scroll={false}
+              className={buttonVariants({ size: "sm", className: "sm:ml-2" })}
+            >
               {cofound ? "Показать всех" : "Показать их"}
             </Link>
           </div>
@@ -87,6 +91,7 @@ export default async function PeoplePage({ searchParams }: Props) {
           ) : (
             <div className="mt-4">
               <EmptyState
+                sticker="link"
                 title="Никого не нашли"
                 text={q ? `По запросу «${q}» никого нет. Попробуй другое слово или убери часть фильтров.` : "Попробуй убрать часть фильтров."}
                 action={

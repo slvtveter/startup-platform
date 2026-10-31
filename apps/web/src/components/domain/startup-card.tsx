@@ -90,11 +90,14 @@ export function StartupCard({
   reasons,
   as: Tag = "div",
   eager,
+  href,
 }: {
   startup: StartupCardData;
   reasons?: string[];
   as?: "div" | "li";
   eager?: boolean;
+  /** Куда вести вместо страницы проекта (витрина главной: таких проектов в базе нет). */
+  href?: string;
 }) {
   const open = startup.open_roles.reduce((n, r) => n + (r.slots ?? 1), 0);
   const team = startup.team_size ?? 1;
@@ -102,7 +105,7 @@ export function StartupCard({
   const more = startup.open_roles.length - roles.length;
   return (
     <Tag className="h-full">
-      <Link href={`/startups/${startup.slug}`} className="card-hover group flex h-full flex-col rounded-3xl bg-tone p-5 hover:bg-tone-2 sm:p-6">
+      <Link href={href ?? `/startups/${startup.slug}`} className="card-hover group flex h-full flex-col rounded-3xl bg-tone p-5 hover:bg-tone-2 sm:p-6">
         <span className="flex items-center gap-4">
           <StartupMark startup={startup} eager={eager} />
           <span className="min-w-0 flex-1">

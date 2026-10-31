@@ -69,6 +69,7 @@ export default async function MyApplicationsPage({
       {apps.length === 0 ? (
         <div className="mt-8">
           <EmptyState
+            sticker="cursor"
             title={archive ? "Архив пуст" : "Пока ни одной активной заявки"}
             text={
               archive

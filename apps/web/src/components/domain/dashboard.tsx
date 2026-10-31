@@ -204,6 +204,7 @@ export async function Dashboard() {
         ) : (
           <div className="mt-5 sm:mt-6">
             <EmptyState
+              sticker="check"
               title="Пока нечего предложить"
               text="Укажи роль и навыки в профиле, и здесь появятся стартапы, которым ты нужен."
               action={
