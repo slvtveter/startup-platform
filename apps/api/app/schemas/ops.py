@@ -83,15 +83,40 @@ class MetricsOut(BaseModel):
 
 
 class AdminTotals(BaseModel):
-    """Общие цифры для первого экрана админки; *_new — за выбранный период."""
+    """Цифры для обзора админки по настоящим пользователям (без демо и E2E);
+    *_new — за выбранный период."""
 
     users: int
     users_new: int
+    active_7d: int
     profiles_published: int
     startups_recruiting: int
+    applications_new: int
     applications_pending: int
+    messages_new: int
     reports_open: int
     feedback_new: int
+    demo_users: int
+
+
+class DayCount(BaseModel):
+    day: date
+    count: int
+
+
+class RecentUser(BaseModel):
+    id: str
+    email: str
+    display_name: str
+    role: str | None = None
+    is_published: bool
+    created_at: datetime
+
+
+class AdminOverview(BaseModel):
+    totals: AdminTotals
+    signups: list[DayCount]
+    recent: list[RecentUser]
 
 
 class FeedbackOut(BaseModel):
@@ -110,6 +135,9 @@ class AdminUserOut(BaseModel):
     is_admin: bool
     email_verified: bool
     created_at: datetime
+    is_demo: bool = False
+    is_published: bool = False
+    role: str | None = None
 
 
 class AdminStartupOut(BaseModel):
