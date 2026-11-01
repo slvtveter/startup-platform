@@ -108,7 +108,7 @@ export function FeedbackButton() {
             <ImagePlus aria-hidden className="size-5 shrink-0 text-brand-ink" />
             <span>
               <span className="block font-semibold">Приложить скриншот</span>
-              <span className="block text-xs text-muted-foreground">Необязательно. Можно вставить из буфера: Ctrl+V в поле выше</span>
+              <span className="block text-xs text-muted-foreground">Необязательно. Можно вставить из буфера в поле выше: ⌘V или Ctrl+V</span>
             </span>
           </button>
         )}

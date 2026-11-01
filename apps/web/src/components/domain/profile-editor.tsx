@@ -439,6 +439,9 @@ export function ProfileEditor({
                 <SkillPicker all={skills} value={f.skills} onChange={(v) => set("skills", v)} role={f.primary_role} />
               </div>
               <Err id="skills-error" text={errors.skills} />
+              {!errors.skills && f.skills.length < 2 && !f.links.some((l) => l.url.trim()) && (
+                <p className="mt-1.5 text-xs text-muted-foreground">Для откликов нужно хотя бы 2 навыка или ссылка на работу ниже.</p>
+              )}
             </div>
             <div>
               <Label htmlFor="bio">Расскажи подробнее</Label>
