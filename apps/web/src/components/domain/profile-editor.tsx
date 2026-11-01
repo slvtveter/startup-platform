@@ -426,7 +426,7 @@ export function ProfileEditor({
               </h2>
               <p className="mt-1 text-muted-foreground">Начни вводить название навыка.</p>
               <div className={cn("mt-4", errors.skills && "-m-2 mt-2 rounded-2xl p-2 ring-2 ring-destructive/60")}>
-                <SkillPicker all={skills} value={f.skills} onChange={(v) => set("skills", v)} />
+                <SkillPicker all={skills} value={f.skills} onChange={(v) => set("skills", v)} role={f.primary_role} />
               </div>
               <Err id="skills-error" text={errors.skills} />
             </div>
@@ -444,7 +444,7 @@ export function ProfileEditor({
               <Label>Работы и портфолио</Label>
               <div id="field-links" className="mt-2 grid scroll-mt-28 gap-2">
                 {f.links.map((l, i) => (
-                  <div key={i} className="flex gap-2">
+                  <div key={i} className="flex flex-col gap-2 sm:flex-row">
                     <LinkKindSelect value={l.kind} onChange={(kind) => set("links", f.links.map((x, j) => (j === i ? { ...x, kind } : x)))} />
                     <Input aria-label="Ссылка" className="h-11" value={l.url} onChange={(e) => set("links", f.links.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)))} placeholder={LINK_PLACEHOLDER[l.kind] ?? "https://…"} aria-invalid={!!errors.links} />
                   </div>

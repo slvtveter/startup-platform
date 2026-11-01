@@ -105,7 +105,7 @@ export function CodeStep({
         </span>
         <p className="text-sm text-muted-foreground" aria-live="polite">
           {resent ? "Отправили новый код на " : "Отправили код на "}
-          <b className="font-bold break-all text-foreground">{email}</b>. Письмо приходит за минуту, если нет — загляни в «Спам».
+          <b className="font-bold whitespace-nowrap text-foreground">{email}</b>. Письмо приходит за минуту, если нет — загляни в «Спам».
         </p>
       </div>
       <div>

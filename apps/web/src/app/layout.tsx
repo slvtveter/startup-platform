@@ -54,7 +54,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <CookieNotice />
         <HydratedFlag />
         <Metrika />
-        <Toaster position="bottom-right" />
+        <Toaster position="bottom-right" mobileOffset={{ bottom: 88 }} />
       </body>
     </html>
   );

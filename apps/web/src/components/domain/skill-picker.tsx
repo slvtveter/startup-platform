@@ -6,26 +6,44 @@ import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import type { SkillOut } from "@/lib/api";
 
+/** Какие категории навыков подсказывать первыми для роли (slug роли → категории). */
+const ROLE_CATEGORIES: Record<string, string[]> = {
+  frontend: ["dev", "design"], backend: ["dev", "data"], mobile: ["dev", "design"], fullstack: ["dev"], gamedev: ["dev", "design"],
+  devops: ["dev"], qa: ["dev", "product"], designer: ["design", "product"], "motion-designer": ["design"], "ux-researcher": ["design", "product"],
+  analyst: ["data", "product"], ml: ["data", "dev"], "data-engineer": ["data", "dev"], "data-scientist": ["data", "dev"],
+  marketer: ["marketing", "product"], smm: ["marketing"], copywriter: ["marketing"], community: ["marketing"], video: ["marketing", "design"],
+  sales: ["marketing", "product"], product: ["product", "data"], project: ["product"], "business-analyst": ["product", "data"], hr: ["product"],
+};
+
 export function SkillPicker({
   all,
   value,
   onChange,
   max = 20,
+  role,
 }: {
   all: SkillOut[];
   value: string[];
   onChange: (v: string[]) => void;
   max?: number;
+  /** Slug основной роли: без запроса сначала подсказываем навыки её категорий, а не по алфавиту. */
+  role?: string | null;
 }) {
   const [q, setQ] = useState("");
   const bySlug = useMemo(() => new Map(all.map((s) => [s.slug, s])), [all]);
   const suggestions = useMemo(() => {
     const needle = q.trim().toLowerCase();
+    const prefer = ROLE_CATEGORIES[role ?? ""] ?? [];
+    const rank = (s: SkillOut) => {
+      const i = prefer.indexOf(s.category ?? "");
+      return i === -1 ? prefer.length : i;
+    };
     return all
       .filter((s) => !value.includes(s.slug))
       .filter((s) => !needle || s.name.toLowerCase().includes(needle))
-      .slice(0, needle ? 12 : 10);
-  }, [all, q, value]);
+      .sort((a, b) => rank(a) - rank(b))
+      .slice(0, needle ? 12 : 12);
+  }, [all, q, value, role]);
 
   return (
     <div className="grid gap-3">
