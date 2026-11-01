@@ -15,10 +15,6 @@ export type FilterGroup = {
   title: string;
   options: Option[];
   toggle?: boolean;
-  /** Подпись строки «снять группу» («Все стадии»). Без неё такой строки нет. */
-  allLabel?: string;
-  /** false — группы нет в шторке на телефоне (там она стоит отдельным рядом над поиском). */
-  sheet?: boolean;
 };
 export type SortOption = { value: string; label: string; short: string };
 
@@ -130,7 +126,7 @@ export function CatalogToolbar({
                 <SheetTitle className="text-xl font-extrabold tracking-[-0.02em]">Фильтры</SheetTitle>
               </div>
               <div className="grid gap-6 overflow-y-auto px-5 pt-2 pb-4">
-                {groups.filter((g) => g.sheet !== false).map((g) => {
+                {groups.map((g) => {
                   const selected = asList(params[g.name]);
                   return (
                     <fieldset key={g.name}>
@@ -272,15 +268,16 @@ export function FilterSidebar({ basePath, params, groups }: { basePath: string; 
           const long = g.options.length > VISIBLE + 1 && !hiddenSelected;
           return (
             <fieldset key={g.name}>
-              <legend className="mb-1.5 text-sm font-bold">{g.title}</legend>
-              <ul>
-                {g.allLabel && (
-                  <li>
-                    <Option href={toggleHref(basePath, params, g.name, null)} on={selected.length === 0} radio label={g.allLabel} count={g.options.reduce((n, o) => n + (o.count ?? 0), 0)} className={row} />
-                  </li>
+              {/* Во всех группах одинаково: галочки, можно несколько; ничего не отмечено — значит «все». */}
+              <div className="mb-1.5 flex items-baseline justify-between gap-2">
+                <legend className="text-sm font-bold">{g.title}</legend>
+                {selected.length > 0 && (
+                  <Link href={toggleHref(basePath, params, g.name, null)} scroll={false} replace prefetch={false} className="text-xs font-semibold text-brand-ink hover:text-brand-hover">
+                    Сбросить
+                  </Link>
                 )}
-                {long ? options.slice(0, VISIBLE) : options}
-              </ul>
+              </div>
+              <ul>{long ? options.slice(0, VISIBLE) : options}</ul>
               {long && (
                 <details className="group/more">
                   <summary className="mt-1 cursor-pointer list-none text-sm font-semibold text-brand-ink hover:text-brand-hover group-open/more:hidden [&::-webkit-details-marker]:hidden">
@@ -297,9 +294,9 @@ export function FilterSidebar({ basePath, params, groups }: { basePath: string; 
   );
 }
 
-function Option({ href, on, label, count, radio, className }: { href: string; on: boolean; label: string; count?: number; radio?: boolean; className: string }) {
+function Option({ href, on, label, count, className }: { href: string; on: boolean; label: string; count?: number; className: string }) {
   // Вариант, под которым ничего нет, не кликается (как на hh): иначе легко попасть в пустую выдачу.
-  if (count === 0 && !on && !radio)
+  if (count === 0 && !on)
     return (
       <span aria-disabled="true" className={cn(className, "cursor-default text-muted-foreground hover:bg-transparent")}>
         <span aria-hidden className="size-[18px] shrink-0 rounded-[6px] border-[1.5px] border-border bg-tone" />
@@ -309,19 +306,10 @@ function Option({ href, on, label, count, radio, className }: { href: string; on
     );
   // prefetch выключен: два десятка фильтров не должны рендерить каталог заранее на каждый показ страницы.
   return (
-    <Link href={href} scroll={false} replace prefetch={false} role={radio ? "radio" : "checkbox"} aria-checked={on} className={className}>
-      {radio ? <Radio on={on} /> : <Box on={on} />}
+    <Link href={href} scroll={false} replace prefetch={false} role="checkbox" aria-checked={on} className={className}>
+      <Box on={on} />
       <span className={cn("min-w-0 flex-1", on && "font-semibold")}>{label}</span>
       {count !== undefined && <span className="text-muted-foreground tabular-nums">{count}</span>}
     </Link>
-  );
-}
-
-function Radio({ on }: { on: boolean }) {
-  const pending = usePending();
-  return (
-    <span aria-hidden className={cn("grid size-[18px] shrink-0 place-items-center rounded-full border-[1.5px] transition-colors", on ? "border-brand" : "border-input bg-white", pending)}>
-      {on && <span className="size-2 rounded-full bg-brand" />}
-    </span>
   );
 }
