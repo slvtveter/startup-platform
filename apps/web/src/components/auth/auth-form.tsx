@@ -15,6 +15,24 @@ import { login, register, verifyCode } from "@/lib/api";
 import { apiCode, errorMessage, fieldErrors } from "@/lib/errors";
 import { goal } from "@/lib/metrika";
 
+// Частые опечатки в доменах почты: письмо с кодом ушло бы в никуда, а человек решил бы, что сайт сломан.
+const DOMAIN_FIXES: Record<string, string> = {
+  "gmial.com": "gmail.com", "gmal.com": "gmail.com", "gmai.com": "gmail.com", "gmail.co": "gmail.com", "gmail.con": "gmail.com",
+  "gmail.ru": "gmail.com", "gamil.com": "gmail.com", "gnail.com": "gmail.com",
+  "yandex.ri": "yandex.ru", "yandex.ry": "yandex.ru", "yandx.ru": "yandex.ru", "yadex.ru": "yandex.ru", "yandex.com.ru": "yandex.ru",
+  "mail.ri": "mail.ru", "mail.ry": "mail.ru", "mial.ru": "mail.ru", "maill.ru": "mail.ru", "mail.ru.ru": "mail.ru",
+  "inbox.ri": "inbox.ru", "bk.ri": "bk.ru", "list.ri": "list.ru", "rambler.ri": "rambler.ru",
+  "outlook.co": "outlook.com", "hotmail.co": "hotmail.com", "icloud.co": "icloud.com",
+};
+
+/** «ivan@gmial.com» → «ivan@gmail.com»; без известной опечатки — null. */
+export function emailFix(email: string): string | null {
+  const [user, domain] = email.trim().toLowerCase().split("@");
+  if (!user || !domain) return null;
+  const fixed = DOMAIN_FIXES[domain];
+  return fixed ? `${user}@${fixed}` : null;
+}
+
 export function safeNext(next: string | null, fallback: string) {
   // Только пути своего сайта: защищаемся от открытого редиректа. «//evil.com», «/\\evil.com»
   // (браузер читает обратный слэш как прямой) и управляющие символы не пропускаем.
@@ -160,6 +178,14 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           onChange={(e) => setEmail(e.target.value)}
         />
         <FieldError id="email-error" message={fields.email} />
+        {mode === "register" && emailFix(email) && (
+          <p className="mt-1.5 text-sm text-warn-ink">
+            Возможно, {emailFix(email)}?{" "}
+            <button type="button" onClick={() => setEmail(emailFix(email)!)} className="font-semibold underline underline-offset-2">
+              Исправить
+            </button>
+          </p>
+        )}
       </div>
       <div>
         <div className="flex items-baseline">
