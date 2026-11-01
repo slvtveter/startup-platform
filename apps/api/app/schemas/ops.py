@@ -76,6 +76,26 @@ class MetricsOut(BaseModel):
     jobs_failed: int = 0
 
 
+class AdminTotals(BaseModel):
+    """Общие цифры для первого экрана админки; *_new — за выбранный период."""
+
+    users: int
+    users_new: int
+    profiles_published: int
+    startups_recruiting: int
+    applications_pending: int
+    reports_open: int
+    feedback_new: int
+
+
+class FeedbackOut(BaseModel):
+    id: int
+    text: str
+    page_url: str
+    created_at: datetime
+    user_email: str | None = None
+
+
 class AdminUserOut(BaseModel):
     id: str
     email: str

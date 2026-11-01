@@ -124,3 +124,20 @@ async def test_cohort_retention_and_csv_export(make_user):
     assert "attachment" in r.headers["content-disposition"]
     r = await admin.get("/api/admin/export?kind=cohorts")
     assert r.text.splitlines()[0] == "﻿неделя регистрации,регистраций,D7,D30"
+
+
+async def test_admin_totals_and_feedback_list(make_user, client):
+    admin = await make_user("boss@mail.ru", admin=True)
+    member = await make_user("fan@mail.ru", published=True)
+    await member.post("/api/feedback", json={"text": "Не нашёл кнопку отклика", "page_url": "/x"})
+    await client.post("/api/feedback", json={"text": "Гость тоже пишет"})
+
+    t = (await admin.get("/api/admin/totals")).json()
+    assert t["users"] == 2 and t["users_new"] == 2
+    assert t["profiles_published"] == 1 and t["feedback_new"] == 2
+
+    rows = (await admin.get("/api/admin/feedback")).json()
+    assert [r["text"] for r in rows] == ["Гость тоже пишет", "Не нашёл кнопку отклика"]
+    assert rows[1]["user_email"] == "fan@mail.ru" and rows[0]["user_email"] is None
+
+    assert (await member.get("/api/admin/feedback")).status_code == 403

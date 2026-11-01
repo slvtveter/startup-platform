@@ -27,11 +27,13 @@ from app.schemas.common import OkOut
 from app.schemas.ops import (
     AdminActionOut,
     AdminStartupOut,
+    AdminTotals,
     AdminUserOut,
     CatalogItemIn,
     CatalogMergeIn,
     CatalogRenameIn,
     CohortRow,
+    FeedbackOut,
     FunnelStep,
     HypothesisRow,
     MetricsOut,
@@ -40,7 +42,7 @@ from app.schemas.ops import (
     SourceRow,
 )
 from app.schemas.startup import StartupDetail, StartupIn
-from app.services import catalog_admin, retention
+from app.services import admin_overview, catalog_admin, retention
 from app.services import hypotheses as hypotheses_service
 from app.services import jobs as jobs_service
 from app.services import startups as startup_service
@@ -133,6 +135,19 @@ async def admin_metrics(
             for s, c in sorted(sources, key=lambda r: -r[1])
         ],
     )
+
+
+@router.get("/totals", response_model=AdminTotals)
+async def admin_totals(
+    admin: AdminUser, db: DbSession, days: Annotated[int, Query(ge=1, le=365)] = 7
+) -> AdminTotals:
+    return await admin_overview.totals(db, days)
+
+
+@router.get("/feedback", response_model=list[FeedbackOut])
+async def admin_feedback(admin: AdminUser, db: DbSession) -> list[FeedbackOut]:
+    """Сообщения из формы «Сообщить о проблеме или идее» в подвале, новые сверху."""
+    return await admin_overview.feedback(db)
 
 
 @router.get("/users", response_model=list[AdminUserOut])

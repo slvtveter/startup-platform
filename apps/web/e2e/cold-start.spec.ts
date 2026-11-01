@@ -16,7 +16,7 @@ test("admin moves a startup to the platform and the founder claims it", async ({
   const res = await admin.request.post("/api/auth/login", { data: { email: "admin@example.com", password: "demo12345" } });
   expect(res.ok()).toBeTruthy();
 
-  await admin.goto("/admin");
+  await admin.goto("/admin?tab=startups");
   await admin.getByLabel("Название", { exact: true }).fill(title);
   await admin.getByLabel("Email основателя").fill(founderEmail);
   await admin.getByLabel("Идея одной фразой").fill("Открытый проект, который переносим на платформу");

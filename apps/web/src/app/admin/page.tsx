@@ -5,18 +5,49 @@ import { notFound } from "next/navigation";
 import { AdminAction } from "@/components/domain/admin-actions";
 import { CatalogEditor, PlatformStartupForm } from "@/components/domain/admin-cold-start";
 import { Container, PageHeader } from "@/components/domain/page-header";
-import { adminAuditLog, adminHypotheses, adminListReports, adminListStartups, adminListUsers, adminCohorts, adminMetrics, listRoles, listSkills, type HypothesisRow } from "@/lib/api";
+import {
+  adminAuditLog,
+  adminCohorts,
+  adminFeedback,
+  adminHypotheses,
+  adminListReports,
+  adminListStartups,
+  adminListUsers,
+  adminMetrics,
+  adminTotals,
+  listRoles,
+  listSkills,
+  type HypothesisRow,
+} from "@/lib/api";
+import { cn } from "@/lib/utils";
+
+const TABS = [
+  ["overview", "Обзор"],
+  ["moderation", "Модерация"],
+  ["users", "Пользователи"],
+  ["startups", "Стартапы"],
+  ["catalog", "Справочники"],
+  ["audit", "Журнал"],
+] as const;
+type Tab = (typeof TABS)[number][0];
 import { STARTUP_STATUS, timeAgo } from "@/lib/labels";
 import { requireMe, serverClient } from "@/lib/server-api";
 
 export const metadata = { title: "Админка", robots: { index: false } };
 
-export default async function AdminPage({ searchParams }: { searchParams: Promise<{ days?: string; q?: string }> }) {
+/**
+ * Админка на вкладках (?tab=): обзор с цифрами и воронкой, модерация (жалобы и обратная связь),
+ * пользователи, стартапы, справочники, журнал действий. Права — только is_admin (make create-admin).
+ */
+export default async function AdminPage({ searchParams }: { searchParams: Promise<{ days?: string; q?: string; tab?: string }> }) {
   const user = await requireMe("/admin");
   if (!user.is_admin) notFound();
-  const { days = "7", q } = await searchParams;
+  const { days = "7", q, tab: rawTab } = await searchParams;
+  const tab: Tab = (TABS.find(([t]) => t === rawTab)?.[0] ?? (q ? "users" : "overview")) as Tab;
   const client = await serverClient();
-  const [{ data: m }, { data: users }, { data: startups }, { data: reports }, { data: audit }, { data: hyp }, { data: roles }, { data: skills }, { data: cohorts }] = await Promise.all([
+  const [{ data: totals }, { data: feedback }, { data: m }, { data: users }, { data: startups }, { data: reports }, { data: audit }, { data: hyp }, { data: roles }, { data: skills }, { data: cohorts }] = await Promise.all([
+    adminTotals({ client, query: { days: Number(days) } }),
+    adminFeedback({ client }),
     adminMetrics({ client, query: { days: Number(days) } }),
     adminListUsers({ client, query: { q } }),
     adminListStartups({ client }),
@@ -34,33 +65,57 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
       <PageHeader
         title="Админка"
         actions={
-          <div className="flex gap-1 rounded-lg border bg-card p-1 text-sm font-semibold">
-            {["7", "30", "90"].map((d) => (
-              <Link key={d} href={`/admin?days=${d}`} className={`rounded-md px-3 py-1.5 ${d === days ? "bg-second text-on-second" : ""}`}>
-                {d} дней
-              </Link>
-            ))}
-          </div>
+          tab === "overview" && (
+            <div className="flex gap-1 rounded-lg border bg-card p-1 text-sm font-semibold">
+              {["7", "30", "90"].map((d) => (
+                <Link key={d} href={`/admin?days=${d}`} className={`rounded-md px-3 py-1.5 ${d === days ? "bg-second text-on-second" : ""}`}>
+                  {d} дней
+                </Link>
+              ))}
+            </div>
+          )
         }
       />
 
-      {/* Страница длинная, особенно на телефоне: быстрый переход к разделам. */}
-      <nav aria-label="Разделы админки" className="mt-6 flex flex-wrap gap-2 text-sm font-semibold">
-        {[
-          ["#metrics", "Метрики"],
-          ["#reports", `Жалобы${reports?.length ? ` (${reports.length})` : ""}`],
-          ["#users", "Пользователи"],
-          ["#startups", "Стартапы"],
-          ["#catalog", "Справочники"],
-          ["#audit", "Журнал"],
-        ].map(([href, label]) => (
-          <a key={href} href={href} className="rounded-lg border bg-card px-3 py-1.5 hover:bg-secondary">
-            {label}
-          </a>
-        ))}
+      <nav aria-label="Разделы админки" className="-mx-4 mt-6 flex gap-1 overflow-x-auto border-b px-4 [scrollbar-width:none] sm:mx-0 sm:px-0">
+        {TABS.map(([t, label]) => {
+          const badge = t === "moderation" ? (reports?.length ?? 0) + (totals?.feedback_new ?? 0) : 0;
+          return (
+            <Link
+              key={t}
+              href={t === "overview" ? `/admin?days=${days}` : `/admin?tab=${t}`}
+              aria-current={tab === t ? "page" : undefined}
+              className={cn(
+                "-mb-px inline-flex h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-sm font-semibold whitespace-nowrap transition-colors",
+                tab === t ? "border-brand text-foreground" : "border-transparent text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {label}
+              {badge > 0 && <span className="rounded-full bg-brand px-1.5 text-xs leading-5 font-bold text-white">{badge}</span>}
+            </Link>
+          );
+        })}
       </nav>
 
-      <section id="metrics" className="mt-8 scroll-mt-20 grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr]">
+      {tab === "overview" && (
+        <>
+          <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            {[
+              ["Пользователей", totals?.users, `+${totals?.users_new ?? 0} за ${days} дн.`],
+              ["Профилей в каталоге", totals?.profiles_published, null],
+              ["Стартапов набирают", totals?.startups_recruiting, null],
+              ["Откликов ждут ответа", totals?.applications_pending, null],
+              ["Жалоб", totals?.reports_open, null],
+              ["Обратной связи", totals?.feedback_new, `за ${days} дн.`],
+            ].map(([label, value, hint]) => (
+              <li key={label as string} className="rounded-2xl border bg-card p-4">
+                <div className="text-sm text-muted-foreground">{label}</div>
+                <div className="mt-1 text-[28px] leading-none font-extrabold tabular-nums">{value ?? 0}</div>
+                {hint && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}
+              </li>
+            ))}
+          </ul>
+      <section id="metrics" className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr]">
         <div className="rounded-2xl border bg-card p-6">
           <h2 className="font-sans text-base font-bold">Воронка за {m?.days} дней</h2>
           <ol className="mt-4 grid gap-3">
@@ -178,17 +233,12 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         </div>
       </section>
 
-      <section className="mt-8 rounded-2xl border bg-card p-6">
-        <h2 className="font-sans text-base font-bold">Перенести стартап на платформу</h2>
-        <p className="mt-1 mb-4 text-sm text-muted-foreground">
-          Для холодного старта: оформить открытый проект за основателя. Черновик принадлежит платформе, пока основатель не
-          зарегистрируется и не подтвердит почту.
-        </p>
-        <PlatformStartupForm />
-      </section>
+        </>
+      )}
 
-
-      <section id="reports" className="mt-10 scroll-mt-20">
+      {tab === "moderation" && (
+        <>
+      <section className="mt-8">
         <h2 className="text-xl">Жалобы</h2>
         <div className="mt-3 grid gap-2">
           {reports?.length ? (
@@ -211,11 +261,41 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         </div>
       </section>
 
-      <section className="mt-10 grid gap-8 lg:grid-cols-2">
-        <div id="users" className="scroll-mt-20">
+          <section className="mt-10">
+            <h2 className="text-xl">Обратная связь</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Сообщения из формы «Сообщить о проблеме или идее» в подвале сайта.</p>
+            <ul className="mt-3 grid gap-2">
+              {feedback?.length ? (
+                feedback.map((f) => (
+                  <li key={f.id} className="rounded-xl border bg-card p-4 text-sm">
+                    <p className="whitespace-pre-line">{f.text}</p>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {timeAgo(f.created_at)} · {f.user_email ?? "гость"}
+                      {f.page_url && (
+                        <>
+                          {" · "}
+                          <Link href={f.page_url} className="underline">
+                            {f.page_url}
+                          </Link>
+                        </>
+                      )}
+                    </p>
+                  </li>
+                ))
+              ) : (
+                <li className="text-sm text-muted-foreground">Сообщений пока нет.</li>
+              )}
+            </ul>
+          </section>
+        </>
+      )}
+
+      {tab === "users" && (
+        <div className="mt-8 max-w-3xl">
           <div className="flex items-center gap-3">
             <h2 className="text-xl">Пользователи</h2>
             <form className="ml-auto min-w-0">
+              <input type="hidden" name="tab" value="users" />
               <input name="q" defaultValue={q} placeholder="Поиск" aria-label="Поиск пользователей" className="h-9 w-36 rounded-xl bg-tone px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/25 sm:w-56" />
             </form>
           </div>
@@ -242,7 +322,11 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             ))}
           </div>
         </div>
-        <div id="startups" className="scroll-mt-20">
+      )}
+
+      {tab === "startups" && (
+        <>
+        <div className="mt-8 max-w-3xl">
           <h2 className="text-xl">Стартапы</h2>
           <div className="mt-3 divide-y rounded-xl border bg-card">
             {startups?.map((s) => (
@@ -263,17 +347,29 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             ))}
           </div>
         </div>
+      <section className="mt-10 max-w-3xl rounded-2xl border bg-card p-6">
+        <h2 className="font-sans text-base font-bold">Перенести стартап на платформу</h2>
+        <p className="mt-1 mb-4 text-sm text-muted-foreground">
+          Для холодного старта: оформить открытый проект за основателя. Черновик принадлежит платформе, пока основатель не
+          зарегистрируется и не подтвердит почту.
+        </p>
+        <PlatformStartupForm />
       </section>
 
+
+        </>
+      )}
+
       {/* Справочники правят редко, а списки длинные: по умолчанию свёрнуты. */}
-      <section id="catalog" className="mt-10 grid scroll-mt-20 grid-cols-1 items-start gap-4 lg:grid-cols-2">
+      {tab === "catalog" && (
+      <section className="mt-8 grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
         {(
           [
             ["roles", "Роли", roles],
             ["skills", "Навыки", skills],
           ] as const
         ).map(([kind, title, items]) => (
-          <details key={kind} className="group rounded-2xl border bg-card p-6">
+          <details key={kind} open className="group rounded-2xl border bg-card p-6">
             <summary className="flex cursor-pointer list-none items-center gap-2 font-sans text-base font-bold">
               {title}
               <span className="font-normal text-muted-foreground">{items?.length ?? 0}</span>
@@ -286,7 +382,10 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         ))}
       </section>
 
-      <section id="audit" className="mt-10 scroll-mt-20">
+      )}
+
+      {tab === "audit" && (
+      <section className="mt-8">
         <h2 className="text-xl">Журнал действий</h2>
         <ul className="mt-3 grid gap-1 text-sm text-muted-foreground">
           {audit?.length ? (
@@ -300,6 +399,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           )}
         </ul>
       </section>
+      )}
     </Container>
   );
 }
