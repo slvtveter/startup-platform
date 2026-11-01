@@ -50,6 +50,12 @@ export function WelcomeChoice() {
         return toast.error(errorMessage(error));
       }
     }
+    if (c.key === "join") {
+      // Каталог сразу под роль из анкеты: дизайнеру — места для дизайнеров.
+      const { data } = await getMyProfile();
+      const role = data?.primary_role?.slug;
+      return router.push(role ? `/startups?role=${role}` : c.next);
+    }
     router.push(c.next);
   }
 

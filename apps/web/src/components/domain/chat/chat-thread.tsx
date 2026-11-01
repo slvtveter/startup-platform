@@ -3,7 +3,7 @@
 import { ArrowLeft, Briefcase, SendHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { toast } from "sonner";
 
 import { Avatar } from "@/components/domain/avatar-upload";
@@ -20,8 +20,15 @@ const STATUS: Record<string, string> = {
   withdrawn: "Отозван",
 };
 
-// Время и день считаются в поясе браузера, а сервер рендерит в UTC: расхождение при гидрации
-// ожидаемо, элементы помечены suppressHydrationWarning — на экране остаётся местное время.
+// Время и день — в поясе браузера. Сервер пояса человека не знает (рендерит в UTC), поэтому
+// на сервере пусто, а текст появляется после гидрации (LocalText). тут
+// не годится: React оставляет серверный текст, и при прямом заходе было бы время по UTC.
+const noop = () => () => {};
+/** Текст, зависящий от пояса браузера: на сервере пусто, в браузере — сразу верное значение. */
+function LocalText({ value }: { value: () => string }) {
+  return <>{useSyncExternalStore(noop, value, () => "")}</>;
+}
+
 function dayLabel(iso: string) {
   const d = new Date(iso);
   const today = new Date();
@@ -53,8 +60,8 @@ function ApplicationMessage({ m }: { m: MessageOut }) {
         <span className="ml-auto shrink-0 rounded-full bg-background px-2 py-0.5 text-xs font-semibold">{STATUS[a.status] ?? a.status}</span>
       </div>
       <p className="px-4 py-3 text-base whitespace-pre-line wrap-anywhere">{m.body}</p>
-      <div className="px-4 pb-2 text-right text-xs text-muted-foreground" suppressHydrationWarning>
-        {time(m.created_at)}
+      <div className="px-4 pb-2 text-right text-xs text-muted-foreground" >
+        <LocalText value={() => time(m.created_at)} />
       </div>
     </div>
   );
@@ -133,8 +140,8 @@ export function ChatThread({ chat, initial }: { chat: ConversationOut; initial: 
           return (
             <li key={m.id}>
               {newDay && (
-                <div className="my-3 text-center text-xs font-semibold text-muted-foreground" suppressHydrationWarning>
-                  {dayLabel(m.created_at)}
+                <div className="my-3 text-center text-xs font-semibold text-muted-foreground" >
+                  <LocalText value={() => dayLabel(m.created_at)} />
                 </div>
               )}
               {m.application ? (
@@ -148,8 +155,8 @@ export function ChatThread({ chat, initial }: { chat: ConversationOut; initial: 
                     )}
                   >
                     {m.body}
-                    <span className={cn("ml-2 align-bottom text-xs", m.mine ? "text-white/90" : "text-muted-foreground")} suppressHydrationWarning>
-                      {time(m.created_at)}
+                    <span className={cn("ml-2 align-bottom text-xs", m.mine ? "text-white/90" : "text-muted-foreground")} >
+                      <LocalText value={() => time(m.created_at)} />
                     </span>
                   </div>
                 </div>
