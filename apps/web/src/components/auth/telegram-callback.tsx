@@ -27,7 +27,7 @@ export function TelegramCallback() {
     void telegramLogin({ body: data }).then(({ data: res, error: err }) => {
       if (err || !res) return setError(errorMessage(err));
       if (res.created) goal("signup", { method: "telegram" });
-      router.replace(res.created ? "/welcome" : "/");
+      router.replace(res.created ? "/me/profile/edit?welcome=1" : "/");
       router.refresh();
     });
   }, [router]);

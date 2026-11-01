@@ -48,11 +48,11 @@ export async function SiteHeader() {
             <>
               <Link href="/startups/new" className={buttonVariants({ variant: "ghost", className: "max-sm:hidden" })}>
                 <Plus aria-hidden className="size-4" />
-                Предложить идею
+                Добавить проект
               </Link>
               <Link
                 href="/startups/new"
-                aria-label="Предложить идею"
+                aria-label="Добавить проект"
                 className="grid size-10 place-items-center rounded-full transition-colors hover:bg-secondary sm:hidden"
               >
                 <Plus aria-hidden className="size-5" />

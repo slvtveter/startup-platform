@@ -35,6 +35,8 @@ const STEPS = ["Кто ты", "Опыт и работы", "Что ищешь"];
 
 /** Цель из развилки после регистрации (/welcome): куда вести, когда профиль готов. */
 export type Goal = "idea" | "cofound" | "join";
+// Новый порядок онбординга (2026-11-01): регистрация → профиль → «Что дальше?» (/welcome).
+const ONBOARDING = { href: "/welcome", cta: "Опубликовать и дальше" };
 const AFTER: Record<Goal, { href: string; cta: string }> = {
   idea: { href: "/startups/new", cta: "Сохранить и описать идею" },
   cofound: { href: "/people/cofounders", cta: "Сохранить и к сообщникам" },
@@ -205,7 +207,7 @@ export function ProfileEditor({
   const extra = { avatar, resume: !!resume };
   const score = COMPLETENESS.reduce((n, c) => n + (c.done(f, extra) ? c.weight : 0), 0);
   const missing = COMPLETENESS.filter((c) => !c.done(f, extra));
-  const after = goal ? AFTER[goal] : welcome ? AFTER.join : null;
+  const after = goal ? AFTER[goal] : welcome ? ONBOARDING : null;
 
   function go(next: number) {
     setStep(next);

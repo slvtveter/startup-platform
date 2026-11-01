@@ -29,7 +29,7 @@ export default async function MyStartupsPage() {
         actions={
           items.length > 0 ? (
             <Link href="/startups/new" className={buttonVariants()}>
-              Предложить идею
+              Добавить проект
             </Link>
           ) : undefined
         }
@@ -42,7 +42,7 @@ export default async function MyStartupsPage() {
             text="Опиши идею, открой роли и собери первую команду."
             action={
               <Link href="/startups/new" className={buttonVariants()}>
-                Предложить идею
+                Добавить проект
               </Link>
             }
           />
