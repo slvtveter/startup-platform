@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDownUp, Check, ChevronDown, SearchIcon, SlidersHorizontal, X } from "lucide-react";
+import { ArrowDownUp, Check, ChevronDown, Info, SearchIcon, SlidersHorizontal, X } from "lucide-react";
 import Link, { useLinkStatus } from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -15,6 +15,8 @@ export type FilterGroup = {
   title: string;
   options: Option[];
   toggle?: boolean;
+  /** Пояснение к группе: значок (i) с подсказкой и ссылкой «Подробнее». */
+  info?: { text: string; href: string };
 };
 export type SortOption = { value: string; label: string; short: string };
 
@@ -36,6 +38,7 @@ export function CatalogToolbar({
   sorts,
   summary,
   resultLabel,
+  action,
 }: {
   basePath: string;
   params: SearchParams;
@@ -47,6 +50,8 @@ export function CatalogToolbar({
   summary: React.ReactNode;
   /** «9 идей» — для кнопки «Показать» в шторке фильтров. */
   resultLabel?: string;
+  /** Действие страницы («Добавить проект») — в строке поиска, справа от сортировки. */
+  action?: React.ReactNode;
 }) {
   const router = useRouter();
   const go = (href: string) => router.push(href, { scroll: false });
@@ -112,6 +117,7 @@ export function CatalogToolbar({
         </form>
 
         <div className="hidden lg:block">{sortMenu}</div>
+        {action && <div className="hidden shrink-0 lg:block">{action}</div>}
 
         {/* Узкий экран: все группы в шторке, рядом сортировка. Группы с sheet: false (стадия) стоят над поиском. */}
         <div className="flex w-full items-center gap-2 lg:hidden">
@@ -130,7 +136,7 @@ export function CatalogToolbar({
                   const selected = asList(params[g.name]);
                   return (
                     <fieldset key={g.name}>
-                      <legend className="mb-2.5 text-sm font-bold">{g.title}</legend>
+                      <legend className={cn("mb-2.5 text-sm font-bold", g.toggle && "sr-only")}>{g.title}</legend>
                       <div className="flex flex-wrap gap-1.5">
                         {g.options.map((o) => {
                           const on = selected.includes(o.value);
@@ -152,6 +158,11 @@ export function CatalogToolbar({
                             </button>
                           );
                         })}
+                        {g.info && (
+                          <Link href={g.info.href} className="inline-flex min-h-10 items-center px-2 text-sm font-semibold text-brand-ink">
+                            Что это?
+                          </Link>
+                        )}
                       </div>
                     </fieldset>
                   );
@@ -249,13 +260,13 @@ export function FilterSidebar({ basePath, params, groups }: { basePath: string; 
             const o = g.options[0];
             const on = selected.includes(o.value);
             return (
-              <Link key={g.name} href={toggleHref(basePath, params, g.name, on ? null : o.value)} scroll={false} replace prefetch={false} role="checkbox" aria-checked={on} className={cn(row, "items-start py-2")}>
-                <Box on={on} />
-                <span>
-                  <span className="block font-semibold">{g.title}</span>
-                  <span className="mt-0.5 block text-muted-foreground">{o.label}</span>
-                </span>
-              </Link>
+              <div key={g.name} className="flex items-center gap-1">
+                <Link href={toggleHref(basePath, params, g.name, on ? null : o.value)} scroll={false} replace prefetch={false} role="checkbox" aria-checked={on} className={cn(row, "mr-0 font-semibold")}>
+                  <Box on={on} />
+                  {g.title}
+                </Link>
+                {g.info && <InfoTip id={`${g.name}-info`} text={g.info.text} href={g.info.href} />}
+              </div>
             );
           }
           const options = g.options.map((o) => (
@@ -311,5 +322,34 @@ function Option({ href, on, label, count, className }: { href: string; on: boole
       <span className={cn("min-w-0 flex-1", on && "font-semibold")}>{label}</span>
       {count !== undefined && <span className="text-muted-foreground tabular-nums">{count}</span>}
     </Link>
+  );
+}
+
+/** Значок (i): по наведению или фокусу — короткое пояснение и ссылка на страницу с подробностями. */
+function InfoTip({ id, text, href }: { id: string; text: string; href: string }) {
+  return (
+    <span className="group/info relative inline-flex">
+      <button
+        type="button"
+        aria-describedby={id}
+        aria-label="Что это"
+        className="grid size-7 place-items-center rounded-full text-muted-foreground transition-colors hover:text-brand-ink focus-visible:text-brand-ink focus-visible:outline-none"
+      >
+        <Info aria-hidden className="size-4" />
+      </button>
+      {/* pt-2 — прозрачный мостик: курсор доходит до ссылки, не теряя наведения. */}
+      <span
+        id={id}
+        role="tooltip"
+        className="invisible absolute top-full left-1/2 z-30 w-60 -translate-x-1/2 pt-2 opacity-0 transition-opacity duration-200 group-focus-within/info:visible group-focus-within/info:opacity-100 group-hover/info:visible group-hover/info:opacity-100"
+      >
+        <span className="block rounded-xl bg-foreground p-3 text-xs leading-5 font-normal text-white shadow-lg">
+          {text}{" "}
+          <Link href={href} className="font-semibold text-white underline underline-offset-2">
+            Подробнее
+          </Link>
+        </span>
+      </span>
+    </span>
   );
 }

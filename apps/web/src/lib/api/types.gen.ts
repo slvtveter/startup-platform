@@ -3384,6 +3384,36 @@ export type GetStartupResponses = {
 
 export type GetStartupResponse = GetStartupResponses[keyof GetStartupResponses];
 
+export type DeleteStartupData = {
+    body?: never;
+    path: {
+        /**
+         * Startup Id
+         */
+        startup_id: string;
+    };
+    query?: never;
+    url: '/api/startups/{startup_id}';
+};
+
+export type DeleteStartupErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteStartupError = DeleteStartupErrors[keyof DeleteStartupErrors];
+
+export type DeleteStartupResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type DeleteStartupResponse = DeleteStartupResponses[keyof DeleteStartupResponses];
+
 export type UpdateStartupData = {
     body: StartupUpdate;
     path: {

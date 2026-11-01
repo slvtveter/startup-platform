@@ -92,6 +92,14 @@ async def upload_startup_cover(
     return await service.to_detail(db, s, user)
 
 
+@router.delete("/startups/{startup_id}", response_model=OkOut)
+async def delete_startup(startup_id: uuid.UUID, user: CurrentUser, db: DbSession) -> OkOut:
+    """Владелец удаляет стартап насовсем: вместе с ролями и откликами."""
+    s = await service.get_owned(db, startup_id, user)
+    await service.delete_startup(db, s)
+    return OkOut()
+
+
 @router.delete("/startups/{startup_id}/cover", response_model=StartupDetail)
 async def delete_startup_cover(
     startup_id: uuid.UUID, user: CurrentUser, db: DbSession

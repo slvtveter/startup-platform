@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { Sticker } from "@/components/brand/stickers";
 import { CatalogToolbar, FilterSidebar, type FilterGroup } from "@/components/domain/filter-bar";
-import { Pager, asList, toggleHref, type SearchParams } from "@/components/domain/filters";
+import { Pager, asList, type SearchParams } from "@/components/domain/filters";
 import { Container, EmptyState } from "@/components/domain/page-header";
 import { PersonCard } from "@/components/domain/person-card";
 import { buttonVariants } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import { listPeople } from "@/lib/api";
 import { LEVEL, TERMS, plural } from "@/lib/labels";
 import { peopleSeo } from "@/lib/seo";
 import { getRoles, serverClient } from "@/lib/server-api";
+import { cn } from "@/lib/utils";
 
 type Props = { searchParams: Promise<SearchParams> };
 
@@ -29,34 +29,33 @@ export default async function PeoplePage({ searchParams }: Props) {
   const q = typeof params.q === "string" ? params.q : "";
   const sort = params.sort === "experience" ? "experience" : "new";
   const client = await serverClient();
-  const [roles, { data }, { data: cof }] = await Promise.all([
+  const [roles, { data }] = await Promise.all([
     getRoles(),
     listPeople({ client, query: { ...selected, cofound, sort, q: q || undefined, limit: LIMIT, offset: (page - 1) * LIMIT } }),
-    listPeople({ client, query: { cofound: true, limit: 1 } }),
   ]);
   const total = data?.total ?? 0;
   const seo = peopleSeo(params, roles);
   const countLabel = `${total} ${plural(total, "человек", "человека", "человек")}`;
   const groups: FilterGroup[] = [
     { name: "role", title: "Роль", options: roles.map((r) => ({ value: r.slug, label: r.name })) },
-    { name: "cofound", title: "Ищет сообщников", toggle: true, options: [{ value: "1", label: "Хочет придумать стартап с нуля" }] },
+    {
+      name: "cofound",
+      title: "Ищет сообщников",
+      toggle: true,
+      info: { text: "Хочет придумать стартап с нуля вместе с кем-то.", href: "/people/cofounders" },
+      options: [{ value: "1", label: "Ищет сообщников" }],
+    },
     { name: "looking_for", title: "Оплата", options: Object.entries(TERMS).map(([value, label]) => ({ value, label })) },
     { name: "level", title: "Опыт", options: Object.entries(LEVEL).map(([value, label]) => ({ value, label })) },
   ];
 
   return (
     <Container>
-      <div className="flex flex-wrap items-center justify-between gap-x-10 gap-y-5">
-        <h1 className="flex items-center gap-4 text-[32px] leading-[1.05] sm:text-[48px]">
-          {seo.h1}
-          <Sticker name="search" className="size-14 shrink-0 -rotate-6 max-sm:hidden" />
-        </h1>
-      </div>
-
-      <div className="mt-8 lg:mt-10 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-12">
-        <FilterSidebar basePath="/people" params={params} groups={groups} />
-        <div className="min-w-0">
-          <CatalogToolbar
+      {/* Заголовок — над колонкой фильтров, на одной линии с поиском: без пустой полосы над каталогом. */}
+      <div className="grid gap-y-5 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-x-12 lg:gap-y-6">
+        <h1 className={cn("flex items-center text-[32px] leading-[1.05] sm:text-[40px] lg:min-h-11", seo.h1.length > 12 && "lg:col-span-2")}>{seo.h1}</h1>
+        <div className="min-w-0 lg:col-start-2">
+        <CatalogToolbar
             basePath="/people"
             params={params}
             placeholder="Имя, роль, навык или город"
@@ -68,31 +67,22 @@ export default async function PeoplePage({ searchParams }: Props) {
             resultLabel={countLabel}
             summary={
               // h2 между h1 страницы и h3 карточек: порядок заголовков для экранных читалок.
-              // «Сообщники» — не отдельный каталог, а фильтр: тихая ссылка рядом с числом включает его.
-              <span className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                <h2 className="text-base font-bold tracking-normal">{countLabel}</h2>
-                {(cof?.total ?? 0) > 0 && (
-                  <Link
-                    href={toggleHref("/people", params, "cofound", cofound ? null : "1")}
-                    scroll={false}
-                    className="inline-flex min-h-6 items-center gap-1.5 text-sm font-semibold text-brand-ink transition-colors hover:text-brand-hover"
-                  >
-                    <span aria-hidden className="size-1.5 rounded-full bg-brand" />
-                    {cofound ? "Показать всех" : `${cof?.total} ${plural(cof?.total ?? 0, "ищет", "ищут", "ищут")} сообщников`}
-                  </Link>
-                )}
-              </span>
+              <h2 className="text-base font-bold tracking-normal">{countLabel}</h2>
             }
           />
-
+        </div>
+        <div className={cn("lg:col-start-1 lg:row-start-2", seo.h1.length > 12 && "lg:row-span-2")}>
+          <FilterSidebar basePath="/people" params={params} groups={groups} />
+        </div>
+        <div className="min-w-0 lg:col-start-2">
           {data && data.items.length > 0 ? (
-            <ul className="mt-4 grid gap-3">
+            <ul className="grid gap-3">
               {data.items.map((p, i) => (
                 <PersonCard key={p.slug} person={p} as="li" eager={i < 4} />
               ))}
             </ul>
           ) : (
-            <div className="mt-4">
+            <div>
               <EmptyState
                 sticker="team"
                 title="Никого не нашли"

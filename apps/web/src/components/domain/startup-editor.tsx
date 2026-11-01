@@ -4,9 +4,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { SeatRow } from "@/components/domain/seats";
 import { SkillPicker } from "@/components/domain/skill-picker";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,6 +14,7 @@ import {
   addStartupRole,
   archiveStartup,
   closeStartup,
+  deleteStartup,
   createStartup,
   deleteStartupRole,
   listRoleTemplates,
@@ -94,12 +95,24 @@ export function StartupEditor({ startup, roles, skills }: { startup?: StartupDet
     router.refresh();
   }
 
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  async function remove() {
+    if (!startup) return;
+    setBusy(true);
+    const { error } = await deleteStartup({ path: { startup_id: startup.id } });
+    setBusy(false);
+    if (error) return toast.error(errorMessage(error));
+    toast.success("Стартап удалён");
+    router.push("/me/startups");
+    router.refresh();
+  }
+
   async function changeStatus(kind: "close" | "archive") {
     if (!startup) return;
     const fn = kind === "close" ? closeStartup : archiveStartup;
     const { error } = await fn({ path: { startup_id: startup.id } });
     if (error) return toast.error(errorMessage(error));
-    toast.success(kind === "close" ? "Набор закрыт" : "Стартап в архиве");
+    toast.success(kind === "close" ? "Набор приостановлен" : "Стартап в архиве");
     router.refresh();
   }
 
@@ -199,14 +212,16 @@ export function StartupEditor({ startup, roles, skills }: { startup?: StartupDet
               {startup.status === "recruiting" ? (
                 <>
                   <div className="font-bold">Набор открыт</div>
-                  <p className="mt-1 text-sm text-muted-foreground">Стартап виден в ленте.</p>
-                  <div className="mt-4 flex gap-2">
-                    <Button variant="outline" onClick={() => changeStatus("close")}>
-                      Закрыть набор
+                  <p className="mt-1 text-sm text-muted-foreground">Стартап в ленте, на места можно откликаться.</p>
+                  <div className="mt-4 grid gap-2">
+                    <Button variant="outline" onClick={() => changeStatus("close")} className="justify-start">
+                      Приостановить набор
                     </Button>
-                    <Button variant="ghost" onClick={() => changeStatus("archive")}>
-                      В архив
+                    <p className="-mt-1 px-1 text-xs text-muted-foreground">Страница останется, но откликнуться будет нельзя.</p>
+                    <Button variant="outline" onClick={() => changeStatus("archive")} className="justify-start">
+                      Убрать в архив
                     </Button>
+                    <p className="-mt-1 px-1 text-xs text-muted-foreground">Стартап пропадёт из ленты, отклики сохранятся.</p>
                   </div>
                 </>
               ) : (
@@ -225,7 +240,28 @@ export function StartupEditor({ startup, roles, skills }: { startup?: StartupDet
                   </Button>
                 </>
               )}
+              <div className="mt-5 border-t pt-4">
+                <button type="button" onClick={() => setConfirmDelete(true)} className="text-sm font-semibold text-destructive hover:underline">
+                  Удалить стартап
+                </button>
+              </div>
             </div>
+            <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Удалить «{startup.title}»?</DialogTitle>
+                  <DialogDescription>Стартап, места в команде и отклики удалятся насовсем. Переписка с людьми останется в сообщениях.</DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setConfirmDelete(false)}>
+                    Отмена
+                  </Button>
+                  <Button variant="destructive" onClick={remove} disabled={busy}>
+                    Удалить насовсем
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </>
         ) : (
           <div className="rounded-2xl bg-secondary p-5 text-sm text-muted-foreground">
@@ -333,16 +369,7 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
       <p className="mt-1 text-sm text-muted-foreground">
         Опиши задачи, часы и что получит человек.
       </p>
-      <div className="mt-4 rounded-2xl bg-white p-3">
-        <div className="text-xs text-muted-foreground">Так команду увидят на странице проекта</div>
-        <div className="mt-2 flex items-center gap-3">
-          <SeatRow
-            filled={startup.team.length}
-            open={startup.roles.filter((r) => r.is_open).reduce((n, r) => n + Math.max(0, (r.slots ?? 1) - (r.filled ?? 0)), 0)}
-          />
-        </div>
-      </div>
-      <ul className="mt-3 grid gap-2">
+      <ul className="mt-4 grid gap-2">
         {startup.roles.map((r) => (
           <li key={r.id} className={`rounded-2xl bg-white p-4 ${editing === r.id ? "ring-2 ring-brand" : ""}`}>
             <div className="min-w-0">

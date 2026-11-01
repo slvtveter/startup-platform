@@ -114,3 +114,19 @@ async def test_reserved_slugs(make_user):
     for title in ("New", "Facets"):
         s = (await founder.post("/api/startups", json={**STARTUP, "title": title})).json()
         assert s["slug"] not in ("new", "facets") and s["slug"].startswith(title.lower())
+
+
+async def test_owner_deletes_startup_with_applications(make_user, client):
+    founder = await make_user("del-owner@mail.ru", published=True)
+    other = await make_user("del-other@mail.ru", published=True)
+    s = await create_published(founder)
+    r = await other.post(
+        f"/api/startup-roles/{s['roles'][0]['id']}/applications",
+        json={"message": "Привет! Хочу помочь с проектом, есть опыт в учебных кейсах."},
+    )
+    assert r.status_code in (200, 201), r.text
+
+    assert (await other.delete(f"/api/startups/{s['id']}")).status_code in (403, 404)
+    assert (await founder.delete(f"/api/startups/{s['id']}")).status_code == 200
+    assert (await client.get(f"/api/startups/{s['slug']}")).status_code == 404
+    assert (await other.get("/api/me/applications")).json() == []
