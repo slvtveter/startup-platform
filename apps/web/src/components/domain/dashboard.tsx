@@ -14,11 +14,16 @@ import {
   listRecommendedStartups,
   unreadChats,
   type ApplicationOut,
+  type MyProfileOut,
 } from "@/lib/api";
+import { Avatar } from "@/components/domain/avatar-upload";
 import { APP_STATUS, initials, plural, timeAgo } from "@/lib/labels";
 import { nextStep } from "@/lib/next-step";
 import { getMe, serverClient } from "@/lib/server-api";
 import { cn } from "@/lib/utils";
+
+/** Карточка «Следующий шаг» только для срочного; общие советы заменяет подборка ниже. */
+const URGENT = new Set(["answer", "accepted", "verify", "profile"]);
 
 const STATUS_TONE: Record<string, string> = {
   pending: "bg-warn-soft text-warn-ink",
@@ -75,8 +80,11 @@ export async function Dashboard() {
   const candidates = (fit?.items ?? []).filter((p) => p.slug !== profile?.slug).slice(0, 4);
 
   const firstName = name?.split(/\s+/)[0];
-  const waitingTotal = stats.reduce((n, x) => n + x.value, 0);
   const findPeople = myStartups.some((m) => m.open_roles.length > 0);
+  // Панелей нечётное число — профиль растягивается на всю ширину полосой, чтобы не было пустой половины.
+  const panels = 1 + (myStartups.length > 0 ? 1 : 0) + (activeApps.length === 0 && candidates.length > 0 ? 1 : 0) + (activeApps.length > 0 ? 1 : 0);
+  // Срочная карточка уже говорит про входящие отклики — счётчик их не повторяет.
+  const chips = stats.filter((st) => st.value > 0 && !(step.kind === "answer" && st.label === "Новые отклики"));
 
   return (
     <Container>
@@ -111,6 +119,7 @@ export async function Dashboard() {
         </div>
       )}
 
+      {URGENT.has(step.kind) && (
       <section aria-labelledby="next-step" className="mt-8 flex flex-col gap-4 rounded-[24px] bg-brand-soft p-5 sm:flex-row sm:items-center sm:gap-6 sm:px-6">
         <div className="min-w-0">
           <h2 id="next-step" className="font-sans text-lg font-bold tracking-normal">
@@ -122,48 +131,29 @@ export async function Dashboard() {
           {step.cta}
         </Link>
       </section>
-
-      {profile && profile.completeness < 80 && (
-        <Link href="/me/profile/edit" className="card-hover mt-3 flex items-center gap-4 rounded-[24px] bg-tone p-5 hover:bg-tone-2 sm:px-6">
-          <span className="min-w-0 flex-1">
-            <span className="flex items-baseline justify-between gap-3">
-              <span className="font-semibold">Профиль заполнен на {profile.completeness}%</span>
-              {profile.missing[0] && <span className="truncate text-sm text-muted-foreground max-sm:hidden">дальше: {profile.missing[0].toLowerCase()}</span>}
-            </span>
-            <span aria-hidden className="mt-3 block h-2 overflow-hidden rounded-full bg-white">
-              <span className="block h-full rounded-full bg-brand" style={{ width: `${Math.max(profile.completeness, 3)}%` }} />
-            </span>
-          </span>
-          <ArrowRightIcon aria-hidden className="size-5 shrink-0 text-brand-ink" />
-        </Link>
       )}
 
-      {/* Счётчики показываем, только когда что-то ждёт ответа: ряд нулей у новичка — шум. */}
-      {waitingTotal > 0 && (
-        <ul aria-label="Что ждёт ответа" className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
-          {stats.map((st) => (
-            <li key={st.label}>
-              <Link
-                href={st.href}
-                className={cn(
-                  "flex h-full items-center justify-between gap-3 rounded-2xl bg-tone p-4 transition-colors duration-200 hover:bg-tone-2 sm:flex-col sm:items-start sm:justify-start",
-                  st.value > 0 && "bg-brand-soft hover:bg-marker",
-                )}
-              >
-                <span className="flex items-center gap-2 text-sm leading-tight font-semibold">
-                  <st.icon aria-hidden className={cn("size-4 max-sm:hidden", st.value > 0 ? "text-brand-ink" : "text-muted-foreground")} />
+      {/* Счётчики — одной строкой и только ненулевые: ряд нулей у новичка — шум. */}
+      {chips.length > 0 && (
+        <ul aria-label="Что ждёт ответа" className="mt-6 flex flex-wrap gap-2">
+          {chips.map((st) => (
+              <li key={st.label}>
+                <Link
+                  href={st.href}
+                  className="inline-flex items-center gap-2 rounded-full bg-brand-soft px-4 py-2 text-sm font-semibold text-brand-ink transition-colors duration-200 hover:bg-marker"
+                >
+                  <st.icon aria-hidden className="size-4" />
                   {st.label}
-                </span>
-                <span className="text-2xl font-extrabold tracking-[-0.03em] tabular-nums sm:text-[32px]">{st.value}</span>
-              </Link>
-            </li>
-          ))}
+                  <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-bold text-white tabular-nums">{st.value}</span>
+                </Link>
+              </li>
+            ))}
         </ul>
       )}
 
       {/* Панели — только когда в них есть что показать; пустые подсказки уже в карточке следующего шага. */}
-      {(myStartups.length > 0 || activeApps.length > 0) && (
-        <div className="mt-8 grid grid-cols-1 gap-3 lg:grid-cols-2">
+      <div className="mt-8 grid grid-cols-1 gap-3 lg:grid-cols-2">
+          {profile && <ProfilePanel profile={profile} wide={panels % 2 === 1} />}
           {myStartups.length > 0 && (
             <Panel title="Мои стартапы" href="/me/startups" more="Управлять">
               <ul className="divide-y">
@@ -176,7 +166,7 @@ export async function Dashboard() {
                           <div className="truncate font-semibold group-hover:text-brand-ink">{m.title}</div>
                           <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
                             <SeatRow filled={m.team_size ?? 1} open={open} />
-                            <span>
+                            <span className="max-sm:hidden">
                               {m.views_30d ?? 0} {plural(m.views_30d ?? 0, "просмотр", "просмотра", "просмотров")} за 30 дней
                             </span>
                           </div>
@@ -233,7 +223,6 @@ export async function Dashboard() {
             </Panel>
           )}
         </div>
-      )}
 
       <section className="mt-12 sm:mt-16">
         <SectionHead title="Подходят тебе" text="Стартапы под твою роль, навыки и условия." href="/startups" more="Все стартапы" />
@@ -345,5 +334,51 @@ function AppRow({ app }: { app: ApplicationOut }) {
         </span>
       </Link>
     </li>
+  );
+}
+
+/** Вместо процентов заполненности — то, что даёт профиль: сколько раз его открывали. */
+function ProfilePanel({ profile, wide }: { profile: MyProfileOut; wide?: boolean }) {
+  const views = profile.views_30d ?? 0;
+  const who = (
+    <div className="flex min-w-0 items-center gap-4">
+      <Avatar name={profile.display_name || "?"} url={profile.avatar_url} className="size-14 shrink-0 rounded-2xl text-base" />
+      <div className="min-w-0">
+        <div className="truncate font-semibold">{profile.display_name || "Без имени"}</div>
+        <div className="truncate text-sm text-muted-foreground">
+          {profile.primary_role?.name ?? "Роль не указана"}
+          {profile.is_published ? "" : " · скрыт из каталога"}
+        </div>
+      </div>
+    </div>
+  );
+  const count = (
+    <div className="flex items-baseline gap-2">
+      <span className="text-[28px] leading-none font-extrabold tracking-[-0.03em] tabular-nums">{views}</span>
+      <span className="text-sm text-muted-foreground">{plural(views, "просмотр", "просмотра", "просмотров")} профиля за 30 дней</span>
+    </div>
+  );
+  if (wide)
+    return (
+      <Link
+        href="/me/profile"
+        className="card-hover flex flex-col gap-4 rounded-[24px] bg-tone p-5 hover:bg-tone-2 sm:flex-row sm:items-center sm:gap-8 sm:px-6 lg:col-span-2"
+      >
+        {who}
+        <span className="sm:ml-auto">{count}</span>
+        <ArrowRightIcon aria-hidden className="size-5 shrink-0 text-brand-ink max-sm:hidden" />
+      </Link>
+    );
+  return (
+    <section className="flex flex-col rounded-[24px] bg-tone p-5 sm:p-6">
+      <div className="flex items-center gap-2">
+        <h2 className="font-sans text-lg font-bold tracking-normal">Твой профиль</h2>
+        <Link href="/me/profile" className="ml-auto text-sm font-semibold text-brand-ink hover:underline">
+          Открыть
+        </Link>
+      </div>
+      <div className="mt-4">{who}</div>
+      <div className="mt-4 border-t border-foreground/10 pt-4">{count}</div>
+    </section>
   );
 }

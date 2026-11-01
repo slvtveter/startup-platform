@@ -79,3 +79,5 @@ class MyProfileOut(PersonDetail):
     missing: list[str]
     can_publish: bool
     apply_blockers: list[str] = []
+    # Сколько раз профиль открывали другие за 30 дней (клиентское событие profile_viewed).
+    views_30d: int = 0

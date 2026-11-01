@@ -1,3 +1,5 @@
+from datetime import UTC, datetime, timedelta
+
 from sqlalchemy import Select, and_, case, exists, false, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -6,6 +8,7 @@ from app.core.errors import AppError, NotFound, PublicationConsentRequired
 from app.db import search
 from app.models import (
     Application,
+    Event,
     Profile,
     ProfileLink,
     Role,
@@ -152,6 +155,13 @@ async def my_profile(db: AsyncSession, user: User) -> MyProfileOut:
     assert p is not None
     score, missing = completeness(p)
     detail = await to_detail(db, p)
+    views = await db.scalar(
+        select(func.count()).where(
+            Event.name == "profile_viewed",
+            Event.props["slug"].astext == p.slug,
+            Event.created_at > datetime.now(UTC) - timedelta(days=30),
+        )
+    )
     # Себе показываем имя как есть: заглушка «Без имени» нужна только в каталоге,
     # а в кабинете давала «Привет, Без имени» и инициалы «БИ».
     return MyProfileOut(
@@ -164,6 +174,7 @@ async def my_profile(db: AsyncSession, user: User) -> MyProfileOut:
         missing=missing,
         can_publish=not publish_blockers(user, p),
         apply_blockers=apply_blockers(user, p),
+        views_30d=views or 0,
     )
 
 
