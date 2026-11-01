@@ -3,13 +3,16 @@ import Link from "next/link";
 import { FieldError } from "@/components/auth/auth-card";
 import { cn } from "@/lib/utils";
 
-export type TermsState = { terms: boolean; adult: boolean };
+export type TermsState = { terms: boolean; publish: boolean };
 
 const link = "font-semibold text-brand-ink underline underline-offset-2 hover:text-brand-hover";
 
 /**
- * Две отдельные пустые галочки (соглашение и 18+) и рядом ссылка на политику.
- * Политика — не согласие, а уведомление: галочки для неё нет. Тексты — по инструкции юриста.
+ * Две пустые галочки.
+ * 1. Обязательная: 18+ и соглашение одной строкой (возраст — условие из п. 2.1 соглашения).
+ *    Политика конфиденциальности — уведомление, а не согласие: только ссылка в той же строке.
+ * 2. Необязательная: согласие на публикацию профиля (ст. 10.1 152-ФЗ требует оформлять его
+ *    отдельно от других согласий). Дано здесь — при публикации профиля больше ничего не спросим.
  */
 export function TermsChecks({
   value,
@@ -20,9 +23,10 @@ export function TermsChecks({
   onChange: (v: TermsState) => void;
   errors: Record<string, string>;
 }) {
-  const box = "size-6 shrink-0 accent-[var(--brand)]";
+  const box = "mt-0.5 size-5 shrink-0 accent-[var(--brand)]";
+  const a = cn(link, "inline");
   return (
-    <div className="grid gap-3 text-sm text-muted-foreground">
+    <div className="grid gap-3 text-sm leading-snug text-muted-foreground">
       <div>
         <label className="flex items-start gap-3">
           <input
@@ -35,35 +39,34 @@ export function TermsChecks({
             className={box}
           />
           <span>
-            Я ознакомился(-лась) с Пользовательским соглашением и принимаю его условия.{" "}
-            <Link href="/terms" target="_blank" className={cn(link, "inline-flex min-h-6 items-center")}>
-              Читать
+            Мне есть 18 лет, я принимаю{" "}
+            <Link href="/terms" target="_blank" className={a}>
+              Пользовательское соглашение
+            </Link>{" "}
+            и ознакомлен(а) с{" "}
+            <Link href="/privacy" target="_blank" className={a}>
+              Политикой конфиденциальности
             </Link>
           </span>
         </label>
         <FieldError id="terms-error" message={errors.terms} />
       </div>
-      <div>
-        <label className="flex items-start gap-3">
-          <input
-            id="adult"
-            type="checkbox"
-            aria-invalid={!!errors.adult}
-            aria-describedby={errors.adult ? "adult-error" : undefined}
-            checked={value.adult}
-            onChange={(e) => onChange({ ...value, adult: e.target.checked })}
-            className={box}
-          />
-          Подтверждаю, что мне исполнилось 18 лет
-        </label>
-        <FieldError id="adult-error" message={errors.adult} />
-      </div>
-      <p>
-        Как мы обрабатываем персональные данные:{" "}
-        <Link href="/privacy" target="_blank" className={cn(link, "inline-flex min-h-6 items-center")}>
-          Политика конфиденциальности
-        </Link>
-      </p>
+      <label className="flex items-start gap-3">
+        <input
+          id="publish"
+          type="checkbox"
+          checked={value.publish}
+          onChange={(e) => onChange({ ...value, publish: e.target.checked })}
+          className={box}
+        />
+        <span>
+          Согласен(на) на{" "}
+          <Link href="/profile/publication-consent" target="_blank" className={a}>
+            публикацию профиля
+          </Link>{" "}
+          в каталоге людей
+        </span>
+      </label>
     </div>
   );
 }
@@ -71,6 +74,5 @@ export function TermsChecks({
 export function termsErrors(v: TermsState): Record<string, string> {
   const errs: Record<string, string> = {};
   if (!v.terms) errs.terms = "Без согласия с соглашением аккаунт не создать";
-  if (!v.adult) errs.adult = "Envola только для тех, кому есть 18";
   return errs;
 }

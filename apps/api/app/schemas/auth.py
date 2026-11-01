@@ -7,9 +7,13 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 class RegisterIn(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
-    # Две отдельные галочки в форме: без них аккаунт не создаётся.
+    # Одна галочка в форме «мне есть 18, принимаю соглашение» (п. 2.1 соглашения): без неё
+    # аккаунт не создаётся. Поля раздельные, чтобы журнал хранил оба подтверждения.
     accept_terms: Literal[True]
     adult: Literal[True]
+    # Отдельная необязательная галочка: согласие на распространение профиля (ст. 10.1 152-ФЗ).
+    # Дано при регистрации — при публикации профиля больше ничего не спрашиваем.
+    publish_consent: bool = False
     utm_source: str | None = Field(default=None, max_length=64)
 
     @field_validator("email")
@@ -124,6 +128,7 @@ class MeOut(BaseModel):
 class TermsIn(BaseModel):
     accept_terms: Literal[True]
     adult: Literal[True]
+    publish_consent: bool = False
 
 
 class SocialProvidersOut(BaseModel):

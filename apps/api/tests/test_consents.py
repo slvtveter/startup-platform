@@ -125,3 +125,51 @@ async def test_publish_without_consent_is_refused(make_user):
     assert r.status_code == 200
     assert (await c.get("/api/auth/me")).json()["needs_publication_consent"] is False
     assert (await c.get(f"/api/people/{slug}")).status_code == 200
+
+
+async def test_publication_consent_at_signup_skips_publish_dialog(client):
+    from app.services import mail
+
+    email = "early@b.ru"
+    r = await client.post(
+        "/api/auth/register",
+        json={
+            "email": email,
+            "password": "secret-pass-1",
+            "accept_terms": True,
+            "adult": True,
+            "publish_consent": True,
+        },
+    )
+    assert r.status_code == 202, r.text
+    rows = await _journal(email)
+    assert sorted((r.kind, r.source) for r in rows) == [
+        ("adult", "register"),
+        ("publication", "register"),
+        ("terms", "register"),
+    ]
+    async with SessionLocal() as db:
+        u = await db.scalar(select(User).where(User.email == email))
+        assert u.publication_version is not None
+    assert mail.outbox  # код ушёл как обычно
+
+
+async def test_publication_consent_is_optional_at_signup(make_user):
+    await make_user("later@b.ru")
+    assert [r.kind for r in await _journal("later@b.ru") if r.kind == "publication"] == []
+
+
+async def test_social_terms_prompt_can_record_publication(monkeypatch, client):
+    monkeypatch.setattr(get_settings(), "telegram_bot_token", TOKEN)
+    data = {"id": 8, "first_name": "Ян", "auth_date": int(time.time())}
+    check = "\n".join(f"{k}={v}" for k, v in sorted(data.items()))
+    data["hash"] = hmac.new(
+        hashlib.sha256(TOKEN.encode()).digest(), check.encode(), hashlib.sha256
+    ).hexdigest()
+    assert (await client.post("/api/auth/telegram", json=data)).status_code == 200
+    email = (await client.get("/api/auth/me")).json()["email"]
+    r = await client.post(
+        "/api/auth/terms", json={"accept_terms": True, "adult": True, "publish_consent": True}
+    )
+    assert r.status_code == 200, r.text
+    assert ("publication", "prompt") in {(r.kind, r.source) for r in await _journal(email)}

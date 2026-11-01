@@ -21,14 +21,18 @@ def has_publication(user: User) -> bool:
     return user.publication_version == PUBLICATION_VERSION
 
 
-def record_publication(db: AsyncSession, user: User) -> None:
+def record_publication(
+    db: AsyncSession, user: User, source: str = "publish", ip: str = "", user_agent: str = ""
+) -> None:
     db.add(
         Consent(
             user_id=user.id,
             email=user.email,
             kind="publication",
             version=PUBLICATION_VERSION,
-            source="publish",
+            source=source,
+            ip=ip[:64],
+            user_agent=user_agent[:300],
         )
     )
     user.publication_version = PUBLICATION_VERSION

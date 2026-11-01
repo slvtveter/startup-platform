@@ -66,7 +66,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
-  const [consent, setConsent] = useState<TermsState>({ terms: false, adult: false });
+  const [consent, setConsent] = useState<TermsState>({ terms: false, publish: false });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [fields, setFields] = useState<Record<string, string>>({});
@@ -108,7 +108,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       setError(errorMessage(res.error));
       return;
     }
-    const res = await register({ body: { ...body, accept_terms: true, adult: true, utm_source: params.get("utm_source") || params.get("ref") || null } });
+    const res = await register({ body: { ...body, accept_terms: true, adult: true, publish_consent: consent.publish, utm_source: params.get("utm_source") || params.get("ref") || null } });
     setBusy(false);
     if (res.error) {
       setFields(fieldErrors(res.error));
