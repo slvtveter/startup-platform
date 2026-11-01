@@ -147,7 +147,11 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     const { data, error: err } = await verifyCode({ body: { email: email.trim(), code } });
     if (err || !data) return errorMessage(err);
     if (data.created) goal("signup", { method: "email" });
-    go(safeNext(next, data.created ? "/me/profile/edit?welcome=1" : "/"));
+    // Новый аккаунт — сначала анкета. Исключение: человек шёл к конкретному действию
+    // (создать стартап, откликнуться на место) — туда и ведём, анкету спросят по ходу.
+    const target = safeNext(next, "/");
+    const action = target.startsWith("/startups/");
+    go(data.created && !action ? "/me/profile/edit?welcome=1" : target);
     return null;
   }
 

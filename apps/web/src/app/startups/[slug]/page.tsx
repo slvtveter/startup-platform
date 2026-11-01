@@ -408,11 +408,20 @@ export default async function StartupPage({ params }: Props) {
               </a>
             )}
             {s.telegram && (
-              <span className="font-semibold">Telegram: {s.telegram}</span>
+              <a
+                href={`https://t.me/${s.telegram.replace(/^@/, "")}`}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="font-semibold underline underline-offset-4"
+              >
+                Telegram: {s.telegram}
+              </a>
             )}
-            <span className="ml-auto">
-              <ReportButton targetType="startup" targetId={s.slug} />
-            </span>
+            {!s.is_owner && (
+              <span className="ml-auto">
+                <ReportButton targetType="startup" targetId={s.slug} />
+              </span>
+            )}
           </div>
         </div>
 
