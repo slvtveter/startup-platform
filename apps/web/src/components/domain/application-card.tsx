@@ -59,11 +59,16 @@ export function ApplicationCard({ app, perspective }: { app: ApplicationOut; per
         : kind === "reject"
           ? await rejectApplication({ path, body: { note } })
           : await withdrawApplication({ path });
-    setBusy(false);
-    if (res.error) return toast.error(errorMessage(res.error));
+    if (res.error) {
+      setBusy(false);
+      return toast.error(errorMessage(res.error));
+    }
     toast.success(kind === "accept" ? "Отклик принят" : kind === "reject" ? "Отказ отправлен" : "Отклик отозван");
     setRejecting(false);
-    router.refresh();
+    // Карточка уйдёт из «Ждут ответа» вниз, и под курсором окажется «Принять» следующего человека.
+    // Кнопки этой карточки остаются выключенными, а список перестраивается через секунду:
+    // двойной клик не примет другого кандидата.
+    setTimeout(() => router.refresh(), 1000);
   }
 
   const [expanded, setExpanded] = useState(false);

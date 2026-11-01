@@ -42,7 +42,7 @@ export function nextStep(i: NextStepInput): NextStep {
     return {
       kind: "accepted",
       title: `Тебя приняли в ${accepted.startupTitle}`,
-      text: "Контакты уже открыты. Напиши основателю первым и договорись о короткой встрече в течение пары дней.",
+      text: "Контакты уже открыты. Договоритесь в чате о короткой встрече в ближайшие дни.",
       href: "/me/applications",
       cta: "Посмотреть контакты",
     };

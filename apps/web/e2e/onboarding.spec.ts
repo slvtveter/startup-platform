@@ -23,5 +23,6 @@ test("signup leads to the profile first, then to the next-step choice", async ({
   await page.waitForURL(/\/welcome$/);
   await expect(page.getByRole("heading", { name: "Профиль готов. Что дальше?" })).toBeVisible();
   await page.getByRole("button", { name: /Хочу в команду/ }).click();
-  await page.waitForURL(/\/startups$/);
+  // Каталог сразу под роль из анкеты.
+  await page.waitForURL(/\/startups\?role=designer$/);
 });

@@ -84,6 +84,16 @@ const LINK_PLACEHOLDER: Partial<Record<LinkKind, string>> = {
   other: "https://…",
 };
 
+/** По адресу понятно, что это за ссылка: github.com → GitHub и т. д. Явно выбранный тип не трогаем. */
+function guessKind(url: string, current: LinkKind): LinkKind {
+  if (current !== "portfolio" && current !== "other") return current;
+  const u = url.toLowerCase();
+  if (u.includes("github.com")) return "github";
+  if (u.includes("behance.net")) return "behance";
+  if (u.includes("linkedin.com")) return "linkedin";
+  return current;
+}
+
 /** Поля, без которых профиль не опубликовать (как в API): ключ — id поля на странице. */
 type FieldKey = "name" | "role" | "skills" | "terms" | "links";
 const FIELD_STEP: Record<FieldKey, number> = { name: 0, role: 0, skills: 1, terms: 2, links: 1 };
@@ -446,7 +456,7 @@ export function ProfileEditor({
                 {f.links.map((l, i) => (
                   <div key={i} className="flex flex-col gap-2 sm:flex-row">
                     <LinkKindSelect value={l.kind} onChange={(kind) => set("links", f.links.map((x, j) => (j === i ? { ...x, kind } : x)))} />
-                    <Input aria-label="Ссылка" className="h-11" value={l.url} onChange={(e) => set("links", f.links.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)))} placeholder={LINK_PLACEHOLDER[l.kind] ?? "https://…"} aria-invalid={!!errors.links} />
+                    <Input aria-label="Ссылка" className="h-11" value={l.url} onChange={(e) => set("links", f.links.map((x, j) => (j === i ? { ...x, url: e.target.value, kind: guessKind(e.target.value, x.kind) } : x)))} placeholder={LINK_PLACEHOLDER[l.kind] ?? "https://…"} aria-invalid={!!errors.links} />
                   </div>
                 ))}
                 {f.links.length < 8 && (
