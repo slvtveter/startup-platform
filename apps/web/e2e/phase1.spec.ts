@@ -70,7 +70,7 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
   await register(candidate, candidateEmail);
   await shot(candidate, "onboarding-step1");
 
-  await candidate.goto("/me/profile?welcome=join");
+  await candidate.goto("/me/profile/edit?welcome=join");
   await candidate.getByLabel("Имя или псевдоним").fill("Мария Тестова");
   await candidate.getByRole("button", { name: "Дизайнер", exact: true }).click();
   await candidate.getByRole("button", { name: "После курсов" }).click();
@@ -97,7 +97,7 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
 
   // --- Отклик ---
   await candidate.goto(startupUrl);
-  await expect(candidate.getByText("1 из 1 совпадают с твоими")).toBeVisible();
+  await expect(candidate.getByText("1 из 1 навыка у тебя есть")).toBeVisible();
   await candidate.getByRole("button", { name: "Откликнуться" }).click();
   await candidate
     .getByLabel("Сообщение основателю")

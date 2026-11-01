@@ -23,6 +23,9 @@ const nextConfig: NextConfig = {
       { source: "/cofounders", destination: "/people/cofounders", permanent: true },
       // Идеи теперь в общем каталоге стартапов, фильтр «Идеи».
       { source: "/ideas", destination: "/startups?stage=idea", permanent: true },
+      // Мастер профиля переехал на /me/profile/edit; ссылки развилки после регистрации (?welcome=…) — туда же.
+      // Query переносится сам.
+      { source: "/me/profile", has: [{ type: "query", key: "welcome" }], destination: "/me/profile/edit", permanent: false },
     ];
   },
   async rewrites() {

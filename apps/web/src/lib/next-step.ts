@@ -61,7 +61,7 @@ export function nextStep(i: NextStepInput): NextStep {
       kind: "profile",
       title: "Добавь пару полей в профиль",
       text: `Чтобы откликаться: ${i.applyBlockers.map((b) => b.toLowerCase()).join(", ")}.`,
-      href: "/me/profile",
+      href: "/me/profile/edit",
       cta: "Заполнить профиль",
     };
   }

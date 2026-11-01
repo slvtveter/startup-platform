@@ -16,21 +16,21 @@ const CHOICES = [
     sticker: "bulb",
     title: "Есть идея",
     text: "Опишу её в двух абзацах и отмечу, кого не хватает.",
-    next: "/me/profile?welcome=idea",
+    next: "/me/profile/edit?welcome=idea",
   },
   {
     key: "cofound",
     sticker: "team",
     title: "Нет идеи, ищу сообщников",
     text: "Хочу найти людей и вместе придумать стартап с нуля.",
-    next: "/me/profile?welcome=cofound",
+    next: "/me/profile/edit?welcome=cofound",
   },
   {
     key: "join",
     sticker: "cap",
     title: "Хочу в команду",
     text: "Найду стартап, который уже работает и ищет людей.",
-    next: "/me/profile?welcome=join",
+    next: "/me/profile/edit?welcome=join",
   },
 ] as const;
 

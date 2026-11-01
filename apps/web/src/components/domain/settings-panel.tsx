@@ -125,7 +125,7 @@ export function ProfileSettings({
             <>
               Чтобы появиться в каталоге, заполни профиль
               {missing.length > 0 && `: ${missing.slice(0, 3).join(", ").toLowerCase()}`}.{" "}
-              <Link href="/me/profile" className="inline-flex min-h-6 items-center font-semibold text-brand-ink hover:underline">
+              <Link href="/me/profile/edit" className="inline-flex min-h-6 items-center font-semibold text-brand-ink hover:underline">
                 Заполнить
               </Link>
             </>

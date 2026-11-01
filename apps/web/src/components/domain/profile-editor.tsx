@@ -25,7 +25,7 @@ import {
   type SkillOut,
   type LookingFor,
 } from "@/lib/api";
-import { errorMessage } from "@/lib/errors";
+import { errorMessage, fieldErrors } from "@/lib/errors";
 import { AVAILABILITY, LEVEL, LINK_KIND, TERMS, TERMS_HINT } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 import { goal as reachGoal } from "@/lib/metrika";
@@ -72,6 +72,28 @@ const COMPLETENESS: { weight: number; label: string; step: number; done: (f: For
   { weight: 5, label: "Условия участия", step: 2, done: (f) => f.looking_for.length > 0 },
   { weight: 5, label: "Telegram", step: 2, done: (f) => !!f.contact_telegram.trim() },
 ];
+
+/** Поля, без которых профиль не опубликовать (как в API): ключ — id поля на странице. */
+type FieldKey = "name" | "role" | "skills" | "terms";
+const FIELD_STEP: Record<FieldKey, number> = { name: 0, role: 0, skills: 1, terms: 2 };
+const API_FIELD: Record<string, FieldKey> = { display_name: "name", primary_role: "role", skills: "skills", looking_for: "terms" };
+
+function Err({ id, text }: { id: string; text?: string }) {
+  if (!text) return null;
+  return (
+    <p id={id} role="alert" className="mt-1.5 text-sm font-semibold text-destructive">
+      {text}
+    </p>
+  );
+}
+
+function Req() {
+  return (
+    <span aria-hidden className="ml-0.5 text-destructive">
+      *
+    </span>
+  );
+}
 
 function Choice({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
@@ -130,6 +152,7 @@ export function ProfileEditor({
   const top = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({});
   const [avatar, setAvatar] = useState(!!profile.avatar_url);
   const [resume, setResume] = useState(profile.resume_name ?? "");
   const [f, setF] = useState<Form>({
@@ -147,7 +170,13 @@ export function ProfileEditor({
     contact_telegram: profile.contact_telegram,
     show_email: profile.show_email,
   });
-  const set = <K extends keyof Form>(k: K, v: Form[K]) => setF((s) => ({ ...s, [k]: v }));
+  const FIELD_OF: Partial<Record<keyof Form, FieldKey>> = { display_name: "name", primary_role: "role", skills: "skills", looking_for: "terms" };
+  const set = <K extends keyof Form>(k: K, v: Form[K]) => {
+    setF((s) => ({ ...s, [k]: v }));
+    // Поправил поле — красная подсветка с него уходит сразу.
+    const key = FIELD_OF[k];
+    if (key && errors[key]) setErrors((e) => ({ ...e, [key]: undefined }));
+  };
 
   const extra = { avatar, resume: !!resume };
   const score = COMPLETENESS.reduce((n, c) => n + (c.done(f, extra) ? c.weight : 0), 0);
@@ -160,6 +189,41 @@ export function ProfileEditor({
     top.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  /** Показать ошибки: перейти на шаг с первой из них, подсветить и прокрутить к полю. */
+  function showErrors(errs: Partial<Record<FieldKey, string>>) {
+    const keys = (Object.keys(errs) as FieldKey[]).filter((k) => errs[k]);
+    if (!keys.length) return;
+    setErrors(errs);
+    const first = keys.sort((a, b) => FIELD_STEP[a] - FIELD_STEP[b])[0];
+    setStep(FIELD_STEP[first]);
+    toast.error(keys.length > 1 ? "Заполни поля, отмеченные красным" : errs[first]!);
+    // Шаг перерисуется — тогда и прокручиваем к полю.
+    setTimeout(() => {
+      const el = document.getElementById(`field-${first}`);
+      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+      (el?.querySelector("input, button") as HTMLElement | null)?.focus({ preventScroll: true });
+    }, 50);
+  }
+
+  /** Обязательные поля (то же, что API проверяет перед публикацией); onlyStep — только поля шага. */
+  function validate(onlyStep?: number): Partial<Record<FieldKey, string>> {
+    const errs: Partial<Record<FieldKey, string>> = {};
+    const name = f.display_name.trim();
+    if (name.length < 2) errs.name = name ? "Имя — минимум 2 буквы" : "Укажи имя или псевдоним";
+    if (!f.primary_role) errs.role = "Выбери основную роль";
+    if (f.skills.length === 0) errs.skills = "Добавь хотя бы один навык";
+    if (f.looking_for.length === 0) errs.terms = "Выбери хотя бы одно условие";
+    if (onlyStep === undefined) return errs;
+    return Object.fromEntries(Object.entries(errs).filter(([k]) => FIELD_STEP[k as FieldKey] === onlyStep));
+  }
+
+  /** «Дальше»: не пускаем на следующий шаг с незаполненными обязательными полями этого шага. */
+  function next() {
+    const errs = validate(step);
+    if (Object.keys(errs).length) return showErrors(errs);
+    save(step + 1);
+  }
+
   async function save(next?: number) {
     setBusy(true);
     const body = {
@@ -170,7 +234,11 @@ export function ProfileEditor({
     const { error } = await updateMyProfile({ body });
     setBusy(false);
     if (error) {
-      toast.error(errorMessage(error));
+      const mapped = Object.fromEntries(
+        Object.entries(fieldErrors(error)).flatMap(([k, v]) => (API_FIELD[k.split(".").pop()!] ? [[API_FIELD[k.split(".").pop()!], v]] : [])),
+      );
+      if (Object.keys(mapped).length) showErrors(mapped);
+      else toast.error(errorMessage(error));
       return false;
     }
     if (next !== undefined) go(next);
@@ -179,23 +247,17 @@ export function ProfileEditor({
     return true;
   }
 
-  /** То же, что проверяет API перед публикацией: сразу ведём к шагу с пропущенным полем. */
-  function blocker(): { text: string; step: number } | null {
-    if (f.display_name.trim().length < 2) return { text: "Укажи имя", step: 0 };
-    if (!f.primary_role) return { text: "Выбери основную роль", step: 0 };
-    if (f.skills.length === 0) return { text: "Добавь хотя бы один навык", step: 1 };
-    if (f.looking_for.length === 0) return { text: "Выбери условия участия", step: 2 };
-    return null;
+  /** Уже опубликованный профиль: проверить, сохранить и показать, как его видят. */
+  async function saveAndView() {
+    const errs = validate();
+    if (Object.keys(errs).length) return showErrors(errs);
+    if (await save()) router.push("/me/profile");
   }
 
   async function publish(published: boolean) {
     if (published) {
-      const b = blocker();
-      if (b) {
-        toast.error(b.text);
-        if (b.step !== step) go(b.step);
-        return;
-      }
+      const errs = validate();
+      if (Object.keys(errs).length) return showErrors(errs);
     }
     if (!(await save())) return;
     if (published) {
@@ -208,6 +270,7 @@ export function ProfileEditor({
     if (published) reachGoal("profile_published");
     toast.success(published ? "Профиль опубликован" : "Профиль скрыт из каталога");
     if (published && after) router.push(after.href);
+    else if (published) router.push("/me/profile");
     else router.refresh();
   }
 
@@ -250,19 +313,40 @@ export function ProfileEditor({
         {step === 0 && (
           <div key="s0" className="wizard-step-forward mt-8 grid gap-6">
             <AvatarUpload name={f.display_name || profile.display_name} initialUrl={profile.avatar_url ?? null} onChange={(u) => setAvatar(!!u)} />
-            <div>
-              <Label htmlFor="name">Имя или псевдоним</Label>
-              <Input id="name" autoComplete="name" className="mt-1.5 h-11" value={f.display_name} onChange={(e) => set("display_name", e.target.value)} placeholder="Мария Ким" />
+            <div id="field-name" className="scroll-mt-28">
+              <Label htmlFor="name">
+                Имя или псевдоним
+                <Req />
+              </Label>
+              <Input
+                id="name"
+                autoComplete="name"
+                aria-invalid={!!errors.name}
+                aria-describedby={errors.name ? "name-error" : undefined}
+                className="mt-1.5 h-11"
+                value={f.display_name}
+                onChange={(e) => set("display_name", e.target.value)}
+                placeholder="Мария Ким"
+              />
+              <Err id="name-error" text={errors.name} />
             </div>
-            <div>
-              <Label>Основная роль</Label>
-              <div className="mt-2 flex flex-wrap gap-2">
+            <div id="field-role" className="scroll-mt-28">
+              <Label>
+                Основная роль
+                <Req />
+              </Label>
+              <div
+                role="group"
+                aria-describedby={errors.role ? "role-error" : undefined}
+                className={cn("mt-2 flex flex-wrap gap-2", errors.role && "-m-2 rounded-2xl p-2 ring-2 ring-destructive/60")}
+              >
                 {roles.map((r) => (
                   <Choice key={r.slug} active={f.primary_role === r.slug} onClick={() => set("primary_role", r.slug)}>
                     {r.name}
                   </Choice>
                 ))}
               </div>
+              <Err id="role-error" text={errors.role} />
             </div>
             <div>
               <Label>Опыт</Label>
@@ -294,12 +378,16 @@ export function ProfileEditor({
 
         {step === 1 && (
           <div key="s1" className="wizard-step-forward mt-8 grid gap-6">
-            <div>
-              <h2 className="text-2xl">Что ты умеешь?</h2>
+            <div id="field-skills" className="scroll-mt-28">
+              <h2 className="text-2xl">
+                Что ты умеешь?
+                <Req />
+              </h2>
               <p className="mt-1 text-muted-foreground">Начни вводить название навыка.</p>
-              <div className="mt-4">
+              <div className={cn("mt-4", errors.skills && "-m-2 mt-2 rounded-2xl p-2 ring-2 ring-destructive/60")}>
                 <SkillPicker all={skills} value={f.skills} onChange={(v) => set("skills", v)} />
               </div>
+              <Err id="skills-error" text={errors.skills} />
             </div>
             <div>
               <Label htmlFor="bio">Расскажи подробнее</Label>
@@ -376,9 +464,12 @@ export function ProfileEditor({
                 </span>
               </span>
             </button>
-            <div>
-              <Label>На каких условиях готов работать</Label>
-              <div className="mt-2 grid gap-2 sm:grid-cols-3">
+            <div id="field-terms" className="scroll-mt-28">
+              <Label>
+                На каких условиях готов работать
+                <Req />
+              </Label>
+              <div className={cn("mt-2 grid gap-2 sm:grid-cols-3", errors.terms && "-m-2 rounded-2xl p-2 ring-2 ring-destructive/60")}>
                 {(["free", "paid", "negotiable"] as LookingFor[]).map((t) => {
                   const on = f.looking_for.includes(t);
                   return (
@@ -395,6 +486,7 @@ export function ProfileEditor({
                   );
                 })}
               </div>
+              <Err id="terms-error" text={errors.terms} />
             </div>
             <div>
               <Label>Сколько времени готов уделять</Label>
@@ -437,12 +529,12 @@ export function ProfileEditor({
           )}
           <div className="ml-auto flex gap-2">
             {step < STEPS.length - 1 ? (
-              <Button size="lg" onClick={() => save(step + 1)} disabled={busy}>
+              <Button size="lg" onClick={next} disabled={busy}>
                 {busy && <Loader2 aria-hidden className="animate-spin" />}
                 Дальше
               </Button>
             ) : profile.is_published ? (
-              <Button size="lg" onClick={() => (after ? publish(true) : save())} disabled={busy}>
+              <Button size="lg" onClick={() => (after ? publish(true) : saveAndView())} disabled={busy}>
                 {busy && <Loader2 aria-hidden className="animate-spin" />}
                 {after ? after.cta : "Сохранить"}
               </Button>

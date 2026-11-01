@@ -9,7 +9,7 @@ const PNG = Buffer.from(
 /** KAN-34: аватар загружается в редакторе и виден на публичном профиле. */
 test("member uploads an avatar and it shows on the public profile", async ({ page }) => {
   await page.request.post("/api/auth/login", { data: { email: "maria@example.com", password: "demo12345" } });
-  await page.goto("/me/profile");
+  await page.goto("/me/profile/edit");
   await page.locator("#avatar").setInputFiles({ name: "me.png", mimeType: "image/png", buffer: PNG });
   await expect(page.getByRole("button", { name: "Заменить фото" })).toBeVisible();
 
