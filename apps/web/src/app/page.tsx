@@ -247,8 +247,12 @@ function RoleStrip({ roles }: { roles: { slug: string; name: string; n: number }
 /* ───────────── Четыре дороги ───────────── */
 
 function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: Startup; people: Person[]; faces: Person[] }) {
-  const card = "reveal-item card-hover group relative flex flex-col overflow-hidden rounded-[28px] p-6 sm:rounded-[32px] sm:p-9";
-  const cta = "mt-auto inline-flex items-center gap-1.5 pt-6 font-bold sm:pt-8";
+  // Четыре дороги в один ряд на широком экране (2×2 на планшете): блок целиком влезает в экран на 100%.
+  const card = "reveal-item card-hover group relative flex flex-col overflow-hidden rounded-[28px] p-6 sm:p-7";
+  const title = "mt-2 pr-12 text-[26px] leading-[1.05] font-extrabold tracking-[-0.04em]";
+  const preview = "mt-5 grid gap-1.5 rounded-2xl bg-white p-2 text-foreground transition-transform duration-500 group-hover:-translate-y-0.5 max-sm:hidden";
+  const row = "flex items-center gap-2.5 rounded-xl bg-tone p-2 pr-3";
+  const cta = "mt-auto inline-flex items-center gap-1.5 pt-6 font-bold";
   const arrow = <ArrowRight aria-hidden className="size-4 transition-transform duration-300 group-hover:translate-x-1" />;
   const slots = idea?.open_roles.length
     ? idea.open_roles.slice(0, 2).map((r) => ({ name: r.role.name, n: r.slots ?? 1 }))
@@ -257,32 +261,27 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
         { name: "Frontend-разработчик", n: 2 },
       ];
   return (
-    <Reveal className="grid gap-3 lg:grid-cols-5">
-      {/* Хочу в команду: главная дорога, крупная и в цвете бренда. */}
-      <PathLink path="seeker" href="/startups" className={cn(card, "bg-brand text-white hover:bg-brand-hover lg:col-span-3")} style={delay(0)}>
-        <span className="grid gap-8 sm:grid-cols-[minmax(0,1fr)_minmax(0,300px)] sm:items-start">
-          <span>
-            <span className="text-sm font-bold text-white/70">Хочу в команду</span>
-            <h3 className="mt-3 max-w-[14ch] text-[32px] leading-[1.02] font-extrabold tracking-[-0.04em] sm:text-[40px]">Залети в стартап и набери опыт</h3>
-            <span className="mt-4 block max-w-[34ch] text-lg text-white/80">Настоящие задачи и кейс в портфолио.</span>
-          </span>
-          <span aria-hidden className="relative grid gap-1.5 rounded-2xl bg-white p-2 text-foreground max-sm:hidden shadow-[0_24px_50px_-20px_rgb(0_0_0/0.5)] transition-transform duration-500 group-hover:-translate-y-1">
-            <Sticker name="cap" className="absolute -top-7 -right-6 z-10 size-16 rotate-12" />
-            {startups.map((s) => (
-              <span key={s.id} className="flex items-center gap-3 rounded-xl bg-tone p-2 pr-3">
-                <span className="relative size-10 shrink-0 overflow-hidden rounded-lg bg-brand-soft">
-                  {s.cover_url && (
-                    // eslint-disable-next-line @next/next/no-img-element -- обложки уже пережаты api в WebP
-                    <img src={s.cover_url} alt="" className="size-full object-cover" />
-                  )}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <b className="block truncate text-sm font-extrabold">{s.title}</b>
-                  <span className="block truncate text-xs text-muted-foreground">Ищут: {s.open_roles.map((r) => r.role.name).join(", ") || "команда собрана"}</span>
-                </span>
+    <Reveal className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Хочу в команду: главная дорога, в цвете бренда. */}
+      <PathLink path="seeker" href="/startups" className={cn(card, "bg-brand text-white hover:bg-brand-hover")} style={delay(0)}>
+        <Sticker name="cap" className="absolute top-4 right-4 size-12 rotate-12" />
+        <span className="text-sm font-bold text-white/70">Хочу в команду</span>
+        <h3 className={title}>Залети в стартап и набери опыт</h3>
+        <span aria-hidden className={cn(preview, "shadow-[0_24px_50px_-20px_rgb(0_0_0/0.5)]")}>
+          {startups.slice(0, 2).map((s) => (
+            <span key={s.id} className={row}>
+              <span className="relative size-9 shrink-0 overflow-hidden rounded-lg bg-brand-soft">
+                {s.cover_url && (
+                  // eslint-disable-next-line @next/next/no-img-element -- обложки уже пережаты api в WebP
+                  <img src={s.cover_url} alt="" className="size-full object-cover" />
+                )}
               </span>
-            ))}
-          </span>
+              <span className="min-w-0 flex-1">
+                <b className="block truncate text-sm font-extrabold">{s.title}</b>
+                <span className="block truncate text-xs text-muted-foreground">Ищут: {s.open_roles.map((r) => r.role.name).join(", ") || "команда собрана"}</span>
+              </span>
+            </span>
+          ))}
         </span>
         <span className={cn(cta, "text-white")}>
           Смотреть стартапы
@@ -291,21 +290,18 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
       </PathLink>
 
       {/* Есть идея. */}
-      <PathLink path="founder" href="/register?next=/startups/new" className={cn(card, "bg-tone hover:bg-tone-2 lg:col-span-2")} style={delay(60)}>
-        <Sticker name="bulb" className="absolute top-5 right-5 size-14 rotate-12 sm:size-16" />
+      <PathLink path="founder" href="/register?next=/startups/new" className={cn(card, "bg-tone hover:bg-tone-2")} style={delay(60)}>
+        <Sticker name="bulb" className="absolute top-4 right-4 size-12 rotate-12" />
         <span className="text-sm font-bold text-muted-foreground">Есть идея</span>
-        <h3 className="mt-3 pr-14 text-[28px] leading-[1.05] font-extrabold tracking-[-0.04em] sm:pr-16 sm:text-[32px]">Собери под неё команду</h3>
-        <span aria-hidden className="mt-6 rounded-2xl bg-white p-4 max-sm:hidden transition-transform duration-500 group-hover:-translate-y-0.5">
-          <b className="block truncate text-sm font-extrabold">{idea?.title ?? "Твоя идея"}</b>
-          <span className="mt-0.5 block text-xs text-muted-foreground">Места в команде</span>
-          <span className="mt-3 grid gap-1.5">
-            {slots.map((s) => (
-              <span key={s.name} className="flex items-center justify-between gap-2 rounded-xl bg-tone px-3 py-2 text-xs font-semibold">
-                <span className="truncate">{s.name}</span>
-                <span className="shrink-0 text-brand-ink">{plural(s.n, `${s.n} место`, `${s.n} места`, `${s.n} мест`)}</span>
-              </span>
-            ))}
-          </span>
+        <h3 className={title}>Собери под неё команду</h3>
+        <span aria-hidden className={cn(preview, "p-3")}>
+          <b className="block truncate px-1 text-sm font-extrabold">{idea?.title ?? "Твоя идея"}</b>
+          {slots.map((s) => (
+            <span key={s.name} className="flex items-center justify-between gap-2 rounded-xl bg-tone px-3 py-2 text-xs font-semibold">
+              <span className="truncate">{s.name}</span>
+              <span className="shrink-0 text-brand-ink">{plural(s.n, `${s.n} место`, `${s.n} места`, `${s.n} мест`)}</span>
+            </span>
+          ))}
         </span>
         <span className={cn(cta, "text-brand-ink")}>
           Опубликовать идею
@@ -314,15 +310,15 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
       </PathLink>
 
       {/* Нет идеи. */}
-      <Link href="/people/cofounders" className={cn(card, "bg-tone hover:bg-tone-2 lg:col-span-2")} style={delay(120)}>
-        <Sticker name="team" className="absolute top-5 right-5 size-14 -rotate-6 sm:size-16" />
+      <Link href="/people/cofounders" className={cn(card, "bg-tone hover:bg-tone-2")} style={delay(120)}>
+        <Sticker name="team" className="absolute top-4 right-4 size-12 -rotate-6" />
         <span className="text-sm font-bold text-muted-foreground">Нет идеи</span>
-        <h3 className="mt-3 pr-14 text-[28px] leading-[1.05] font-extrabold tracking-[-0.04em] sm:pr-16 sm:text-[32px]">Придумай её вместе с сообщниками</h3>
+        <h3 className={title}>Придумай её с сообщниками</h3>
         {faces.length > 0 && (
-          <span aria-hidden className="mt-6 flex -space-x-3 max-sm:mt-5">
-            {faces.map((p) => (
+          <span aria-hidden className="mt-5 flex -space-x-3 max-sm:hidden">
+            {faces.slice(0, 5).map((p) => (
               // eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP
-              <img key={p.slug} src={p.avatar_url!} alt="" className="size-14 rounded-full object-cover ring-4 ring-tone transition-transform duration-500 group-hover:-translate-y-0.5" />
+              <img key={p.slug} src={p.avatar_url!} alt="" className="size-12 rounded-full object-cover ring-4 ring-tone transition-transform duration-500 group-hover:-translate-y-0.5" />
             ))}
           </span>
         )}
@@ -332,29 +328,22 @@ function Paths({ startups, idea, people, faces }: { startups: Startup[]; idea?: 
         </span>
       </Link>
 
-      {/* Нужны люди: светлая, превью людей поднимается при наведении, как в остальных карточках. */}
-      <Link href="/people" className={cn(card, "bg-brand-soft hover:bg-marker lg:col-span-3")} style={delay(180)}>
-        <span className="grid gap-8 sm:grid-cols-[minmax(0,1fr)_minmax(0,300px)] sm:items-start">
-          <span>
-            <span className="text-sm font-bold text-brand-ink">Нужны люди</span>
-            <h3 className="mt-3 max-w-[16ch] text-[32px] leading-[1.02] font-extrabold tracking-[-0.04em] sm:text-[40px]">Найди разработчика или дизайнера</h3>
-          </span>
-          <span aria-hidden className="relative grid gap-1.5 rounded-2xl bg-white p-2 transition-transform duration-500 group-hover:-translate-y-1 max-sm:hidden">
-            <Sticker name="code" className="absolute -top-7 -right-6 z-10 size-16 rotate-12" />
-            {people.map((p) => (
-              <span key={p.slug} className="flex items-center gap-3 rounded-xl bg-tone p-2 pr-3">
-                {/* eslint-disable-next-line @next/next/no-img-element -- фото витрины уже пережаты в WebP */}
-                <img src={p.avatar_url!} alt="" className="size-10 shrink-0 rounded-lg object-cover" />
-                <span className="min-w-0 flex-1">
-                  <b className="block truncate text-sm font-extrabold">{p.primary_role?.name ?? p.display_name}</b>
-                  <span className="block truncate text-xs text-muted-foreground">
-                    {p.display_name}
-                    {p.city ? ` · ${p.city}` : ""}
-                  </span>
-                </span>
+      {/* Нужны люди. */}
+      <Link href="/people" className={cn(card, "bg-brand-soft hover:bg-marker")} style={delay(180)}>
+        <Sticker name="code" className="absolute top-4 right-4 size-12 rotate-12" />
+        <span className="text-sm font-bold text-brand-ink">Нужны люди</span>
+        <h3 className={title}>Найди разработчика или дизайнера</h3>
+        <span aria-hidden className={preview}>
+          {people.slice(0, 2).map((p) => (
+            <span key={p.slug} className={row}>
+              {/* eslint-disable-next-line @next/next/no-img-element -- фото витрины уже пережаты в WebP */}
+              <img src={p.avatar_url!} alt="" className="size-9 shrink-0 rounded-lg object-cover" />
+              <span className="min-w-0 flex-1">
+                <b className="block truncate text-sm font-extrabold">{p.primary_role?.name ?? p.display_name}</b>
+                <span className="block truncate text-xs text-muted-foreground">{p.display_name}</span>
               </span>
-            ))}
-          </span>
+            </span>
+          ))}
         </span>
         <span className={cn(cta, "text-brand-ink")}>
           Смотреть людей
@@ -404,9 +393,10 @@ function Section({
         </div>
         {lead && <p className="max-w-[40ch] text-lg text-muted-foreground sm:ml-auto">{lead}</p>}
         {(sticker || aside) && (
-          <div className="ml-auto flex items-center gap-8">
+          // Ссылка «Все …» стоит на линии заголовка (по низу), наклейка — над ней, не сдвигая её.
+          <div className="ml-auto flex items-end gap-8">
             {sticker && <div className="max-sm:hidden">{sticker}</div>}
-            {aside && <div>{aside}</div>}
+            {aside && <div className="pb-1.5">{aside}</div>}
           </div>
         )}
       </div>

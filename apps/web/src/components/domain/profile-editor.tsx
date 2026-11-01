@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Loader2 } from "lucide-react";
+import { Check, ChevronDown, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
@@ -11,6 +11,7 @@ import { ResumeUpload } from "@/components/domain/resume-upload";
 import { SkillPicker } from "@/components/domain/skill-picker";
 import { usePublishWithConsent } from "@/components/domain/publish-consent";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -92,6 +93,29 @@ function Req() {
     <span aria-hidden className="ml-0.5 text-destructive">
       *
     </span>
+  );
+}
+
+/** Тип ссылки — фирменный список вместо системного select (тот выглядит по-разному на каждом устройстве). */
+function LinkKindSelect({ value, onChange }: { value: LinkKind; onChange: (v: LinkKind) => void }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label={`Тип ссылки: ${LINK_KIND[value]}`}
+        className="inline-flex h-11 w-36 shrink-0 items-center justify-between gap-2 rounded-xl border border-[var(--field)] bg-white px-3.5 text-sm font-semibold transition-colors outline-none hover:border-[var(--input)] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/25 aria-expanded:border-ring"
+      >
+        {LINK_KIND[value]}
+        <ChevronDown aria-hidden className="size-4 text-muted-foreground" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-44 p-1.5">
+        {(Object.entries(LINK_KIND) as [LinkKind, string][]).map(([v, label]) => (
+          <DropdownMenuItem key={v} onClick={() => onChange(v)} className="gap-2.5 rounded-lg py-2">
+            <Check aria-hidden className={cn("size-4 text-brand", v !== value && "invisible")} />
+            <span className={cn(v === value && "font-semibold")}>{label}</span>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -404,18 +428,7 @@ export function ProfileEditor({
               <div className="mt-2 grid gap-2">
                 {f.links.map((l, i) => (
                   <div key={i} className="flex gap-2">
-                    <select
-                      aria-label="Тип ссылки"
-                      value={l.kind}
-                      onChange={(e) => set("links", f.links.map((x, j) => (j === i ? { ...x, kind: e.target.value as LinkKind } : x)))}
-                      className="h-11 rounded-xl bg-tone px-3 text-sm"
-                    >
-                      {Object.entries(LINK_KIND).map(([v, label]) => (
-                        <option key={v} value={v}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
+                    <LinkKindSelect value={l.kind} onChange={(kind) => set("links", f.links.map((x, j) => (j === i ? { ...x, kind } : x)))} />
                     <Input aria-label="Ссылка" className="h-11" value={l.url} onChange={(e) => set("links", f.links.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)))} placeholder="github.com/your-name" />
                   </div>
                 ))}

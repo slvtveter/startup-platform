@@ -48,8 +48,8 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
 
   // Роль с навыком — через редактор: в мастере роли создаются по шаблону без навыков.
   // Роль из мастера убираем, чтобы у стартапа было одно место и одна кнопка «Откликнуться».
-  await founder.getByRole("button", { name: "Удалить" }).click();
-  await expect(founder.getByRole("button", { name: "Удалить" })).toHaveCount(0);
+  await founder.getByRole("button", { name: "Удалить", exact: true }).click();
+  await expect(founder.getByRole("button", { name: "Удалить", exact: true })).toHaveCount(0);
   await founder.getByRole("button", { name: "Добавить место" }).click();
   await founder.getByPlaceholder("Название роли").fill("UI/UX дизайнер");
   await founder.getByPlaceholder("Начни вводить").fill("Figma");

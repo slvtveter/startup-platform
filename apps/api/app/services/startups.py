@@ -402,6 +402,15 @@ async def update_role(db: AsyncSession, r: StartupRole, data: RoleUpdate) -> Non
     await db.commit()
 
 
+async def delete_startup(db: AsyncSession, s: Startup) -> None:
+    """Удалить стартап насовсем. Роли и отклики уходят каскадом (FK ondelete=CASCADE),
+    переписка остаётся у людей (ссылка чата на отклик обнуляется), файлы обложки удаляются."""
+    cover = s.cover_key
+    await db.delete(s)
+    await db.commit()
+    covers.drop(cover)
+
+
 async def delete_role(db: AsyncSession, r: StartupRole) -> None:
     has_apps = await db.scalar(select(exists().where(Application.startup_role_id == r.id)))
     if has_apps:

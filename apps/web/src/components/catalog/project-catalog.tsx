@@ -3,13 +3,14 @@ import Link from "next/link";
 
 import { CatalogToolbar, FilterSidebar, type FilterGroup } from "@/components/domain/filter-bar";
 import { Pager, asList, type SearchParams } from "@/components/domain/filters";
-import { Container, EmptyState, PageHeader } from "@/components/domain/page-header";
+import { Container, EmptyState } from "@/components/domain/page-header";
 import { StartupCard } from "@/components/domain/startup-card";
 import { buttonVariants } from "@/components/ui/button";
 import { listStartups, startupFacets } from "@/lib/api";
 import { STAGE, TERMS, plural } from "@/lib/labels";
 import { startupsSeo } from "@/lib/seo";
 import { getRoles, serverClient } from "@/lib/server-api";
+import { cn } from "@/lib/utils";
 
 const LIMIT = 12;
 const BASE = "/startups";
@@ -57,21 +58,18 @@ export async function ProjectCatalog({ params }: { params: SearchParams }) {
 
   return (
     <Container>
-      <PageHeader
-        sticker="flag"
-        title={seo.h1}
-        actions={
-          <Link href="/startups/new" className={buttonVariants()}>
+      {/* Заголовок — над колонкой фильтров, на одной линии с поиском: без пустой полосы над каталогом.
+          Длинный SEO-заголовок («Стартапы ищут Frontend-разработчика») — на всю ширину. */}
+      <div className="grid gap-y-5 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-x-12 lg:gap-y-6">
+        <div className={cn("flex items-center justify-between gap-4 lg:min-h-11", seo.h1.length > 12 && "lg:col-span-2")}>
+          <h1 className="text-[32px] leading-[1.05] sm:text-[40px]">{seo.h1}</h1>
+          <Link href="/startups/new" className={buttonVariants({ size: "sm", variant: "outline", className: "shrink-0 lg:hidden" })}>
             <Plus aria-hidden />
-            Добавить проект
+            Проект
           </Link>
-        }
-      />
-
-      <div className="mt-6 lg:mt-10 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-12">
-        <FilterSidebar basePath={BASE} params={params} groups={groups} />
-        <div className="min-w-0">
-          <CatalogToolbar
+        </div>
+          <div className="min-w-0 lg:col-start-2">
+        <CatalogToolbar
             basePath={BASE}
             params={params}
             placeholder="Название, тема, роль или навык"
@@ -81,19 +79,29 @@ export async function ProjectCatalog({ params }: { params: SearchParams }) {
               { value: "roles", label: "Больше открытых ролей", short: "больше ролей" },
             ]}
             resultLabel={countLabel}
+            action={
+              <Link href="/startups/new" className={buttonVariants({ className: "h-11" })}>
+                <Plus aria-hidden />
+                Добавить проект
+              </Link>
+            }
             summary={
               // h2 между h1 страницы и h3 карточек: порядок заголовков для экранных читалок.
               <span className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
                 <h2 className="text-base font-bold tracking-normal">{countLabel}</h2>
                 <Link href="/me/settings" className="inline-flex min-h-6 items-center text-sm font-semibold text-brand-ink transition-colors hover:text-brand-hover">
-                  Присылать новые роли на почту
+                  Присылать новые стартапы на почту
                 </Link>
               </span>
             }
           />
-
+        </div>
+        <div className={cn("lg:col-start-1 lg:row-start-2", seo.h1.length > 12 && "lg:row-span-2")}>
+          <FilterSidebar basePath={BASE} params={params} groups={groups} />
+        </div>
+        <div className="min-w-0 lg:col-start-2">
           {data && data.items.length > 0 ? (
-            <ul className="mt-4 grid gap-3">
+            <ul className="grid gap-3">
               {data.items.map((s, i) => (
                 <StartupCard key={s.id} startup={s} as="li" eager={i < 6} />
               ))}
@@ -117,7 +125,7 @@ export async function ProjectCatalog({ params }: { params: SearchParams }) {
               )}
             </ul>
           ) : (
-            <div className="mt-4">
+            <div>
               <EmptyState
                 title={q && !["role", "terms", "stage"].some((k) => asList(params[k]).length) ? "Ничего не нашли" : "Под этот фильтр ничего нет"}
                 text={
