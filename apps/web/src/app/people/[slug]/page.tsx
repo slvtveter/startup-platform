@@ -13,6 +13,7 @@ import { ReportButton } from "@/components/domain/report-button";
 import { PersonView } from "@/components/domain/person-view";
 import { buttonVariants } from "@/components/ui/button";
 import { JsonLd, breadcrumbs, siteUrl } from "@/components/site/json-ld";
+import { TrackView } from "@/components/site/track-view";
 import { getPerson, getStartup, listMyStartups } from "@/lib/api";
 import { TERMS, termsOf } from "@/lib/labels";
 import { getMe, serverClient } from "@/lib/server-api";
@@ -73,6 +74,8 @@ export default async function PersonPage({ params }: Props) {
 
   return (
     <Container className={showBar ? "pb-28 lg:pb-10" : undefined}>
+      {/* Просмотр чужого профиля: владелец видит счётчик «посмотрели за 30 дней» на главной. */}
+      {!p.is_demo && user?.profile?.slug !== p.slug && <TrackView name="profile_viewed" slug={p.slug} />}
       <JsonLd
         data={{
           "@context": "https://schema.org",
