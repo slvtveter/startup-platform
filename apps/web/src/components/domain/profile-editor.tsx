@@ -327,9 +327,10 @@ export function ProfileEditor({
                 >
                   {i < step ? <Check aria-hidden className="size-4" strokeWidth={3} /> : i + 1}
                 </span>
-                <span className={i === step ? "" : "text-muted-foreground"}>{title}</span>
+                {/* На телефоне подписан только текущий шаг: три названия не помещаются в строку. */}
+                <span className={i === step ? "" : "text-muted-foreground max-sm:sr-only"}>{title}</span>
               </button>
-              {i < STEPS.length - 1 && <span className="hidden h-px w-8 bg-border sm:block" />}
+              {i < STEPS.length - 1 && <span className="h-px w-4 bg-border sm:w-8" />}
             </li>
           ))}
         </ol>
@@ -562,7 +563,8 @@ export function ProfileEditor({
       </div>
 
       <aside className="grid h-fit gap-4 lg:sticky lg:top-24">
-        <div className="rounded-[28px] bg-tone p-6">
+        {/* На телефоне полоска уже есть над шагами — здесь не повторяем. */}
+        <div className="rounded-[28px] bg-tone p-6 max-lg:hidden">
           <Progress value={score} label="Профиль заполнен" />
           {missing.length > 0 ? (
             <>
