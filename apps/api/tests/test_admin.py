@@ -188,3 +188,23 @@ async def _demo(make_user, email: str, demo_email: str):
         await db.execute(update(User).where(User.email == email).values(email=demo_email))
         await db.commit()
     return c
+
+
+async def test_admin_deletes_startup_and_journal_is_readable(make_user, client):
+    admin = await make_user("jr-admin@mail.ru", admin=True)
+    founder = await make_user("jr-founder@mail.ru", published=True)
+    s = await create_published(founder)
+    await admin.post(f"/api/admin/startups/{s['id']}/hide")
+    assert (await founder.delete(f"/api/admin/startups/{s['id']}")).status_code == 403
+    assert (await admin.delete(f"/api/admin/startups/{s['id']}")).status_code == 200
+    assert (await client.get(f"/api/startups/{s['slug']}")).status_code == 404
+
+    log = (await admin.get("/api/admin/audit")).json()
+    by_action = {a["action"]: a for a in log}
+    assert by_action["delete_startup"]["label"] == "Удалил стартап"
+    assert by_action["delete_startup"]["target_label"] == s["title"]
+    assert by_action["delete_startup"]["target_href"] is None  # стартапа больше нет
+    assert by_action["hide_startup"]["label"] == "Скрыл стартап"
+
+    admins = (await admin.get("/api/admin/users", params={"kind": "admins"})).json()
+    assert [u["email"] for u in admins] == ["jr-admin@mail.ru"]

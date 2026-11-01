@@ -32,6 +32,18 @@ export type AdminActionOut = {
      * Created At
      */
     created_at: string;
+    /**
+     * Label
+     */
+    label?: string;
+    /**
+     * Target Label
+     */
+    target_label?: string;
+    /**
+     * Target Href
+     */
+    target_href?: string | null;
 };
 
 /**
@@ -4598,7 +4610,7 @@ export type AdminListUsersData = {
         /**
          * Kind
          */
-        kind?: 'all' | 'real' | 'demo';
+        kind?: 'all' | 'real' | 'demo' | 'admins';
     };
     url: '/api/admin/users';
 };
@@ -4755,6 +4767,36 @@ export type AdminCreatePlatformStartupResponses = {
 };
 
 export type AdminCreatePlatformStartupResponse = AdminCreatePlatformStartupResponses[keyof AdminCreatePlatformStartupResponses];
+
+export type AdminDeleteStartupData = {
+    body?: never;
+    path: {
+        /**
+         * Startup Id
+         */
+        startup_id: string;
+    };
+    query?: never;
+    url: '/api/admin/startups/{startup_id}';
+};
+
+export type AdminDeleteStartupErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminDeleteStartupError = AdminDeleteStartupErrors[keyof AdminDeleteStartupErrors];
+
+export type AdminDeleteStartupResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type AdminDeleteStartupResponse = AdminDeleteStartupResponses[keyof AdminDeleteStartupResponses];
 
 export type AdminHideStartupData = {
     body?: never;
