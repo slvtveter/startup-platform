@@ -50,10 +50,8 @@ export async function fillRegistration(page: Page, email: string) {
 export async function register(page: Page, email: string) {
   await page.goto("/register");
   await fillRegistration(page, email);
-  // После регистрации — развилка «С чего начнёшь?», дальше профиль.
-  await page.waitForURL(/\/welcome/);
-  await page.getByRole("button", { name: /Хочу в команду/ }).click();
-  await page.waitForURL(/\/me\/profile/);
+  // После регистрации — сразу анкета профиля; выбор «Что дальше?» — после неё.
+  await page.waitForURL(/\/me\/profile\/edit/);
 }
 
 export async function shot(page: Page, name: string) {

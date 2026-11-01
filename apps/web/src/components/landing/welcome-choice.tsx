@@ -16,21 +16,21 @@ const CHOICES = [
     sticker: "bulb",
     title: "Есть идея",
     text: "Опишу её в двух абзацах и отмечу, кого не хватает.",
-    next: "/me/profile/edit?welcome=idea",
+    next: "/startups/new",
   },
   {
     key: "cofound",
     sticker: "team",
     title: "Нет идеи, ищу сообщников",
     text: "Хочу найти людей и вместе придумать стартап с нуля.",
-    next: "/me/profile/edit?welcome=cofound",
+    next: "/people/cofounders",
   },
   {
     key: "join",
     sticker: "cap",
     title: "Хочу в команду",
     text: "Найду стартап, который уже работает и ищет людей.",
-    next: "/me/profile/edit?welcome=join",
+    next: "/startups",
   },
 ] as const;
 
@@ -41,7 +41,7 @@ export function WelcomeChoice() {
   async function choose(c: (typeof CHOICES)[number]) {
     setBusy(c.key);
     if (c.key === "cofound") {
-      // Сразу отмечаем «Ищу сообщников»: человек попадёт в раздел, как только заполнит профиль.
+      // Сразу отмечаем «Ищу сообщников»: профиль уже заполнен, человек сразу виден в разделе.
       const { data } = await getMyProfile();
       const current = (data?.looking_for ?? []) as LookingFor[];
       const { error } = await updateMyProfile({ body: { looking_for: [...new Set<LookingFor>([...current, "cofound"])] } });

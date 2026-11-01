@@ -81,7 +81,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
   // Страница после входа подгружается заранее, пока человек вводит пароль.
   useEffect(() => {
-    router.prefetch(safeNext(next, mode === "register" ? "/welcome" : "/"));
+    router.prefetch(safeNext(next, mode === "register" ? "/me/profile/edit?welcome=1" : "/"));
   }, [router, next, mode]);
 
   /** Свои понятные сообщения вместо всплывающих подсказок браузера (они на языке браузера и пропадают). */
@@ -129,7 +129,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     const { data, error: err } = await verifyCode({ body: { email: email.trim(), code } });
     if (err || !data) return errorMessage(err);
     if (data.created) goal("signup", { method: "email" });
-    go(safeNext(next, data.created ? "/welcome" : "/"));
+    go(safeNext(next, data.created ? "/me/profile/edit?welcome=1" : "/"));
     return null;
   }
 
