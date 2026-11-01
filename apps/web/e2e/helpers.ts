@@ -40,8 +40,8 @@ export async function fillRegistration(page: Page, email: string) {
   await page.getByLabel("Email").fill(email);
   await expect(page.getByLabel("Email")).toHaveValue(email);
   await page.getByLabel("Пароль", { exact: true }).fill("e2e-password-1");
-  // Публикацию профиля здесь не отмечаем: тесты проверяют и окно согласия при публикации.
-  await page.getByLabel(/Мне есть 18 лет/).check();
+  // Соглашение и 18+ принимаются нажатием кнопки. Публикацию профиля не отмечаем:
+  // тесты проверяют и окно согласия при публикации.
   await page.getByRole("button", { name: "Получить код на почту" }).click();
   // Код отправляется сам после шестой цифры.
   await page.getByLabel("Код из письма").fill(await codeFromMailpit(email));

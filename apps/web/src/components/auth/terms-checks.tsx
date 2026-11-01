@@ -1,79 +1,50 @@
 import Link from "next/link";
 
-import { FieldError } from "@/components/auth/auth-card";
-import { cn } from "@/lib/utils";
-
-export type TermsState = { terms: boolean; publish: boolean };
+export type TermsState = { publish: boolean };
 
 const link = "font-semibold text-brand-ink underline underline-offset-2 hover:text-brand-hover";
 
 /**
- * Две пустые галочки.
- * 1. Обязательная: 18+ и соглашение одной строкой (возраст — условие из п. 2.1 соглашения).
- *    Политика конфиденциальности — уведомление, а не согласие: только ссылка в той же строке.
- * 2. Необязательная: согласие на публикацию профиля (ст. 10.1 152-ФЗ требует оформлять его
- *    отдельно от других согласий). Дано здесь — при публикации профиля больше ничего не спросим.
+ * Регистрация с одной галочкой (решение владельца 2026-11-01, разбор в docs/legal.md):
+ * - Соглашение и 18+ (п. 2.1 соглашения) принимаются нажатием кнопки — акцепт действием
+ *   (п. 3 ст. 438 ГК). Данные аккаунта обрабатываются по договору (п. 5 ч. 1 ст. 6 152-ФЗ),
+ *   поэтому отдельного согласия на обработку нет, а политика — уведомление и только ссылка.
+ * - Согласие на публикацию профиля (ст. 10.1) по закону отдельное и активное: пустая
+ *   необязательная галочка. Отмечена — при публикации профиля больше ничего не спросим.
  */
-export function TermsChecks({
-  value,
-  onChange,
-  errors,
-}: {
-  value: TermsState;
-  onChange: (v: TermsState) => void;
-  errors: Record<string, string>;
-}) {
-  const box = "size-6 shrink-0 accent-[var(--brand)]";
-  // Строка 24px — у ссылок внутри текста тап-зона не меньше 24px (WCAG 2.5.8).
-  const a = cn(link, "inline py-0.5");
+export function PublishCheck({ value, onChange }: { value: TermsState; onChange: (v: TermsState) => void }) {
   return (
-    <div className="grid gap-3 text-sm leading-6 text-muted-foreground">
-      <div>
-        <label className="flex items-start gap-3">
-          <input
-            id="terms"
-            type="checkbox"
-            aria-invalid={!!errors.terms}
-            aria-describedby={errors.terms ? "terms-error" : undefined}
-            checked={value.terms}
-            onChange={(e) => onChange({ ...value, terms: e.target.checked })}
-            className={box}
-          />
-          <span>
-            Мне есть 18 лет, я принимаю{" "}
-            <Link href="/terms" target="_blank" className={a}>
-              Пользовательское соглашение
-            </Link>{" "}
-            и ознакомлен(а) с{" "}
-            <Link href="/privacy" target="_blank" className={a}>
-              Политикой конфиденциальности
-            </Link>
-          </span>
-        </label>
-        <FieldError id="terms-error" message={errors.terms} />
-      </div>
-      <label className="flex items-start gap-3">
-        <input
-          id="publish"
-          type="checkbox"
-          checked={value.publish}
-          onChange={(e) => onChange({ ...value, publish: e.target.checked })}
-          className={box}
-        />
-        <span>
-          Согласен(на) на{" "}
-          <Link href="/profile/publication-consent" target="_blank" className={a}>
-            публикацию профиля
-          </Link>{" "}
-          в каталоге людей
-        </span>
-      </label>
-    </div>
+    <label className="flex items-start gap-3 text-sm leading-6 text-muted-foreground">
+      <input
+        id="publish"
+        type="checkbox"
+        checked={value.publish}
+        onChange={(e) => onChange({ ...value, publish: e.target.checked })}
+        className="size-6 shrink-0 accent-[var(--brand)]"
+      />
+      <span>
+        Согласен(на) на{" "}
+        <Link href="/profile/publication-consent" target="_blank" className={`${link} inline py-0.5`}>
+          публикацию профиля
+        </Link>{" "}
+        в каталоге людей
+      </span>
+    </label>
   );
 }
 
-export function termsErrors(v: TermsState): Record<string, string> {
-  const errs: Record<string, string> = {};
-  if (!v.terms) errs.terms = "Без согласия с соглашением аккаунт не создать";
-  return errs;
+/** Строка под кнопкой: нажатие кнопки = принятие соглашения и подтверждение 18+. */
+export function TermsNote({ action }: { action: string }) {
+  return (
+    <p className="text-center text-xs leading-5 text-muted-foreground">
+      Нажимая «{action}», ты подтверждаешь, что тебе есть 18 лет, и принимаешь{" "}
+      <Link href="/terms" target="_blank" className={`${link} inline py-0.5`}>
+        Пользовательское соглашение
+      </Link>
+      .{" "}
+      <Link href="/privacy" target="_blank" className={`${link} inline py-0.5`}>
+        Политика конфиденциальности
+      </Link>
+    </p>
+  );
 }

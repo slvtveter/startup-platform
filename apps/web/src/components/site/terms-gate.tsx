@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { TermsChecks, termsErrors, type TermsState } from "@/components/auth/terms-checks";
+import { PublishCheck, TermsNote, type TermsState } from "@/components/auth/terms-checks";
 import { Button } from "@/components/ui/button";
 import { acceptTerms, logout } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
@@ -19,8 +19,7 @@ const OPEN = ["/terms", "/privacy", "/cookies", "/profile/publication-consent"];
 export function TermsGate({ needed, children }: { needed: boolean; children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [value, setValue] = useState<TermsState>({ terms: false, publish: false });
-  const [fields, setFields] = useState<Record<string, string>>({});
+  const [value, setValue] = useState<TermsState>({ publish: false });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -28,9 +27,6 @@ export function TermsGate({ needed, children }: { needed: boolean; children: Rea
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const errs = termsErrors(value);
-    setFields(errs);
-    if (Object.keys(errs).length) return document.getElementById(Object.keys(errs)[0])?.focus();
     setBusy(true);
     const res = await acceptTerms({ body: { accept_terms: true, adult: true, publish_consent: value.publish } });
     if (res.error) {
@@ -47,7 +43,7 @@ export function TermsGate({ needed, children }: { needed: boolean; children: Rea
           <h1 className="text-[32px] leading-[1.05]">Последний шаг</h1>
           <p className="mt-2.5 text-muted-foreground">Прими условия Envola, чтобы продолжить.</p>
           <div className="mt-7">
-            <TermsChecks value={value} onChange={setValue} errors={fields} />
+            <PublishCheck value={value} onChange={setValue} />
           </div>
           {error && (
             <p role="alert" className="mt-4 rounded-xl bg-destructive/10 px-3 py-2.5 text-sm text-destructive">
@@ -58,6 +54,9 @@ export function TermsGate({ needed, children }: { needed: boolean; children: Rea
             {busy && <Loader2 aria-hidden className="size-5 animate-spin" />}
             Продолжить
           </Button>
+          <div className="mt-3">
+            <TermsNote action="Продолжить" />
+          </div>
           <button
             type="button"
             onClick={async () => {

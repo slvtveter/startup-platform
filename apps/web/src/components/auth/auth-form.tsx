@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
 import { FieldError } from "@/components/auth/auth-card";
-import { TermsChecks, termsErrors, type TermsState } from "@/components/auth/terms-checks";
+import { PublishCheck, TermsNote, type TermsState } from "@/components/auth/terms-checks";
 import { CodeStep } from "@/components/auth/code-step";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,7 +66,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
-  const [consent, setConsent] = useState<TermsState>({ terms: false, publish: false });
+  const [consent, setConsent] = useState<TermsState>({ publish: false });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [fields, setFields] = useState<Record<string, string>>({});
@@ -83,7 +83,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) errs.email = "Проверь адрес: нужен вид name@mail.ru";
     if (mode === "register" && password.length < 8) errs.password = "Пароль короче 8 символов";
     if (mode === "login" && !password) errs.password = "Введи пароль";
-    return mode === "register" ? { ...errs, ...termsErrors(consent) } : errs;
+    return errs;
   }
 
   async function submit(e: React.FormEvent) {
@@ -194,7 +194,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         )}
         <FieldError id="password-error" message={fields.password} />
       </div>
-      {mode === "register" && <TermsChecks value={consent} onChange={setConsent} errors={fields} />}
+      {mode === "register" && <PublishCheck value={consent} onChange={setConsent} />}
       {error && (
         <p role="alert" className="rounded-xl bg-destructive/10 px-3 py-2.5 text-sm text-destructive">
           {error}
@@ -220,6 +220,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           "Получить код на почту"
         )}
       </Button>
+      {mode === "register" && <TermsNote action="Получить код на почту" />}
     </form>
   );
 }
