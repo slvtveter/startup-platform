@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 
 import { CatalogToolbar, FilterSidebar, type FilterGroup } from "@/components/domain/filter-bar";
-import { Pager, asList, toggleHref, type SearchParams } from "@/components/domain/filters";
+import { Pager, asList, type SearchParams } from "@/components/domain/filters";
 import { Container, EmptyState, PageHeader } from "@/components/domain/page-header";
 import { StartupCard } from "@/components/domain/startup-card";
 import { buttonVariants } from "@/components/ui/button";
@@ -10,7 +10,6 @@ import { listStartups, startupFacets } from "@/lib/api";
 import { STAGE, TERMS, plural } from "@/lib/labels";
 import { startupsSeo } from "@/lib/seo";
 import { getRoles, serverClient } from "@/lib/server-api";
-import { cn } from "@/lib/utils";
 
 const LIMIT = 12;
 const BASE = "/startups";
@@ -42,7 +41,6 @@ export async function ProjectCatalog({ params }: { params: SearchParams }) {
     startupFacets({ client, query: { ...common, stage } }),
   ]);
   const counts = Object.fromEntries(STAGES.map((s) => [s.value, facets?.stage[s.value] ?? 0]));
-  const all = Object.values(counts).reduce((a, b) => a + b, 0);
   const total = data?.total ?? 0;
   const onlyIdeas = stage.length === 1 && stage[0] === "idea";
   const countLabel = onlyIdeas ? `${total} ${plural(total, "идея", "идеи", "идей")}` : `${total} ${plural(total, "проект", "проекта", "проектов")}`;
@@ -51,10 +49,8 @@ export async function ProjectCatalog({ params }: { params: SearchParams }) {
   const roleOptions = roles
     .map((r) => ({ value: r.slug, label: r.name, count: facets?.role[r.slug] ?? 0 }))
     .sort((a, b) => Number(b.count > 0) - Number(a.count > 0));
-  const chip = "inline-flex h-11 shrink-0 items-center gap-2 rounded-full pr-2 pl-4 text-sm font-semibold whitespace-nowrap transition-colors";
-  const badge = "grid h-7 min-w-7 place-items-center rounded-full px-2 text-xs font-bold tabular-nums";
   const groups: FilterGroup[] = [
-    { name: "stage", title: "Стадия", allLabel: "Все стадии", sheet: false, options: STAGES.map((s) => ({ value: s.value, label: s.label, count: counts[s.value] })) },
+    { name: "stage", title: "Стадия", options: STAGES.map((s) => ({ value: s.value, label: s.label, count: counts[s.value] })) },
     { name: "role", title: "Кого ищут", options: roleOptions },
     { name: "terms", title: "Оплата", options: Object.entries(TERMS).map(([value, label]) => ({ value, label, count: facets?.terms[value] ?? 0 })) },
   ];
@@ -72,35 +68,7 @@ export async function ProjectCatalog({ params }: { params: SearchParams }) {
         }
       />
 
-      {/* Телефон: стадия рядом прокручиваемых переключателей над поиском. На широком экране она в колонке фильтров. */}
-      <nav aria-label="Стадия проекта" className="-mx-4 mt-6 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0 lg:hidden">
-        <Link
-          href={toggleHref(BASE, params, "stage", null)}
-          scroll={false}
-          aria-current={stage.length === 0 ? "true" : undefined}
-          className={cn(chip, stage.length === 0 ? "bg-second text-on-second hover:bg-second-hover" : "bg-tone hover:bg-tone-2")}
-        >
-          Все
-          <span className={cn(badge, stage.length === 0 ? "bg-white/50" : "bg-white")}>{all}</span>
-        </Link>
-        {STAGES.map((s) => {
-          const on = stage.includes(s.value);
-          return (
-            <Link
-              key={s.value}
-              href={toggleHref(BASE, params, "stage", s.value)}
-              scroll={false}
-              aria-current={on ? "true" : undefined}
-              className={cn(chip, on ? "bg-second text-on-second hover:bg-second-hover" : "bg-tone hover:bg-tone-2")}
-            >
-              {s.label}
-              <span className={cn(badge, on ? "bg-white/50" : "bg-white")}>{counts[s.value]}</span>
-            </Link>
-          );
-        })}
-      </nav>
-
-      <div className="mt-4 lg:mt-10 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-12">
+      <div className="mt-6 lg:mt-10 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-12">
         <FilterSidebar basePath={BASE} params={params} groups={groups} />
         <div className="min-w-0">
           <CatalogToolbar
