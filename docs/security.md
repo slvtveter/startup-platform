@@ -13,3 +13,7 @@
 - Лимиты и CSRF: `app/core/csrf.py`, `app/services/ratelimit.py`, `app/services/client_events.py`.
 - Заголовки и CSP: `infra/Caddyfile.prod`.
 - Секреты: только `.env` (в git не попадают), шаблоны — `infra/.env.example` и `infra/.env.prod.example`.
+
+## Аудиты
+
+- [2026-11-01](security-audit-2026-11-01.md) — пентест прода, кода и сервера: что проверено, что исправлено, рекомендации.

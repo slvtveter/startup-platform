@@ -16,8 +16,15 @@ import { apiCode, errorMessage, fieldErrors } from "@/lib/errors";
 import { goal } from "@/lib/metrika";
 
 export function safeNext(next: string | null, fallback: string) {
-  // Только относительные пути: защищаемся от открытого редиректа.
-  return next && next.startsWith("/") && !next.startsWith("//") ? next : fallback;
+  // Только пути своего сайта: защищаемся от открытого редиректа. «//evil.com», «/\\evil.com»
+  // (браузер читает обратный слэш как прямой) и управляющие символы не пропускаем.
+  if (!next || !next.startsWith("/") || next.startsWith("//") || /[\\\u0000-\u001f]/.test(next)) return fallback;
+  try {
+    const url = new URL(next, "https://envola.invalid");
+    return url.origin === "https://envola.invalid" ? url.pathname + url.search + url.hash : fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 /** Переход после входа: пока грузится следующая страница, показываем «Входим…», а не замершую кнопку. */
