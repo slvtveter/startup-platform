@@ -1,6 +1,5 @@
 import asyncio
 import html
-import json
 import logging
 import re
 import smtplib
@@ -31,8 +30,9 @@ def _send_smtp(msg: EmailMessage) -> None:
 
 
 _URL = re.compile(r"https?://[^\s<]+")
-# Шаблон в стиле сайта: инлайн-стили и таблицы (почтовые клиенты не понимают остальное).
-# Ни одной картинки, даже логотип — текстом: с картинками письмо уходит в «Промоакции» и спам.
+# Шаблон нарочно похож на обычное письмо, а не на рассылку: белый фон, без «карточек»,
+# слоганов и картинок (даже логотип текстом). Gmail раскладывает письма по вкладкам по виду
+# письма: дизайнерская вёрстка с брендингом и кнопками-пилюлями уводит коды в «Промоакции».
 _TEMPLATE = Template((Path(__file__).parent.parent / "templates" / "email.html").read_text())
 
 
@@ -51,9 +51,9 @@ _LABELS = (
 
 _BUTTON_STYLE = (
     "display:inline-block;background:#3b6fe4;color:#ffffff;text-decoration:none;"
-    "font-weight:700;font-size:16px;line-height:1;padding:16px 28px;border-radius:999px"
+    "font-weight:600;font-size:15px;line-height:1;padding:12px 20px;border-radius:6px"
 )
-_MUTED = "#5b6678"
+_MUTED = "#6b7280"
 # Строка из одних шести цифр — код из письма: крупно, отдельной плашкой.
 _CODE = re.compile(r"\d{6}")
 
@@ -73,9 +73,8 @@ def _button(url: str, label: str | None) -> str:
 
 def _code(code: str) -> str:
     return (
-        '<p style="margin:8px 0 20px;padding:20px 12px;background:#f4f6fa;border-radius:20px;'
-        "text-align:center;font-size:36px;line-height:1;font-weight:800;letter-spacing:10px;"
-        f'color:#0f1b2d">{code}</p>'
+        '<p style="margin:4px 0 16px;font-size:28px;line-height:1.2;font-weight:700;'
+        f'letter-spacing:4px;color:#1a2233">{code}</p>'
     )
 
 
@@ -106,9 +105,10 @@ def _html(subject: str, body: str, unsubscribe: str | None, title: str | None = 
         if pending:
             paragraphs.append(_text(pending))
     footer = (
+        "Уведомление с envola.ru. "
         f'<a href="{html.escape(unsubscribe)}" style="color:{_MUTED}">Отписаться от таких писем</a>'
         if unsubscribe
-        else "Это служебное письмо, от него нельзя отписаться."
+        else "Это служебное письмо об аккаунте на envola.ru, поэтому от него нельзя отписаться."
     )
     return _TEMPLATE.substitute(
         subject=html.escape(subject),
@@ -135,9 +135,6 @@ def _message(
     msg.add_alternative(_html(subject, body, unsubscribe, title), subtype="html")
     if unsubscribe:
         msg["List-Unsubscribe"] = f"<{unsubscribe}>"
-    # Unisender Go: не подменять ссылки и не вставлять пиксель открытия. Письма служебные,
-    # а ссылки подтверждения и отписки должны вести прямо на сайт. Другие SMTP заголовок игнорируют.
-    msg["X-UNISENDER-GO"] = json.dumps({"track_links": 0, "track_read": 0})
     return msg
 
 
