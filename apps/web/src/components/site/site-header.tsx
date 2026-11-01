@@ -2,6 +2,7 @@ import { MessageCircle, Plus } from "lucide-react";
 import Link from "next/link";
 
 import { MobileNav } from "@/components/site/mobile-nav";
+import { MobileTabBar } from "@/components/site/mobile-tab-bar";
 import { NavLink } from "@/components/site/nav-link";
 import { Logo } from "@/components/site/logo";
 import { UserMenu } from "@/components/site/user-menu";
@@ -22,17 +23,14 @@ export async function SiteHeader() {
     { href: "/startups", label: "Стартапы" },
     { href: "/people", label: "Люди" },
   ];
-  const mobileLinks = user
-    ? [
-        ...links,
-        { href: "/startups/new", label: "Предложить идею" },
-        { href: "/chats", label: "Сообщения", badge: chats?.count ?? 0 },
-        { href: "/me/profile", label: "Мой профиль" },
-        { href: "/me/applications", label: "Мои отклики", badge: inbox?.mine ?? 0 },
-        { href: "/me/startups", label: "Мои стартапы", badge: inbox?.incoming ?? 0 },
-        { href: "/me/settings", label: "Настройки" },
-      ]
-    : [...links, { href: "/login", label: "Войти" }, { href: "/register", label: "Регистрация" }];
+  // Гостю на телефоне — разделы в бургере; вошедшему — нижняя панель (MobileTabBar) и меню аватара.
+  const guestLinks = [
+    { href: "/startups", label: "Стартапы" },
+    { href: "/startups?stage=idea", label: "Идеи" },
+    { href: "/people", label: "Люди" },
+    { href: "/people/cofounders", label: "Сообщники" },
+    { href: "/guides", label: "Гайды" },
+  ];
 
   return (
     <header className="sticky top-0 z-40 bg-background shadow-[0_1px_0_var(--border)]">
@@ -53,8 +51,16 @@ export async function SiteHeader() {
                 Предложить идею
               </Link>
               <Link
+                href="/startups/new"
+                aria-label="Предложить идею"
+                className="grid size-10 place-items-center rounded-full transition-colors hover:bg-secondary sm:hidden"
+              >
+                <Plus aria-hidden className="size-5" />
+              </Link>
+              {/* На телефоне сообщения — в нижней панели. */}
+              <Link
                 href="/chats"
-                className="relative grid size-10 place-items-center rounded-full transition-colors hover:bg-secondary"
+                className="relative grid size-10 place-items-center rounded-full transition-colors hover:bg-secondary max-lg:hidden"
                 aria-label={chats?.count ? `Сообщения, непрочитанных диалогов: ${chats.count}` : "Сообщения"}
               >
                 <MessageCircle aria-hidden className="size-5" />
@@ -74,17 +80,18 @@ export async function SiteHeader() {
             </>
           ) : (
             <>
-              <Link href="/login" className={buttonVariants({ variant: "ghost", className: "h-10 max-sm:hidden" })}>
+              <Link href="/login" className={buttonVariants({ variant: "ghost", size: "sm", className: "px-2.5 sm:h-10 sm:px-4 sm:text-base" })}>
                 Войти
               </Link>
               <Link href="/register" className={buttonVariants({ size: "sm", className: "sm:h-10 sm:px-4 sm:text-base" })}>
                 Регистрация
               </Link>
+              <MobileNav links={guestLinks} />
             </>
           )}
-          <MobileNav links={mobileLinks} />
         </div>
       </div>
+      {user && <MobileTabBar chats={chats?.count ?? 0} />}
     </header>
   );
 }
