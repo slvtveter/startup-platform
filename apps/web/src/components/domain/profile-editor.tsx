@@ -70,7 +70,7 @@ const COMPLETENESS: { weight: number; label: string; step: number; done: (f: For
   { weight: 10, label: "Фото", step: 0, done: (_, x) => x.avatar },
   { weight: 10, label: "Коротко о себе", step: 0, done: (f) => !!f.headline.trim() },
   { weight: 20, label: "3 навыка", step: 1, done: (f) => f.skills.length >= 3 },
-  { weight: 10, label: "Рассказ о себе", step: 1, done: (f) => f.bio.trim().length >= 30 },
+  { weight: 10, label: "Подробнее о себе", step: 1, done: (f) => f.bio.trim().length >= 30 },
   { weight: 15, label: "Портфолио или резюме", step: 1, done: (f, x) => x.resume || f.links.some((l) => l.url.trim()) },
   { weight: 5, label: "Условия участия", step: 2, done: (f) => f.looking_for.length > 0 },
   { weight: 5, label: "Telegram", step: 2, done: (f) => !!f.contact_telegram.trim() },
@@ -539,7 +539,7 @@ export function ProfileEditor({
                 </div>
                 <label className="flex items-center gap-2 self-end pb-3 text-sm">
                   <input type="checkbox" checked={f.show_email} onChange={(e) => set("show_email", e.target.checked)} className="check" />
-                  Показывать email после согласия
+                  Показывать почту, когда договоритесь
                 </label>
               </div>
             </div>
@@ -560,10 +560,18 @@ export function ProfileEditor({
           )}
           <div className="ml-auto flex gap-2">
             {step < STEPS.length - 1 ? (
-              <Button size="lg" onClick={next} disabled={busy}>
-                {busy && <Loader2 aria-hidden className="animate-spin" />}
-                Дальше
-              </Button>
+              <>
+                {/* Опубликованный профиль правят точечно: сохранить можно с любого шага. */}
+                {profile.is_published && !after && (
+                  <Button size="lg" variant="outline" onClick={saveAndView} disabled={busy}>
+                    Сохранить
+                  </Button>
+                )}
+                <Button size="lg" onClick={next} disabled={busy}>
+                  {busy && <Loader2 aria-hidden className="animate-spin" />}
+                  Дальше
+                </Button>
+              </>
             ) : profile.is_published ? (
               <Button size="lg" onClick={() => (after ? publish(true) : saveAndView())} disabled={busy}>
                 {busy && <Loader2 aria-hidden className="animate-spin" />}

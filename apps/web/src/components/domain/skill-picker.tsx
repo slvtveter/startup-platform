@@ -40,7 +40,8 @@ export function SkillPicker({
     };
     return all
       .filter((s) => !value.includes(s.slug))
-      .filter((s) => !needle || s.name.toLowerCase().includes(needle))
+      // Совпадение с началом слова: «UX» находит «UX исследования», но не «Linux».
+      .filter((s) => !needle || s.name.toLowerCase().split(/[\s./-]+/).some((w) => w.startsWith(needle)) || s.name.toLowerCase().startsWith(needle))
       .sort((a, b) => rank(a) - rank(b))
       .slice(0, needle ? 12 : 12);
   }, [all, q, value, role]);

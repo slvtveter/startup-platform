@@ -268,6 +268,7 @@ export async function Dashboard() {
                     <span className="block truncate text-sm">
                       {p.display_name}
                       {p.city && <span className="text-muted-foreground"> · {p.city}</span>}
+                      {p.is_demo && <span className="text-xs text-muted-foreground"> · пример</span>}
                     </span>
                     {p.headline && <span className="mt-0.5 block truncate text-sm text-muted-foreground">{p.headline}</span>}
                   </span>

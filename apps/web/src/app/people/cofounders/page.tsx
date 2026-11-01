@@ -37,6 +37,9 @@ export default async function CofoundersPage() {
     listStartups({ client, query: { stage: ["idea"], limit: 100 } }),
   ]);
   const total = people?.total ?? 0;
+  // В счётчике — только настоящие люди: «12 человек», где 11 — примеры, вводит в заблуждение.
+  const real = (people?.items ?? []).filter((p) => !p.is_demo).length;
+  const amIn = !!user?.profile && (people?.items ?? []).some((p) => p.slug === user.profile?.slug);
   const shown = pinned(people?.items ?? []).slice(0, 2);
   const shownIdeas = pinned(ideas?.items ?? []).slice(0, 3);
   const join = user ? "/me/profile/edit" : "/register?next=/me/profile/edit";
@@ -64,8 +67,8 @@ export default async function CofoundersPage() {
               обсудите идеи и возьмитесь за лучшую вместе.
             </p>
             <div className="mt-8 flex flex-wrap gap-2.5">
-              <Link href={join} className={buttonVariants({ size: "lg" })}>
-                Я тоже ищу сообщников
+              <Link href={amIn ? "/people?cofound=1" : join} className={buttonVariants({ size: "lg" })}>
+                {amIn ? "Ты уже в списке — смотреть всех" : "Я тоже ищу сообщников"}
               </Link>
               <Link href="#people" className={buttonVariants({ variant: "onphoto", size: "lg" })}>
                 Посмотреть, кто уже здесь
@@ -95,9 +98,11 @@ export default async function CofoundersPage() {
                 Ищут сообщников прямо сейчас
               </h2>
               <p className="mt-4 max-w-[52ch] text-lg text-muted-foreground">
-                {total > 0
-                  ? `${total} ${plural(total, "человек хочет", "человека хотят", "человек хотят")} придумать стартап с нуля. Напиши тому, чьи навыки дополняют твои.`
-                  : "Пока здесь никого нет. Включи в профиле «Ищу сообщников», и тебя увидят первым."}
+                {real >= 3
+                  ? `${real} ${plural(real, "человек хочет", "человека хотят", "человек хотят")} придумать стартап с нуля. Напиши тому, чьи навыки дополняют твои.`
+                  : total > 0
+                    ? "Напиши тому, чьи навыки дополняют твои."
+                    : "Пока здесь никого нет. Включи в профиле «Ищу сообщников», и тебя увидят первым."}
               </p>
             </div>
             {total > 0 && (

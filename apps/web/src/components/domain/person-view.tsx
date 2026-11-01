@@ -40,7 +40,7 @@ export function PersonView({
           {p.looking_for.includes(COFOUND) && (
             <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-brand-soft px-3 py-1 text-xs font-bold text-brand-ink">
               <span aria-hidden className="size-2 rounded-full bg-cornflower" />
-              Ищет сообщников на свой стартап
+              Ищет сообщников
             </span>
           )}
           <h1 className="text-[32px] leading-[1.04] wrap-anywhere sm:text-[48px]">{p.display_name}</h1>

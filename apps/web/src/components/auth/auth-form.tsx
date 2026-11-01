@@ -33,6 +33,13 @@ export function emailFix(email: string): string | null {
   return fixed ? `${user}@${fixed}` : null;
 }
 
+/** Ошибка поля исчезает, как только человек начинает его исправлять. */
+function omit(f: Record<string, string>, key: string) {
+  const next = { ...f };
+  delete next[key];
+  return next;
+}
+
 export function safeNext(next: string | null, fallback: string) {
   // Только пути своего сайта: защищаемся от открытого редиректа. «//evil.com», «/\\evil.com»
   // (браузер читает обратный слэш как прямой) и управляющие символы не пропускаем.
@@ -179,7 +186,10 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           aria-describedby={fields.email ? "email-error" : undefined}
           className="mt-1.5 h-11"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (fields.email) setFields((f) => omit(f, "email"));
+          }}
         />
         <FieldError id="email-error" message={fields.email} />
         {mode === "register" && emailFix(email) && (
@@ -212,7 +222,10 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             aria-describedby={fields.password ? "password-error" : mode === "register" ? "password-hint" : undefined}
             className="h-11 pr-11"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (fields.password) setFields((f) => omit(f, "password"));
+            }}
           />
           <button
             type="button"
