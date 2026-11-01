@@ -69,6 +69,42 @@ export type AdminStartupOut = {
 };
 
 /**
+ * AdminTotals
+ *
+ * Общие цифры для первого экрана админки; *_new — за выбранный период.
+ */
+export type AdminTotals = {
+    /**
+     * Users
+     */
+    users: number;
+    /**
+     * Users New
+     */
+    users_new: number;
+    /**
+     * Profiles Published
+     */
+    profiles_published: number;
+    /**
+     * Startups Recruiting
+     */
+    startups_recruiting: number;
+    /**
+     * Applications Pending
+     */
+    applications_pending: number;
+    /**
+     * Reports Open
+     */
+    reports_open: number;
+    /**
+     * Feedback New
+     */
+    feedback_new: number;
+};
+
+/**
  * AdminUserOut
  */
 export type AdminUserOut = {
@@ -517,6 +553,32 @@ export type FeedbackIn = {
      * Page Url
      */
     page_url?: string;
+};
+
+/**
+ * FeedbackOut
+ */
+export type FeedbackOut = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Text
+     */
+    text: string;
+    /**
+     * Page Url
+     */
+    page_url: string;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * User Email
+     */
+    user_email?: string | null;
 };
 
 /**
@@ -4328,6 +4390,54 @@ export type AdminMetricsResponses = {
 };
 
 export type AdminMetricsResponse = AdminMetricsResponses[keyof AdminMetricsResponses];
+
+export type AdminTotalsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Days
+         */
+        days?: number;
+    };
+    url: '/api/admin/totals';
+};
+
+export type AdminTotalsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminTotalsError = AdminTotalsErrors[keyof AdminTotalsErrors];
+
+export type AdminTotalsResponses = {
+    /**
+     * Successful Response
+     */
+    200: AdminTotals;
+};
+
+export type AdminTotalsResponse = AdminTotalsResponses[keyof AdminTotalsResponses];
+
+export type AdminFeedbackData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/admin/feedback';
+};
+
+export type AdminFeedbackResponses = {
+    /**
+     * Response Admin Feedback
+     *
+     * Successful Response
+     */
+    200: Array<FeedbackOut>;
+};
+
+export type AdminFeedbackResponse = AdminFeedbackResponses[keyof AdminFeedbackResponses];
 
 export type AdminListUsersData = {
     body?: never;

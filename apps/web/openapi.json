@@ -3353,6 +3353,77 @@
         }
       }
     },
+    "/api/admin/totals": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin Totals",
+        "operationId": "admin_totals",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 365,
+              "minimum": 1,
+              "default": 7,
+              "title": "Days"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminTotals"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/feedback": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin Feedback",
+        "description": "\u0421\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u044f \u0438\u0437 \u0444\u043e\u0440\u043c\u044b \u00ab\u0421\u043e\u043e\u0431\u0449\u0438\u0442\u044c \u043e \u043f\u0440\u043e\u0431\u043b\u0435\u043c\u0435 \u0438\u043b\u0438 \u0438\u0434\u0435\u0435\u00bb \u0432 \u043f\u043e\u0434\u0432\u0430\u043b\u0435, \u043d\u043e\u0432\u044b\u0435 \u0441\u0432\u0435\u0440\u0445\u0443.",
+        "operationId": "admin_feedback",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FeedbackOut"
+                  },
+                  "type": "array",
+                  "title": "Response Admin Feedback"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/users": {
       "get": {
         "tags": [
@@ -4146,6 +4217,50 @@
         ],
         "title": "AdminStartupOut"
       },
+      "AdminTotals": {
+        "properties": {
+          "users": {
+            "type": "integer",
+            "title": "Users"
+          },
+          "users_new": {
+            "type": "integer",
+            "title": "Users New"
+          },
+          "profiles_published": {
+            "type": "integer",
+            "title": "Profiles Published"
+          },
+          "startups_recruiting": {
+            "type": "integer",
+            "title": "Startups Recruiting"
+          },
+          "applications_pending": {
+            "type": "integer",
+            "title": "Applications Pending"
+          },
+          "reports_open": {
+            "type": "integer",
+            "title": "Reports Open"
+          },
+          "feedback_new": {
+            "type": "integer",
+            "title": "Feedback New"
+          }
+        },
+        "type": "object",
+        "required": [
+          "users",
+          "users_new",
+          "profiles_published",
+          "startups_recruiting",
+          "applications_pending",
+          "reports_open",
+          "feedback_new"
+        ],
+        "title": "AdminTotals",
+        "description": "\u041e\u0431\u0449\u0438\u0435 \u0446\u0438\u0444\u0440\u044b \u0434\u043b\u044f \u043f\u0435\u0440\u0432\u043e\u0433\u043e \u044d\u043a\u0440\u0430\u043d\u0430 \u0430\u0434\u043c\u0438\u043d\u043a\u0438; *_new \u2014 \u0437\u0430 \u0432\u044b\u0431\u0440\u0430\u043d\u043d\u044b\u0439 \u043f\u0435\u0440\u0438\u043e\u0434."
+      },
       "AdminUserOut": {
         "properties": {
           "id": {
@@ -4882,6 +4997,46 @@
           "text"
         ],
         "title": "FeedbackIn"
+      },
+      "FeedbackOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "page_url": {
+            "type": "string",
+            "title": "Page Url"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "user_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "text",
+          "page_url",
+          "created_at"
+        ],
+        "title": "FeedbackOut"
       },
       "ForgotIn": {
         "properties": {
