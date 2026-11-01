@@ -133,12 +133,13 @@ async function TabBody({ tab, params }: { tab: Tab; params: Params }) {
     );
   }
   if (tab === "users") {
-    const kind = (["real", "demo"] as const).find((k) => k === params.kind) ?? "all";
+    const kind = (["real", "demo", "admins"] as const).find((k) => k === params.kind) ?? "all";
     const { data: users } = await adminListUsers({ client, query: { q: params.q, kind } });
     const filters = [
       ["all", "Все"],
       ["real", "Настоящие"],
       ["demo", "Демо"],
+      ["admins", "Админы"],
     ] as const;
     return (
       <section className="mt-8 max-w-4xl">
@@ -217,8 +218,9 @@ async function TabBody({ tab, params }: { tab: Tab; params: Params }) {
                     {s.is_hidden && " · скрыт"}
                   </div>
                 </div>
-                <span className="ml-auto shrink-0">
-                  {s.is_hidden ? <AdminAction kind="unhide" id={s.id} label="Вернуть" /> : <AdminAction kind="hide" id={s.id} label="Скрыть" variant="destructive" />}
+                <span className="ml-auto flex shrink-0 gap-2">
+                  {s.is_hidden ? <AdminAction kind="unhide" id={s.id} label="Вернуть" /> : <AdminAction kind="hide" id={s.id} label="Скрыть" variant="outline" />}
+                  <AdminDeleteUser kind="startup" id={s.id} name={s.title} />
                 </span>
               </div>
             ))}
@@ -227,7 +229,9 @@ async function TabBody({ tab, params }: { tab: Tab; params: Params }) {
         <section className="mt-10 max-w-3xl rounded-2xl border bg-card p-6">
           <h2 className="font-sans text-base font-bold">Перенести стартап на платформу</h2>
           <p className="mt-1 mb-4 text-sm text-muted-foreground">
-            Для холодного старта: оформить открытый проект за основателя. Черновик принадлежит платформе, пока основатель не зарегистрируется и не подтвердит почту.
+            Для холодного старта: оформить открытый проект за основателя. Здесь — только основа (название, суть, почта основателя); после
+            «Создать черновик» откроется полный редактор стартапа: описание, стадия, условия, обложка и места в команде. Черновик принадлежит
+            платформе, пока основатель не зарегистрируется с этой почтой.
           </p>
           <PlatformStartupForm />
         </section>
@@ -260,16 +264,26 @@ async function TabBody({ tab, params }: { tab: Tab; params: Params }) {
   }
   const { data: audit } = await adminAuditLog({ client });
   return (
-    <section className="mt-8">
-      <ul className="grid gap-1 text-sm text-muted-foreground">
+    <section className="mt-8 max-w-3xl">
+      <ul className="divide-y rounded-xl border bg-card text-sm">
         {audit?.length ? (
-          audit.slice(0, 50).map((a) => (
-            <li key={a.id}>
-              {timeAgo(a.created_at)} · {a.admin_email} · {a.action} · {a.target_type} {a.target_id.slice(0, 8)}
+          audit.slice(0, 100).map((a) => (
+            <li key={a.id} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 p-3">
+              <span className="font-semibold">{a.label || a.action}</span>
+              {a.target_href ? (
+                <Link href={a.target_href} className="font-semibold text-brand-ink hover:underline">
+                  {a.target_label}
+                </Link>
+              ) : (
+                <span className="text-muted-foreground">{a.target_label}</span>
+              )}
+              <span className="ml-auto text-xs text-muted-foreground">
+                {a.admin_email ?? "удалённый админ"} · {timeAgo(a.created_at)}
+              </span>
             </li>
           ))
         ) : (
-          <li>Пока пусто</li>
+          <li className="p-3 text-muted-foreground">Пока пусто</li>
         )}
       </ul>
     </section>

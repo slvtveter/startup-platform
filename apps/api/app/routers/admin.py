@@ -166,9 +166,9 @@ async def admin_list_users(
     admin: AdminUser,
     db: DbSession,
     q: str | None = None,
-    kind: Annotated[Literal["all", "real", "demo"], Query()] = "all",
+    kind: Annotated[Literal["all", "real", "demo", "admins"], Query()] = "all",
 ) -> list[AdminUserOut]:
-    """kind: real — настоящие (без демо и E2E), demo — примеры с витрины, all — все."""
+    """kind: real — настоящие (без демо и E2E), demo — примеры с витрины, admins — админы."""
     stmt = (
         select(User)
         .outerjoin(Profile, Profile.user_id == User.id)
@@ -181,6 +181,8 @@ async def admin_list_users(
         stmt = stmt.where(admin_overview.real())
     elif kind == "demo":
         stmt = stmt.where(~real_user())
+    elif kind == "admins":
+        stmt = stmt.where(User.is_admin.is_(True))
     users = (await db.scalars(stmt)).unique()
     return [
         AdminUserOut(
@@ -268,6 +270,18 @@ async def _set_hidden(db, admin: User, startup_id: uuid.UUID, hidden: bool) -> N
     await db.commit()
 
 
+@router.delete("/startups/{startup_id}", response_model=OkOut)
+async def admin_delete_startup(startup_id: uuid.UUID, admin: AdminUser, db: DbSession) -> OkOut:
+    """Удалить стартап насовсем: роли и отклики — каскадом, переписка остаётся у людей."""
+    s = await db.get(Startup, startup_id)
+    if s is None:
+        raise NotFound("Стартап не найден")
+    _log(db, admin, "delete_startup", "startup", s.id, title=s.title, slug=s.slug)
+    await db.commit()
+    await startup_service.delete_startup(db, s)
+    return OkOut()
+
+
 @router.post("/startups/{startup_id}/hide", response_model=OkOut)
 async def admin_hide_startup(startup_id: uuid.UUID, admin: AdminUser, db: DbSession) -> OkOut:
     await _set_hidden(db, admin, startup_id, True)
@@ -303,25 +317,93 @@ async def admin_resolve_report(
     return OkOut()
 
 
+ACTION_LABELS = {
+    "block_user": "Заблокировал пользователя",
+    "unblock_user": "Разблокировал пользователя",
+    "delete_user": "Удалил пользователя",
+    "hide_startup": "Скрыл стартап",
+    "unhide_startup": "Вернул стартап в каталог",
+    "delete_startup": "Удалил стартап",
+    "resolve_report": "Закрыл жалобу",
+    "dismiss_report": "Отклонил жалобу",
+    "catalog_create": "Добавил в справочник",
+    "catalog_rename": "Переименовал в справочнике",
+    "catalog_merge": "Слил дубли в справочнике",
+    "startup_create_for": "Перенёс стартап на платформу",
+    "export_csv": "Выгрузил CSV",
+}
+
+
 @router.get("/audit", response_model=list[AdminActionOut])
 async def admin_audit_log(admin: AdminUser, db: DbSession) -> list[AdminActionOut]:
-    rows = await db.execute(
-        select(AdminAction, User.email)
-        .outerjoin(User, User.id == AdminAction.admin_id)
-        .order_by(AdminAction.created_at.desc())
-        .limit(200)
-    )
-    return [
-        AdminActionOut(
-            id=a.id,
-            admin_email=email,
-            action=a.action,
-            target_type=a.target_type,
-            target_id=a.target_id,
-            created_at=a.created_at,
+    """Журнал действий админов: понятная подпись и ссылка на объект, если он ещё существует."""
+    rows = (
+        await db.execute(
+            select(AdminAction, User.email)
+            .outerjoin(User, User.id == AdminAction.admin_id)
+            .order_by(AdminAction.created_at.desc())
+            .limit(200)
         )
-        for a, email in rows
-    ]
+    ).all()
+
+    def ids(kind: str) -> list[uuid.UUID]:
+        out = []
+        for a, _ in rows:
+            if a.target_type == kind:
+                try:
+                    out.append(uuid.UUID(a.target_id))
+                except ValueError:
+                    pass
+        return out
+
+    users = {
+        str(u.id): u
+        for u in (await db.scalars(select(User).where(User.id.in_(ids("user"))))).unique()
+    }
+    startups = {
+        str(s.id): s
+        for s in (await db.scalars(select(Startup).where(Startup.id.in_(ids("startup"))))).unique()
+    }
+
+    def target(a: AdminAction) -> tuple[str, str | None]:
+        d = a.details or {}
+        if a.target_type == "user":
+            u = users.get(a.target_id)
+            email = u.email if u else d.get("email", "удалённый аккаунт")
+            return email, (f"/admin?tab=users&q={email}" if u else None)
+        if a.target_type == "startup":
+            s = startups.get(a.target_id)
+            if s:
+                return s.title, f"/startups/{s.slug}"
+            return d.get("title", "удалённый стартап"), None
+        if a.target_type == "report":
+            return (f"жалоба №{a.target_id}" if a.action != "export_csv" else a.target_id), (
+                "/admin?tab=moderation" if a.action != "export_csv" else None
+            )
+        if a.target_type in CATALOGS:
+            name = d.get("name") or a.target_id
+            into = f" → {d['into']}" if d.get("into") else ""
+            kind = "роль" if a.target_type == "roles" else "навык"
+            return f"{kind} «{name}»{into}", "/admin?tab=catalog"
+        return a.target_id, None
+
+    out = []
+    for a, email in rows:
+        label, href = target(a)
+        out.append(
+            AdminActionOut(
+                id=a.id,
+                admin_email=email,
+                action=a.action,
+                target_type=a.target_type,
+                target_id=a.target_id,
+                created_at=a.created_at,
+                label=ACTION_LABELS.get(a.action, a.action),
+                target_label=label,
+                target_href=href,
+            )
+        )
+    return out
 
 
 # --- Справочники ролей и навыков (KAN-75) ---
@@ -384,7 +466,15 @@ async def admin_create_platform_startup(
     s = await startup_service.create_for_platform(
         db, admin, StartupIn(**data.model_dump(exclude={"owner_email"})), data.owner_email
     )
-    _log(db, admin, "startup_create_for", "startup", s.id, owner_email=data.owner_email)
+    _log(
+        db,
+        admin,
+        "startup_create_for",
+        "startup",
+        s.id,
+        owner_email=data.owner_email,
+        title=s.title,
+    )
     await db.commit()
     return await startup_service.to_detail(db, s, admin)
 

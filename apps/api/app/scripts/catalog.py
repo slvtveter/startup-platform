@@ -26,17 +26,35 @@ ROLES = [
     ("qa", "QA-инженер"),
     ("devops", "DevOps-инженер"),
     ("copywriter", "Копирайтер"),
+    # 2026-11-01: справочник удвоен по просьбе владельца. Первое слово названия — существительное
+    # мужского рода: его склоняет SEO-заголовок «Стартапы ищут …» (apps/web/src/lib/seo.ts).
+    ("fullstack", "Fullstack-разработчик"),
+    ("gamedev", "Разработчик игр"),
+    ("data-engineer", "Data-инженер"),
+    ("data-scientist", "Data Scientist"),
+    ("motion-designer", "Motion-дизайнер"),
+    ("ux-researcher", "UX-исследователь"),
+    ("project", "Проджект-менеджер"),
+    ("business-analyst", "Бизнес-аналитик"),
+    ("sales", "Менеджер по продажам"),
+    ("hr", "HR-менеджер"),
+    ("community", "Комьюнити-менеджер"),
+    ("video", "Видеомонтажёр"),
 ]
 
 SKILLS = {
     "dev": "Python FastAPI Django JavaScript TypeScript React Next.js Vue Node.js Go Java Kotlin Swift "
-    "Flutter PostgreSQL Docker Git Linux REST GraphQL",
+    "Flutter PostgreSQL Docker Git Linux REST GraphQL C++ .NET PHP Laravel Spring Angular Svelte Tailwind "
+    "HTML/CSS Redis MongoDB Kubernetes CI/CD Unity Rust",
     "design": "Figma UX-исследования Прототипирование Дизайн-системы Мобильные-интерфейсы Иллюстрация "
-    "Брендинг Motion Tilda Adobe-Illustrator",
-    "data": "SQL pandas scikit-learn PyTorch Статистика A/B-тесты Power-BI Excel",
+    "Брендинг Motion Tilda Adobe-Illustrator Photoshop After-Effects Blender UI-дизайн Веб-дизайн Типографика "
+    "Framer Webflow 3D-моделирование",
+    "data": "SQL pandas scikit-learn PyTorch Статистика A/B-тесты Power-BI Excel Tableau DataLens ClickHouse "
+    "Airflow Spark Машинное-обучение NLP Computer-Vision LLM Data-визуализация",
     "marketing": "SMM Таргет-VK SEO Контент-маркетинг Email-маркетинг Аналитика-трафика Копирайтинг "
-    "Customer-Development",
-    "product": "Jira Roadmap Unit-экономика Интервью-с-пользователями",
+    "Customer-Development Яндекс-Директ Telegram-Ads Performance-маркетинг Продажи PR Видеомонтаж Сторителлинг",
+    "product": "Jira Roadmap Unit-экономика Интервью-с-пользователями Product-аналитика CJM Agile Scrum Notion "
+    "Miro Управление-проектами Питчинг Презентации",
 }
 
 

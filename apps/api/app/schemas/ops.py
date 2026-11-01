@@ -157,6 +157,10 @@ class AdminActionOut(BaseModel):
     target_type: str
     target_id: str
     created_at: datetime
+    # Для людей: «Скрыл стартап», «Flowly», ссылка, где на него посмотреть (если он ещё есть).
+    label: str = ""
+    target_label: str = ""
+    target_href: str | None = None
 
 
 class CatalogItemIn(BaseModel):
