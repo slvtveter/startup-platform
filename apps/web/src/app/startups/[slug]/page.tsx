@@ -127,8 +127,8 @@ export default async function StartupPage({ params }: Props) {
               s.status !== "recruiting" && <StartupStatusBadge status={s.status} />
             )}
           </div>
-          <h1 className="mt-4 text-[36px] leading-[1.04] sm:text-[56px]">{s.title}</h1>
-          <p className="mt-4 max-w-[46ch] text-xl text-muted-foreground">{s.pitch}</p>
+          <h1 className="mt-4 text-[36px] leading-[1.04] wrap-anywhere sm:text-[56px]">{s.title}</h1>
+          <p className="mt-4 max-w-[46ch] text-xl wrap-anywhere text-muted-foreground">{s.pitch}</p>
           <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3">
             <span className="flex">
               {s.team.slice(0, 5).map((m, i) => (
@@ -254,7 +254,7 @@ export default async function StartupPage({ params }: Props) {
         <div className="bg-white p-5 sm:p-6">
           <dt className="text-sm text-muted-foreground">Условия</dt>
           <dd className="mt-1 text-lg font-extrabold tracking-[-0.02em]">{TERMS[s.terms]}</dd>
-          <dd className="mt-1 text-sm whitespace-pre-line text-foreground/80">{s.terms_details || TERMS_HINT[s.terms]}</dd>
+          <dd className="mt-1 text-sm whitespace-pre-line wrap-anywhere text-foreground/80">{s.terms_details || TERMS_HINT[s.terms]}</dd>
         </div>
         <div className="bg-white p-5 sm:p-6">
           <dt className="text-sm text-muted-foreground">Свободные места</dt>
@@ -315,13 +315,13 @@ export default async function StartupPage({ params }: Props) {
                         {r.description && (
                           <div>
                             <h4 className="text-sm font-bold">Задачи</h4>
-                            <p className="mt-1 whitespace-pre-line text-foreground/85">{r.description}</p>
+                            <p className="mt-1 whitespace-pre-line wrap-anywhere text-foreground/85">{r.description}</p>
                           </div>
                         )}
                         {r.outcome && (
                           <div>
                             <h4 className="text-sm font-bold">Что получишь</h4>
-                            <p className="mt-1 whitespace-pre-line text-foreground/85">{r.outcome}</p>
+                            <p className="mt-1 whitespace-pre-line wrap-anywhere text-foreground/85">{r.outcome}</p>
                           </div>
                         )}
                       </div>
@@ -473,7 +473,7 @@ function About({ s, title, className }: { s: StartupDetail; title: string; class
   return (
     <section className={className}>
       <h2 className="text-[28px] sm:text-[36px]">{title}</h2>
-      <p className="mt-4 max-w-[68ch] text-lg leading-relaxed whitespace-pre-line text-foreground/85">
+      <p className="mt-4 max-w-[68ch] text-lg leading-relaxed whitespace-pre-line wrap-anywhere text-foreground/85">
         {s.description || "Описание пока не заполнено."}
       </p>
       {extra.length > 0 && (
@@ -481,7 +481,7 @@ function About({ s, title, className }: { s: StartupDetail; title: string; class
           {extra.map((b) => (
             <div key={b.title} className="rounded-[20px] bg-tone p-5">
               <h3 className="font-sans text-base font-bold tracking-normal">{b.title}</h3>
-              <p className="mt-2 whitespace-pre-line text-foreground/85">{b.text}</p>
+              <p className="mt-2 whitespace-pre-line wrap-anywhere text-foreground/85">{b.text}</p>
             </div>
           ))}
         </div>

@@ -115,7 +115,7 @@ export function ApplicationCard({ app, perspective }: { app: ApplicationOut; per
         {ctx.lead} <span className="font-bold text-foreground">{app.role_title}</span> · {ctx.when}
       </p>
       <blockquote className="mt-2 border-l-2 border-cornflower pl-4 text-base leading-relaxed">
-        <span ref={messageRef} className={cn("whitespace-pre-line", !expanded && "line-clamp-3")}>
+        <span ref={messageRef} className={cn("whitespace-pre-line wrap-anywhere", !expanded && "line-clamp-3")}>
           {app.message}
         </span>
         {(overflowing || expanded) && (
