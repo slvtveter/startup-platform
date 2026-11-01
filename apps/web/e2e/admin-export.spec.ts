@@ -7,7 +7,8 @@ test("admin sees the overview and exports CSV, others cannot", async ({ page, br
   await expect(page.getByRole("heading", { name: "Регистрации по дням" })).toBeVisible();
   await page.getByRole("link", { name: "Пользователи" }).click();
   await page.getByRole("link", { name: "Демо", exact: true }).click();
-  await expect(page.getByText(/@demo\.invalid/).first()).toBeVisible();
+  await expect(page).toHaveURL(/kind=demo/);
+  await expect(page.getByText(/^\d+ аккаунт/)).toBeVisible();
 
   const csv = await page.request.get("/api/admin/export?kind=funnel");
   expect(csv.ok()).toBeTruthy();
