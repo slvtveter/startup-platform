@@ -108,10 +108,10 @@ export default async function StartupPage({ params }: Props) {
         }}
       />
       <Link
-        href={s.stage === "idea" ? "/startups?stage=idea" : "/startups"}
+        href="/startups"
         className="inline-flex min-h-6 items-center gap-1 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
       >
-        <ChevronLeftIcon className="size-4" /> {s.stage === "idea" ? "Все идеи" : "Все стартапы"}
+        <ChevronLeftIcon className="size-4" /> Все стартапы
       </Link>
 
       <header className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:items-center">

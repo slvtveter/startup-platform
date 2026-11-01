@@ -12,11 +12,11 @@ import { cn } from "@/lib/utils";
 
 const CHOICES = [
   {
-    key: "idea",
-    sticker: "bulb",
-    title: "Есть идея",
-    text: "Опишу её в двух абзацах и отмечу, кого не хватает.",
-    next: "/startups/new",
+    key: "join",
+    sticker: "cap",
+    title: "Хочу в команду",
+    text: "Найду стартап, который уже работает и ищет людей.",
+    next: "/startups",
   },
   {
     key: "cofound",
@@ -26,11 +26,11 @@ const CHOICES = [
     next: "/people/cofounders",
   },
   {
-    key: "join",
-    sticker: "cap",
-    title: "Хочу в команду",
-    text: "Найду стартап, который уже работает и ищет людей.",
-    next: "/startups",
+    key: "idea",
+    sticker: "bulb",
+    title: "Есть идея",
+    text: "Опишу её в двух абзацах и отмечу, кого не хватает.",
+    next: "/startups/new",
   },
 ] as const;
 

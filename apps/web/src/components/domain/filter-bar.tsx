@@ -138,7 +138,8 @@ export function CatalogToolbar({
                     <fieldset key={g.name}>
                       <legend className={cn("mb-2.5 text-sm font-bold", g.toggle && "sr-only")}>{g.title}</legend>
                       <div className="flex flex-wrap gap-1.5">
-                        {g.options.map((o) => {
+                        {g.options.filter((o) => o.count !== 0 || selected.includes(o.value)).map((o) => {
+                          // На телефоне варианты без проектов скрыты: 24 роли с нулями — длинная простыня.
                           const on = selected.includes(o.value);
                           const empty = o.count === 0 && !on;
                           return (

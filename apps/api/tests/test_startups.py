@@ -130,3 +130,17 @@ async def test_owner_deletes_startup_with_applications(make_user, client):
     assert (await founder.delete(f"/api/startups/{s['id']}")).status_code == 200
     assert (await client.get(f"/api/startups/{s['slug']}")).status_code == 404
     assert (await other.get("/api/me/applications")).json() == []
+
+
+async def test_recommendations_respect_wanted_terms(make_user):
+    async def publish(c, title, terms):
+        s = (await c.post("/api/startups", json={**STARTUP, "title": title, "terms": terms})).json()
+        await c.post(f"/api/startups/{s['id']}/roles", json=ROLE)
+        assert (await c.post(f"/api/startups/{s['id']}/publish")).status_code == 200
+
+    await publish(await make_user("free-owner@mail.ru", published=True), "Бесплатный", "free")
+    await publish(await make_user("paid-owner@mail.ru", published=True), "Платный", "paid")
+    seeker = await make_user("wants-pay@mail.ru", published=True)
+    await seeker.patch("/api/profile/me", json={"looking_for": ["paid"]})
+    recs = (await seeker.get("/api/me/recommended-startups")).json()
+    assert [r["startup"]["title"] for r in recs][0] == "Платный"

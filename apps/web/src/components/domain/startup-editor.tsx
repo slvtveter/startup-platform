@@ -454,7 +454,7 @@ function RolesEditor({ startup, roles, skills }: { startup: StartupDetail; roles
               />
             </label>
           </div>
-          <SkillPicker all={skills} value={draft.skills} max={12} onChange={(v) => setDraft({ ...draft, skills: v })} />
+          <SkillPicker all={skills} value={draft.skills} max={12} onChange={(v) => setDraft({ ...draft, skills: v })} role={draft.role} />
           <div className="flex gap-2">
             <Button onClick={add} disabled={draft.title.trim().length < 2}>
               {editing ? "Сохранить роль" : "Добавить роль"}

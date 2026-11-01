@@ -616,10 +616,17 @@ async def recommended(db: AsyncSession, user: User, limit: int = 6) -> list[Reco
                 why.append(f"Совпадает навыков: {len(common)}")
             if score > best:
                 best, reasons = score, why
-        if best and p.looking_for and s.terms in p.looking_for:
-            best += 2
-            reasons.append("Подходят условия")
-        if best:
+        # Условия весят заметно: кто ищет оплату, не должен видеть «без оплаты» первым.
+        wanted = {t for t in (p.looking_for or []) if t != "cofound"}
+        if best and wanted:
+            if s.terms in wanted:
+                best += 3
+                reasons.append("Подходят условия")
+            elif s.terms == "negotiable" and "paid" in wanted:
+                best += 1
+            else:
+                best -= 3
+        if best > 0:
             scored.append((best, s, reasons))
     scored.sort(key=lambda t: (-t[0], -(t[1].published_at.timestamp() if t[1].published_at else 0)))
     for _, s, _ in scored[:limit]:
