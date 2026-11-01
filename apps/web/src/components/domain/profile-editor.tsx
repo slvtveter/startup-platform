@@ -76,10 +76,18 @@ const COMPLETENESS: { weight: number; label: string; step: number; done: (f: For
   { weight: 5, label: "Telegram", step: 2, done: (f) => !!f.contact_telegram.trim() },
 ];
 
+const LINK_PLACEHOLDER: Partial<Record<LinkKind, string>> = {
+  portfolio: "мой-сайт.ru или ссылка на Notion",
+  github: "github.com/your-name",
+  behance: "behance.net/your-name",
+  linkedin: "linkedin.com/in/your-name",
+  other: "https://…",
+};
+
 /** Поля, без которых профиль не опубликовать (как в API): ключ — id поля на странице. */
-type FieldKey = "name" | "role" | "skills" | "terms";
-const FIELD_STEP: Record<FieldKey, number> = { name: 0, role: 0, skills: 1, terms: 2 };
-const API_FIELD: Record<string, FieldKey> = { display_name: "name", primary_role: "role", skills: "skills", looking_for: "terms" };
+type FieldKey = "name" | "role" | "skills" | "terms" | "links";
+const FIELD_STEP: Record<FieldKey, number> = { name: 0, role: 0, skills: 1, terms: 2, links: 1 };
+const API_FIELD: Record<string, FieldKey> = { display_name: "name", primary_role: "role", skills: "skills", looking_for: "terms", links: "links", url: "links" };
 
 function Err({ id, text }: { id: string; text?: string }) {
   if (!text) return null;
@@ -196,7 +204,7 @@ export function ProfileEditor({
     contact_telegram: profile.contact_telegram,
     show_email: profile.show_email,
   });
-  const FIELD_OF: Partial<Record<keyof Form, FieldKey>> = { display_name: "name", primary_role: "role", skills: "skills", looking_for: "terms" };
+  const FIELD_OF: Partial<Record<keyof Form, FieldKey>> = { display_name: "name", primary_role: "role", skills: "skills", looking_for: "terms", links: "links" };
   const set = <K extends keyof Form>(k: K, v: Form[K]) => {
     setF((s) => ({ ...s, [k]: v }));
     // Поправил поле — красная подсветка с него уходит сразу.
@@ -239,6 +247,9 @@ export function ProfileEditor({
     if (!f.primary_role) errs.role = "Выбери основную роль";
     if (f.skills.length === 0) errs.skills = "Добавь хотя бы один навык";
     if (f.looking_for.length === 0) errs.terms = "Выбери хотя бы одно условие";
+    // Ссылка без точки или с пробелами — не адрес: API её не примет, лучше сказать сразу у поля.
+    if (f.links.some((l) => l.url.trim() && (/\s/.test(l.url.trim()) || !l.url.includes("."))))
+      errs.links = "Проверь ссылку: нужен адрес вида github.com/имя";
     if (onlyStep === undefined) return errs;
     return Object.fromEntries(Object.entries(errs).filter(([k]) => FIELD_STEP[k as FieldKey] === onlyStep));
   }
@@ -261,7 +272,10 @@ export function ProfileEditor({
     setBusy(false);
     if (error) {
       const mapped = Object.fromEntries(
-        Object.entries(fieldErrors(error)).flatMap(([k, v]) => (API_FIELD[k.split(".").pop()!] ? [[API_FIELD[k.split(".").pop()!], v]] : [])),
+        Object.entries(fieldErrors(error)).flatMap(([k, v]) => {
+          const key = API_FIELD[k.split(".")[0]] ?? API_FIELD[k.split(".").pop()!];
+          return key ? [[key, key === "links" ? "Проверь ссылку: нужен адрес вида github.com/имя" : v]] : [];
+        }),
       );
       if (Object.keys(mapped).length) showErrors(mapped);
       else toast.error(errorMessage(error));
@@ -428,11 +442,11 @@ export function ProfileEditor({
             </div>
             <div>
               <Label>Работы и портфолио</Label>
-              <div className="mt-2 grid gap-2">
+              <div id="field-links" className="mt-2 grid scroll-mt-28 gap-2">
                 {f.links.map((l, i) => (
                   <div key={i} className="flex gap-2">
                     <LinkKindSelect value={l.kind} onChange={(kind) => set("links", f.links.map((x, j) => (j === i ? { ...x, kind } : x)))} />
-                    <Input aria-label="Ссылка" className="h-11" value={l.url} onChange={(e) => set("links", f.links.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)))} placeholder="github.com/your-name" />
+                    <Input aria-label="Ссылка" className="h-11" value={l.url} onChange={(e) => set("links", f.links.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)))} placeholder={LINK_PLACEHOLDER[l.kind] ?? "https://…"} aria-invalid={!!errors.links} />
                   </div>
                 ))}
                 {f.links.length < 8 && (
@@ -441,6 +455,7 @@ export function ProfileEditor({
                   </button>
                 )}
               </div>
+              <Err id="links-error" text={errors.links} />
             </div>
           </div>
         )}
@@ -523,7 +538,7 @@ export function ProfileEditor({
                   <Input id="tg" className="mt-1.5 h-11 bg-card" value={f.contact_telegram} onChange={(e) => set("contact_telegram", e.target.value)} placeholder="@username" />
                 </div>
                 <label className="flex items-center gap-2 self-end pb-3 text-sm">
-                  <input type="checkbox" checked={f.show_email} onChange={(e) => set("show_email", e.target.checked)} className="size-4 accent-[var(--brand)]" />
+                  <input type="checkbox" checked={f.show_email} onChange={(e) => set("show_email", e.target.checked)} className="check" />
                   Показывать email после согласия
                 </label>
               </div>

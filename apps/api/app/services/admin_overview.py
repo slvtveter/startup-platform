@@ -11,9 +11,26 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.types import Date
 
 from app.core.demo import real_user
-from app.models import Application, Feedback, Message, Profile, Report, Session, Startup, User
+from app.models import (
+    Application,
+    Event,
+    Feedback,
+    Message,
+    Profile,
+    Report,
+    Session,
+    Startup,
+    User,
+)
 from app.models.enums import ApplicationStatus, ReportStatus, StartupStatus
-from app.schemas.ops import AdminOverview, AdminTotals, DayCount, FeedbackOut, RecentUser
+from app.schemas.ops import (
+    ActivityOut,
+    AdminOverview,
+    AdminTotals,
+    DayCount,
+    FeedbackOut,
+    RecentUser,
+)
 
 E2E_DOMAIN = "@e2e.example.com"
 
@@ -120,7 +137,48 @@ async def feedback(db: AsyncSession, limit: int = 100) -> list[FeedbackOut]:
     ).all()
     return [
         FeedbackOut(
-            id=f.id, text=f.text, page_url=f.page_url, created_at=f.created_at, user_email=email
+            id=f.id,
+            text=f.text,
+            page_url=f.page_url,
+            created_at=f.created_at,
+            user_email=email,
+            has_screenshot=bool(f.screenshot_key),
         )
         for f, email in rows
+    ]
+
+
+# Ключевые шаги пути пользователя — по ним видно, где люди застревают. Просмотры страниц
+# и служебные события (подборки, показы рекомендаций) в ленту не попадают.
+ACTIVITY_LABELS = {
+    "signup": "Зарегистрировался",
+    "email_verified": "Подтвердил почту",
+    "profile_completed": "Заполнил профиль",
+    "profile_published": "Опубликовал профиль",
+    "startup_created": "Создал стартап",
+    "startup_published": "Опубликовал стартап",
+    "application_sent": "Откликнулся на место",
+    "invite_sent": "Пригласил в команду",
+    "application_answered": "Ответил на отклик",
+    "contacts_exchanged": "Обменялись контактами",
+    "chat_started": "Начал переписку",
+    "team_assembled": "Собрал команду",
+    "startup_claimed": "Забрал перенесённый стартап",
+    "email_changed": "Сменил почту",
+}
+
+
+async def activity(db: AsyncSession, limit: int = 50) -> list[ActivityOut]:
+    rows = (
+        await db.execute(
+            select(Event.created_at, Event.name, User.email)
+            .outerjoin(User, User.id == Event.user_id)
+            .where(Event.name.in_(ACTIVITY_LABELS))
+            .order_by(Event.created_at.desc())
+            .limit(limit)
+        )
+    ).all()
+    return [
+        ActivityOut(created_at=at, name=name, label=ACTIVITY_LABELS[name], user_email=email)
+        for at, name, email in rows
     ]

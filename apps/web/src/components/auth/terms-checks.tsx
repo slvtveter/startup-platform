@@ -20,7 +20,7 @@ export function PublishCheck({ value, onChange }: { value: TermsState; onChange:
         type="checkbox"
         checked={value.publish}
         onChange={(e) => onChange({ ...value, publish: e.target.checked })}
-        className="size-6 shrink-0 accent-[var(--brand)]"
+        className="check"
       />
       <span>
         Согласен(на) на{" "}
@@ -33,17 +33,19 @@ export function PublishCheck({ value, onChange }: { value: TermsState; onChange:
   );
 }
 
-/** Строка под кнопкой: нажатие кнопки = принятие соглашения и подтверждение 18+. */
-export function TermsNote({ action }: { action: string }) {
+/** Строка под кнопкой: нажатие кнопки = принятие соглашения и подтверждение 18+.
+ *  Ссылки не переносятся посередине (whitespace-nowrap). Обращение на «вы» — так попросил владелец. */
+export function TermsNote() {
+  const a = `${link} whitespace-nowrap`;
   return (
     <p className="text-center text-xs leading-5 text-muted-foreground">
-      Нажимая «{action}», ты подтверждаешь, что тебе есть 18 лет, и принимаешь{" "}
-      <Link href="/terms" target="_blank" className={`${link} inline py-0.5`}>
-        Пользовательское соглашение
-      </Link>
-      .{" "}
-      <Link href="/privacy" target="_blank" className={`${link} inline py-0.5`}>
-        Политика конфиденциальности
+      Продолжая, вы подтверждаете, что вам есть 18, и принимаете{" "}
+      <Link href="/terms" target="_blank" className={a}>
+        условия сервиса
+      </Link>{" "}
+      и{" "}
+      <Link href="/privacy" target="_blank" className={a}>
+        политику конфиденциальности
       </Link>
     </p>
   );

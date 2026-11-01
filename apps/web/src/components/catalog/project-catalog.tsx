@@ -61,7 +61,7 @@ export async function ProjectCatalog({ params }: { params: SearchParams }) {
       {/* Заголовок — над колонкой фильтров, на одной линии с поиском: без пустой полосы над каталогом.
           Длинный SEO-заголовок («Стартапы ищут Frontend-разработчика») — на всю ширину. */}
       <div className="grid gap-y-5 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-x-12 lg:gap-y-6">
-        <div className={cn("flex items-center justify-between gap-4 lg:min-h-11", seo.h1.length > 12 && "lg:col-span-2")}>
+        <div className={cn("flex items-center justify-between gap-4 lg:min-h-11 lg:self-start", seo.h1.length > 12 && "lg:col-span-2")}>
           <h1 className="text-[32px] leading-[1.05] sm:text-[40px]">{seo.h1}</h1>
           <Link href="/startups/new" className={buttonVariants({ size: "sm", variant: "outline", className: "shrink-0 lg:hidden" })}>
             <Plus aria-hidden />

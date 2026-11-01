@@ -1,16 +1,18 @@
 from datetime import UTC, datetime, timedelta
+from typing import Annotated
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Form, Request, UploadFile
 from sqlalchemy import func, select
 
 from app.core.demo import real_user
 from app.core.deps import OptionalUser, client_ip
 from app.db.session import DbSession
-from app.models import Event, Feedback, Profile, Report, Startup, StartupRole, User
+from app.models import Event, Profile, Report, Startup, StartupRole, User
 from app.models.enums import StartupStatus
 from app.schemas.common import OkOut
 from app.schemas.ops import ClientEventIn, FeedbackIn, ReportIn, StatsOut
 from app.services import client_events, ratelimit
+from app.services import feedback as feedback_service
 
 router = APIRouter(tags=["ops"])
 
@@ -101,6 +103,21 @@ async def send_feedback(
     data: FeedbackIn, request: Request, user: OptionalUser, db: DbSession
 ) -> OkOut:
     await _limit(db, "feedback", request)
-    db.add(Feedback(user_id=user.id if user else None, text=data.text, page_url=data.page_url))
-    await db.commit()
+    await feedback_service.create(db, user, data.text, data.page_url, None)
+    return OkOut()
+
+
+@router.post("/feedback/form", response_model=OkOut, status_code=201)
+async def send_feedback_form(
+    request: Request,
+    user: OptionalUser,
+    db: DbSession,
+    text: Annotated[str, Form(min_length=3, max_length=3000)],
+    page_url: Annotated[str, Form(max_length=500)] = "",
+    screenshot: UploadFile | None = None,
+) -> OkOut:
+    """То же, что /feedback, но можно приложить скриншот (до 5 МБ)."""
+    await _limit(db, "feedback", request)
+    data = await screenshot.read(feedback_service.MAX_BYTES + 1) if screenshot else None
+    await feedback_service.create(db, user, text, page_url, data or None)
     return OkOut()

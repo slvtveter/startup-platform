@@ -125,6 +125,16 @@ class FeedbackOut(BaseModel):
     page_url: str
     created_at: datetime
     user_email: str | None = None
+    has_screenshot: bool = False
+
+
+class ActivityOut(BaseModel):
+    """Событие продукта для ленты в админке: кто и что сделал."""
+
+    created_at: datetime
+    name: str
+    label: str
+    user_email: str | None = None
 
 
 class AdminUserOut(BaseModel):

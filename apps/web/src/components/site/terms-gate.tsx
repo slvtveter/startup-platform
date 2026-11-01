@@ -55,7 +55,7 @@ export function TermsGate({ needed, children }: { needed: boolean; children: Rea
             Продолжить
           </Button>
           <div className="mt-3">
-            <TermsNote action="Продолжить" />
+            <TermsNote />
           </div>
           <button
             type="button"

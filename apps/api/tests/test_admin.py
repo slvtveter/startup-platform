@@ -208,3 +208,45 @@ async def test_admin_deletes_startup_and_journal_is_readable(make_user, client):
 
     admins = (await admin.get("/api/admin/users", params={"kind": "admins"})).json()
     assert [u["email"] for u in admins] == ["jr-admin@mail.ru"]
+
+
+async def test_feedback_with_screenshot_activity_and_filters(make_user, client):
+    import io
+
+    from PIL import Image
+
+    admin = await make_user("fb-admin@mail.ru", admin=True)
+    member = await make_user("fb-member@mail.ru", published=True)
+    buf = io.BytesIO()
+    Image.new("RGB", (40, 30), "red").save(buf, "PNG")
+    r = await member.post(
+        "/api/feedback/form",
+        data={"text": "Кнопка не нажимается", "page_url": "/startups"},
+        files={"screenshot": ("shot.png", buf.getvalue(), "image/png")},
+    )
+    assert r.status_code == 201, r.text
+    bad = await client.post(
+        "/api/feedback/form",
+        data={"text": "Не картинка"},
+        files={"screenshot": ("x.png", b"not an image", "image/png")},
+    )
+    assert bad.status_code == 400
+
+    fb = (await admin.get("/api/admin/feedback")).json()[0]
+    assert fb["has_screenshot"] is True
+    shot = await admin.get(f"/api/admin/feedback/{fb['id']}/screenshot")
+    assert shot.status_code == 200 and shot.headers["content-type"] == "image/webp"
+    assert (await member.get(f"/api/admin/feedback/{fb['id']}/screenshot")).status_code == 403
+
+    activity = (await admin.get("/api/admin/activity")).json()
+    assert {"Зарегистрировался", "Опубликовал профиль"} <= {a["label"] for a in activity}
+
+    recent = (await admin.get("/api/admin/users", params={"days": 1})).json()
+    assert {u["email"] for u in recent} >= {"fb-admin@mail.ru", "fb-member@mail.ru"}
+    s = await create_published(member)
+    assert [
+        x["slug"]
+        for x in (await admin.get("/api/admin/startups", params={"status": "recruiting"})).json()
+    ] == [s["slug"]]
+    assert (await admin.get("/api/admin/startups", params={"status": "draft"})).json() == []
+    assert len((await admin.get("/api/admin/startups", params={"q": "fb-member"})).json()) == 1

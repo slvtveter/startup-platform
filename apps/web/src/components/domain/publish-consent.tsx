@@ -62,7 +62,7 @@ export function usePublishWithConsent() {
             type="checkbox"
             checked={checked}
             onChange={(e) => setChecked(e.target.checked)}
-            className="size-6 shrink-0 accent-[var(--brand)]"
+            className="check"
             aria-describedby={error ? "pub-error" : undefined}
           />
           <span>

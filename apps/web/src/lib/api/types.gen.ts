@@ -5,6 +5,30 @@ export type ClientOptions = {
 };
 
 /**
+ * ActivityOut
+ *
+ * Событие продукта для ленты в админке: кто и что сделал.
+ */
+export type ActivityOut = {
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Label
+     */
+    label: string;
+    /**
+     * User Email
+     */
+    user_email?: string | null;
+};
+
+/**
  * AdminActionOut
  */
 export type AdminActionOut = {
@@ -272,6 +296,24 @@ export type ApplyIn = {
  * Availability
  */
 export type Availability = 'few_hours' | 'part_time' | 'full_time';
+
+/**
+ * Body_send_feedback_form
+ */
+export type BodySendFeedbackForm = {
+    /**
+     * Text
+     */
+    text: string;
+    /**
+     * Page Url
+     */
+    page_url?: string;
+    /**
+     * Screenshot
+     */
+    screenshot?: Blob | File | null;
+};
 
 /**
  * Body_upload_my_avatar
@@ -649,6 +691,10 @@ export type FeedbackOut = {
      * User Email
      */
     user_email?: string | null;
+    /**
+     * Has Screenshot
+     */
+    has_screenshot?: boolean;
 };
 
 /**
@@ -4459,6 +4505,31 @@ export type SendFeedbackResponses = {
 
 export type SendFeedbackResponse = SendFeedbackResponses[keyof SendFeedbackResponses];
 
+export type SendFeedbackFormData = {
+    body: BodySendFeedbackForm;
+    path?: never;
+    query?: never;
+    url: '/api/feedback/form';
+};
+
+export type SendFeedbackFormErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SendFeedbackFormError = SendFeedbackFormErrors[keyof SendFeedbackFormErrors];
+
+export type SendFeedbackFormResponses = {
+    /**
+     * Successful Response
+     */
+    201: OkOut;
+};
+
+export type SendFeedbackFormResponse = SendFeedbackFormResponses[keyof SendFeedbackFormResponses];
+
 export type AdminHypothesesData = {
     body?: never;
     path?: never;
@@ -4581,6 +4652,66 @@ export type AdminOverviewPageResponses = {
 
 export type AdminOverviewPageResponse = AdminOverviewPageResponses[keyof AdminOverviewPageResponses];
 
+export type AdminActivityData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/admin/activity';
+};
+
+export type AdminActivityErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminActivityError = AdminActivityErrors[keyof AdminActivityErrors];
+
+export type AdminActivityResponses = {
+    /**
+     * Response Admin Activity
+     *
+     * Successful Response
+     */
+    200: Array<ActivityOut>;
+};
+
+export type AdminActivityResponse = AdminActivityResponses[keyof AdminActivityResponses];
+
+export type AdminFeedbackScreenshotData = {
+    body?: never;
+    path: {
+        /**
+         * Feedback Id
+         */
+        feedback_id: number;
+    };
+    query?: never;
+    url: '/api/admin/feedback/{feedback_id}/screenshot';
+};
+
+export type AdminFeedbackScreenshotErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminFeedbackScreenshotError = AdminFeedbackScreenshotErrors[keyof AdminFeedbackScreenshotErrors];
+
+export type AdminFeedbackScreenshotResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
 export type AdminFeedbackData = {
     body?: never;
     path?: never;
@@ -4611,6 +4742,10 @@ export type AdminListUsersData = {
          * Kind
          */
         kind?: 'all' | 'real' | 'demo' | 'admins';
+        /**
+         * Days
+         */
+        days?: number | null;
     };
     url: '/api/admin/users';
 };
@@ -4728,9 +4863,31 @@ export type AdminUnblockUserResponse = AdminUnblockUserResponses[keyof AdminUnbl
 export type AdminListStartupsData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Status
+         */
+        status?: 'all' | 'recruiting' | 'draft' | 'closed' | 'archived' | 'hidden';
+        /**
+         * Days
+         */
+        days?: number | null;
+        /**
+         * Q
+         */
+        q?: string | null;
+    };
     url: '/api/admin/startups';
 };
+
+export type AdminListStartupsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminListStartupsError = AdminListStartupsErrors[keyof AdminListStartupsErrors];
 
 export type AdminListStartupsResponses = {
     /**

@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import { AdminAction, AdminDeleteUser } from "@/components/domain/admin-actions";
 import { CatalogEditor, PlatformStartupForm } from "@/components/domain/admin-cold-start";
 import { Container, PageHeader } from "@/components/domain/page-header";
-import { adminAuditLog, adminFeedback, adminListReports, adminListStartups, adminListUsers, adminOverviewPage, listRoles, listSkills } from "@/lib/api";
+import { adminActivity, adminAuditLog, adminFeedback, adminListReports, adminListStartups, adminListUsers, adminOverviewPage, listRoles, listSkills } from "@/lib/api";
 import { STARTUP_STATUS, plural, timeAgo } from "@/lib/labels";
 import { requireMe, serverClient } from "@/lib/server-api";
 import { cn } from "@/lib/utils";
@@ -22,7 +22,30 @@ const TABS = [
   ["audit", "Журнал"],
 ] as const;
 type Tab = (typeof TABS)[number][0];
-type Params = { days?: string; q?: string; tab?: string; kind?: string };
+type Params = { days?: string; q?: string; tab?: string; kind?: string; period?: string; status?: string };
+
+const PERIODS = [
+  ["", "За всё время"],
+  ["1", "24 часа"],
+  ["7", "7 дней"],
+  ["30", "30 дней"],
+] as const;
+
+/** Ссылка на ту же вкладку с изменённым параметром (остальные фильтры сохраняются). */
+function withParam(params: Params, tab: string, key: keyof Params, value: string) {
+  const q = new URLSearchParams({ tab });
+  for (const [k, v] of Object.entries(params)) if (v && k !== "tab" && k !== key) q.set(k, v);
+  if (value) q.set(key, value);
+  return `/admin?${q.toString()}`;
+}
+
+function Chip({ href, on, children }: { href: string; on: boolean; children: React.ReactNode }) {
+  return (
+    <Link href={href} aria-current={on ? "true" : undefined} className={cn("rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors", on ? "bg-second text-on-second" : "bg-tone hover:bg-tone-2")}>
+      {children}
+    </Link>
+  );
+}
 
 /**
  * Админка на вкладках (?tab=). Каждая вкладка грузит только свои данные, а пока они идут —
@@ -111,6 +134,13 @@ async function TabBody({ tab, params }: { tab: Tab; params: Params }) {
               feedback.map((f) => (
                 <li key={f.id} className="rounded-xl border bg-card p-4 text-sm">
                   <p className="whitespace-pre-line wrap-anywhere">{f.text}</p>
+                  {f.has_screenshot && (
+                    <a href={`/api/admin/feedback/${f.id}/screenshot`} target="_blank" rel="noopener" className="mt-2 block w-fit overflow-hidden rounded-lg border">
+                      {/* Скриншот отдаёт только API админки; next/image для приватного файла не нужен. */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={`/api/admin/feedback/${f.id}/screenshot`} alt="Скриншот к сообщению" className="max-h-56 max-w-full bg-tone object-contain" />
+                    </a>
+                  )}
                   <p className="mt-2 text-xs text-muted-foreground">
                     {timeAgo(f.created_at)} · {f.user_email ?? "гость"}
                     {f.page_url && (
@@ -134,7 +164,8 @@ async function TabBody({ tab, params }: { tab: Tab; params: Params }) {
   }
   if (tab === "users") {
     const kind = (["real", "demo", "admins"] as const).find((k) => k === params.kind) ?? "all";
-    const { data: users } = await adminListUsers({ client, query: { q: params.q, kind } });
+    const period = PERIODS.find(([v]) => v === params.period)?.[0] ?? "";
+    const { data: users } = await adminListUsers({ client, query: { q: params.q, kind, ...(period ? { days: Number(period) } : {}) } });
     const filters = [
       ["all", "Все"],
       ["real", "Настоящие"],
@@ -166,7 +197,17 @@ async function TabBody({ tab, params }: { tab: Tab; params: Params }) {
             />
           </form>
         </div>
-        <p className="mt-3 text-sm text-muted-foreground">{users?.length ?? 0} {plural(users?.length ?? 0, "аккаунт", "аккаунта", "аккаунтов")}</p>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="text-sm text-muted-foreground">Регистрация:</span>
+          {PERIODS.map(([v, label]) => (
+            <Chip key={v} href={withParam(params, "users", "period", v)} on={period === v}>
+              {label}
+            </Chip>
+          ))}
+        </div>
+        <p className="mt-3 text-sm text-muted-foreground">
+          {users?.length ?? 0} {plural(users?.length ?? 0, "аккаунт", "аккаунта", "аккаунтов")}, новые сверху
+        </p>
         <div className="mt-2 divide-y rounded-xl border bg-card">
           {users?.map((u) => (
             <div key={u.id} className="flex flex-wrap items-center gap-3 p-3 text-sm">
@@ -201,12 +242,52 @@ async function TabBody({ tab, params }: { tab: Tab; params: Params }) {
     );
   }
   if (tab === "startups") {
-    const { data: startups } = await adminListStartups({ client });
+    const STATUSES = [
+      ["all", "Все"],
+      ["recruiting", "Идёт набор"],
+      ["draft", "Черновики"],
+      ["closed", "Набор закрыт"],
+      ["archived", "В архиве"],
+      ["hidden", "Скрыты"],
+    ] as const;
+    const status = STATUSES.find(([v]) => v === params.status)?.[0] ?? "all";
+    const period = PERIODS.find(([v]) => v === params.period)?.[0] ?? "";
+    const { data: startups } = await adminListStartups({
+      client,
+      query: { status, q: params.q, ...(period ? { days: Number(period) } : {}) },
+    });
     return (
       <>
-        <section className="mt-8 max-w-3xl">
-          <h2 className="text-xl">Стартапы</h2>
-          <div className="mt-3 divide-y rounded-xl border bg-card">
+        <section className="mt-8 max-w-4xl">
+          <div className="flex flex-wrap items-center gap-2">
+            {STATUSES.map(([v, label]) => (
+              <Chip key={v} href={withParam(params, "startups", "status", v === "all" ? "" : v)} on={status === v}>
+                {label}
+              </Chip>
+            ))}
+            <form className="ml-auto min-w-0">
+              <input type="hidden" name="tab" value="startups" />
+              {status !== "all" && <input type="hidden" name="status" value={status} />}
+              {period && <input type="hidden" name="period" value={period} />}
+              <input
+                name="q"
+                defaultValue={params.q}
+                placeholder="Название или почта владельца"
+                aria-label="Поиск стартапов"
+                className="h-9 w-48 rounded-xl border border-[var(--field)] bg-white px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/25 sm:w-72"
+              />
+            </form>
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className="text-sm text-muted-foreground">Созданы:</span>
+            {PERIODS.map(([v, label]) => (
+              <Chip key={v} href={withParam(params, "startups", "period", v)} on={period === v}>
+                {label}
+              </Chip>
+            ))}
+          </div>
+          <p className="mt-3 text-sm text-muted-foreground">{startups?.length ?? 0} {plural(startups?.length ?? 0, "стартап", "стартапа", "стартапов")}, новые сверху</p>
+          <div className="mt-2 divide-y rounded-xl border bg-card">
             {startups?.map((s) => (
               <div key={s.id} className="flex items-center gap-3 p-3 text-sm">
                 <div className="min-w-0">
@@ -214,7 +295,7 @@ async function TabBody({ tab, params }: { tab: Tab; params: Params }) {
                     {s.title}
                   </Link>
                   <div className="truncate text-muted-foreground">
-                    {STARTUP_STATUS[s.status]} · {s.owner_email}
+                    {STARTUP_STATUS[s.status]} · {s.owner_email} · {timeAgo(s.created_at)}
                     {s.is_hidden && " · скрыт"}
                   </div>
                 </div>
@@ -263,29 +344,45 @@ async function TabBody({ tab, params }: { tab: Tab; params: Params }) {
     );
   }
   const { data: audit } = await adminAuditLog({ client });
+  const fmt = new Intl.DateTimeFormat("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" });
   return (
-    <section className="mt-8 max-w-3xl">
-      <ul className="divide-y rounded-xl border bg-card text-sm">
-        {audit?.length ? (
-          audit.slice(0, 100).map((a) => (
-            <li key={a.id} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 p-3">
-              <span className="font-semibold">{a.label || a.action}</span>
-              {a.target_href ? (
-                <Link href={a.target_href} className="font-semibold text-brand-ink hover:underline">
-                  {a.target_label}
-                </Link>
-              ) : (
-                <span className="text-muted-foreground">{a.target_label}</span>
-              )}
-              <span className="ml-auto text-xs text-muted-foreground">
-                {a.admin_email ?? "удалённый админ"} · {timeAgo(a.created_at)}
-              </span>
-            </li>
-          ))
-        ) : (
-          <li className="p-3 text-muted-foreground">Пока пусто</li>
-        )}
-      </ul>
+    <section className="mt-8 overflow-x-auto rounded-xl border bg-card" tabIndex={0} role="region" aria-label="Журнал действий админов">
+      <table className="w-full min-w-[720px] text-sm">
+        <thead className="border-b bg-tone text-left text-xs text-muted-foreground">
+          <tr>
+            <th className="px-4 py-2.5 font-semibold">Дата и время</th>
+            <th className="px-4 py-2.5 font-semibold">Админ</th>
+            <th className="px-4 py-2.5 font-semibold">Действие</th>
+            <th className="px-4 py-2.5 font-semibold">Объект</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y">
+          {audit?.length ? (
+            audit.map((a) => (
+              <tr key={a.id} className="align-top">
+                <td className="px-4 py-2.5 whitespace-nowrap text-muted-foreground tabular-nums">{fmt.format(new Date(a.created_at))}</td>
+                <td className="px-4 py-2.5 whitespace-nowrap">{a.admin_email ?? "удалённый админ"}</td>
+                <td className="px-4 py-2.5 font-semibold">{a.label || a.action}</td>
+                <td className="px-4 py-2.5">
+                  {a.target_href ? (
+                    <Link href={a.target_href} className="font-semibold text-brand-ink hover:underline">
+                      {a.target_label}
+                    </Link>
+                  ) : (
+                    <span className="text-muted-foreground">{a.target_label}</span>
+                  )}
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={4} className="px-4 py-3 text-muted-foreground">
+                Пока пусто
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </section>
   );
 }
@@ -293,7 +390,11 @@ async function TabBody({ tab, params }: { tab: Tab; params: Params }) {
 /** Обзор: простая аналитика по настоящим пользователям (без демо и тестовых аккаунтов). */
 async function Overview({ days }: { days: number }) {
   const period = [7, 14, 30].includes(days) ? days : 14;
-  const { data } = await adminOverviewPage({ client: await serverClient(), query: { days: period } });
+  const client = await serverClient();
+  const [{ data }, { data: activity }] = await Promise.all([
+    adminOverviewPage({ client, query: { days: period } }),
+    adminActivity({ client, query: { limit: 30 } }),
+  ]);
   if (!data) return null;
   const t = data.totals;
   const tiles: [string, number, string | null][] = [
@@ -369,6 +470,25 @@ async function Overview({ days }: { days: number }) {
           </ul>
         </section>
       </div>
+      <section className="rounded-2xl border bg-card p-5">
+        <h2 className="font-sans text-base font-bold">Последние события</h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Ключевые шаги людей: регистрация, подтверждение почты, публикация, отклики. Технические ошибки (коды 4xx/5xx) — в логах сервера.
+        </p>
+        <ul className="mt-3 divide-y text-sm">
+          {activity?.length ? (
+            activity.map((e, i) => (
+              <li key={i} className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 py-2">
+                <span className={cn("rounded-full px-2 py-0.5 text-xs font-bold", e.name === "signup" ? "bg-brand-soft text-brand-ink" : "bg-success-soft text-success-ink")}>{e.label}</span>
+                <span className="truncate">{e.user_email ?? "без аккаунта"}</span>
+                <span className="ml-auto text-xs text-muted-foreground tabular-nums">{timeAgo(e.created_at)}</span>
+              </li>
+            ))
+          ) : (
+            <li className="py-2 text-muted-foreground">Событий пока нет</li>
+          )}
+        </ul>
+      </section>
     </div>
   );
 }

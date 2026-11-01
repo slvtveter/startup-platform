@@ -43,7 +43,22 @@ export function SkillPicker({
           ))}
         </div>
       )}
-      <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Начни вводить: Figma, React, SEO..." className="h-11" />
+      <Input
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        onKeyDown={(e) => {
+          // Enter добавляет первый подходящий навык, а не отправляет форму.
+          if (e.key !== "Enter") return;
+          e.preventDefault();
+          const first = q.trim() && suggestions[0];
+          if (first && value.length < max) {
+            onChange([...value, first.slug]);
+            setQ("");
+          }
+        }}
+        placeholder="Начни вводить: Figma, React, SEO..."
+        className="h-11"
+      />
       <div className="flex flex-wrap gap-2">
         {suggestions.map((s) => (
           <button
@@ -59,7 +74,9 @@ export function SkillPicker({
             + {s.name}
           </button>
         ))}
-        {suggestions.length === 0 && <span className="text-sm text-muted-foreground">Ничего не нашлось</span>}
+        {suggestions.length === 0 && (
+          <span className="text-sm text-muted-foreground">Такого навыка пока нет в списке — выбери близкий или напиши о нём в «О себе».</span>
+        )}
       </div>
       <p className="text-xs text-muted-foreground">
         Выбрано {value.length} из {max}
