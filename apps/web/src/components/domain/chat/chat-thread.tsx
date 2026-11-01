@@ -104,7 +104,7 @@ export function ChatThread({ chat, initial }: { chat: ConversationOut; initial: 
   }
 
   return (
-    <section className="flex min-h-0 flex-col" aria-label={`Диалог: ${peer.display_name}`}>
+    <section className="chat-thread flex min-h-0 flex-col" aria-label={`Диалог: ${peer.display_name}`}>
       <header className="flex items-center gap-3 border-b px-4 py-3">
         <Link href="/chats" className="-ml-1 rounded-lg p-1 hover:bg-secondary md:hidden" aria-label="Все диалоги">
           <ArrowLeft className="size-5" />

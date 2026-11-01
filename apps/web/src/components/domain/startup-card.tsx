@@ -66,13 +66,13 @@ function StartupMark({ startup, eager }: { startup: StartupCardData; eager?: boo
   if (startup.cover_url)
     return (
       // eslint-disable-next-line @next/next/no-img-element -- обложки уже пережаты api в WebP
-      <img src={startup.cover_url} alt="" loading={eager ? "eager" : "lazy"} decoding="async" className="size-14 shrink-0 rounded-2xl bg-tone-2 object-cover" />
+      <img src={startup.cover_url} alt="" loading={eager ? "eager" : "lazy"} decoding="async" className="size-12 shrink-0 rounded-2xl bg-tone-2 object-cover sm:size-14" />
     );
   const [from, to, ink] = FALLBACK[[...startup.slug].reduce((n, c) => n + c.charCodeAt(0), 0) % FALLBACK.length];
   return (
     <span
       aria-hidden
-      className="grid size-14 shrink-0 place-items-center rounded-2xl text-2xl font-extrabold tracking-[-0.04em]"
+      className="grid size-12 shrink-0 place-items-center rounded-2xl text-xl font-extrabold tracking-[-0.04em] sm:size-14 sm:text-2xl"
       style={{ background: `radial-gradient(120% 120% at 15% 10%, ${to}, ${from})`, color: ink }}
     >
       {startup.title.trim()[0]?.toUpperCase() ?? "•"}
@@ -108,16 +108,16 @@ export function StartupCard({
   const more = startup.open_roles.length - roles.length;
   return (
     <Tag className="h-full">
-      <Link href={href ?? `/startups/${startup.slug}`} className={cn("card-hover group flex h-full flex-col rounded-3xl bg-tone p-5 hover:bg-tone-2", !compact && "sm:p-6")}>
-        <span className="flex items-center gap-4">
+      <Link href={href ?? `/startups/${startup.slug}`} className={cn("card-hover group flex h-full flex-col rounded-[20px] bg-tone p-4 hover:bg-tone-2 sm:rounded-3xl sm:p-5", !compact && "sm:p-6")}>
+        <span className="flex items-center gap-3 sm:gap-4">
           <StartupMark startup={startup} eager={eager} />
           <span className="min-w-0 flex-1">
             <span className="flex items-baseline gap-2">
-              <h3 className="truncate text-xl leading-7 font-extrabold tracking-[-0.03em] text-brand-ink transition-colors group-hover:text-brand-hover" title={startup.title}>
+              <h3 className="truncate text-lg leading-6 font-extrabold sm:text-xl sm:leading-7 tracking-[-0.03em] text-brand-ink transition-colors group-hover:text-brand-hover" title={startup.title}>
                 {startup.title}
               </h3>
             </span>
-            <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+            <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm sm:mt-1">
               <span className="font-semibold">{STAGE[startup.stage] ?? startup.stage}</span>
               <span aria-hidden className="text-muted-foreground">·</span>
               <TermsBadge terms={startup.terms} className="px-2 py-0.5" />
@@ -127,16 +127,16 @@ export function StartupCard({
           </span>
         </span>
 
-        <p className={cn("text-base leading-6 text-foreground/80", compact ? "mt-3 line-clamp-1" : "mt-4 line-clamp-2")}>{startup.pitch}</p>
+        <p className={cn("text-sm leading-5 text-foreground/80 sm:text-base sm:leading-6", compact ? "mt-3 line-clamp-1" : "mt-3 line-clamp-2 sm:mt-4")}>{startup.pitch}</p>
 
         {roles.length > 0 ? (
-          <span className={cn("flex flex-wrap gap-1.5", compact ? "mt-3" : "mt-4")} aria-label="Кого ищут">
+          <span className={cn("flex flex-wrap gap-1.5", compact ? "mt-3" : "mt-3 sm:mt-4")} aria-label="Кого ищут">
             {roles.map((r) => (
-              <span key={r.id} className="rounded-full bg-white px-3 py-1 text-sm leading-5 font-semibold">
+              <span key={r.id} className="rounded-full bg-white px-2.5 py-0.5 text-xs leading-5 font-semibold sm:px-3 sm:py-1 sm:text-sm">
                 {r.title}
               </span>
             ))}
-            {more > 0 && <span className="rounded-full bg-white px-3 py-1 text-sm leading-5 font-semibold text-muted-foreground">ещё {more}</span>}
+            {more > 0 && <span className="rounded-full bg-white px-2.5 py-0.5 text-xs leading-5 font-semibold text-muted-foreground sm:px-3 sm:py-1 sm:text-sm">ещё {more}</span>}
           </span>
         ) : (
           <span className="mt-4 text-sm text-muted-foreground">Команда собрана</span>
@@ -144,8 +144,8 @@ export function StartupCard({
 
         {reasons && reasons.length > 0 && (
           <span className="mt-2.5 flex flex-wrap gap-1.5" aria-label="Почему подходит">
-            {reasons.slice(0, 2).map((r) => (
-              <span key={r} className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-bold text-brand-ink">
+            {reasons.slice(0, 2).map((r, i) => (
+              <span key={r} className={cn("inline-flex items-center gap-1 rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-bold text-brand-ink", i > 0 && "max-sm:hidden")}>
                 <Check aria-hidden className="size-3 shrink-0" />
                 {reasonLabel(r)}
               </span>
@@ -153,13 +153,13 @@ export function StartupCard({
           </span>
         )}
 
-        <span className={cn("mt-auto", compact ? "pt-4" : "pt-5")}>
-          <span className={cn("flex items-center gap-2 border-t border-foreground/[0.08] text-sm text-muted-foreground", compact ? "pt-3" : "pt-4")}>
+        <span className={cn("mt-auto", compact ? "pt-4" : "pt-4 sm:pt-5")}>
+          <span className={cn("flex items-center gap-2 border-t border-foreground/[0.08] text-sm text-muted-foreground", compact ? "pt-3" : "pt-3 sm:pt-4")}>
             {startup.owner_avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP
-              <img src={startup.owner_avatar_url} alt="" loading="lazy" decoding="async" className="size-7 shrink-0 rounded-full bg-tone-2 object-cover" />
+              <img src={startup.owner_avatar_url} alt="" loading="lazy" decoding="async" className="size-6 shrink-0 rounded-full bg-tone-2 object-cover sm:size-7" />
             ) : (
-              <span aria-hidden className="grid size-7 shrink-0 place-items-center rounded-full bg-brand-soft text-[11px] font-extrabold text-brand-ink">
+              <span aria-hidden className="grid size-6 shrink-0 place-items-center rounded-full bg-brand-soft text-[11px] font-extrabold text-brand-ink sm:size-7">
                 {initials(startup.owner_name)}
               </span>
             )}
@@ -169,7 +169,8 @@ export function StartupCard({
             </span>
             {open > 0 && (
               <span className="ml-auto inline-flex shrink-0 items-center gap-1 font-bold text-brand-ink">
-                {plural(open, `${open} свободное место`, `${open} свободных места`, `${open} свободных мест`)}
+                <span className="sm:hidden">{plural(open, `${open} место`, `${open} места`, `${open} мест`)}</span>
+                <span className="max-sm:hidden">{plural(open, `${open} свободное место`, `${open} свободных места`, `${open} свободных мест`)}</span>
                 <ArrowRight aria-hidden className="size-3.5" />
               </span>
             )}

@@ -326,10 +326,35 @@
   }
 }
 
-/* Мессенджер на телефоне — приложение на весь экран: подвал сайта под ним не нужен. */
+/* Нижняя панель разделов у вошедших (< lg): место под ней, кнопки и плашки внизу экрана — над ней. */
+@media (width < 64rem) {
+  body:has(.tabbar) {
+    --tabbar-h: calc(4rem + env(safe-area-inset-bottom));
+    padding-bottom: var(--tabbar-h);
+  }
+  body:has(.tabbar) .sticky-cta {
+    bottom: calc(var(--cookie-offset, 0px) + var(--tabbar-h));
+  }
+  body:has(.tabbar) .cookie-in {
+    bottom: calc(var(--tabbar-h) + 0.75rem);
+  }
+  body:has(.tabbar) .chat-shell {
+    height: calc(100dvh - 72px - var(--tabbar-h));
+  }
+}
+
+/* Открытый диалог на телефоне — как мессенджер: на весь экран, без подвала и нижней панели.
+   В списке диалогов подвал и панель на месте (из «Сообщений» всегда можно уйти в другой раздел). */
 @media (width < 48rem) {
-  body:has(.chat-shell) footer {
+  body:has(.chat-thread) footer,
+  body:has(.chat-thread) .tabbar {
     display: none;
+  }
+  body:has(.chat-thread) {
+    padding-bottom: 0;
+  }
+  body:has(.chat-thread) .chat-shell {
+    height: calc(100dvh - 72px);
   }
 }
 

@@ -85,27 +85,27 @@ export function PersonCard({
       "Навыки",
       <span key="s" className="flex flex-wrap gap-1.5">
         {skills.map((s) => (
-          <span key={s.slug} className={cn("rounded-full px-2.5 py-0.5 text-sm font-semibold", chip)}>
+          <span key={s.slug} className={cn("rounded-full px-2.5 py-0.5 text-xs font-semibold sm:text-sm", chip)}>
             {s.name}
           </span>
         ))}
         {more > 0 && <span className={cn("rounded-full px-2.5 py-0.5 text-sm font-semibold text-muted-foreground", chip)}>+{more}</span>}
       </span>,
     ]);
-  const cols = "grid grid-cols-[64px_minmax(0,1fr)] gap-x-4 sm:grid-cols-[96px_minmax(0,1fr)] sm:gap-x-6";
+  const cols = "grid grid-cols-[56px_minmax(0,1fr)] gap-x-3 sm:grid-cols-[96px_minmax(0,1fr)] sm:gap-x-6";
 
   return (
     <Tag className={compact ? "h-full" : undefined}>
       <Link
         href={href ?? `/people/${person.slug}`}
         className={cn(
-          "card-hover group block rounded-3xl p-5",
+          "card-hover group block rounded-[20px] p-4 sm:rounded-3xl sm:p-5",
           compact ? "flex h-full flex-col sm:p-6" : "sm:p-7",
           white ? "bg-white hover:bg-tone" : "bg-tone hover:bg-tone-2",
         )}
       >
         <div className={cols}>
-          <span className="relative size-16 overflow-hidden rounded-2xl bg-tone-2 sm:size-24">
+          <span className="relative size-14 overflow-hidden rounded-2xl bg-tone-2 sm:size-24">
             {photo ? (
               // eslint-disable-next-line @next/next/no-img-element -- аватары уже пережаты api в WebP
               <img src={photo} alt="" loading={eager ? "eager" : "lazy"} decoding="async" className="size-full object-cover" />
@@ -117,11 +117,11 @@ export function PersonCard({
           </span>
           <div className="min-w-0 self-center">
             <div className="flex items-start gap-3">
-              <h3 className="min-w-0 truncate text-xl leading-7 font-bold tracking-[-0.02em] text-brand-ink transition-colors group-hover:text-brand-hover sm:text-2xl sm:leading-8">
+              <h3 className="min-w-0 truncate text-lg leading-6 font-bold tracking-[-0.02em] text-brand-ink transition-colors group-hover:text-brand-hover sm:text-2xl sm:leading-8">
                 {title}
               </h3>
             </div>
-            <p className="mt-0.5 truncate text-base">
+            <p className="mt-0.5 truncate text-sm sm:text-base">
               {person.primary_role && <span className="font-semibold">{person.display_name}</span>}
               {city && <span className="text-muted-foreground">{person.primary_role ? " · " : ""}{city}</span>}
               {person.is_demo && <span className="text-xs whitespace-nowrap text-muted-foreground"> · пример</span>}
@@ -139,18 +139,18 @@ export function PersonCard({
           </div>
         </div>
         {/* На телефоне бейджи под фото во всю ширину: рядом с ним им тесно. */}
-        {compact && <span className="block h-4 shrink-0" />}
+        {compact && <span className="block h-3 shrink-0 sm:h-4" />}
         {(cofound || terms.length > 0 || availability) && (
-          <span className="mt-4 flex flex-wrap gap-1.5 sm:hidden">
+          <span className="mt-3 flex flex-wrap gap-1.5 sm:hidden">
             <Badges cofound={cofound} terms={terms} availability={availability} chip={chip} />
           </span>
         )}
         {rows.length > 0 && (
-          <dl className="mt-5 border-t border-foreground/[0.08] sm:mt-6">
+          <dl className="mt-3 border-t border-foreground/[0.08] sm:mt-6">
             {rows.map(([label, value]) => (
-              <div key={label} className={cn(cols, "items-baseline border-b border-foreground/[0.08] py-3 last:border-b-0 last:pb-0")}>
-                <dt className="text-sm text-muted-foreground">{label}</dt>
-                <dd className="min-w-0 text-base">{value}</dd>
+              <div key={label} className={cn(cols, "items-baseline border-b border-foreground/[0.08] py-2 last:border-b-0 last:pb-0 sm:py-3")}>
+                <dt className="text-xs text-muted-foreground sm:text-sm">{label}</dt>
+                <dd className="min-w-0 text-sm sm:text-base">{value}</dd>
               </div>
             ))}
           </dl>

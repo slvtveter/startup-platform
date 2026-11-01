@@ -52,7 +52,7 @@ export function StepsLive({ role, person }: { role?: string; person?: Person }) 
 
   const skills = person?.skills?.slice(0, 3).map((s) => s.name) ?? ["Figma", "UX", "Прототипы"];
   return (
-    <div ref={ref} className={cn("steps-live grid gap-3 md:grid-cols-3", play && "play")}>
+    <div ref={ref} className={cn("steps-live grid gap-2 md:grid-cols-3 md:gap-3", play && "play")}>
       <style>{CSS}</style>
 
       <Panel i={0}>
@@ -110,14 +110,15 @@ export function StepsLive({ role, person }: { role?: string; person?: Person }) 
 /** Шаг — ссылка: «Создай профиль» и «Откликнись» ведут в регистрацию, «Выбери стартап» — в каталог. */
 function Panel({ i, children }: { i: number; children: React.ReactNode }) {
   return (
-    <Link href={STEPS[i].href} className="card-hover group flex flex-col rounded-[28px] bg-tone p-2 hover:bg-tone-2">
-      <div aria-hidden className="grid h-44 place-items-center rounded-[20px] bg-white px-6">
+    <Link href={STEPS[i].href} className="card-hover group flex flex-col rounded-[20px] bg-tone p-2 hover:bg-tone-2 md:rounded-[28px]">
+      {/* Живая иллюстрация — только с планшета: на телефоне три шага должны помещаться в экран. */}
+      <div aria-hidden className="grid h-44 place-items-center rounded-[20px] bg-white px-6 max-md:hidden">
         {children}
       </div>
-      <div className="px-5 pt-5 pb-6">
+      <div className="px-3 py-3 md:px-5 md:pt-5 md:pb-6">
         <p className="text-sm font-bold text-brand-ink">Шаг {i + 1}</p>
-        <h3 className="mt-1.5 text-2xl font-extrabold tracking-[-0.03em] transition-colors group-hover:text-brand-ink">{STEPS[i].title}</h3>
-        <p className="mt-2 text-muted-foreground">{STEPS[i].text}</p>
+        <h3 className="mt-1 text-lg font-extrabold tracking-[-0.03em] transition-colors group-hover:text-brand-ink md:mt-1.5 md:text-2xl">{STEPS[i].title}</h3>
+        <p className="mt-1 text-sm text-muted-foreground md:mt-2 md:text-base">{STEPS[i].text}</p>
       </div>
     </Link>
   );
