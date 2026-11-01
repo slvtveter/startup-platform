@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, DicesIcon, MinusIcon, PlusIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, DicesIcon, ImagePlus, MinusIcon, PlusIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -13,6 +13,7 @@ import {
   createStartup,
   listRoleTemplates,
   publishStartup,
+  uploadStartupCover,
   type RoleOut,
   type RoleTemplateOut,
   type Stage,
@@ -56,7 +57,7 @@ const STEPS: Step[] = [
   { key: "description", title: "Расскажи подробнее", hint: "Главное — проблема. Остальное можно дописать потом.", ready: (f) => f.description.trim().length >= MIN_DESCRIPTION },
   { key: "terms", title: "На каких условиях зовёшь людей?", hint: "Видно на карточке и в фильтрах.", ready: () => true },
   { key: "roles", title: "Кого ищешь в команду?", hint: "Можно выбрать несколько, до трёх человек на роль. Задачи и часы подставим примером — после публикации поправишь их у каждой роли.", ready: (_f, r) => Object.keys(r).length > 0 },
-  { key: "finish", title: "Почти готово", hint: "Ссылки необязательны, но с ними больше доверия.", ready: () => true },
+  { key: "finish", title: "Почти готово", hint: "Обложка и ссылки необязательны, но с ними проект заметнее.", ready: () => true },
 ];
 
 /**
@@ -101,6 +102,16 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
   const [ideas, setIdeas] = useState<string[]>([]);
   const [templates, setTemplates] = useState<Record<string, RoleTemplateOut>>({});
   const [busy, setBusy] = useState(false);
+  // Обложка выбирается в мастере, а загружается сразу после создания стартапа (до публикации).
+  const [cover, setCover] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const coverInput = useRef<HTMLInputElement>(null);
+  useEffect(
+    () => () => {
+      if (coverPreview) URL.revokeObjectURL(coverPreview);
+    },
+    [coverPreview],
+  );
   const stepRef = useRef<HTMLDivElement>(null);
 
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
@@ -151,6 +162,15 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
     setStep((s) => Math.min(STEPS.length - 1, Math.max(0, s + delta)));
   }
 
+  function pickCover(file: File | undefined) {
+    if (coverInput.current) coverInput.current.value = "";
+    if (!file) return;
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return toast.error("Нужна картинка JPEG, PNG или WebP");
+    if (file.size > 5 * 1024 * 1024) return toast.error("Файл больше 5 МБ");
+    setCover(file);
+    setCoverPreview(URL.createObjectURL(file));
+  }
+
   function roll() {
     const names = generateNames(3);
     setIdeas(names);
@@ -182,6 +202,10 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
         },
       });
       if (error) toast.error(`${name}: ${errorMessage(error)}`);
+    }
+    if (cover) {
+      const { error } = await uploadStartupCover({ path: { startup_id: s.id }, body: { file: cover } });
+      if (error) toast.error(`Обложка не загрузилась: ${errorMessage(error)}. Попробуй ещё раз в редакторе.`);
     }
     try {
       sessionStorage.removeItem(DRAFT_KEY);
@@ -384,19 +408,57 @@ export function StartupWizard({ roles, emailVerified }: { roles: RoleOut[]; emai
                   <Input aria-label="Сайт или прототип" placeholder="Сайт или прототип: https://…" className="h-11" value={form.website} onChange={(e) => set("website", e.target.value)} />
                   <Input aria-label="Telegram-канал" placeholder="Telegram-канал: @channel" className="h-11" value={form.telegram} onChange={(e) => set("telegram", e.target.value)} />
                 </div>
-                <p className="rounded-2xl bg-brand-soft p-4 text-sm">
-                  Обложку и задачи ролей можно поправить на странице проекта.
-                </p>
+                <div>
+                  <input ref={coverInput} type="file" accept="image/jpeg,image/png,image/webp" hidden aria-label="Обложка проекта" onChange={(e) => pickCover(e.target.files?.[0])} />
+                  {coverPreview ? (
+                    <div className="relative aspect-[16/9] overflow-hidden rounded-2xl bg-tone">
+                      {/* Локальный предпросмотр (blob:), next/image для него не нужен. */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={coverPreview} alt="Обложка проекта" className="size-full object-cover" />
+                      <div className="absolute right-3 bottom-3 flex gap-2">
+                        <Button type="button" size="sm" variant="light" onClick={() => coverInput.current?.click()}>
+                          Заменить
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="light"
+                          aria-label="Убрать обложку"
+                          onClick={() => {
+                            setCover(null);
+                            setCoverPreview(null);
+                          }}
+                        >
+                          <X aria-hidden />
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => coverInput.current?.click()}
+                      className="flex w-full items-center gap-4 rounded-2xl border-2 border-dashed border-border p-5 text-left transition-colors hover:border-brand hover:bg-brand-soft/40"
+                    >
+                      <span aria-hidden className="grid size-12 shrink-0 place-items-center rounded-xl bg-brand-soft text-brand-ink">
+                        <ImagePlus className="size-5" />
+                      </span>
+                      <span>
+                        <span className="block font-bold">Добавить обложку</span>
+                        <span className="mt-0.5 block text-sm text-muted-foreground">Фото продукта или команды. JPEG, PNG или WebP до 5 МБ</span>
+                      </span>
+                    </button>
+                  )}
+                </div>
                 <dl className="grid gap-3 rounded-2xl bg-tone p-5 text-sm">
-                  <Summary label="Название" value={form.title} onEdit={() => jump(0)} />
-                  <Summary label="Идея" value={form.pitch} onEdit={() => jump(1)} />
-                  <Summary label="Стадия и условия" value={`${STAGE[form.stage]}, ${TERMS[form.terms].toLowerCase()}`} onEdit={() => jump(3)} />
+                  <Summary label="Название" value={form.title} onEdit={() => jump(STEPS.findIndex((x) => x.key === "title"))} />
+                  <Summary label="Идея" value={form.pitch} onEdit={() => jump(STEPS.findIndex((x) => x.key === "pitch"))} />
+                  <Summary label="Стадия и условия" value={`${STAGE[form.stage]}, ${TERMS[form.terms].toLowerCase()}`} onEdit={() => jump(STEPS.findIndex((x) => x.key === "stage"))} />
                   <Summary
                     label="Ищем"
                     value={Object.entries(picked)
                       .map(([slug, n]) => `${roles.find((r) => r.slug === slug)?.name ?? slug}${n > 1 ? ` ×${n}` : ""}`)
                       .join(", ")}
-                    onEdit={() => jump(5)}
+                    onEdit={() => jump(STEPS.findIndex((x) => x.key === "roles"))}
                   />
                 </dl>
                 {!emailVerified && (

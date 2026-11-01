@@ -2,6 +2,12 @@ import { expect, test } from "@playwright/test";
 
 import { register, shot, uniqueEmail } from "./helpers";
 
+// PNG 4×4: сервер сам обрежет и уменьшит.
+const PNG = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAE0lEQVR4nGO0tf3KAANMcBZeDgBH+gF3AbJGaQAAAABJRU5ErkJggg==",
+  "base64",
+);
+
 /**
  * Definition of done фазы 1 (KAN-68): основатель публикует стартап, новичок регистрируется,
  * заполняет профиль, откликается, основатель принимает, и оба видят контакты друг друга.
@@ -33,8 +39,12 @@ test("full phase 1 flow: register → profile → startup → apply → accept �
   await next.click();
   await founder.getByRole("button", { name: "Маркетолог", exact: true }).click();
   await next.click();
+  // Обложка выбирается прямо в мастере и загружается при создании стартапа.
+  await founder.getByLabel("Обложка проекта").setInputFiles({ name: "cover.png", mimeType: "image/png", buffer: PNG });
+  await expect(founder.getByRole("img", { name: "Обложка проекта" })).toBeVisible();
   await founder.getByRole("button", { name: "В черновик" }).click();
   await founder.waitForURL(/\/edit$/);
+  await expect(founder.locator('img[src*="/media/covers/"]').first()).toBeVisible();
 
   // Роль с навыком — через редактор: в мастере роли создаются по шаблону без навыков.
   // Роль из мастера убираем, чтобы у стартапа было одно место и одна кнопка «Откликнуться».
