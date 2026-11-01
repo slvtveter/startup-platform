@@ -344,7 +344,7 @@ export type ClientEventIn = {
     /**
      * Name
      */
-    name: 'landing_viewed' | 'landing_path_selected' | 'startup_viewed' | 'apply_started';
+    name: 'landing_viewed' | 'landing_path_selected' | 'startup_viewed' | 'profile_viewed' | 'apply_started';
     /**
      * Path
      */
@@ -954,6 +954,10 @@ export type MyProfileOut = {
      * Apply Blockers
      */
     apply_blockers?: Array<string>;
+    /**
+     * Views 30D
+     */
+    views_30d?: number;
 };
 
 /**

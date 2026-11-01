@@ -16,7 +16,7 @@ from app.models import Event
 from app.services.events import track
 
 # Просмотры страниц считаем не чаще раза в 30 минут на посетителя и страницу.
-DEDUP_EVENTS = {"landing_viewed", "startup_viewed"}
+DEDUP_EVENTS = {"landing_viewed", "startup_viewed", "profile_viewed"}
 DEDUP_WINDOW = timedelta(minutes=30)
 
 _process_salt = secrets.token_hex(16)
