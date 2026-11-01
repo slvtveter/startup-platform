@@ -1,15 +1,17 @@
 import { expect, test } from "@playwright/test";
 
-/** KAN-100: админ видит когорты и скачивает CSV; без прав выгрузка недоступна. */
-test("admin downloads funnel CSV, others cannot", async ({ page, browser }) => {
+/** Админка: обзор с аналитикой, вкладки со скелетоном; CSV по API — только админу (KAN-100). */
+test("admin sees the overview and exports CSV, others cannot", async ({ page, browser }) => {
   await page.request.post("/api/auth/login", { data: { email: "admin@example.com", password: "demo12345" } });
   await page.goto("/admin");
-  await expect(page.getByRole("heading", { name: "Удержание по неделям регистрации" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Регистрации по дням" })).toBeVisible();
+  await page.getByRole("link", { name: "Пользователи" }).click();
+  await page.getByRole("link", { name: "Демо", exact: true }).click();
+  await expect(page.getByText(/@demo\.invalid/).first()).toBeVisible();
 
-  const download = page.waitForEvent("download");
-  await page.getByRole("link", { name: "Воронка в CSV" }).click();
-  const file = await download;
-  expect(file.suggestedFilename()).toMatch(/^funnel-\d{4}-\d{2}-\d{2}\.csv$/);
+  const csv = await page.request.get("/api/admin/export?kind=funnel");
+  expect(csv.ok()).toBeTruthy();
+  expect(csv.headers()["content-disposition"]).toMatch(/funnel-\d{4}-\d{2}-\d{2}\.csv/);
 
   const guest = await browser.newContext();
   expect((await guest.request.get("/api/admin/export?kind=funnel")).status()).toBe(401);
