@@ -43,9 +43,9 @@ export function PersonView({
               Ищет сообщников на свой стартап
             </span>
           )}
-          <h1 className="text-[32px] leading-[1.04] sm:text-[48px]">{p.display_name}</h1>
+          <h1 className="text-[32px] leading-[1.04] wrap-anywhere sm:text-[48px]">{p.display_name}</h1>
           <p className="mt-2 text-lg text-muted-foreground">{facts.join(", ")}</p>
-          {p.headline && <p className="mt-4 max-w-[60ch] text-xl leading-snug font-bold tracking-[-0.02em]">{p.headline}</p>}
+          {p.headline && <p className="mt-4 max-w-[60ch] text-xl leading-snug font-bold tracking-[-0.02em] wrap-anywhere">{p.headline}</p>}
           {(terms.length > 0 || p.availability) && (
             <ul className="mt-4 flex flex-wrap gap-2 text-sm font-semibold">
               {terms.map((t) => (
@@ -64,7 +64,7 @@ export function PersonView({
         {p.bio && (
           <section>
             <h2 className="text-[24px] sm:text-[28px]">О себе</h2>
-            <p className="mt-3 text-lg leading-relaxed whitespace-pre-line text-foreground/85">{p.bio}</p>
+            <p className="mt-3 text-lg leading-relaxed whitespace-pre-line wrap-anywhere text-foreground/85">{p.bio}</p>
           </section>
         )}
 

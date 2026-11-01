@@ -52,7 +52,7 @@ function ApplicationMessage({ m }: { m: MessageOut }) {
         </div>
         <span className="ml-auto shrink-0 rounded-full bg-background px-2 py-0.5 text-xs font-semibold">{STATUS[a.status] ?? a.status}</span>
       </div>
-      <p className="px-4 py-3 text-base whitespace-pre-line">{m.body}</p>
+      <p className="px-4 py-3 text-base whitespace-pre-line wrap-anywhere">{m.body}</p>
       <div className="px-4 pb-2 text-right text-xs text-muted-foreground" suppressHydrationWarning>
         {time(m.created_at)}
       </div>
@@ -143,7 +143,7 @@ export function ChatThread({ chat, initial }: { chat: ConversationOut; initial: 
                 <div className={cn("flex", m.mine ? "justify-end" : "justify-start")}>
                   <div
                     className={cn(
-                      "max-w-[75%] rounded-2xl px-3.5 py-2 text-base whitespace-pre-line",
+                      "max-w-[75%] rounded-2xl px-3.5 py-2 text-base whitespace-pre-line wrap-anywhere",
                       m.mine ? "rounded-br-md bg-brand text-white" : "rounded-bl-md border bg-background",
                     )}
                   >

@@ -6,7 +6,7 @@ import { requireMe, serverClient } from "@/lib/server-api";
 export const metadata = { title: "Новая идея или стартап" };
 
 export default async function NewStartupPage() {
-  const user = await requireMe("/startups/new");
+  const user = await requireMe("/startups/new", { signup: true });
   const { data: roles } = await listRoles({ client: await serverClient() });
   return (
     <Container>

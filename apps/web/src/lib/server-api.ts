@@ -33,9 +33,10 @@ export const getMe = cache(async () => {
 });
 
 /** Для закрытых страниц: без входа уводим на /login и возвращаем обратно после. */
-export async function requireMe(next: string) {
+/** signup — гостя ведём на регистрацию, а не на вход (действие для новичка: «Добавить проект»). */
+export async function requireMe(next: string, { signup = false }: { signup?: boolean } = {}) {
   const user = await getMe();
-  if (!user) redirect(`/login?next=${encodeURIComponent(next)}`);
+  if (!user) redirect(`/${signup ? "register" : "login"}?next=${encodeURIComponent(next)}`);
   return user;
 }
 

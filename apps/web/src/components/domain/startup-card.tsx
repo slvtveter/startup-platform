@@ -127,7 +127,7 @@ export function StartupCard({
           </span>
         </span>
 
-        <p className={cn("text-sm leading-5 text-foreground/80 sm:text-base sm:leading-6", compact ? "mt-3 line-clamp-1" : "mt-3 line-clamp-2 sm:mt-4")}>{startup.pitch}</p>
+        <p className={cn("text-sm leading-5 wrap-anywhere text-foreground/80 sm:text-base sm:leading-6", compact ? "mt-3 line-clamp-1" : "mt-3 line-clamp-2 sm:mt-4")}>{startup.pitch}</p>
 
         {roles.length > 0 ? (
           <span className={cn("flex flex-wrap gap-1.5", compact ? "mt-3" : "mt-3 sm:mt-4")} aria-label="Кого ищут">
