@@ -14,7 +14,8 @@
 
 ## Команды
 `make setup`, `make dev`, `make seed`, `make test`, `make lint`, `make fmt`, `make migration m="..."`, `make migrate`, `make gen-client`, `make create-admin email=...`.
-E2E: `cd apps/web && npx playwright test` (против `make dev` + `make seed`). Деплой: `docs/deploy.md`.
+E2E: `cd apps/web && npx playwright test` (против `make dev` + `make seed`). Деплой: `docs/deploy.md`. Админка: `docs/admin.md`.
+Грабли dev-стека: в контейнер `web` смонтированы только `src`, `public`, `assets` — правку `next.config.ts` он не видит (`docker compose -f infra/docker-compose.yml cp apps/web/next.config.ts web:/app/next.config.ts` и `restart web`). На внешнем диске HMR иногда не подхватывает правку — если страница не меняется, `restart web`.
 
 ## Правила
 1. **Сервер: агенты могут подключаться по SSH** (владелец разрешил 2026-10-24) — настройка, диагностика, логи, проверка после деплоя. При этом:

@@ -23,10 +23,11 @@ export function TermsChecks({
   onChange: (v: TermsState) => void;
   errors: Record<string, string>;
 }) {
-  const box = "mt-0.5 size-5 shrink-0 accent-[var(--brand)]";
-  const a = cn(link, "inline");
+  const box = "size-6 shrink-0 accent-[var(--brand)]";
+  // Строка 24px — у ссылок внутри текста тап-зона не меньше 24px (WCAG 2.5.8).
+  const a = cn(link, "inline py-0.5");
   return (
-    <div className="grid gap-3 text-sm leading-snug text-muted-foreground">
+    <div className="grid gap-3 text-sm leading-6 text-muted-foreground">
       <div>
         <label className="flex items-start gap-3">
           <input
