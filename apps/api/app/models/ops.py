@@ -56,6 +56,8 @@ class Feedback(Base):
     user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
     text: Mapped[str] = mapped_column(Text)
     page_url: Mapped[str] = mapped_column(String(500), default="")
+    # Скриншот к сообщению (необязательно): лежит в private/, публично не раздаётся (Caddy → 404).
+    screenshot_key: Mapped[str | None] = mapped_column(String(200))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 

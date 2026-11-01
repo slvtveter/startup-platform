@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Rocket, Send, Settings, Shield, UserRound, type LucideIcon } from "lucide-react";
+import { LogOut, MessageSquareWarning, Rocket, Send, Settings, Shield, UserRound, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { FEEDBACK_EVENT } from "@/components/site/feedback-button";
 import { logout } from "@/lib/api";
 import { initials } from "@/lib/labels";
 
@@ -92,6 +93,11 @@ export function UserMenu({
           </DropdownMenuGroup>
         ))}
         <DropdownMenuSeparator />
+        {/* Окно обратной связи живёт в подвале (FeedbackButton) и открывается по событию. */}
+        <DropdownMenuItem className="gap-2.5 px-2 py-2" onClick={() => window.dispatchEvent(new Event(FEEDBACK_EVENT))}>
+          <MessageSquareWarning aria-hidden className="size-4 text-muted-foreground" />
+          Сообщить о проблеме
+        </DropdownMenuItem>
         <DropdownMenuItem
           className="gap-2.5 px-2 py-2"
           onClick={async () => {

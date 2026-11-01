@@ -53,7 +53,7 @@ export default async function PeoplePage({ searchParams }: Props) {
     <Container>
       {/* Заголовок — над колонкой фильтров, на одной линии с поиском: без пустой полосы над каталогом. */}
       <div className="grid gap-y-5 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-x-12 lg:gap-y-6">
-        <h1 className={cn("flex items-center text-[32px] leading-[1.05] sm:text-[40px] lg:min-h-11", seo.h1.length > 12 && "lg:col-span-2")}>{seo.h1}</h1>
+        <h1 className={cn("flex items-center text-[32px] leading-[1.05] sm:text-[40px] lg:min-h-11 lg:self-start", seo.h1.length > 12 && "lg:col-span-2")}>{seo.h1}</h1>
         <div className="min-w-0 lg:col-start-2">
         <CatalogToolbar
             basePath="/people"

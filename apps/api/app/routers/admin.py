@@ -5,6 +5,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Query, Response
+from fastapi.responses import FileResponse
 from sqlalchemy import delete, func, or_, select
 
 from app.core.demo import is_demo, real_user
@@ -15,6 +16,7 @@ from app.models import (
     AdminAction,
     Application,
     Event,
+    Feedback,
     Profile,
     Report,
     Role,
@@ -26,6 +28,7 @@ from app.models import (
 from app.models.enums import ApplicationStatus, ReportStatus, StartupStatus
 from app.schemas.common import OkOut
 from app.schemas.ops import (
+    ActivityOut,
     AdminActionOut,
     AdminOverview,
     AdminStartupOut,
@@ -46,6 +49,7 @@ from app.schemas.ops import (
 from app.schemas.startup import StartupDetail, StartupIn
 from app.services import admin_overview, catalog_admin, retention
 from app.services import auth as auth_service
+from app.services import feedback as feedback_service
 from app.services import hypotheses as hypotheses_service
 from app.services import jobs as jobs_service
 from app.services import startups as startup_service
@@ -155,6 +159,25 @@ async def admin_overview_page(
     return await admin_overview.overview(db, days)
 
 
+@router.get("/activity", response_model=list[ActivityOut])
+async def admin_activity(
+    admin: AdminUser, db: DbSession, limit: Annotated[int, Query(ge=1, le=200)] = 50
+) -> list[ActivityOut]:
+    """Лента ключевых событий: регистрации, подтверждения почты, публикации, отклики."""
+    return await admin_overview.activity(db, limit)
+
+
+@router.get("/feedback/{feedback_id}/screenshot", response_class=FileResponse)
+async def admin_feedback_screenshot(feedback_id: int, admin: AdminUser, db: DbSession):
+    fb = await db.get(Feedback, feedback_id)
+    path = feedback_service.screenshot_path(fb) if fb else None
+    if path is None or not path.exists():
+        raise NotFound("Скриншота нет")
+    return FileResponse(
+        path, media_type="image/webp", headers={"Cache-Control": "private, no-store"}
+    )
+
+
 @router.get("/feedback", response_model=list[FeedbackOut])
 async def admin_feedback(admin: AdminUser, db: DbSession) -> list[FeedbackOut]:
     """Сообщения из формы «Сообщить о проблеме или идее» в подвале, новые сверху."""
@@ -167,6 +190,7 @@ async def admin_list_users(
     db: DbSession,
     q: str | None = None,
     kind: Annotated[Literal["all", "real", "demo", "admins"], Query()] = "all",
+    days: Annotated[int | None, Query(ge=1, le=365)] = None,
 ) -> list[AdminUserOut]:
     """kind: real — настоящие (без демо и E2E), demo — примеры с витрины, admins — админы."""
     stmt = (
@@ -183,6 +207,8 @@ async def admin_list_users(
         stmt = stmt.where(~real_user())
     elif kind == "admins":
         stmt = stmt.where(User.is_admin.is_(True))
+    if days:
+        stmt = stmt.where(User.created_at > datetime.now(UTC) - timedelta(days=days))
     users = (await db.scalars(stmt)).unique()
     return [
         AdminUserOut(
@@ -243,10 +269,26 @@ async def admin_unblock_user(user_id: uuid.UUID, admin: AdminUser, db: DbSession
 
 
 @router.get("/startups", response_model=list[AdminStartupOut])
-async def admin_list_startups(admin: AdminUser, db: DbSession) -> list[AdminStartupOut]:
-    rows = (
-        await db.scalars(select(Startup).order_by(Startup.created_at.desc()).limit(200))
-    ).unique()
+async def admin_list_startups(
+    admin: AdminUser,
+    db: DbSession,
+    status: Annotated[
+        Literal["all", "recruiting", "draft", "closed", "archived", "hidden"], Query()
+    ] = "all",
+    days: Annotated[int | None, Query(ge=1, le=365)] = None,
+    q: str | None = None,
+) -> list[AdminStartupOut]:
+    """Новые сверху; фильтры: статус (hidden — скрытые админом), созданы за N дней, поиск."""
+    stmt = select(Startup).join(User, User.id == Startup.owner_id)
+    if status == "hidden":
+        stmt = stmt.where(Startup.is_hidden.is_(True))
+    elif status != "all":
+        stmt = stmt.where(Startup.status == StartupStatus(status))
+    if days:
+        stmt = stmt.where(Startup.created_at > datetime.now(UTC) - timedelta(days=days))
+    if q:
+        stmt = stmt.where(or_(Startup.title.ilike(f"%{q}%"), User.email.ilike(f"%{q}%")))
+    rows = (await db.scalars(stmt.order_by(Startup.created_at.desc()).limit(300))).unique()
     return [
         AdminStartupOut(
             id=str(s.id),

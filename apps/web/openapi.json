@@ -3301,6 +3301,48 @@
         }
       }
     },
+    "/api/feedback/form": {
+      "post": {
+        "tags": [
+          "ops"
+        ],
+        "summary": "Send Feedback Form",
+        "description": "\u0422\u043e \u0436\u0435, \u0447\u0442\u043e /feedback, \u043d\u043e \u043c\u043e\u0436\u043d\u043e \u043f\u0440\u0438\u043b\u043e\u0436\u0438\u0442\u044c \u0441\u043a\u0440\u0438\u043d\u0448\u043e\u0442 (\u0434\u043e 5 \u041c\u0411).",
+        "operationId": "send_feedback_form",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_send_feedback_form"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/hypotheses": {
       "get": {
         "tags": [
@@ -3486,6 +3528,91 @@
         }
       }
     },
+    "/api/admin/activity": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin Activity",
+        "description": "\u041b\u0435\u043d\u0442\u0430 \u043a\u043b\u044e\u0447\u0435\u0432\u044b\u0445 \u0441\u043e\u0431\u044b\u0442\u0438\u0439: \u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u0438, \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0438\u044f \u043f\u043e\u0447\u0442\u044b, \u043f\u0443\u0431\u043b\u0438\u043a\u0430\u0446\u0438\u0438, \u043e\u0442\u043a\u043b\u0438\u043a\u0438.",
+        "operationId": "admin_activity",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ActivityOut"
+                  },
+                  "title": "Response Admin Activity"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/feedback/{feedback_id}/screenshot": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin Feedback Screenshot",
+        "operationId": "admin_feedback_screenshot",
+        "parameters": [
+          {
+            "name": "feedback_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Feedback Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/feedback": {
       "get": {
         "tags": [
@@ -3551,6 +3678,24 @@
               "type": "string",
               "default": "all",
               "title": "Kind"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 365,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Days"
             }
           }
         ],
@@ -3718,18 +3863,83 @@
           "admin"
         ],
         "summary": "Admin List Startups",
+        "description": "\u041d\u043e\u0432\u044b\u0435 \u0441\u0432\u0435\u0440\u0445\u0443; \u0444\u0438\u043b\u044c\u0442\u0440\u044b: \u0441\u0442\u0430\u0442\u0443\u0441 (hidden \u2014 \u0441\u043a\u0440\u044b\u0442\u044b\u0435 \u0430\u0434\u043c\u0438\u043d\u043e\u043c), \u0441\u043e\u0437\u0434\u0430\u043d\u044b \u0437\u0430 N \u0434\u043d\u0435\u0439, \u043f\u043e\u0438\u0441\u043a.",
         "operationId": "admin_list_startups",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "all",
+                "recruiting",
+                "draft",
+                "closed",
+                "archived",
+                "hidden"
+              ],
+              "type": "string",
+              "default": "all",
+              "title": "Status"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 365,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Days"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
+                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/AdminStartupOut"
                   },
-                  "type": "array",
                   "title": "Response Admin List Startups"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -3743,14 +3953,14 @@
         "summary": "Admin Create Platform Startup",
         "operationId": "admin_create_platform_startup",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PlatformStartupIn"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "201": {
@@ -4321,6 +4531,42 @@
   },
   "components": {
     "schemas": {
+      "ActivityOut": {
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "user_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "name",
+          "label"
+        ],
+        "title": "ActivityOut",
+        "description": "\u0421\u043e\u0431\u044b\u0442\u0438\u0435 \u043f\u0440\u043e\u0434\u0443\u043a\u0442\u0430 \u0434\u043b\u044f \u043b\u0435\u043d\u0442\u044b \u0432 \u0430\u0434\u043c\u0438\u043d\u043a\u0435: \u043a\u0442\u043e \u0438 \u0447\u0442\u043e \u0441\u0434\u0435\u043b\u0430\u043b."
+      },
       "AdminActionOut": {
         "properties": {
           "id": {
@@ -4732,6 +4978,39 @@
           "full_time"
         ],
         "title": "Availability"
+      },
+      "Body_send_feedback_form": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 3000,
+            "minLength": 3,
+            "title": "Text"
+          },
+          "page_url": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Page Url",
+            "default": ""
+          },
+          "screenshot": {
+            "anyOf": [
+              {
+                "type": "string",
+                "contentMediaType": "application/octet-stream"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Screenshot"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "Body_send_feedback_form"
       },
       "Body_upload_my_avatar": {
         "properties": {
@@ -5330,6 +5609,11 @@
               }
             ],
             "title": "User Email"
+          },
+          "has_screenshot": {
+            "type": "boolean",
+            "title": "Has Screenshot",
+            "default": false
           }
         },
         "type": "object",

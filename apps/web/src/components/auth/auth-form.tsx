@@ -257,7 +257,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           "Получить код на почту"
         )}
       </Button>
-      {mode === "register" && <TermsNote action="Получить код на почту" />}
+      {mode === "register" && <TermsNote />}
     </form>
   );
 }

@@ -538,7 +538,7 @@ export function ProfileEditor({
                   <Input id="tg" className="mt-1.5 h-11 bg-card" value={f.contact_telegram} onChange={(e) => set("contact_telegram", e.target.value)} placeholder="@username" />
                 </div>
                 <label className="flex items-center gap-2 self-end pb-3 text-sm">
-                  <input type="checkbox" checked={f.show_email} onChange={(e) => set("show_email", e.target.checked)} className="size-4 accent-[var(--brand)]" />
+                  <input type="checkbox" checked={f.show_email} onChange={(e) => set("show_email", e.target.checked)} className="check" />
                   Показывать email после согласия
                 </label>
               </div>
