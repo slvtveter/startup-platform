@@ -13,10 +13,10 @@ export const metadata = { title: "Мой профиль" };
  * Пустой профиль (нет имени или роли) смотреть не на что — сразу ведём в редактор.
  */
 export default async function MyProfilePage({ searchParams }: { searchParams: Promise<{ welcome?: string }> }) {
-  await requireMe("/me/profile");
+  // Старые ссылки из развилки после регистрации (/me/profile?welcome=…) ведут в мастер — сразу, до запросов.
   const { welcome } = await searchParams;
-  // Старые ссылки из развилки после регистрации (/me/profile?welcome=…) ведут в мастер.
   if (welcome) redirect(`/me/profile/edit?welcome=${encodeURIComponent(welcome)}`);
+  await requireMe("/me/profile");
   const { data: p } = await getMyProfile({ client: await serverClient() });
   if (!p || !p.primary_role || p.display_name === "Без имени") redirect("/me/profile/edit");
 
