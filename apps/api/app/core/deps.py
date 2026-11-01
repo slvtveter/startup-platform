@@ -34,8 +34,9 @@ AdminUser = Annotated[User, Depends(get_admin_user)]
 
 
 def client_ip(request: Request) -> str:
-    # За Caddy реальный IP приходит в X-Forwarded-For.
+    # За Caddy реальный IP приходит в X-Forwarded-For. Берём последний адрес: его дописывает
+    # сам Caddy, а первые клиент может подставить сам и обойти лимиты по IP.
     fwd = request.headers.get("x-forwarded-for")
     if fwd:
-        return fwd.split(",")[0].strip()
+        return fwd.split(",")[-1].strip()
     return request.client.host if request.client else "unknown"
