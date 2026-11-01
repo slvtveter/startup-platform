@@ -80,7 +80,13 @@ def me_out(user: User) -> MeOut:
 async def register(data: RegisterIn, request: Request, db: DbSession) -> CodeSentOut:
     """Аккаунт создан, на почту ушёл код. Вход — после POST /auth/code."""
     await auth_service.register(
-        db, data.email, data.password, client_ip(request), data.utm_source, _ua(request)
+        db,
+        data.email,
+        data.password,
+        client_ip(request),
+        data.utm_source,
+        _ua(request),
+        publish_consent=data.publish_consent,
     )
     return CodeSentOut(email=data.email)
 
@@ -130,6 +136,8 @@ async def me(user: CurrentUser) -> MeOut:
 async def accept_terms(data: TermsIn, request: Request, user: CurrentUser, db: DbSession) -> MeOut:
     """Согласие после входа: вход через соцсети или аккаунт старше действующей редакции."""
     consents.record_terms(db, user, "prompt", client_ip(request), _ua(request))
+    if data.publish_consent and not consents.has_publication(user):
+        consents.record_publication(db, user, "prompt", client_ip(request), _ua(request))
     await db.commit()
     return me_out(user)
 

@@ -6445,6 +6445,11 @@
             "const": true,
             "title": "Adult"
           },
+          "publish_consent": {
+            "type": "boolean",
+            "title": "Publish Consent",
+            "default": false
+          },
           "utm_source": {
             "anyOf": [
               {
@@ -7743,6 +7748,11 @@
             "type": "boolean",
             "const": true,
             "title": "Adult"
+          },
+          "publish_consent": {
+            "type": "boolean",
+            "title": "Publish Consent",
+            "default": false
           }
         },
         "type": "object",

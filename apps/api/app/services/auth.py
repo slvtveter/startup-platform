@@ -290,6 +290,7 @@ async def register(
     ip: str,
     utm_source: str | None,
     user_agent: str = "",
+    publish_consent: bool = False,
 ) -> None:
     """Аккаунт без входа: войти можно только после кода из письма (verify_code).
 
@@ -316,6 +317,8 @@ async def register(
         # Чужой аккаунт так не забрать — войти всё равно можно только с кодом из письма.
         user.password_hash = await hash_password_async(password)
     consents.record_terms(db, user, "register", ip, user_agent)
+    if publish_consent and not consents.has_publication(user):
+        consents.record_publication(db, user, "register", ip, user_agent)
     await send_code(db, user, TokenPurpose.email_code)  # делает commit
 
 

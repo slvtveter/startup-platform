@@ -19,7 +19,7 @@ const OPEN = ["/terms", "/privacy", "/cookies", "/profile/publication-consent"];
 export function TermsGate({ needed, children }: { needed: boolean; children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [value, setValue] = useState<TermsState>({ terms: false, adult: false });
+  const [value, setValue] = useState<TermsState>({ terms: false, publish: false });
   const [fields, setFields] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -32,7 +32,7 @@ export function TermsGate({ needed, children }: { needed: boolean; children: Rea
     setFields(errs);
     if (Object.keys(errs).length) return document.getElementById(Object.keys(errs)[0])?.focus();
     setBusy(true);
-    const res = await acceptTerms({ body: { accept_terms: true, adult: true } });
+    const res = await acceptTerms({ body: { accept_terms: true, adult: true, publish_consent: value.publish } });
     if (res.error) {
       setBusy(false);
       return setError(errorMessage(res.error));

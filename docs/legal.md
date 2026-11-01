@@ -9,14 +9,14 @@
 |---|---|---|---|
 | Пользовательское соглашение | `/terms` | `apps/web/src/lib/legal/terms.ts` | галочка при регистрации или экран «Последний шаг», запись в `consents` |
 | Политика конфиденциальности | `/privacy` | `apps/web/src/lib/legal/privacy.ts` | не согласие, а уведомление: ссылка рядом с галочками, в подвале, на `/cookies` |
-| Подтверждение 18+ | — | — | отдельная галочка, запись в `consents` (kind `adult`) |
-| Согласие на распространение данных профиля (ст. 10.1) | `/profile/publication-consent` | `apps/web/src/lib/legal/publication.ts` | отдельная пустая галочка в окне при публикации профиля, запись в `consents` (kind `publication`) |
+| Подтверждение 18+ | — | п. 2.1 соглашения | одна галочка вместе с соглашением («Мне есть 18 лет, я принимаю…»), в `consents` отдельная строка (kind `adult`) |
+| Согласие на распространение данных профиля (ст. 10.1) | `/profile/publication-consent` | `apps/web/src/lib/legal/publication.ts` | отдельная необязательная пустая галочка при регистрации (и на экране «Последний шаг» после входа через соцсети); кто её не отметил — окно с галочкой при публикации профиля. Запись в `consents` (kind `publication`, source `register` / `prompt` / `publish`) |
 
 Реквизиты оператора — `apps/web/src/lib/legal/operator.ts`. Пустые реквизиты ломают сборку: без них документы не публикуются.
 
 ## Как устроены согласия
 
-- `POST /api/auth/register` требует `accept_terms: true` и `adult: true`; в журнал `consents` пишутся две строки (`source=register`).
+- `POST /api/auth/register` требует `accept_terms: true` и `adult: true` (в форме это одна галочка); в журнал `consents` пишутся две строки (`source=register`). Необязательное `publish_consent: true` добавляет третью строку `publication`, и профиль потом публикуется без окна согласия. `POST /api/auth/terms` принимает то же поле.
 - Вход через Telegram/VK и аккаунты, принявшие старую редакцию, получают `needs_terms: true` в `/api/auth/me`. `TermsGate` в корневом layout показывает экран согласия вместо страницы (кроме `/terms`, `/privacy`, `/cookies`), он вызывает `POST /api/auth/terms` (`source=prompt`).
 - Журнал `consents` не удаляется вместе с аккаунтом (нет внешнего ключа, email копируется) — это доказательство согласия, срок хранения 3 года (п. 8.3 политики).
 

@@ -20,11 +20,13 @@ class Consent(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[uuid.UUID] = mapped_column()
     email: Mapped[str] = mapped_column(String(320), default="")
-    # terms — пользовательское соглашение, adult — подтверждение «мне есть 18».
+    # terms — пользовательское соглашение, adult — подтверждение «мне есть 18»,
+    # publication — распространение сведений профиля (ст. 10.1).
     kind: Mapped[str] = mapped_column(String(32))
     # Редакция документа (дата), см. app.core.legal.
     version: Mapped[str] = mapped_column(String(32))
-    # Как получено: register — галочки в форме регистрации, prompt — экран после входа.
+    # Как получено: register — галочки в форме регистрации, prompt — экран после входа,
+    # publish — окно при публикации профиля.
     source: Mapped[str] = mapped_column(String(16))
     ip: Mapped[str] = mapped_column(String(64), default="")
     user_agent: Mapped[str] = mapped_column(String(300), default="")

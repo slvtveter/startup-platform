@@ -1409,6 +1409,10 @@ export type RegisterIn = {
      */
     adult: true;
     /**
+     * Publish Consent
+     */
+    publish_consent?: boolean;
+    /**
      * Utm Source
      */
     utm_source?: string | null;
@@ -2162,6 +2166,10 @@ export type TermsIn = {
      * Adult
      */
     adult: true;
+    /**
+     * Publish Consent
+     */
+    publish_consent?: boolean;
 };
 
 /**
