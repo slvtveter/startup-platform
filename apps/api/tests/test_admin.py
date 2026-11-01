@@ -250,3 +250,17 @@ async def test_feedback_with_screenshot_activity_and_filters(make_user, client):
     ] == [s["slug"]]
     assert (await admin.get("/api/admin/startups", params={"status": "draft"})).json() == []
     assert len((await admin.get("/api/admin/startups", params={"q": "fb-member"})).json()) == 1
+
+
+async def test_admin_deletes_feedback_and_finds_startup_by_slug(make_user, client):
+    admin = await make_user("fb2-admin@mail.ru", admin=True)
+    owner = await make_user("fb2-owner@mail.ru", published=True)
+    s = await create_published(owner)
+    found = (await admin.get("/api/admin/startups", params={"q": s["slug"]})).json()
+    assert [x["slug"] for x in found] == [s["slug"]]
+
+    await client.post("/api/feedback", json={"text": "спам спам"})
+    fb = (await admin.get("/api/admin/feedback")).json()[0]
+    assert (await owner.delete(f"/api/admin/feedback/{fb['id']}")).status_code == 403
+    assert (await admin.delete(f"/api/admin/feedback/{fb['id']}")).status_code == 200
+    assert (await admin.get("/api/admin/feedback")).json() == []

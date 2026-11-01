@@ -178,6 +178,21 @@ async def admin_feedback_screenshot(feedback_id: int, admin: AdminUser, db: DbSe
     )
 
 
+@router.delete("/feedback/{feedback_id}", response_model=OkOut)
+async def admin_delete_feedback(feedback_id: int, admin: AdminUser, db: DbSession) -> OkOut:
+    """Убрать сообщение (спам, тест) вместе со скриншотом."""
+    fb = await db.get(Feedback, feedback_id)
+    if fb is None:
+        raise NotFound("Сообщение не найдено")
+    path = feedback_service.screenshot_path(fb)
+    await db.delete(fb)
+    _log(db, admin, "delete_feedback", "feedback", feedback_id)
+    await db.commit()
+    if path:
+        path.unlink(missing_ok=True)
+    return OkOut()
+
+
 @router.get("/feedback", response_model=list[FeedbackOut])
 async def admin_feedback(admin: AdminUser, db: DbSession) -> list[FeedbackOut]:
     """Сообщения из формы «Сообщить о проблеме или идее» в подвале, новые сверху."""
@@ -287,7 +302,13 @@ async def admin_list_startups(
     if days:
         stmt = stmt.where(Startup.created_at > datetime.now(UTC) - timedelta(days=days))
     if q:
-        stmt = stmt.where(or_(Startup.title.ilike(f"%{q}%"), User.email.ilike(f"%{q}%")))
+        stmt = stmt.where(
+            or_(
+                Startup.title.ilike(f"%{q}%"),
+                Startup.slug.ilike(f"%{q}%"),
+                User.email.ilike(f"%{q}%"),
+            )
+        )
     rows = (await db.scalars(stmt.order_by(Startup.created_at.desc()).limit(300))).unique()
     return [
         AdminStartupOut(
@@ -373,6 +394,7 @@ ACTION_LABELS = {
     "catalog_merge": "Слил дубли в справочнике",
     "startup_create_for": "Перенёс стартап на платформу",
     "export_csv": "Выгрузил CSV",
+    "delete_feedback": "Удалил сообщение обратной связи",
 }
 
 

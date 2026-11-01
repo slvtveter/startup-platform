@@ -134,6 +134,9 @@ async function TabBody({ tab, params }: { tab: Tab; params: Params }) {
               feedback.map((f) => (
                 <li key={f.id} className="rounded-xl border bg-card p-4 text-sm">
                   <p className="whitespace-pre-line wrap-anywhere">{f.text}</p>
+                  <span className="mt-2 block">
+                    <AdminDeleteUser kind="feedback" id={String(f.id)} name="это сообщение" />
+                  </span>
                   {f.has_screenshot && (
                     <a href={`/api/admin/feedback/${f.id}/screenshot`} target="_blank" rel="noopener" className="mt-2 block w-fit overflow-hidden rounded-lg border">
                       {/* Скриншот отдаёт только API админки; next/image для приватного файла не нужен. */}
@@ -142,7 +145,7 @@ async function TabBody({ tab, params }: { tab: Tab; params: Params }) {
                     </a>
                   )}
                   <p className="mt-2 text-xs text-muted-foreground">
-                    {timeAgo(f.created_at)} · {f.user_email ?? "гость"}
+                    {timeAgo(f.created_at)} · {f.user_email ?? "гость или удалённый аккаунт"}
                     {f.page_url && (
                       <>
                         {" · "}
@@ -176,18 +179,14 @@ async function TabBody({ tab, params }: { tab: Tab; params: Params }) {
       <section className="mt-8 max-w-4xl">
         <div className="flex flex-wrap items-center gap-2">
           {filters.map(([k, label]) => (
-            <Link
-              key={k}
-              href={`/admin?tab=users${k === "all" ? "" : `&kind=${k}`}${params.q ? `&q=${encodeURIComponent(params.q)}` : ""}`}
-              aria-current={kind === k ? "true" : undefined}
-              className={cn("rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors", kind === k ? "bg-second text-on-second" : "bg-tone hover:bg-tone-2")}
-            >
+            <Chip key={k} href={withParam(params, "users", "kind", k === "all" ? "" : k)} on={kind === k}>
               {label}
-            </Link>
+            </Chip>
           ))}
           <form className="ml-auto min-w-0">
             <input type="hidden" name="tab" value="users" />
             {kind !== "all" && <input type="hidden" name="kind" value={kind} />}
+            {params.period && <input type="hidden" name="period" value={params.period} />}
             <input
               name="q"
               defaultValue={params.q}
@@ -344,13 +343,14 @@ async function TabBody({ tab, params }: { tab: Tab; params: Params }) {
     );
   }
   const { data: audit } = await adminAuditLog({ client });
-  const fmt = new Intl.DateTimeFormat("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  // Сервер не знает пояс админа: показываем московское время явно.
+  const fmt = new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" });
   return (
     <section className="mt-8 overflow-x-auto rounded-xl border bg-card" tabIndex={0} role="region" aria-label="Журнал действий админов">
       <table className="w-full min-w-[720px] text-sm">
         <thead className="border-b bg-tone text-left text-xs text-muted-foreground">
           <tr>
-            <th className="px-4 py-2.5 font-semibold">Дата и время</th>
+            <th className="px-4 py-2.5 font-semibold">Дата и время, МСК</th>
             <th className="px-4 py-2.5 font-semibold">Админ</th>
             <th className="px-4 py-2.5 font-semibold">Действие</th>
             <th className="px-4 py-2.5 font-semibold">Объект</th>

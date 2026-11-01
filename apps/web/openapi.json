@@ -3613,6 +3613,49 @@
         }
       }
     },
+    "/api/admin/feedback/{feedback_id}": {
+      "delete": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin Delete Feedback",
+        "description": "\u0423\u0431\u0440\u0430\u0442\u044c \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435 (\u0441\u043f\u0430\u043c, \u0442\u0435\u0441\u0442) \u0432\u043c\u0435\u0441\u0442\u0435 \u0441\u043e \u0441\u043a\u0440\u0438\u043d\u0448\u043e\u0442\u043e\u043c.",
+        "operationId": "admin_delete_feedback",
+        "parameters": [
+          {
+            "name": "feedback_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Feedback Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/feedback": {
       "get": {
         "tags": [

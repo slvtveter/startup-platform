@@ -4712,6 +4712,36 @@ export type AdminFeedbackScreenshotResponses = {
     200: unknown;
 };
 
+export type AdminDeleteFeedbackData = {
+    body?: never;
+    path: {
+        /**
+         * Feedback Id
+         */
+        feedback_id: number;
+    };
+    query?: never;
+    url: '/api/admin/feedback/{feedback_id}';
+};
+
+export type AdminDeleteFeedbackErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminDeleteFeedbackError = AdminDeleteFeedbackErrors[keyof AdminDeleteFeedbackErrors];
+
+export type AdminDeleteFeedbackResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type AdminDeleteFeedbackResponse = AdminDeleteFeedbackResponses[keyof AdminDeleteFeedbackResponses];
+
 export type AdminFeedbackData = {
     body?: never;
     path?: never;

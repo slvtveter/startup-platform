@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   adminBlockUser,
+  adminDeleteFeedback,
   adminDeleteStartup,
   adminDeleteUser,
   adminHideStartup,
@@ -46,17 +47,22 @@ export function AdminAction({ kind, id, label, variant = "outline" }: {
 }
 
 /** Удалить аккаунт или стартап насовсем — с подтверждением: вернуть нельзя. */
-export function AdminDeleteUser({ id, name, kind = "user" }: { id: string; name: string; kind?: "user" | "startup" }) {
+export function AdminDeleteUser({ id, name, kind = "user" }: { id: string; name: string; kind?: "user" | "startup" | "feedback" }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   async function run() {
     setBusy(true);
-    const res = kind === "user" ? await adminDeleteUser({ path: { user_id: id } }) : await adminDeleteStartup({ path: { startup_id: id } });
+    const res =
+      kind === "user"
+        ? await adminDeleteUser({ path: { user_id: id } })
+        : kind === "startup"
+          ? await adminDeleteStartup({ path: { startup_id: id } })
+          : await adminDeleteFeedback({ path: { feedback_id: Number(id) } });
     setBusy(false);
     if (res.error) return toast.error("Не получилось удалить");
     setOpen(false);
-    toast.success(kind === "user" ? "Аккаунт удалён" : "Стартап удалён");
+    toast.success(kind === "user" ? "Аккаунт удалён" : kind === "startup" ? "Стартап удалён" : "Сообщение удалено");
     router.refresh();
   }
   return (
@@ -67,11 +73,13 @@ export function AdminDeleteUser({ id, name, kind = "user" }: { id: string; name:
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Удалить «{name}»?</DialogTitle>
+            <DialogTitle>{kind === "feedback" ? "Удалить это сообщение?" : `Удалить «${name}»?`}</DialogTitle>
             <DialogDescription>
               {kind === "user"
                 ? "Профиль, стартапы, отклики и файлы удалятся насовсем. Вернуть нельзя."
-                : "Стартап, места в команде и отклики удалятся насовсем. Переписка с людьми останется. Вернуть нельзя."}
+                : kind === "startup"
+                  ? "Стартап, места в команде и отклики удалятся насовсем. Переписка с людьми останется. Вернуть нельзя."
+                  : "Сообщение и скриншот к нему удалятся насовсем."}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
