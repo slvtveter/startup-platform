@@ -1,36 +1,44 @@
-import { Container, PageHeader } from "@/components/domain/page-header";
-import { ProfileEditor, type Goal } from "@/components/domain/profile-editor";
-import { getMyProfile, listRoles, listSkills } from "@/lib/api";
+import { redirect } from "next/navigation";
+
+import { MyProfileActions, PhotoDialogButton } from "@/components/domain/my-profile-actions";
+import { Container } from "@/components/domain/page-header";
+import { PersonView } from "@/components/domain/person-view";
+import { getMyProfile } from "@/lib/api";
 import { requireMe, serverClient } from "@/lib/server-api";
 
 export const metadata = { title: "Мой профиль" };
 
+/**
+ * Свой профиль так, как его видят другие, с кнопками «Редактировать» и «Фото».
+ * Пустой профиль (нет имени или роли) смотреть не на что — сразу ведём в редактор.
+ */
 export default async function MyProfilePage({ searchParams }: { searchParams: Promise<{ welcome?: string }> }) {
-  const user = await requireMe("/me/profile");
+  await requireMe("/me/profile");
   const { welcome } = await searchParams;
-  // ?welcome=idea|cofound|join — цель из развилки после регистрации; «1» — старые ссылки.
-  const goal = (["idea", "cofound", "join"] as const).find((g) => g === welcome) as Goal | undefined;
-  const client = await serverClient();
-  const [{ data: profile }, { data: roles }, { data: skills }] = await Promise.all([
-    getMyProfile({ client }),
-    listRoles({ client }),
-    listSkills({ client }),
-  ]);
+  // Старые ссылки из развилки после регистрации (/me/profile?welcome=…) ведут в мастер.
+  if (welcome) redirect(`/me/profile/edit?welcome=${encodeURIComponent(welcome)}`);
+  const { data: p } = await getMyProfile({ client: await serverClient() });
+  if (!p || !p.primary_role || p.display_name === "Без имени") redirect("/me/profile/edit");
+
   return (
     <Container>
-      <PageHeader
-        title={welcome ? "Расскажи о себе" : "Мой профиль"}
-        description={
-          welcome
-            ? goal === "idea"
-              ? "Три коротких шага, потом опишешь идею."
-              : "Три коротких шага."
-            : "Профиль видят основатели стартапов в каталоге людей."
+      <div
+        className={
+          p.is_published
+            ? "mb-8 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl bg-success-soft px-4 py-3 text-sm text-success-ink"
+            : "mb-8 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl bg-warn-soft px-4 py-3 text-sm text-warn-ink"
         }
-      />
-      <div className="mt-8">
-        <ProfileEditor profile={profile!} roles={roles ?? []} skills={skills ?? []} emailVerified={user.email_verified} welcome={!!welcome} goal={goal} />
+      >
+        <span aria-hidden className={`size-2 rounded-full ${p.is_published ? "bg-success-ink" : "bg-warn-ink"}`} />
+        <b>{p.is_published ? "Профиль опубликован" : "Профиль скрыт"}</b>
+        <span>{p.is_published ? "Так тебя видят основатели в каталоге людей." : "Пока он скрыт, тебя не найдут в каталоге и нельзя откликаться."}</span>
       </div>
+      <PersonView
+        p={p}
+        signedIn
+        photoSlot={<PhotoDialogButton overlay name={p.display_name} url={p.avatar_url ?? null} />}
+        actions={<MyProfileActions slug={p.slug} published={p.is_published} canPublish={p.can_publish} />}
+      />
     </Container>
   );
 }

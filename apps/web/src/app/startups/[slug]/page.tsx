@@ -171,7 +171,7 @@ export default async function StartupPage({ params }: Props) {
                 </Link>
               )
             )}
-            {!s.is_demo && <ShareButton title={s.title} text={s.pitch} path={`/startups/${s.slug}`} />}
+            {!s.is_demo && <ShareButton size="lg" title={s.title} text={s.pitch} path={`/startups/${s.slug}`} />}
             {s.is_demo && (
               <>
                 <Link href={s.stage === "idea" ? "/startups?stage=idea" : "/startups"} className={buttonVariants({ size: "lg" })}>
@@ -249,8 +249,28 @@ export default async function StartupPage({ params }: Props) {
         </section>
       )}
 
-      <div className="mt-14 grid gap-10 lg:grid-cols-[1fr_360px]">
-        <div className="min-w-0">
+      {/* Факты одной полосой под шапкой: условия, отклик команды, места. Без отдельной колонки справа. */}
+      <dl className="mt-10 grid gap-px overflow-hidden rounded-[28px] bg-border shadow-[0_0_0_1px_var(--border)] sm:grid-cols-3">
+        <div className="bg-white p-5 sm:p-6">
+          <dt className="text-sm text-muted-foreground">Условия</dt>
+          <dd className="mt-1 text-lg font-extrabold tracking-[-0.02em]">{TERMS[s.terms]}</dd>
+          <dd className="mt-1 text-sm whitespace-pre-line text-foreground/80">{s.terms_details || TERMS_HINT[s.terms]}</dd>
+        </div>
+        <div className="bg-white p-5 sm:p-6">
+          <dt className="text-sm text-muted-foreground">Свободные места</dt>
+          <dd className="mt-1 text-lg font-extrabold tracking-[-0.02em]">
+            {openSeats > 0 ? plural(openSeats, `${openSeats} место`, `${openSeats} места`, `${openSeats} мест`) : "Все заняты"}
+          </dd>
+          {openRoles.length > 0 && <dd className="mt-1 text-sm text-foreground/80">{openRoles.map((r) => r.title).join(", ")}</dd>}
+        </div>
+        <div className="bg-white p-5 sm:p-6">
+          <dt className="text-sm text-muted-foreground">Как команда отвечает</dt>
+          <dd className="mt-1 text-lg font-extrabold tracking-[-0.02em]">{s.response_stats ? responseHead(s.response_stats) : "Новая команда"}</dd>
+          <dd className="mt-1 text-sm text-foreground/80">{s.response_stats ? responseText(s.response_stats) : "Статистики откликов пока нет"}</dd>
+        </div>
+      </dl>
+
+      <div className="mt-14 max-w-[960px]">
           {s.stage === "idea" && <About s={s} title="Идея" className="mb-14" />}
           <section id="roles" className="scroll-mt-24">
             <h2 className="text-[28px] sm:text-[36px]">Свободные места</h2>
@@ -259,30 +279,25 @@ export default async function StartupPage({ params }: Props) {
                 Сейчас все места заняты.
               </p>
             )}
-            <div className="mt-6 space-y-4">
+            <div className="mt-6 space-y-3">
               {openRoles.map((r) => {
-                const matched = r.skills.filter((sk) =>
-                  mySkills.has(sk.slug),
-                ).length;
+                const matched = r.skills.filter((sk) => mySkills.has(sk.slug)).length;
                 const left = Math.max(0, (r.slots ?? 1) - (r.filled ?? 0));
+                const meta = [
+                  r.role.name !== r.title && r.role.name,
+                  r.hours_per_week ? `${r.hours_per_week} ч в неделю` : null,
+                  TERMS[s.terms],
+                  plural(left, `${left} место`, `${left} места`, `${left} мест`),
+                ].filter(Boolean);
                 return (
-                  <article key={r.id} className="overflow-hidden rounded-[28px] bg-white shadow-[0_0_0_1.5px_var(--border)]">
-                    {/* Шапка роли: кого ищут и сколько это времени — главное, что нужно понять за секунду. */}
-                    <div className="flex flex-wrap items-start gap-x-4 gap-y-3 p-5 sm:p-7 sm:pb-5">
+                  <article key={r.id} className="rounded-[28px] bg-white p-5 shadow-[0_0_0_1px_var(--border)] sm:p-7">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold text-brand-ink">Ищут в команду</p>
-                        <h3 className="mt-1 text-2xl leading-tight font-extrabold tracking-[-0.03em] sm:text-[28px]">{r.title}</h3>
-                        <div className="mt-3 flex flex-wrap gap-1.5 text-sm font-semibold">
-                          <span className="rounded-full bg-brand-soft px-3 py-1 text-brand-ink">
-                            {plural(left, `${left} место`, `${left} места`, `${left} мест`)}
-                          </span>
-                          {r.hours_per_week ? <span className="rounded-full bg-tone px-3 py-1">{r.hours_per_week} ч в неделю</span> : null}
-                          {r.role.name !== r.title && <span className="rounded-full bg-tone px-3 py-1">{r.role.name}</span>}
-                          <span className="rounded-full bg-tone px-3 py-1">{TERMS[s.terms]}</span>
-                        </div>
+                        <h3 className="text-2xl leading-tight font-extrabold tracking-[-0.03em]">{r.title}</h3>
+                        <p className="mt-1.5 text-muted-foreground">{meta.join(" · ")}</p>
                       </div>
                       {!s.is_owner && !s.is_demo && (
-                        <div className="w-full sm:w-auto">
+                        <div className="w-full shrink-0 sm:w-auto">
                           <ApplyDialog
                             roleId={r.id}
                             roleTitle={r.title}
@@ -296,30 +311,30 @@ export default async function StartupPage({ params }: Props) {
                       )}
                     </div>
                     {(r.description || r.outcome) && (
-                      <div className="grid gap-px border-t bg-border sm:grid-cols-2">
+                      <div className="mt-5 grid gap-5 sm:grid-cols-2 sm:gap-8">
                         {r.description && (
-                          <div className="bg-white p-5 sm:px-7">
-                            <div className="text-xs font-bold tracking-wide text-muted-foreground uppercase">Что делать</div>
-                            <p className="mt-2 whitespace-pre-line">{r.description}</p>
+                          <div>
+                            <h4 className="text-sm font-bold">Задачи</h4>
+                            <p className="mt-1 whitespace-pre-line text-foreground/85">{r.description}</p>
                           </div>
                         )}
                         {r.outcome && (
-                          <div className="bg-brand-soft/60 p-5 sm:px-7">
-                            <div className="text-xs font-bold tracking-wide text-brand-ink uppercase">Что получишь</div>
-                            <p className="mt-2 whitespace-pre-line">{r.outcome}</p>
+                          <div>
+                            <h4 className="text-sm font-bold">Что получишь</h4>
+                            <p className="mt-1 whitespace-pre-line text-foreground/85">{r.outcome}</p>
                           </div>
                         )}
                       </div>
                     )}
                     {r.skills.length > 0 && (
-                      <div className="flex flex-wrap items-center gap-1.5 border-t px-5 py-4 sm:px-7">
-                        <span className="mr-1 text-sm text-muted-foreground">Навыки:</span>
+                      <div className="mt-5 flex flex-wrap items-center gap-1.5">
                         {r.skills.map((sk) => (
                           <SkillChip key={sk.slug} name={sk.name} highlight={mySkills.has(sk.slug)} />
                         ))}
                         {profile && matched > 0 && (
-                          <span className="ml-auto text-xs font-bold text-success-ink">
-                            {matched} из {r.skills.length} совпадают с твоими
+                          <span className="ml-1 inline-flex items-center gap-1 text-xs font-bold text-success-ink">
+                            <Check aria-hidden className="size-3.5" strokeWidth={3} />
+                            {matched} из {r.skills.length} {plural(r.skills.length, "навыка", "навыков", "навыков")} у тебя есть
                           </span>
                         )}
                       </div>
@@ -401,38 +416,6 @@ export default async function StartupPage({ params }: Props) {
           </div>
         </div>
 
-        <aside className="h-fit space-y-4 lg:sticky lg:top-24">
-          <div className="rounded-[28px] bg-tone p-6">
-            <div className="text-sm text-muted-foreground">Условия участия</div>
-            <div className="mt-1 text-2xl font-extrabold tracking-[-0.02em]">{TERMS[s.terms]}</div>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {TERMS_HINT[s.terms]}
-            </p>
-            {s.terms_details && (
-              <p className="mt-3 text-sm whitespace-pre-line">
-                {s.terms_details}
-              </p>
-            )}
-            {s.response_stats && (
-              <div className="mt-5 border-t border-foreground/10 pt-4">
-                <div className="text-sm text-muted-foreground">Как команда отвечает</div>
-                <div className="mt-1 font-semibold">{responseText(s.response_stats)}</div>
-              </div>
-            )}
-            {openSeats > 0 && !s.is_owner && !s.is_demo && (
-              <a
-                href="#roles"
-                className={buttonVariants({
-                  size: "lg",
-                  className: "mt-5 w-full max-lg:hidden",
-                })}
-              >
-                Выбрать место
-              </a>
-            )}
-          </div>
-        </aside>
-      </div>
 
       {openSeats > 0 && !s.is_owner && !s.is_demo && (
         <div className="sticky-cta fixed inset-x-0 bottom-[var(--cookie-offset,0px)] z-30 border-t bg-background/95 px-4 py-3 backdrop-blur lg:hidden">
@@ -464,16 +447,21 @@ export default async function StartupPage({ params }: Props) {
   );
 }
 
-function responseText(stats: StartupDetail["response_stats"]) {
-  if (!stats) return "Новая команда, статистики пока нет";
-  const share = `Отвечают на ${Math.round(stats.answered_share * 100)}% откликов`;
-  if (stats.median_hours == null) return share;
+type Stats = NonNullable<StartupDetail["response_stats"]>;
+
+/** «Отвечают на 80%» — коротко для полосы фактов. */
+function responseHead(stats: Stats) {
+  return `Отвечают на ${Math.round(stats.answered_share * 100)}%`;
+}
+
+function responseText(stats: Stats) {
+  if (stats.median_hours == null) return "откликов";
   const h = stats.median_hours;
   const when =
     h < 24
       ? `${Math.max(1, Math.ceil(h))} ч`
       : `${Math.round(h / 24)} ${plural(Math.round(h / 24), "день", "дня", "дней")}`;
-  return `${share}, обычно за ${when}`;
+  return `откликов, обычно за ${when}`;
 }
 
 /** Описание: проблема — главный текст, «что уже есть» и «планы» — две карточки под ним. */

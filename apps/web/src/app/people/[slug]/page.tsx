@@ -1,9 +1,8 @@
-import { ArrowUpRight, ChevronLeftIcon, FileText } from "lucide-react";
+import { ChevronLeftIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { SkillChip } from "@/components/domain/badges";
 import { WriteDialog } from "@/components/domain/chat/write-dialog";
 import {
   InviteDialog,
@@ -11,11 +10,11 @@ import {
 } from "@/components/domain/invite-dialog";
 import { Container } from "@/components/domain/page-header";
 import { ReportButton } from "@/components/domain/report-button";
-import { PersonPhoto } from "@/components/domain/person-card";
+import { PersonView } from "@/components/domain/person-view";
 import { buttonVariants } from "@/components/ui/button";
 import { JsonLd, breadcrumbs, siteUrl } from "@/components/site/json-ld";
 import { getPerson, getStartup, listMyStartups } from "@/lib/api";
-import { AVAILABILITY, COFOUND, LEVEL, LINK_KIND, TERMS, termsOf } from "@/lib/labels";
+import { TERMS, termsOf } from "@/lib/labels";
 import { getMe, serverClient } from "@/lib/server-api";
 import { roleLower } from "@/lib/seo";
 
@@ -70,20 +69,6 @@ export default async function PersonPage({ params }: Props) {
     );
   }
 
-  const facts = [
-    p.primary_role?.name ?? "Роль не указана",
-    p.experience_level && LEVEL[p.experience_level].toLowerCase(),
-    p.city,
-    p.education,
-  ].filter(Boolean);
-  const experience = p.memberships ?? [];
-  // «с октября 2026»: в формате месяца с днём Intl даёт родительный падеж.
-  const sinceLabel = (iso: string) => {
-    const d = new Date(iso);
-    const m = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long" }).format(d).replace(/^\d+\s/, "");
-    return `${m} ${d.getFullYear()}`;
-  };
-
   const showBar = !p.is_demo && user?.profile?.slug !== p.slug;
 
   return (
@@ -120,186 +105,35 @@ export default async function PersonPage({ params }: Props) {
         <ChevronLeftIcon className="size-4" /> Все люди
       </Link>
 
-      <div className="mt-6 grid gap-10 lg:grid-cols-[1fr_320px]">
-        <div className="min-w-0">
-          <header className="grid gap-6 sm:grid-cols-[220px_minmax(0,1fr)] sm:items-end md:grid-cols-[280px_minmax(0,1fr)]">
-            <div className="relative aspect-square w-full max-w-[280px] overflow-hidden rounded-[28px] bg-tone">
-              <PersonPhoto person={p} eager sizes="280px" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex flex-wrap gap-2">
-                {p.looking_for.includes(COFOUND) && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-soft px-3 py-1 text-xs font-bold text-brand-ink">
-                    <span aria-hidden className="size-2 rounded-full bg-cornflower" />
-                    Ищет сообщников на свой стартап
-                  </span>
-                )}
-              </div>
-              <h1 className="mt-3 text-[36px] leading-[1.04] sm:text-[56px]">{p.display_name}</h1>
-              <p className="mt-2 text-lg text-muted-foreground">{facts.join(", ")}</p>
-            </div>
-          </header>
-          {p.headline && <p className="mt-8 max-w-2xl text-2xl leading-snug font-bold tracking-[-0.02em]">{p.headline}</p>}
-          {p.bio && (
-            <p className="mt-3 max-w-2xl text-lg leading-relaxed whitespace-pre-line text-foreground/85">
-              {p.bio}
-            </p>
-          )}
-
-          {experience.length > 0 && (
-          <section className="mt-10">
-            <h2 className="text-[28px] sm:text-[32px]">Опыт на платформе</h2>
-              <ol className="mt-4 grid gap-2">
-                {experience.map((m) => (
-                  <li
-                    key={m.startup_slug + m.role_title}
-                    className="flex flex-wrap items-baseline gap-x-4 gap-y-1 rounded-2xl bg-tone px-5 py-4"
-                  >
-                    <Link
-                      href={`/startups/${m.startup_slug}`}
-                      className="font-semibold hover:text-brand-ink"
-                    >
-                      {m.startup_title}
-                    </Link>
-                    <span className="text-muted-foreground">
-                      {m.role_title}
-                    </span>
-                    <span className="ml-auto text-sm text-muted-foreground">
-                      с {sinceLabel(m.since)}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-          </section>
-          )}
-
-          <section className="mt-10">
-            <h2 className="text-[28px] sm:text-[32px]">Навыки</h2>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {p.skills.length ? (
-                p.skills.map((s) => <SkillChip key={s.slug} name={s.name} />)
-              ) : (
-                <span className="text-muted-foreground">Не указаны</span>
-              )}
-            </div>
-          </section>
-
-          {(p.links.length > 0 || p.has_resume) && (
-            <section className="mt-10">
-              <h2 className="text-[28px] sm:text-[32px]">Работы</h2>
-              <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {p.has_resume && (
-                  <li>
-                    {/* Резюме отдаём только вошедшим: гостю — ссылка на вход с возвратом сюда. */}
-                    <a
-                      href={user ? `/api/people/${p.slug}/resume` : `/login?next=/people/${p.slug}`}
-                      target={user ? "_blank" : undefined}
-                      rel={user ? "noopener" : undefined}
-                      className="group flex h-full items-center gap-3 rounded-2xl bg-tone p-4 transition-colors hover:bg-tone-2"
-                    >
-                      <span aria-hidden className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-brand-ink">
-                        <FileText className="size-5" />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-sm text-muted-foreground">{user ? "PDF" : "Откроется после входа"}</span>
-                        <span className="mt-0.5 block truncate font-semibold">Резюме</span>
-                      </span>
-                      <ArrowUpRight aria-hidden className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
-                    </a>
-                  </li>
-                )}
-                {p.links.map((l) => (
-                  <li key={l.url}>
-                    <a
-                      href={l.url}
-                      target="_blank"
-                      rel="noopener noreferrer nofollow"
-                      className="group flex h-full items-center gap-3 rounded-2xl bg-tone p-4 transition-colors hover:bg-tone-2"
-                    >
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-sm text-muted-foreground">{LINK_KIND[l.kind]}</span>
-                        <span className="mt-0.5 block truncate font-semibold">{linkLabel(l.url)}</span>
-                      </span>
-                      <ArrowUpRight aria-hidden className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          <div className="mt-12 border-t pt-5 text-sm">
-            <ReportButton targetType="profile" targetId={p.slug} />
-          </div>
-        </div>
-
-        <aside id="contact" className="h-fit scroll-mt-24 space-y-4 lg:sticky lg:top-24">
-          <div className="rounded-[28px] bg-tone p-6">
-            <div className="text-sm text-muted-foreground">Условия участия</div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {termsOf(p.looking_for).length ? (
-                termsOf(p.looking_for).map((t) => (
-                  <span
-                    key={t}
-                    className="rounded-full bg-white px-3 py-1 text-sm font-semibold"
-                  >
-                    {TERMS[t]}
-                  </span>
-                ))
-              ) : (
-                <span className="text-sm">Условия не указаны</span>
-              )}
-            </div>
-            {p.availability && (
+      <div className="mt-6">
+        <PersonView
+          p={p}
+          signedIn={!!user}
+          footer={<ReportButton targetType="profile" targetId={p.slug} />}
+          actions={
+            p.is_demo ? (
               <>
-                <div className="mt-4 text-sm text-muted-foreground">Время</div>
-                <div className="mt-1 font-semibold">
-                  {AVAILABILITY[p.availability]}
-                </div>
+                <Link href={p.primary_role ? `/people?role=${p.primary_role.slug}` : "/people"} className={buttonVariants({ size: "lg" })}>
+                  Найти похожих людей
+                </Link>
+                <span className="text-sm text-muted-foreground">Это пример: так выглядит профиль на Envola</span>
               </>
-            )}
-            <div className="mt-5">
-              {p.is_demo ? (
-                <div className="grid gap-3">
-                  <Link href={p.primary_role ? `/people?role=${p.primary_role.slug}` : "/people"} className={buttonVariants({ className: "w-full" })}>
-                    Найти похожих людей
-                  </Link>
-                  <p className="text-center text-xs text-muted-foreground">Это пример: так выглядит профиль на Envola</p>
-                </div>
-              ) : !user ? (
-                <Link
-                  href={`/login?next=/people/${p.slug}`}
-                  className={buttonVariants({
-                    className: "w-full",
-                  })}
-                >
-                  Войти, чтобы написать
-                </Link>
-              ) : user.profile?.slug === p.slug ? (
-                <Link
-                  href="/me/profile"
-                  className={buttonVariants({
-                    variant: "outline",
-                    className: "w-full",
-                  })}
-                >
-                  Редактировать профиль
-                </Link>
-              ) : options.length > 0 ? (
-                <div className="grid gap-2">
-                  <InviteDialog
-                    slug={p.slug}
-                    name={p.display_name}
-                    options={options}
-                  />
-                  <WriteDialog slug={p.slug} name={p.display_name} />
-                </div>
-              ) : (
+            ) : !user ? (
+              <Link href={`/login?next=/people/${p.slug}`} className={buttonVariants({ size: "lg" })}>
+                Войти, чтобы написать
+              </Link>
+            ) : user.profile?.slug === p.slug ? (
+              <Link href="/me/profile" className={buttonVariants({ variant: "outline", size: "lg" })}>
+                Это ты: перейти в свой профиль
+              </Link>
+            ) : (
+              <span id="contact" className="flex scroll-mt-24 flex-wrap gap-2.5">
+                {options.length > 0 && <InviteDialog slug={p.slug} name={p.display_name} options={options} />}
                 <WriteDialog slug={p.slug} name={p.display_name} />
-              )}
-            </div>
-          </div>
-        </aside>
+              </span>
+            )
+          }
+        />
       </div>
 
       {/* На телефоне блок с кнопкой оказывается в самом конце — дублируем действие внизу экрана, как на странице стартапа. */}
@@ -328,18 +162,4 @@ export default async function PersonPage({ params }: Props) {
       )}
     </Container>
   );
-}
-
-/** «github.com/kirill» вместо голого домена и «/»; у ссылки без пути — только домен. */
-function linkLabel(url: string) {
-  const path = url.replace(/^https?:\/\/[^/]+/, "").replace(/\/$/, "");
-  return domainOf(url) + path;
-}
-
-function domainOf(url: string) {
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return url;
-  }
 }

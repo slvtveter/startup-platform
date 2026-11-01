@@ -124,7 +124,7 @@ export async function Dashboard() {
       </section>
 
       {profile && profile.completeness < 80 && (
-        <Link href="/me/profile" className="card-hover mt-3 flex items-center gap-4 rounded-[24px] bg-tone p-5 hover:bg-tone-2 sm:px-6">
+        <Link href="/me/profile/edit" className="card-hover mt-3 flex items-center gap-4 rounded-[24px] bg-tone p-5 hover:bg-tone-2 sm:px-6">
           <span className="min-w-0 flex-1">
             <span className="flex items-baseline justify-between gap-3">
               <span className="font-semibold">Профиль заполнен на {profile.completeness}%</span>
@@ -250,7 +250,7 @@ export async function Dashboard() {
               title="Пока нечего предложить"
               text="Укажи роль и навыки в профиле, и здесь появятся стартапы, которым ты нужен."
               action={
-                <Link href="/me/profile" className={buttonVariants({ variant: "brand" })}>
+                <Link href="/me/profile/edit" className={buttonVariants({ variant: "brand" })}>
                   Заполнить профиль
                 </Link>
               }

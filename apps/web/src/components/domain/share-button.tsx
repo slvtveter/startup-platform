@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
  * «Поделиться»: на телефоне — системное меню (Telegram, WhatsApp…), иначе ссылка копируется в буфер.
  * Основатели раздают ссылку на стартап по чатам — это главный канал первых откликов.
  */
-export function ShareButton({ title, text, path }: { title: string; text?: string; path: string }) {
+export function ShareButton({ title, text, path, size = "sm" }: { title: string; text?: string; path: string; size?: "sm" | "lg" }) {
   async function share() {
     const url = new URL(path, window.location.origin).toString();
     if (navigator.share) {
@@ -29,7 +29,7 @@ export function ShareButton({ title, text, path }: { title: string; text?: strin
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={share}>
+    <Button variant="outline" size={size} onClick={share}>
       <Share2 aria-hidden />
       Поделиться
     </Button>

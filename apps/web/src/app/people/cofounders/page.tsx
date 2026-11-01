@@ -39,7 +39,7 @@ export default async function CofoundersPage() {
   const total = people?.total ?? 0;
   const shown = pinned(people?.items ?? []).slice(0, 2);
   const shownIdeas = pinned(ideas?.items ?? []).slice(0, 3);
-  const join = user ? "/me/profile" : "/register?next=/me/profile";
+  const join = user ? "/me/profile/edit" : "/register?next=/me/profile/edit";
 
   return (
     <>
