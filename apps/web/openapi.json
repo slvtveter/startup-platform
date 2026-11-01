@@ -3440,6 +3440,52 @@
         }
       }
     },
+    "/api/admin/overview": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin Overview Page",
+        "description": "\u041f\u0435\u0440\u0432\u044b\u0439 \u044d\u043a\u0440\u0430\u043d \u0430\u0434\u043c\u0438\u043d\u043a\u0438: \u0446\u0438\u0444\u0440\u044b, \u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u0438 \u043f\u043e \u0434\u043d\u044f\u043c \u0438 \u043f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0435 \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u0438.",
+        "operationId": "admin_overview_page",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 90,
+              "minimum": 7,
+              "default": 14,
+              "title": "Days"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminOverview"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/feedback": {
       "get": {
         "tags": [
@@ -3472,6 +3518,7 @@
           "admin"
         ],
         "summary": "Admin List Users",
+        "description": "kind: real \u2014 \u043d\u0430\u0441\u0442\u043e\u044f\u0449\u0438\u0435 (\u0431\u0435\u0437 \u0434\u0435\u043c\u043e \u0438 E2E), demo \u2014 \u043f\u0440\u0438\u043c\u0435\u0440\u044b \u0441 \u0432\u0438\u0442\u0440\u0438\u043d\u044b, all \u2014 \u0432\u0441\u0435.",
         "operationId": "admin_list_users",
         "parameters": [
           {
@@ -3489,6 +3536,21 @@
               ],
               "title": "Q"
             }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "all",
+                "real",
+                "demo"
+              ],
+              "type": "string",
+              "default": "all",
+              "title": "Kind"
+            }
           }
         ],
         "responses": {
@@ -3502,6 +3564,50 @@
                     "$ref": "#/components/schemas/AdminUserOut"
                   },
                   "title": "Response Admin List Users"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users/{user_id}": {
+      "delete": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin Delete User",
+        "description": "\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0430\u043a\u043a\u0430\u0443\u043d\u0442 \u043d\u0430\u0441\u043e\u0432\u0441\u0435\u043c: \u043f\u0440\u043e\u0444\u0438\u043b\u044c, \u0441\u0442\u0430\u0440\u0442\u0430\u043f\u044b, \u043e\u0442\u043a\u043b\u0438\u043a\u0438 \u0438 \u0444\u0430\u0439\u043b\u044b. \u0410\u0434\u043c\u0438\u043d\u0430 \u0443\u0434\u0430\u043b\u0438\u0442\u044c \u043d\u0435\u043b\u044c\u0437\u044f.",
+        "operationId": "admin_delete_user",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkOut"
                 }
               }
             }
@@ -4215,6 +4321,34 @@
         ],
         "title": "AdminActionOut"
       },
+      "AdminOverview": {
+        "properties": {
+          "totals": {
+            "$ref": "#/components/schemas/AdminTotals"
+          },
+          "signups": {
+            "items": {
+              "$ref": "#/components/schemas/DayCount"
+            },
+            "type": "array",
+            "title": "Signups"
+          },
+          "recent": {
+            "items": {
+              "$ref": "#/components/schemas/RecentUser"
+            },
+            "type": "array",
+            "title": "Recent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "totals",
+          "signups",
+          "recent"
+        ],
+        "title": "AdminOverview"
+      },
       "AdminStartupOut": {
         "properties": {
           "id": {
@@ -4269,6 +4403,10 @@
             "type": "integer",
             "title": "Users New"
           },
+          "active_7d": {
+            "type": "integer",
+            "title": "Active 7D"
+          },
           "profiles_published": {
             "type": "integer",
             "title": "Profiles Published"
@@ -4277,9 +4415,17 @@
             "type": "integer",
             "title": "Startups Recruiting"
           },
+          "applications_new": {
+            "type": "integer",
+            "title": "Applications New"
+          },
           "applications_pending": {
             "type": "integer",
             "title": "Applications Pending"
+          },
+          "messages_new": {
+            "type": "integer",
+            "title": "Messages New"
           },
           "reports_open": {
             "type": "integer",
@@ -4288,20 +4434,28 @@
           "feedback_new": {
             "type": "integer",
             "title": "Feedback New"
+          },
+          "demo_users": {
+            "type": "integer",
+            "title": "Demo Users"
           }
         },
         "type": "object",
         "required": [
           "users",
           "users_new",
+          "active_7d",
           "profiles_published",
           "startups_recruiting",
+          "applications_new",
           "applications_pending",
+          "messages_new",
           "reports_open",
-          "feedback_new"
+          "feedback_new",
+          "demo_users"
         ],
         "title": "AdminTotals",
-        "description": "\u041e\u0431\u0449\u0438\u0435 \u0446\u0438\u0444\u0440\u044b \u0434\u043b\u044f \u043f\u0435\u0440\u0432\u043e\u0433\u043e \u044d\u043a\u0440\u0430\u043d\u0430 \u0430\u0434\u043c\u0438\u043d\u043a\u0438; *_new \u2014 \u0437\u0430 \u0432\u044b\u0431\u0440\u0430\u043d\u043d\u044b\u0439 \u043f\u0435\u0440\u0438\u043e\u0434."
+        "description": "\u0426\u0438\u0444\u0440\u044b \u0434\u043b\u044f \u043e\u0431\u0437\u043e\u0440\u0430 \u0430\u0434\u043c\u0438\u043d\u043a\u0438 \u043f\u043e \u043d\u0430\u0441\u0442\u043e\u044f\u0449\u0438\u043c \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f\u043c (\u0431\u0435\u0437 \u0434\u0435\u043c\u043e \u0438 E2E);\n*_new \u2014 \u0437\u0430 \u0432\u044b\u0431\u0440\u0430\u043d\u043d\u044b\u0439 \u043f\u0435\u0440\u0438\u043e\u0434."
       },
       "AdminUserOut": {
         "properties": {
@@ -4333,6 +4487,27 @@
             "type": "string",
             "format": "date-time",
             "title": "Created At"
+          },
+          "is_demo": {
+            "type": "boolean",
+            "title": "Is Demo",
+            "default": false
+          },
+          "is_published": {
+            "type": "boolean",
+            "title": "Is Published",
+            "default": false
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
           }
         },
         "type": "object",
@@ -4956,6 +5131,25 @@
           "id"
         ],
         "title": "ConversationRef"
+      },
+      "DayCount": {
+        "properties": {
+          "day": {
+            "type": "string",
+            "format": "date",
+            "title": "Day"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "day",
+          "count"
+        ],
+        "title": "DayCount"
       },
       "DecisionIn": {
         "properties": {
@@ -6599,6 +6793,51 @@
           "published"
         ],
         "title": "PublishIn"
+      },
+      "RecentUser": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
+          },
+          "is_published": {
+            "type": "boolean",
+            "title": "Is Published"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "display_name",
+          "is_published",
+          "created_at"
+        ],
+        "title": "RecentUser"
       },
       "RecommendedStartup": {
         "properties": {

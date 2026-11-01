@@ -141,3 +141,50 @@ async def test_admin_totals_and_feedback_list(make_user, client):
     assert rows[1]["user_email"] == "fan@mail.ru" and rows[0]["user_email"] is None
 
     assert (await member.get("/api/admin/feedback")).status_code == 403
+
+
+async def test_admin_overview_excludes_demo_and_e2e(make_user):
+    admin = await make_user("ov-admin@mail.ru", admin=True)
+    await make_user("real-one@mail.ru", published=True)
+    await _demo(make_user, "sample@mail.ru", "sample@demo.invalid")
+    await make_user("bot@e2e.example.com")
+
+    o = (await admin.get("/api/admin/overview", params={"days": 14})).json()
+    assert o["totals"]["users"] == 2  # админ и настоящий, без демо и E2E
+    assert o["totals"]["demo_users"] == 1
+    assert len(o["signups"]) == 14 and sum(d["count"] for d in o["signups"]) == 2
+    assert {u["email"] for u in o["recent"]} == {"ov-admin@mail.ru", "real-one@mail.ru"}
+
+    demo = (await admin.get("/api/admin/users", params={"kind": "demo"})).json()
+    assert [u["email"] for u in demo] == ["sample@demo.invalid"] and demo[0]["is_demo"]
+    real = {
+        u["email"] for u in (await admin.get("/api/admin/users", params={"kind": "real"})).json()
+    }
+    assert real == {"ov-admin@mail.ru", "real-one@mail.ru"}
+
+
+async def test_admin_deletes_user_but_not_admin(make_user, client):
+    admin = await make_user("del-admin@mail.ru", admin=True)
+    victim = await _demo(make_user, "victim@mail.ru", "victim@demo.invalid")
+    users = (await admin.get("/api/admin/users", params={"q": "victim"})).json()
+    assert (await admin.delete(f"/api/admin/users/{users[0]['id']}")).status_code == 200
+    assert (await victim.get("/api/auth/me")).status_code == 401
+    assert (await admin.get("/api/admin/users", params={"q": "victim"})).json() == []
+    me = (await admin.get("/api/admin/users", params={"q": "del-admin"})).json()[0]
+    assert (await admin.delete(f"/api/admin/users/{me['id']}")).status_code == 403
+    actions = {a["action"] for a in (await admin.get("/api/admin/audit")).json()}
+    assert "delete_user" in actions
+
+
+async def _demo(make_user, email: str, demo_email: str):
+    """Демо-аккаунт: через API такой адрес не зарегистрировать, поэтому меняем почту в базе."""
+    from sqlalchemy import update
+
+    from app.db.session import SessionLocal
+    from app.models import User
+
+    c = await make_user(email, published=True)
+    async with SessionLocal() as db:
+        await db.execute(update(User).where(User.email == email).values(email=demo_email))
+        await db.commit()
+    return c

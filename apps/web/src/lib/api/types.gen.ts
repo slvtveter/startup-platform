@@ -35,6 +35,21 @@ export type AdminActionOut = {
 };
 
 /**
+ * AdminOverview
+ */
+export type AdminOverview = {
+    totals: AdminTotals;
+    /**
+     * Signups
+     */
+    signups: Array<DayCount>;
+    /**
+     * Recent
+     */
+    recent: Array<RecentUser>;
+};
+
+/**
  * AdminStartupOut
  */
 export type AdminStartupOut = {
@@ -71,7 +86,8 @@ export type AdminStartupOut = {
 /**
  * AdminTotals
  *
- * Общие цифры для первого экрана админки; *_new — за выбранный период.
+ * Цифры для обзора админки по настоящим пользователям (без демо и E2E);
+ * *_new — за выбранный период.
  */
 export type AdminTotals = {
     /**
@@ -83,6 +99,10 @@ export type AdminTotals = {
      */
     users_new: number;
     /**
+     * Active 7D
+     */
+    active_7d: number;
+    /**
      * Profiles Published
      */
     profiles_published: number;
@@ -91,9 +111,17 @@ export type AdminTotals = {
      */
     startups_recruiting: number;
     /**
+     * Applications New
+     */
+    applications_new: number;
+    /**
      * Applications Pending
      */
     applications_pending: number;
+    /**
+     * Messages New
+     */
+    messages_new: number;
     /**
      * Reports Open
      */
@@ -102,6 +130,10 @@ export type AdminTotals = {
      * Feedback New
      */
     feedback_new: number;
+    /**
+     * Demo Users
+     */
+    demo_users: number;
 };
 
 /**
@@ -136,6 +168,18 @@ export type AdminUserOut = {
      * Created At
      */
     created_at: string;
+    /**
+     * Is Demo
+     */
+    is_demo?: boolean;
+    /**
+     * Is Published
+     */
+    is_published?: boolean;
+    /**
+     * Role
+     */
+    role?: string | null;
 };
 
 /**
@@ -492,6 +536,20 @@ export type ConversationRef = {
      * Id
      */
     id: string;
+};
+
+/**
+ * DayCount
+ */
+export type DayCount = {
+    /**
+     * Day
+     */
+    day: string;
+    /**
+     * Count
+     */
+    count: number;
 };
 
 /**
@@ -1437,6 +1495,36 @@ export type PublishIn = {
      * Consent
      */
     consent?: boolean;
+};
+
+/**
+ * RecentUser
+ */
+export type RecentUser = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Display Name
+     */
+    display_name: string;
+    /**
+     * Role
+     */
+    role?: string | null;
+    /**
+     * Is Published
+     */
+    is_published: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
 };
 
 /**
@@ -4451,6 +4539,36 @@ export type AdminTotalsResponses = {
 
 export type AdminTotalsResponse = AdminTotalsResponses[keyof AdminTotalsResponses];
 
+export type AdminOverviewPageData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Days
+         */
+        days?: number;
+    };
+    url: '/api/admin/overview';
+};
+
+export type AdminOverviewPageErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminOverviewPageError = AdminOverviewPageErrors[keyof AdminOverviewPageErrors];
+
+export type AdminOverviewPageResponses = {
+    /**
+     * Successful Response
+     */
+    200: AdminOverview;
+};
+
+export type AdminOverviewPageResponse = AdminOverviewPageResponses[keyof AdminOverviewPageResponses];
+
 export type AdminFeedbackData = {
     body?: never;
     path?: never;
@@ -4477,6 +4595,10 @@ export type AdminListUsersData = {
          * Q
          */
         q?: string | null;
+        /**
+         * Kind
+         */
+        kind?: 'all' | 'real' | 'demo';
     };
     url: '/api/admin/users';
 };
@@ -4500,6 +4622,36 @@ export type AdminListUsersResponses = {
 };
 
 export type AdminListUsersResponse = AdminListUsersResponses[keyof AdminListUsersResponses];
+
+export type AdminDeleteUserData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/admin/users/{user_id}';
+};
+
+export type AdminDeleteUserErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminDeleteUserError = AdminDeleteUserErrors[keyof AdminDeleteUserErrors];
+
+export type AdminDeleteUserResponses = {
+    /**
+     * Successful Response
+     */
+    200: OkOut;
+};
+
+export type AdminDeleteUserResponse = AdminDeleteUserResponses[keyof AdminDeleteUserResponses];
 
 export type AdminBlockUserData = {
     body?: never;

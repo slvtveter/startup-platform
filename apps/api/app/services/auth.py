@@ -457,6 +457,25 @@ async def confirm_email_change(db: AsyncSession, token: str) -> User:
 
 
 async def delete_account(db: AsyncSession, user: User) -> None:
-    # Профиль, сессии, стартапы и отклики удаляются каскадом (ON DELETE CASCADE).
+    """Профиль, сессии, стартапы и отклики удаляются каскадом (ON DELETE CASCADE).
+    Файлы (фото, резюме, обложки стартапов) — тоже персональные данные: удаляем после commit."""
+    from app.models import Startup
+    from app.services import avatars, covers
+    from app.services.storage import get_storage
+
+    p = user.profile
+    avatar = p.avatar_key if p else None
+    resume = p.resume_key if p else None
+    cover_keys = list(
+        await db.scalars(select(Startup.cover_key).where(Startup.owner_id == user.id))
+    )
     await db.delete(user)
     await db.commit()
+    storage = get_storage()
+    if avatar:
+        for size in avatars.SIZES:
+            storage.delete(f"{avatar}-{size}.webp")
+    if resume:
+        storage.delete(resume)
+    for key in cover_keys:
+        covers.drop(key)

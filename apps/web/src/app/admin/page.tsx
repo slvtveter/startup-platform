@@ -1,25 +1,17 @@
-import Link from "next/link";
 import { ChevronDownIcon } from "lucide-react";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
-import { AdminAction } from "@/components/domain/admin-actions";
+import { AdminAction, AdminDeleteUser } from "@/components/domain/admin-actions";
 import { CatalogEditor, PlatformStartupForm } from "@/components/domain/admin-cold-start";
 import { Container, PageHeader } from "@/components/domain/page-header";
-import {
-  adminAuditLog,
-  adminCohorts,
-  adminFeedback,
-  adminHypotheses,
-  adminListReports,
-  adminListStartups,
-  adminListUsers,
-  adminMetrics,
-  adminTotals,
-  listRoles,
-  listSkills,
-  type HypothesisRow,
-} from "@/lib/api";
+import { adminAuditLog, adminFeedback, adminListReports, adminListStartups, adminListUsers, adminOverviewPage, listRoles, listSkills } from "@/lib/api";
+import { STARTUP_STATUS, plural, timeAgo } from "@/lib/labels";
+import { requireMe, serverClient } from "@/lib/server-api";
 import { cn } from "@/lib/utils";
+
+export const metadata = { title: "Админка", robots: { index: false } };
 
 const TABS = [
   ["overview", "Обзор"],
@@ -30,303 +22,188 @@ const TABS = [
   ["audit", "Журнал"],
 ] as const;
 type Tab = (typeof TABS)[number][0];
-import { STARTUP_STATUS, timeAgo } from "@/lib/labels";
-import { requireMe, serverClient } from "@/lib/server-api";
-
-export const metadata = { title: "Админка", robots: { index: false } };
+type Params = { days?: string; q?: string; tab?: string; kind?: string };
 
 /**
- * Админка на вкладках (?tab=): обзор с цифрами и воронкой, модерация (жалобы и обратная связь),
- * пользователи, стартапы, справочники, журнал действий. Права — только is_admin (make create-admin).
+ * Админка на вкладках (?tab=). Каждая вкладка грузит только свои данные, а пока они идут —
+ * скелетон (Suspense с ключом по параметрам: при смене вкладки он показывается сразу).
+ * Права — только is_admin (docs/admin.md).
  */
-export default async function AdminPage({ searchParams }: { searchParams: Promise<{ days?: string; q?: string; tab?: string }> }) {
+export default async function AdminPage({ searchParams }: { searchParams: Promise<Params> }) {
   const user = await requireMe("/admin");
   if (!user.is_admin) notFound();
-  const { days = "7", q, tab: rawTab } = await searchParams;
-  const tab: Tab = (TABS.find(([t]) => t === rawTab)?.[0] ?? (q ? "users" : "overview")) as Tab;
-  const client = await serverClient();
-  const [{ data: totals }, { data: feedback }, { data: m }, { data: users }, { data: startups }, { data: reports }, { data: audit }, { data: hyp }, { data: roles }, { data: skills }, { data: cohorts }] = await Promise.all([
-    adminTotals({ client, query: { days: Number(days) } }),
-    adminFeedback({ client }),
-    adminMetrics({ client, query: { days: Number(days) } }),
-    adminListUsers({ client, query: { q } }),
-    adminListStartups({ client }),
-    adminListReports({ client }),
-    adminAuditLog({ client }),
-    adminHypotheses({ client, query: { days: Number(days) } }),
-    listRoles({ client }),
-    listSkills({ client }),
-    adminCohorts({ client }),
-  ]);
-  const top = Math.max(1, ...(m?.funnel.map((f) => f.count) ?? [1]));
+  const params = await searchParams;
+  const tab: Tab = (TABS.find(([t]) => t === params.tab)?.[0] ?? (params.q ? "users" : "overview")) as Tab;
 
   return (
     <Container className="ym-hide-content">
-      <PageHeader
-        title="Админка"
-        actions={
-          tab === "overview" && (
-            <div className="flex gap-1 rounded-lg border bg-card p-1 text-sm font-semibold">
-              {["7", "30", "90"].map((d) => (
-                <Link key={d} href={`/admin?days=${d}`} className={`rounded-md px-3 py-1.5 ${d === days ? "bg-second text-on-second" : ""}`}>
-                  {d} дней
-                </Link>
-              ))}
-            </div>
-          )
-        }
-      />
-
+      <PageHeader title="Админка" />
       <nav aria-label="Разделы админки" className="-mx-4 mt-6 flex gap-1 overflow-x-auto border-b px-4 [scrollbar-width:none] sm:mx-0 sm:px-0">
-        {TABS.map(([t, label]) => {
-          const badge = t === "moderation" ? (reports?.length ?? 0) + (totals?.feedback_new ?? 0) : 0;
-          return (
+        {TABS.map(([t, label]) => (
+          <Link
+            key={t}
+            href={t === "overview" ? "/admin" : `/admin?tab=${t}`}
+            aria-current={tab === t ? "page" : undefined}
+            className={cn(
+              "-mb-px inline-flex h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-sm font-semibold whitespace-nowrap transition-colors",
+              tab === t ? "border-brand text-foreground" : "border-transparent text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {label}
+          </Link>
+        ))}
+      </nav>
+      <Suspense key={JSON.stringify({ ...params, tab })} fallback={<TabSkeleton />}>
+        <TabBody tab={tab} params={params} />
+      </Suspense>
+    </Container>
+  );
+}
+
+function TabSkeleton() {
+  return (
+    <div aria-busy="true" aria-label="Загрузка" className="mt-8 grid animate-pulse gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {Array.from({ length: 8 }, (_, i) => (
+          <div key={i} className="h-24 rounded-2xl bg-tone" />
+        ))}
+      </div>
+      <div className="h-56 rounded-2xl bg-tone" />
+      <div className="h-40 rounded-2xl bg-tone" />
+    </div>
+  );
+}
+
+async function TabBody({ tab, params }: { tab: Tab; params: Params }) {
+  const client = await serverClient();
+  if (tab === "overview") return <Overview days={Number(params.days) || 14} />;
+  if (tab === "moderation") {
+    const [{ data: reports }, { data: feedback }] = await Promise.all([adminListReports({ client }), adminFeedback({ client })]);
+    return (
+      <>
+        <section className="mt-8">
+          <h2 className="text-xl">Жалобы</h2>
+          <div className="mt-3 grid gap-2">
+            {reports?.length ? (
+              reports.map((r) => (
+                <div key={r.id} className="flex flex-wrap items-center gap-3 rounded-xl border bg-card p-4 text-sm">
+                  <Link href={`/${r.target_type === "startup" ? "startups" : "people"}/${r.target_id}`} className="font-bold underline">
+                    {r.target_type}: {r.target_id}
+                  </Link>
+                  <span>{r.reason}</span>
+                  {r.comment && <span className="text-muted-foreground">«{r.comment}»</span>}
+                  <span className="ml-auto flex gap-2">
+                    <AdminAction kind="resolve" id={String(r.id)} label="Решено" />
+                    <AdminAction kind="dismiss" id={String(r.id)} label="Отклонить" variant="ghost" />
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">Новых жалоб нет.</p>
+            )}
+          </div>
+        </section>
+        <section className="mt-10">
+          <h2 className="text-xl">Обратная связь</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Сообщения из формы «Сообщить о проблеме или идее» в подвале сайта.</p>
+          <ul className="mt-3 grid gap-2">
+            {feedback?.length ? (
+              feedback.map((f) => (
+                <li key={f.id} className="rounded-xl border bg-card p-4 text-sm">
+                  <p className="whitespace-pre-line wrap-anywhere">{f.text}</p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {timeAgo(f.created_at)} · {f.user_email ?? "гость"}
+                    {f.page_url && (
+                      <>
+                        {" · "}
+                        <Link href={f.page_url} className="underline">
+                          {f.page_url}
+                        </Link>
+                      </>
+                    )}
+                  </p>
+                </li>
+              ))
+            ) : (
+              <li className="text-sm text-muted-foreground">Сообщений пока нет.</li>
+            )}
+          </ul>
+        </section>
+      </>
+    );
+  }
+  if (tab === "users") {
+    const kind = (["real", "demo"] as const).find((k) => k === params.kind) ?? "all";
+    const { data: users } = await adminListUsers({ client, query: { q: params.q, kind } });
+    const filters = [
+      ["all", "Все"],
+      ["real", "Настоящие"],
+      ["demo", "Демо"],
+    ] as const;
+    return (
+      <section className="mt-8 max-w-4xl">
+        <div className="flex flex-wrap items-center gap-2">
+          {filters.map(([k, label]) => (
             <Link
-              key={t}
-              href={t === "overview" ? `/admin?days=${days}` : `/admin?tab=${t}`}
-              aria-current={tab === t ? "page" : undefined}
-              className={cn(
-                "-mb-px inline-flex h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-sm font-semibold whitespace-nowrap transition-colors",
-                tab === t ? "border-brand text-foreground" : "border-transparent text-muted-foreground hover:text-foreground",
-              )}
+              key={k}
+              href={`/admin?tab=users${k === "all" ? "" : `&kind=${k}`}${params.q ? `&q=${encodeURIComponent(params.q)}` : ""}`}
+              aria-current={kind === k ? "true" : undefined}
+              className={cn("rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors", kind === k ? "bg-second text-on-second" : "bg-tone hover:bg-tone-2")}
             >
               {label}
-              {badge > 0 && <span className="rounded-full bg-brand px-1.5 text-xs leading-5 font-bold text-white">{badge}</span>}
             </Link>
-          );
-        })}
-      </nav>
-
-      {tab === "overview" && (
-        <>
-          <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {[
-              ["Пользователей", totals?.users, `+${totals?.users_new ?? 0} за ${days} дн.`],
-              ["Профилей в каталоге", totals?.profiles_published, null],
-              ["Стартапов набирают", totals?.startups_recruiting, null],
-              ["Откликов ждут ответа", totals?.applications_pending, null],
-              ["Жалоб", totals?.reports_open, null],
-              ["Обратной связи", totals?.feedback_new, `за ${days} дн.`],
-            ].map(([label, value, hint]) => (
-              <li key={label as string} className="rounded-2xl border bg-card p-4">
-                <div className="text-sm text-muted-foreground">{label}</div>
-                <div className="mt-1 text-[28px] leading-none font-extrabold tabular-nums">{value ?? 0}</div>
-                {hint && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}
-              </li>
-            ))}
-          </ul>
-      <section id="metrics" className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr]">
-        <div className="rounded-2xl border bg-card p-6">
-          <h2 className="font-sans text-base font-bold">Воронка за {m?.days} дней</h2>
-          <ol className="mt-4 grid gap-3">
-            {m?.funnel.map((f) => (
-              <li key={f.name}>
-                <div className="flex text-sm">
-                  <span>{f.label}</span>
-                  <span className="ml-auto font-bold tabular-nums">{f.count}</span>
+          ))}
+          <form className="ml-auto min-w-0">
+            <input type="hidden" name="tab" value="users" />
+            {kind !== "all" && <input type="hidden" name="kind" value={kind} />}
+            <input
+              name="q"
+              defaultValue={params.q}
+              placeholder="Почта или имя"
+              aria-label="Поиск пользователей"
+              className="h-9 w-44 rounded-xl border border-[var(--field)] bg-white px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/25 sm:w-64"
+            />
+          </form>
+        </div>
+        <p className="mt-3 text-sm text-muted-foreground">{users?.length ?? 0} {plural(users?.length ?? 0, "аккаунт", "аккаунта", "аккаунтов")}</p>
+        <div className="mt-2 divide-y rounded-xl border bg-card">
+          {users?.map((u) => (
+            <div key={u.id} className="flex flex-wrap items-center gap-3 p-3 text-sm">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="truncate font-semibold">{u.display_name || u.email}</span>
+                  {u.is_demo && <Badge tone="tone">демо</Badge>}
+                  {u.is_admin && <Badge tone="brand">админ</Badge>}
+                  {!u.is_active && <Badge tone="danger">заблокирован</Badge>}
+                  {u.is_published && <Badge tone="success">в каталоге</Badge>}
                 </div>
-                <div className="mt-1 h-2 rounded-full bg-secondary">
-                  <div className="h-full rounded-full bg-brand" style={{ width: `${(f.count / top) * 100}%` }} />
+                <div className="truncate text-muted-foreground">
+                  {u.email}
+                  {u.role ? ` · ${u.role}` : ""} · {timeAgo(u.created_at)}
+                  {!u.email_verified && " · почта не подтверждена"}
                 </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-        <div className="grid gap-4">
-          <div className="rounded-2xl border bg-card p-6">
-            <div className="text-sm text-muted-foreground">Ответ на отклик за 72 часа</div>
-            <div className="mt-1 text-[36px] font-bold">{m?.answered_72h_share == null ? "—" : `${Math.round(m.answered_72h_share * 100)}%`}</div>
-            <div className="mt-4 text-sm text-muted-foreground">Активных стартапов</div>
-            <div className="mt-1 text-[36px] font-bold">{m?.active_startups ?? 0}</div>
-            <div className="mt-4 text-sm text-muted-foreground">Фоновые задачи</div>
-            <div className="mt-1 text-sm">
-              <span className="font-semibold">{m?.jobs_pending ?? 0}</span> в очереди,{" "}
-              <span className={`font-semibold ${m?.jobs_failed ? "text-destructive" : ""}`}>{m?.jobs_failed ?? 0}</span> упало
-            </div>
-          </div>
-          <div className="rounded-2xl border bg-card p-6">
-            <div className="font-bold">Источники регистраций</div>
-            <ul className="mt-3 grid gap-1 text-sm">
-              {m?.sources.length ? (
-                m.sources.map((s) => (
-                  <li key={s.source} className="flex">
-                    <span>{s.source}</span>
-                    <span className="ml-auto font-bold tabular-nums">{s.signups}</span>
-                  </li>
-                ))
-              ) : (
-                <li className="text-muted-foreground">Пока нет данных</li>
-              )}
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <section className="mt-8 rounded-2xl border bg-card p-6">
-        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
-          <h2 className="font-sans text-base font-bold">Удержание по неделям регистрации</h2>
-          <span className="ml-auto flex gap-3 text-sm font-semibold">
-            <a href={`/api/admin/export?kind=funnel&days=${days}`} className="text-brand-ink hover:underline">
-              Воронка в CSV
-            </a>
-            <a href="/api/admin/export?kind=cohorts" className="text-brand-ink hover:underline">
-              Когорты в CSV
-            </a>
-          </span>
-        </div>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Доля тех, кто сделал осмысленное действие (отклик, приглашение, ответ, публикация) на 7–13 и 30–36 день.
-        </p>
-        <div className="mt-4 overflow-x-auto" tabIndex={0} role="region" aria-label="Таблица когорт">
-          <table className="w-full min-w-[420px] text-sm">
-            <thead className="text-left text-muted-foreground">
-              <tr className="border-b">
-                <th className="py-2 pr-3 font-semibold">Неделя</th>
-                <th className="py-2 pr-3 text-right font-semibold">Регистраций</th>
-                <th className="py-2 pr-3 text-right font-semibold">D7</th>
-                <th className="py-2 text-right font-semibold">D30</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(cohorts ?? []).map((c) => (
-                <tr key={c.week} className="border-b last:border-0">
-                  <td className="py-2.5 pr-3">с {new Date(c.week).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })}</td>
-                  <td className="py-2.5 pr-3 text-right tabular-nums">{c.signups}</td>
-                  <td className="py-2.5 pr-3 text-right tabular-nums">{fmtShare(c.d7)}</td>
-                  <td className="py-2.5 text-right tabular-nums">{fmtShare(c.d30)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section className="mt-8 rounded-2xl border bg-card p-6">
-        <h2 className="font-sans text-base font-bold">Гипотезы редизайна за {days} дней</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Сравнение с предыдущими {days} днями. Описание гипотез: docs/ux/research.md.
-        </p>
-        <div className="mt-4 overflow-x-auto" tabIndex={0} role="region" aria-label="Таблица гипотез">
-          <table className="w-full min-w-[640px] text-sm">
-            <thead className="text-left text-muted-foreground">
-              <tr className="border-b">
-                <th className="py-2 pr-3 font-semibold">Гипотеза</th>
-                <th className="py-2 pr-3 font-semibold">Метрика</th>
-                <th className="py-2 pr-3 text-right font-semibold">Сейчас</th>
-                <th className="py-2 text-right font-semibold">Было</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(hyp ?? []).map((h) => (
-                <tr key={h.key} className="border-b last:border-0">
-                  <td className="py-3 pr-3">
-                    <span className="mr-2 font-bold">{h.key}</span>
-                    {h.title}
-                  </td>
-                  <td className="py-3 pr-3 text-muted-foreground">{h.metric}</td>
-                  <td className="py-3 pr-3 text-right font-semibold tabular-nums">{fmtMetric(h.current, h.unit)}</td>
-                  <td className="py-3 text-right text-muted-foreground tabular-nums">{fmtMetric(h.previous, h.unit)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-        </>
-      )}
-
-      {tab === "moderation" && (
-        <>
-      <section className="mt-8">
-        <h2 className="text-xl">Жалобы</h2>
-        <div className="mt-3 grid gap-2">
-          {reports?.length ? (
-            reports.map((r) => (
-              <div key={r.id} className="flex flex-wrap items-center gap-3 rounded-xl border bg-card p-4 text-sm">
-                <Link href={`/${r.target_type === "startup" ? "startups" : "people"}/${r.target_id}`} className="font-bold underline">
-                  {r.target_type}: {r.target_id}
-                </Link>
-                <span>{r.reason}</span>
-                {r.comment && <span className="text-muted-foreground">«{r.comment}»</span>}
-                <span className="ml-auto flex gap-2">
-                  <AdminAction kind="resolve" id={String(r.id)} label="Решено" />
-                  <AdminAction kind="dismiss" id={String(r.id)} label="Отклонить" variant="ghost" />
-                </span>
               </div>
-            ))
-          ) : (
-            <p className="text-sm text-muted-foreground">Новых жалоб нет.</p>
-          )}
-        </div>
-      </section>
-
-          <section className="mt-10">
-            <h2 className="text-xl">Обратная связь</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Сообщения из формы «Сообщить о проблеме или идее» в подвале сайта.</p>
-            <ul className="mt-3 grid gap-2">
-              {feedback?.length ? (
-                feedback.map((f) => (
-                  <li key={f.id} className="rounded-xl border bg-card p-4 text-sm">
-                    <p className="whitespace-pre-line">{f.text}</p>
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      {timeAgo(f.created_at)} · {f.user_email ?? "гость"}
-                      {f.page_url && (
-                        <>
-                          {" · "}
-                          <Link href={f.page_url} className="underline">
-                            {f.page_url}
-                          </Link>
-                        </>
-                      )}
-                    </p>
-                  </li>
-                ))
-              ) : (
-                <li className="text-sm text-muted-foreground">Сообщений пока нет.</li>
-              )}
-            </ul>
-          </section>
-        </>
-      )}
-
-      {tab === "users" && (
-        <div className="mt-8 max-w-3xl">
-          <div className="flex items-center gap-3">
-            <h2 className="text-xl">Пользователи</h2>
-            <form className="ml-auto min-w-0">
-              <input type="hidden" name="tab" value="users" />
-              <input name="q" defaultValue={q} placeholder="Поиск" aria-label="Поиск пользователей" className="h-9 w-36 rounded-xl bg-tone px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/25 sm:w-56" />
-            </form>
-          </div>
-          <div className="mt-3 divide-y rounded-xl border bg-card">
-            {users?.map((u) => (
-              <div key={u.id} className="flex items-center gap-3 p-3 text-sm">
-                <div className="min-w-0">
-                  <div className="truncate font-semibold">{u.display_name || u.email}</div>
-                  <div className="truncate text-muted-foreground">
-                    {u.email} · {timeAgo(u.created_at)}
-                    {!u.email_verified && " · email не подтверждён"}
-                  </div>
-                </div>
-                <span className="ml-auto shrink-0">
-                  {u.is_admin ? (
-                    <span className="text-xs font-bold">админ</span>
-                  ) : u.is_active ? (
-                    <AdminAction kind="block" id={u.id} label="Заблокировать" variant="destructive" />
+              {!u.is_admin && (
+                <span className="flex shrink-0 gap-2">
+                  {u.is_active ? (
+                    <AdminAction kind="block" id={u.id} label="Заблокировать" variant="outline" />
                   ) : (
                     <AdminAction kind="unblock" id={u.id} label="Разблокировать" />
                   )}
+                  <AdminDeleteUser id={u.id} name={u.display_name || u.email} />
                 </span>
-              </div>
-            ))}
-          </div>
+              )}
+            </div>
+          ))}
         </div>
-      )}
-
-      {tab === "startups" && (
-        <>
-        <div className="mt-8 max-w-3xl">
+      </section>
+    );
+  }
+  if (tab === "startups") {
+    const { data: startups } = await adminListStartups({ client });
+    return (
+      <>
+        <section className="mt-8 max-w-3xl">
           <h2 className="text-xl">Стартапы</h2>
           <div className="mt-3 divide-y rounded-xl border bg-card">
             {startups?.map((s) => (
@@ -346,22 +223,20 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               </div>
             ))}
           </div>
-        </div>
-      <section className="mt-10 max-w-3xl rounded-2xl border bg-card p-6">
-        <h2 className="font-sans text-base font-bold">Перенести стартап на платформу</h2>
-        <p className="mt-1 mb-4 text-sm text-muted-foreground">
-          Для холодного старта: оформить открытый проект за основателя. Черновик принадлежит платформе, пока основатель не
-          зарегистрируется и не подтвердит почту.
-        </p>
-        <PlatformStartupForm />
-      </section>
-
-
-        </>
-      )}
-
-      {/* Справочники правят редко, а списки длинные: по умолчанию свёрнуты. */}
-      {tab === "catalog" && (
+        </section>
+        <section className="mt-10 max-w-3xl rounded-2xl border bg-card p-6">
+          <h2 className="font-sans text-base font-bold">Перенести стартап на платформу</h2>
+          <p className="mt-1 mb-4 text-sm text-muted-foreground">
+            Для холодного старта: оформить открытый проект за основателя. Черновик принадлежит платформе, пока основатель не зарегистрируется и не подтвердит почту.
+          </p>
+          <PlatformStartupForm />
+        </section>
+      </>
+    );
+  }
+  if (tab === "catalog") {
+    const [{ data: roles }, { data: skills }] = await Promise.all([listRoles({ client }), listSkills({ client })]);
+    return (
       <section className="mt-8 grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
         {(
           [
@@ -381,35 +256,115 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           </details>
         ))}
       </section>
-
-      )}
-
-      {tab === "audit" && (
-      <section className="mt-8">
-        <h2 className="text-xl">Журнал действий</h2>
-        <ul className="mt-3 grid gap-1 text-sm text-muted-foreground">
-          {audit?.length ? (
-            audit.slice(0, 30).map((a) => (
-              <li key={a.id}>
-                {timeAgo(a.created_at)} · {a.admin_email} · {a.action} · {a.target_type} {a.target_id.slice(0, 8)}
-              </li>
-            ))
-          ) : (
-            <li>Пока пусто</li>
-          )}
-        </ul>
-      </section>
-      )}
-    </Container>
+    );
+  }
+  const { data: audit } = await adminAuditLog({ client });
+  return (
+    <section className="mt-8">
+      <ul className="grid gap-1 text-sm text-muted-foreground">
+        {audit?.length ? (
+          audit.slice(0, 50).map((a) => (
+            <li key={a.id}>
+              {timeAgo(a.created_at)} · {a.admin_email} · {a.action} · {a.target_type} {a.target_id.slice(0, 8)}
+            </li>
+          ))
+        ) : (
+          <li>Пока пусто</li>
+        )}
+      </ul>
+    </section>
   );
 }
 
-function fmtMetric(v: number | null | undefined, unit: HypothesisRow["unit"]) {
-  if (v == null) return "нет данных";
-  if (unit === "%") return `${Math.round(v * 1000) / 10}%`;
-  return unit === "ч" ? `${v} ч` : String(v);
+/** Обзор: простая аналитика по настоящим пользователям (без демо и тестовых аккаунтов). */
+async function Overview({ days }: { days: number }) {
+  const period = [7, 14, 30].includes(days) ? days : 14;
+  const { data } = await adminOverviewPage({ client: await serverClient(), query: { days: period } });
+  if (!data) return null;
+  const t = data.totals;
+  const tiles: [string, number, string | null][] = [
+    ["Пользователей", t.users, `+${t.users_new} за ${period} дн.`],
+    ["Заходили за 7 дней", t.active_7d, null],
+    ["Профилей в каталоге", t.profiles_published, null],
+    ["Стартапов набирают", t.startups_recruiting, null],
+    ["Откликов", t.applications_new, `${t.applications_pending} ждут ответа`],
+    ["Сообщений", t.messages_new, `за ${period} дн.`],
+    ["Новых жалоб", t.reports_open, null],
+    ["Обратная связь", t.feedback_new, `за ${period} дн.`],
+  ];
+  const top = Math.max(1, ...data.signups.map((d) => d.count));
+  return (
+    <div className="mt-8 grid gap-4">
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <span className="text-muted-foreground">Период:</span>
+        {[7, 14, 30].map((d) => (
+          <Link
+            key={d}
+            href={d === 14 ? "/admin" : `/admin?days=${d}`}
+            className={cn("rounded-full px-3 py-1 font-semibold", d === period ? "bg-second text-on-second" : "bg-tone hover:bg-tone-2")}
+          >
+            {d} дней
+          </Link>
+        ))}
+        <span className="ml-auto text-xs text-muted-foreground">Без демо-аккаунтов ({t.demo_users}) и тестовых</span>
+      </div>
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {tiles.map(([label, value, hint]) => (
+          <li key={label} className="rounded-2xl border bg-card p-4">
+            <div className="text-sm text-muted-foreground">{label}</div>
+            <div className="mt-1 text-[28px] leading-none font-extrabold tabular-nums">{value}</div>
+            {hint && <div className="mt-1.5 text-xs text-muted-foreground">{hint}</div>}
+          </li>
+        ))}
+      </ul>
+      <div className="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
+        <section className="rounded-2xl border bg-card p-5">
+          <h2 className="font-sans text-base font-bold">Регистрации по дням</h2>
+          <div className="mt-4 flex h-40 items-end gap-1" role="img" aria-label={`Регистрации за ${period} дней: всего ${t.users_new}`}>
+            {data.signups.map((d) => (
+              <div key={d.day} className="group relative flex h-full flex-1 flex-col justify-end">
+                <div className={cn("rounded-t-md", d.count ? "bg-brand" : "bg-tone")} style={{ height: `${Math.max((d.count / top) * 100, 3)}%` }} />
+                <span className="pointer-events-none absolute -top-6 left-1/2 hidden -translate-x-1/2 rounded bg-foreground px-1.5 py-0.5 text-xs whitespace-nowrap text-white group-hover:block">
+                  {new Date(d.day).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })}: {d.count}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-2 flex justify-between text-xs text-muted-foreground">
+            <span>{new Date(data.signups[0]?.day).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })}</span>
+            <span>сегодня</span>
+          </div>
+        </section>
+        <section className="rounded-2xl border bg-card p-5">
+          <div className="flex items-center">
+            <h2 className="font-sans text-base font-bold">Новые пользователи</h2>
+            <Link href="/admin?tab=users&kind=real" className="ml-auto text-sm font-semibold text-brand-ink hover:underline">
+              Все
+            </Link>
+          </div>
+          <ul className="mt-3 divide-y text-sm">
+            {data.recent.map((u) => (
+              <li key={u.id} className="py-2.5">
+                <div className="truncate font-semibold">{u.display_name || u.email}</div>
+                <div className="truncate text-xs text-muted-foreground">
+                  {u.role ?? "роль не указана"}
+                  {u.is_published ? " · в каталоге" : ""} · {timeAgo(u.created_at)}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </div>
+  );
 }
 
-function fmtShare(v: number | null | undefined) {
-  return v == null ? "рано считать" : `${Math.round(v * 1000) / 10}%`;
+function Badge({ tone, children }: { tone: "tone" | "brand" | "danger" | "success"; children: React.ReactNode }) {
+  const cls = {
+    tone: "bg-tone text-muted-foreground",
+    brand: "bg-brand-soft text-brand-ink",
+    danger: "bg-destructive/10 text-destructive",
+    success: "bg-success-soft text-success-ink",
+  }[tone];
+  return <span className={cn("rounded-full px-2 py-0.5 text-xs font-bold", cls)}>{children}</span>;
 }

@@ -31,7 +31,14 @@ const COLUMNS = [
       { href: "/people/cofounders", label: "Сообщники" },
     ],
   },
-  { title: "Стартапы ищут", links: STARTUP_ROLES.map(([slug, name]) => ({ href: `/startups?role=${slug}`, label: name })) },
+  // Три самые частые роли и ссылка на всё — колонка не длиннее соседних.
+  {
+    title: "Стартапы ищут",
+    links: [
+      ...STARTUP_ROLES.slice(0, 3).map(([slug, name]) => ({ href: `/startups?role=${slug}`, label: name })),
+      { href: "/startups", label: "Все вакансии →" },
+    ],
+  },
   {
     title: "Envola",
     links: [

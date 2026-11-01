@@ -7,8 +7,9 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, Query, Response
 from sqlalchemy import delete, func, or_, select
 
+from app.core.demo import is_demo, real_user
 from app.core.deps import AdminUser
-from app.core.errors import NotFound
+from app.core.errors import Forbidden, NotFound
 from app.db.session import DbSession
 from app.models import (
     AdminAction,
@@ -26,6 +27,7 @@ from app.models.enums import ApplicationStatus, ReportStatus, StartupStatus
 from app.schemas.common import OkOut
 from app.schemas.ops import (
     AdminActionOut,
+    AdminOverview,
     AdminStartupOut,
     AdminTotals,
     AdminUserOut,
@@ -43,6 +45,7 @@ from app.schemas.ops import (
 )
 from app.schemas.startup import StartupDetail, StartupIn
 from app.services import admin_overview, catalog_admin, retention
+from app.services import auth as auth_service
 from app.services import hypotheses as hypotheses_service
 from app.services import jobs as jobs_service
 from app.services import startups as startup_service
@@ -144,6 +147,14 @@ async def admin_totals(
     return await admin_overview.totals(db, days)
 
 
+@router.get("/overview", response_model=AdminOverview)
+async def admin_overview_page(
+    admin: AdminUser, db: DbSession, days: Annotated[int, Query(ge=7, le=90)] = 14
+) -> AdminOverview:
+    """Первый экран админки: цифры, регистрации по дням и последние пользователи."""
+    return await admin_overview.overview(db, days)
+
+
 @router.get("/feedback", response_model=list[FeedbackOut])
 async def admin_feedback(admin: AdminUser, db: DbSession) -> list[FeedbackOut]:
     """Сообщения из формы «Сообщить о проблеме или идее» в подвале, новые сверху."""
@@ -152,16 +163,24 @@ async def admin_feedback(admin: AdminUser, db: DbSession) -> list[FeedbackOut]:
 
 @router.get("/users", response_model=list[AdminUserOut])
 async def admin_list_users(
-    admin: AdminUser, db: DbSession, q: str | None = None
+    admin: AdminUser,
+    db: DbSession,
+    q: str | None = None,
+    kind: Annotated[Literal["all", "real", "demo"], Query()] = "all",
 ) -> list[AdminUserOut]:
+    """kind: real — настоящие (без демо и E2E), demo — примеры с витрины, all — все."""
     stmt = (
         select(User)
         .outerjoin(Profile, Profile.user_id == User.id)
         .order_by(User.created_at.desc())
-        .limit(200)
+        .limit(300)
     )
     if q:
         stmt = stmt.where(or_(User.email.ilike(f"%{q}%"), Profile.display_name.ilike(f"%{q}%")))
+    if kind == "real":
+        stmt = stmt.where(admin_overview.real())
+    elif kind == "demo":
+        stmt = stmt.where(~real_user())
     users = (await db.scalars(stmt)).unique()
     return [
         AdminUserOut(
@@ -172,9 +191,26 @@ async def admin_list_users(
             is_admin=u.is_admin,
             email_verified=u.email_verified,
             created_at=u.created_at,
+            is_demo=is_demo(u),
+            is_published=bool(u.profile and u.profile.is_published),
+            role=u.profile.primary_role.name if u.profile and u.profile.primary_role else None,
         )
         for u in users
     ]
+
+
+@router.delete("/users/{user_id}", response_model=OkOut)
+async def admin_delete_user(user_id: uuid.UUID, admin: AdminUser, db: DbSession) -> OkOut:
+    """Удалить аккаунт насовсем: профиль, стартапы, отклики и файлы. Админа удалить нельзя."""
+    user = await db.get(User, user_id)
+    if user is None:
+        raise NotFound("Пользователь не найден")
+    if user.is_admin:
+        raise Forbidden("Админа удалить нельзя: сначала снимите права")
+    _log(db, admin, "delete_user", "user", user.id, email=user.email)
+    await db.commit()
+    await auth_service.delete_account(db, user)
+    return OkOut()
 
 
 async def _set_user_active(db, admin: User, user_id: uuid.UUID, active: bool) -> None:
