@@ -2,10 +2,29 @@
 # Хеш пароля: docker run --rm caddy:2-alpine caddy hash-password --plaintext 'пароль'
 {
 	email {$ACME_EMAIL}
+	# Без HTTP/3 (QUIC по UDP): в РФ UDP 443 режут ТСПУ и многие VPN-клиенты, и наполовину
+	# рабочий QUIC даёт «сайт открывается со второй попытки». HTTP/2 по TCP проходит везде,
+	# шифрование то же (TLS 1.3). Порт 443/udp закрыт и в compose, и в ufw.
+	servers {
+		protocols h1 h2
+	}
 }
 
 {$SITE_DOMAIN} {
 	encode zstd gzip
+	# Журнал запросов: время, путь, статус, протокол, длительность, IP и User-Agent.
+	# Заголовки (там cookie) не пишем. Хранится в логах контейнера: 5 × 10 МБ, старое удаляется.
+	log {
+		output stderr
+		format filter {
+			request>headers delete
+			request>tls delete
+			resp_headers delete
+		}
+	}
+	log_append ua {http.request.header.User-Agent}
+	# Статика Next с хешем в имени: её много, и для диагностики она не нужна.
+	log_skip /_next/static/*
 	header {
 		X-Robots-Tag "noindex, nofollow"
 		X-Content-Type-Options "nosniff"
@@ -36,9 +55,21 @@
 		request_body {
 			max_size 6MB
 		}
-		reverse_proxy api:8000
+		reverse_proxy api:8000 {
+			# Во время деплоя контейнер перезапускается ~10–25 с. Вместо мгновенной 502 Caddy ждёт
+			# его до 30 с и доставляет запрос. Повтор только при неудачном подключении: до приложения
+			# запрос ещё не дошёл, двойной отправки формы не будет.
+			lb_try_duration 30s
+			lb_try_interval 250ms
+		}
 	}
 	handle {
-		reverse_proxy web:3000
+		reverse_proxy web:3000 {
+			# Во время деплоя контейнер перезапускается ~10–25 с. Вместо мгновенной 502 Caddy ждёт
+			# его до 30 с и доставляет запрос. Повтор только при неудачном подключении: до приложения
+			# запрос ещё не дошёл, двойной отправки формы не будет.
+			lb_try_duration 30s
+			lb_try_interval 250ms
+		}
 	}
 }
