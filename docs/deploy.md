@@ -49,6 +49,7 @@ Staging (`staging.envola.ru`, автодеплой из `main`, прод — к�
    sudo ufw allow OpenSSH && sudo ufw allow 80 && sudo ufw allow 443 && sudo ufw enable
    ```
    Docker публикует порты в обход ufw, поэтому наружу открыт только Caddy: у остальных сервисов в `compose.prod.yml` нет `ports`.
+   HTTP/3 (QUIC, `443/udp`) выключен намеренно: в РФ UDP 443 режут ТСПУ и VPN-клиенты, и сайт открывался со второй попытки. Не открывайте `443/udp`.
    SSH только по ключу и автообновления безопасности (боты перебирают пароли к SSH с первого часа):
    ```bash
    # сначала: ssh-copy-id user@сервер и проверить, что вход по ключу работает
@@ -81,6 +82,17 @@ Staging (`staging.envola.ru`, автодеплой из `main`, прод — к�
 - Откатить: Actions → Deploy → Run workflow, `image_tag` = предыдущий `sha-xxxxxxx` (теги неизменяемые).
 - Руками на сервере: `sh /opt/startup-platform/deploy.sh sha-xxxxxxx`.
 - Откат схемы — только руками хранителя схемы (`alembic downgrade`).
+- Во время выкатки `web` и `api` перезапускаются на 10–25 с. Caddy в это время не отдаёт 502, а ждёт контейнер до 30 с (`lb_try_duration` в Caddyfile): пользователь видит долгую загрузку вместо ошибки.
+
+## Журнал запросов
+
+Caddy пишет каждый запрос (кроме `/_next/static/*`) JSON-строкой в лог контейнера: время, путь, статус, протокол, длительность, IP, User-Agent. Заголовки с cookie не пишутся. Хранится 5 × 10 МБ, старое удаляется само.
+```bash
+# последние ошибки сервера
+docker logs --since 1h startup-platform-prod-caddy-1 2>&1 | grep '"logger":"http.log.access' | grep -E '"status":5[0-9]{2}'
+# медленные ответы (дольше 3 с)
+docker logs --since 1h startup-platform-prod-caddy-1 2>&1 | grep '"logger":"http.log.access' | python3 -c "import sys,json;[print(d['status'],round(d['duration'],1),d['request']['uri']) for d in map(json.loads,sys.stdin) if d['duration']>3]"
+```
 
 ## Staging
 
